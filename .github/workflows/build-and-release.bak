@@ -1,0 +1,104 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ "master" ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release, GitRelease]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: DevModManager.sln
+      Wap_Project_Directory: DevModManagerInstaller
+      Wap_Project_Path: DevModManagerInstaller\DevModManagerInstaller.aip
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore the application
+      run: |
+        echo "Restoring the application..."
+        msbuild ${{ env.Solution_Name }} /t:Restore /p:Configuration=${{ matrix.configuration }}
+        echo "Application restored."
+
+    - name: Publish application
+      if: matrix.configuration == 'GitRelease'
+      run: |
+        echo "Publishing application..."
+        msbuild ${{ env.Solution_Name }} /t:Publish /p:Configuration=GitRelease
+        echo "Application published."
+
+    - name: Build DevModManager_AIP
+      if: matrix.configuration == 'GitRelease'
+      run: |
+        echo "Building DevModManager_AIP..."
+        "C:\Program Files (x86)\Caphyon\Advanced Installer 22.0\bin\x86\AdvancedInstaller.com" /build "$(SolutionDir)DevModManagerInstaller\DevModManagerInstaller.aip"
+        echo "DevModManager_AIP built."
+      shell: cmd
+
+    - name: Upload MSI
+      if: matrix.configuration == 'GitRelease'
+      uses: actions/upload-artifact@v3
+      with:
+        name: DevModManagerInstaller
+        path: DevModManagerInstaller\Release\DevModManagerInstaller.msi
+
+    - name: Create GitHub Release
+      if: matrix.configuration == 'GitRelease'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.VERSION }}
+        release_name: Release ${{ env.VERSION }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Assets
+      if: matrix.configuration == 'GitRelease'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: DevModManagerInstaller\Release\DevModManagerInstaller.msi
+        asset_name: DevModManagerInstaller.msi
+        asset_content_type: application/octet-stream
+
+    - name: Merge dev to master
+      if: matrix.configuration == 'GitRelease'
+      run: |
+        git config --global user.email "you@example.com"
+        git config --global user.name "Your Name"
+        git checkout master
+        git merge dev
+        git push origin master
+        echo "Merged dev to master."
+
+    - name: Tag the release
+      if: matrix.configuration == 'GitRelease'
+      run: |
+        version=$(cat App/Properties/version.txt)
+        git tag -a "v$version" -m "Version $version"
+        git push origin "v$version"
+        echo "Tagged the release."
