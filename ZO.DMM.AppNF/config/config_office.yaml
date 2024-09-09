@@ -1,0 +1,32 @@
+repoFolder: S:\Games\Starfield\ZO_Mods_GitRepo\StarfieldMods
+useGit: true
+gitHubRepo: https://github.com/ZeeOgre/StarfieldMods
+useModManager: true
+modStagingFolder: S:\Games\Starfield\Mods
+gameFolder: S:\Games\Starfield\Content
+modManagerExecutable: S:\Games\Vortex\Vortex.exe
+modManagerParameters: ''
+ideExecutable: C:\Users\rth\AppData\Local\Programs\Microsoft VS Code\Code.exe
+modStages:
+- '*DEV'
+- TEST
+- RELEASE
+- '#NEXUS'
+- '#DEPLOYED'
+limitFiletypes: true
+promoteIncludeFiletypes:
+- .esm
+- .ba2
+- .ini
+- .txt
+packageExcludeFiletypes:
+- .zip
+- .7z
+- .rar
+timestampFormat: yyMMddHHmm
+archiveFormat: zip
+myNameSpace: ZeeOgre
+myResourcePrefix: ZO_
+showSaveMessage: false
+showOverwriteMessage: false
+nexusAPIKey: E7SKr5C5BGJE/IfPvKhYLl+is6SI0hfBlxG12EiwSSwX--6zX4iFUvU5dSWaqz--YD7/HX4ZLnBB8qCr8Unj8w==

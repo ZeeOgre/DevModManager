@@ -1,0 +1,327 @@
+using Microsoft.Win32;
+using System;
+using System.Data.SQLite;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+
+namespace ZO.DMM.AppNF
+{
+    public class Config
+    {
+        private static Config _instance;
+        private static readonly object _lock = new object();
+        private static readonly string localAppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ZeeOgre", "DevModManager");
+        public static readonly string configFilePath = Path.Combine(localAppDataPath, "config.yaml");
+        public static readonly string dbFilePath = Path.Combine(localAppDataPath, "DevModManager.db");
+        private static bool _isVerificationInProgress = false;
+
+        public static Config Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new Config();
+                        }
+                    }
+                }
+                return _instance;
+            }
+        }
+
+        public string RepoFolder { get; set; } = string.Empty;
+        public bool UseGit { get; set; }
+        public string GitHubRepo { get; set; } = string.Empty;
+        public bool UseModManager { get; set; }
+        public string ModStagingFolder { get; set; } = string.Empty;
+        public string GameFolder { get; set; } = string.Empty;
+        public string ModManagerExecutable { get; set; } = string.Empty;
+        public string ModManagerParameters { get; set; } = string.Empty;
+        public string IdeExecutable { get; set; } = string.Empty;
+        public string[] ModStages { get; set; } = new string[0];
+        public bool LimitFiletypes { get; set; }
+        public string[] PromoteIncludeFiletypes { get; set; } = new string[0];
+        public string[] PackageExcludeFiletypes { get; set; } = new string[0];
+        public string TimestampFormat { get; set; } = string.Empty;
+        public string ArchiveFormat { get; set; } = string.Empty;
+        public string MyNameSpace { get; set; } = string.Empty;
+        public string MyResourcePrefix { get; set; } = string.Empty;
+        public bool ShowSaveMessage { get; set; }
+        public bool ShowOverwriteMessage { get; set; }
+        public string NexusAPIKey { get; set; } = string.Empty;
+        public bool AutoCheckForUpdates { get; set; }
+
+        public static void Initialize()
+        {
+            if (_instance == null)
+            {
+                lock (_lock)
+                {
+                    if (_instance == null)
+                    {
+                        VerifyLocalAppDataFiles();
+                        if (File.Exists(dbFilePath))
+                        {
+                            _instance = LoadFromDatabase();
+                        }
+                        else
+                        {
+                            _instance = LoadFromYaml(configFilePath);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void InitializeNewInstance()
+        {
+            _instance = new Config();
+        }
+
+        public static void VerifyLocalAppDataFiles()
+        {
+            if (_isVerificationInProgress)
+            {
+                return;
+            }
+
+            _isVerificationInProgress = true;
+
+            try
+            {
+                if (!Directory.Exists(localAppDataPath))
+                {
+                    Directory.CreateDirectory(localAppDataPath);
+                    return;
+                }
+
+                if (!File.Exists(dbFilePath))
+                {
+                    string sampleDbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "DevModManager.db");
+                    if (File.Exists(sampleDbPath))
+                    {
+                        var result = MessageBox.Show("The database file is missing. Would you like to copy the sample data over?", "Database Missing", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            File.Copy(sampleDbPath, dbFilePath);
+                            MessageBox.Show("Sample data copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Database file is missing. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("The database file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
+                        return;
+                    }
+                }
+
+                if (!File.Exists(configFilePath))
+                {
+                    string sampleConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "config.yaml");
+                    if (File.Exists(sampleConfigPath))
+                    {
+                        File.Copy(sampleConfigPath, configFilePath);
+                        MessageBox.Show("Sample config copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("The config file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
+                        return;
+                    }
+                }
+            }
+            finally
+            {
+                _isVerificationInProgress = false;
+            }
+        }
+
+        public static Config LoadFromYaml()
+        {
+            return LoadFromYaml(configFilePath);
+        }
+
+        public static void SaveToYaml()
+        {
+            SaveToYaml(configFilePath);
+        }
+
+        public static Config LoadFromYaml(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("Configuration file not found", filePath);
+            }
+
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            using (var reader = new StreamReader(filePath))
+            {
+                var config = deserializer.Deserialize<Config>(reader);
+
+                lock (_lock)
+                {
+                    _instance = config;
+                }
+
+                return _instance;
+            }
+        }
+
+        public static void SaveToYaml(string filePath)
+        {
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            var yaml = serializer.Serialize(Instance);
+
+            File.WriteAllText(filePath, yaml);
+        }
+
+        public static Config LoadFromDatabase()
+        {
+            using (var connection = DbManager.Instance.GetConnection())
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand("SELECT * FROM vwConfig", connection))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            _instance = new Config
+                            {
+                                RepoFolder = reader["RepoFolder"] != DBNull.Value ? reader["RepoFolder"].ToString() : string.Empty,
+                                UseGit = Convert.ToBoolean(reader["UseGit"]),
+                                GitHubRepo = reader["GitHubRepo"] != DBNull.Value ? reader["GitHubRepo"].ToString() : string.Empty,
+                                UseModManager = Convert.ToBoolean(reader["UseModManager"]),
+                                GameFolder = reader["GameFolder"] != DBNull.Value ? reader["GameFolder"].ToString() : string.Empty,
+                                ModStagingFolder = reader["ModStagingFolder"] != DBNull.Value ? reader["ModStagingFolder"].ToString() : string.Empty,
+                                ModManagerExecutable = reader["ModManagerExecutable"] != DBNull.Value ? reader["ModManagerExecutable"].ToString() : string.Empty,
+                                ModManagerParameters = reader["ModManagerParameters"] != DBNull.Value ? reader["ModManagerParameters"].ToString() : string.Empty,
+                                IdeExecutable = reader["IDEExecutable"] != DBNull.Value ? reader["IDEExecutable"].ToString() : string.Empty,
+                                LimitFiletypes = Convert.ToBoolean(reader["LimitFileTypes"]),
+                                PromoteIncludeFiletypes = reader["PromoteIncludeFiletypes"] != DBNull.Value ? reader["PromoteIncludeFiletypes"].ToString().Split(new char[] { ',' }) : new string[0],
+                                PackageExcludeFiletypes = reader["PackageExcludeFiletypes"] != DBNull.Value ? reader["PackageExcludeFiletypes"].ToString().Split(new char[] { ',' }) : new string[0],
+                                TimestampFormat = reader["TimestampFormat"] != DBNull.Value ? reader["TimestampFormat"].ToString() : string.Empty,
+                                MyNameSpace = reader["MyNameSpace"] != DBNull.Value ? reader["MyNameSpace"].ToString() : string.Empty,
+                                MyResourcePrefix = reader["MyResourcePrefix"] != DBNull.Value ? reader["MyResourcePrefix"].ToString() : string.Empty,
+                                ShowSaveMessage = Convert.ToBoolean(reader["ShowSaveMessage"]),
+                                ShowOverwriteMessage = Convert.ToBoolean(reader["ShowOverwriteMessage"]),
+                                NexusAPIKey = reader["NexusAPIKey"] != DBNull.Value ? reader["NexusAPIKey"].ToString() : string.Empty,
+                                ModStages = reader["ModStages"] != DBNull.Value ? reader["ModStages"].ToString().Split(new char[] { ',' }) : new string[0],
+                                ArchiveFormat = reader["ArchiveFormat"] != DBNull.Value ? reader["ArchiveFormat"].ToString() : string.Empty,
+                                AutoCheckForUpdates = Convert.ToBoolean(reader["AutoCheckForUpdates"])
+                            };
+                        }
+                    }
+                }
+            }
+            return _instance;
+        }
+
+
+        public static void SaveToDatabase()
+        {
+            using (var connection = DbManager.Instance.GetConnection())
+            {
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    using (var command = new SQLiteCommand(connection))
+                    {
+                command.CommandText = "DELETE FROM Config";
+                _ = command.ExecuteNonQuery();
+
+                command.CommandText = @"
+                                INSERT INTO Config (
+                                    RepoFolder,
+                                    UseGit,
+                                    GitHubRepo,
+                                    UseModManager,
+                                    GameFolder,
+                                    ModStagingFolder,
+                                    ModManagerExecutable,
+                                    ModManagerParameters,
+                                    IDEExecutable,
+                                    LimitFileTypes,
+                                    PromoteIncludeFiletypes,
+                                    PackageExcludeFiletypes,
+                                    TimestampFormat,
+                                    MyNameSpace,
+                                    MyResourcePrefix,
+                                    ShowSaveMessage,
+                                    ShowOverwriteMessage,
+                                    NexusAPIKey,
+                                    ArchiveFormatID,
+                                    AutoCheckForUpdates
+                                ) VALUES (
+                                    @RepoFolder,
+                                    @UseGit,
+                                    @GitHubRepo,
+                                    @UseModManager,
+                                    @GameFolder,
+                                    @ModStagingFolder,
+                                    @ModManagerExecutable,
+                                    @ModManagerParameters,
+                                    @IdeExecutable,
+                                    @LimitFiletypes,
+                                    @PromoteIncludeFiletypes,
+                                    @PackageExcludeFiletypes,
+                                    @TimestampFormat,
+                                    @MyNameSpace,
+                                    @MyResourcePrefix,
+                                    @ShowSaveMessage,
+                                    @ShowOverwriteMessage,
+                                    @NexusAPIKey,
+                                    (SELECT ArchiveFormatID FROM ArchiveFormats WHERE FormatName = @ArchiveFormat),
+                                    @AutoCheckForUpdates
+                                )";
+
+                command.Parameters.AddWithValue("@RepoFolder", Instance.RepoFolder ?? (object)DBNull.Value);
+                _ = command.Parameters.AddWithValue("@UseGit", Instance.UseGit);
+                command.Parameters.AddWithValue("@GitHubRepo", Instance.GitHubRepo ?? (object)DBNull.Value);
+                _ = command.Parameters.AddWithValue("@UseModManager", Instance.UseModManager);
+                command.Parameters.AddWithValue("@GameFolder", Instance.GameFolder ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@ModStagingFolder", Instance.ModStagingFolder ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@ModManagerExecutable", Instance.ModManagerExecutable ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@ModManagerParameters", Instance.ModManagerParameters ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@IdeExecutable", Instance.IdeExecutable ?? (object)DBNull.Value);
+                _ = command.Parameters.AddWithValue("@LimitFiletypes", Instance.LimitFiletypes);
+                _ = command.Parameters.AddWithValue("@PromoteIncludeFiletypes", string.Join(",", Instance.PromoteIncludeFiletypes ?? Array.Empty<string>()));
+                _ = command.Parameters.AddWithValue("@PackageExcludeFiletypes", string.Join(",", Instance.PackageExcludeFiletypes ?? Array.Empty<string>()));
+                command.Parameters.AddWithValue("@TimestampFormat", Instance.TimestampFormat ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@MyNameSpace", Instance.MyNameSpace ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@MyResourcePrefix", Instance.MyResourcePrefix ?? (object)DBNull.Value);
+                _ = command.Parameters.AddWithValue("@ShowSaveMessage", Instance.ShowSaveMessage);
+                _ = command.Parameters.AddWithValue("@ShowOverwriteMessage", Instance.ShowOverwriteMessage);
+                command.Parameters.AddWithValue("@NexusAPIKey", Instance.NexusAPIKey ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@ArchiveFormat", Instance.ArchiveFormat ?? (object)DBNull.Value);
+                _ = command.Parameters.AddWithValue("@AutoCheckForUpdates", Instance.AutoCheckForUpdates);
+
+                _ = command.ExecuteNonQuery();
+            }
+                    transaction.Commit();
+                }
+            }
+        }
+    }
+}
