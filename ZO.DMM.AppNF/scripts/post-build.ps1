@@ -13,9 +13,13 @@ function Execute-Command {
     Write-Output "Executing: $command"
     $result = Invoke-Expression $command 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Command failed: $command"
-        Write-Error ($result -join "`n")
-        exit 1
+        if ($result -match "nothing to commit, working tree clean") {
+            Write-Output "Nothing to commit, working tree clean."
+        } else {
+            Write-Error "Command failed: $command"
+            Write-Error ($result -join "`n")
+            exit 1
+        }
     }
     Write-Output $result
 }
