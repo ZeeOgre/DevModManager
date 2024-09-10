@@ -114,8 +114,13 @@ if ($configuration -eq 'GitRelease') {
         exit 1
     }
 
-    # Apply stashed changes
-    Execute-Command "git stash pop"
+    # Check if there is a stash to pop
+    $stashList = git stash list
+    if (-not [string]::IsNullOrWhiteSpace($stashList)) {
+        Execute-Command "git stash pop"
+    } else {
+        Write-Output "No stash to pop."
+    }
 }
 
 # Push AutoUpdater.xml
