@@ -192,17 +192,21 @@ namespace ZO.DMM.AppNF
 
             public static List<string> GetUpdatedGameFolderFiles(ModItem modItem)
             {
-                //ModItem.CheckDeploymentStatus(modItem); because of how this is called, we assume this is valid.
+                // ModItem.CheckDeploymentStatus(modItem); because of how this is called, we assume this is valid.
                 string gameFolder = Config.Instance.GameFolder;
+                string dataFolder = Path.Combine(gameFolder, "data");
                 string deployFolder = PathBuilder.GetDeployBackupFolder(modItem.ModName);
                 string latestFile = GetNewestFile(deployFolder, ArchiveFileTypes);
                 DateTime referenceTimestamp = ParseFileTimestamp(latestFile);
-                string[] files = Directory.GetFiles(gameFolder, "*.*", SearchOption.AllDirectories);
+                string[] files = Directory.GetFiles(dataFolder, "*.*", SearchOption.AllDirectories);
+
+                List<string> excludedExtensions = new List<string> { ".dmp", ".json", ".log" };
                 List<string> newerFiles = new List<string>();
+
                 foreach (string file in files)
                 {
                     FileInfo fileInfo = new FileInfo(file);
-                    if (fileInfo.LastWriteTime > referenceTimestamp)
+                    if (fileInfo.LastWriteTime > referenceTimestamp && !excludedExtensions.Contains(fileInfo.Extension.ToLower()))
                     {
                         newerFiles.Add(file);
                     }
