@@ -14,7 +14,7 @@ function Execute-Command {
     $result = Invoke-Expression $command 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Command failed: $command"
-        Write-Error $result
+        Write-Error ($result -join "`n")
         exit 1
     }
     Write-Output $result
@@ -113,8 +113,14 @@ if ($configuration -eq 'GitRelease') {
 
     # Create GitHub release
     if (Get-Command gh -ErrorAction SilentlyContinue) {
-        Execute-Command "gh release create $tagName $msiFile -t $tagName -n 'Release $tagName'"
-        Write-Output "Created GitHub release: $tagName"
+        $autoUpdaterFile = "$(git rev-parse --show-toplevel)\App\Properties\AutoUpdater.xml"
+        if (Test-Path -Path $autoUpdaterFile) {
+            Execute-Command "gh release create $tagName $msiFile $autoUpdaterFile -t $tagName -n 'Release $tagName'"
+            Write-Output "Created GitHub release: $tagName with AutoUpdater.xml"
+        } else {
+            Write-Error "AutoUpdater.xml file not found at path: $autoUpdaterFile"
+            exit 1
+        }
     } else {
         Write-Error "GitHub CLI (gh) not found."
         exit 1
