@@ -101,6 +101,12 @@ if (-not [string]::IsNullOrWhiteSpace($gitStatus)) {
 
 # Handle release
 if ($configuration -eq 'GitRelease') {
+    # Delete existing local tag if it exists
+    $existingTag = git tag -l $tagName
+    if ($existingTag) {
+        Execute-Command "git tag -d $tagName"
+    }
+
     Execute-Command "git tag $tagName"
     Execute-Command "git push origin $tagName"
     Write-Output "Tagged and pushed release: $tagName"
