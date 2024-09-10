@@ -4,6 +4,16 @@ param (
     [string]$versionFile,
     [bool]$manual = $false
 )
+# Ensure all changes are staged
+git add -A
+
+# Commit the changes
+try {
+    git commit -m "Post-build commit for configuration $configuration"
+} catch {
+    Write-Error "Failed to commit changes."
+    exit 1
+}
 
 function Get-NewestTag {
     $tags = git tag --sort=-v:refname
