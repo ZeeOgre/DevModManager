@@ -4,12 +4,28 @@ param (
     [string]$versionFile,
     [bool]$manual = $false
 )
+
+# Function to execute a Git command and handle errors
+function Execute-GitCommand {
+    param (
+        [string]$command
+    )
+    Write-Output "Executing: git $command"
+    $result = Invoke-Expression "git $command" 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Git command failed: git $command"
+        Write-Error $result
+        exit 1
+    }
+    Write-Output $result
+}
+
 # Ensure all changes are staged
-git add -A
+Execute-GitCommand "add -A"
 
 # Commit the changes
 try {
-    git commit -m "Post-build commit for configuration $configuration"
+    Execute-GitCommand "commit -m 'Post-build commit for configuration $configuration'"
 } catch {
     Write-Error "Failed to commit changes."
     exit 1
@@ -60,58 +76,38 @@ Write-Output "Current Branch: $currentBranch"
 
 if ($currentBranch -eq 'master') {
     # Clobber down to dev
-    git checkout dev
-    git merge -X theirs master
-    if ($?) {
-        Write-Output "Merged master into dev with conflicts resolved in favor of master."
-    } else {
-        Write-Error "Failed to merge master into dev."
-        exit 1
-    }
+    Execute-GitCommand "checkout dev"
+    Execute-GitCommand "merge -X theirs master"
+    Write-Output "Merged master into dev with conflicts resolved in favor of master."
 } elseif ($currentBranch -eq 'dev') {
     # Friendly merge up to master
-    git checkout master
-    git merge dev
-    if ($?) {
-        Write-Output "Merged dev into master."
-    } else {
-        Write-Error "Failed to merge dev into master."
-        exit 1
-    }
+    Execute-GitCommand "checkout master"
+    Execute-GitCommand "merge dev"
+    Write-Output "Merged dev into master."
 }
 
 # Check if there are any changes before committing
 $gitStatus = git status --porcelain
 if (-not [string]::IsNullOrWhiteSpace($gitStatus)) {
-    git add .
-    git commit -m "Automated commit for $configuration configuration"
-    if ($?) {
-        Write-Output "Committed changes."
-    } else {
-        Write-Error "Failed to commit changes."
-        exit 1
-    }
+    Execute-GitCommand "add ."
+    Execute-GitCommand "commit -m 'Automated commit for $configuration configuration'"
+    Write-Output "Committed changes."
 
-    git push origin $currentBranch
-    if ($?) {
-        Write-Output "Pushed changes to $currentBranch."
-    } else {
-        Write-Error "Failed to push changes to $currentBranch."
-        exit 1
-    }
+    Execute-GitCommand "push origin $currentBranch"
+    Write-Output "Pushed changes to $currentBranch."
 } else {
     Write-Output "Nothing to commit, working tree clean."
 }
 
 # Handle release
 if ($configuration -eq 'GitRelease') {
-    git tag $tagName
-    git push origin $tagName
+    Execute-GitCommand "tag $tagName"
+    Execute-GitCommand "push origin $tagName"
     Write-Output "Tagged and pushed release: $tagName"
 
     # Create GitHub release
     if (Get-Command gh -ErrorAction SilentlyContinue) {
-        gh release create $tagName $msiFile -t $tagName -n "Release $tagName"
+        Execute-GitCommand "gh release create $tagName $msiFile -t $tagName -n 'Release $tagName'"
         Write-Output "Created GitHub release: $tagName"
     } else {
         Write-Error "GitHub CLI (gh) not found."
@@ -119,7 +115,19 @@ if ($configuration -eq 'GitRelease') {
     }
 
     # Apply stashed changes
-    git stash pop
+    Execute-GitCommand "stash pop"
+}
+
+# Push AutoUpdater.xml
+$autoUpdaterFile = "$(git rev-parse --show-toplevel)\App\Properties\AutoUpdater.xml"
+if (Test-Path -Path $autoUpdaterFile) {
+    Execute-GitCommand "add $autoUpdaterFile"
+    Execute-GitCommand "commit -m 'Update AutoUpdater.xml for $tagName'"
+    Execute-GitCommand "push origin $currentBranch"
+    Write-Output "Pushed AutoUpdater.xml changes."
+} else {
+    Write-Error "AutoUpdater.xml file not found at path: $autoUpdaterFile"
+    exit 1
 }
 
 # Check if GitHub CLI is available
@@ -130,6 +138,6 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
 
 # Switch back to dev if needed
 if ($currentBranch -eq 'dev') {
-    git checkout dev
+    Execute-GitCommand "checkout dev"
     Write-Output "Switched back to dev branch."
 }
