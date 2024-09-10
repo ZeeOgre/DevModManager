@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <item>
-  <version>0.0.2.0</version>
+  <version>0.0.3.0</version>
   <url>https://github.com/ZeeOgre/ZO.DevModManager/releases/latest/download/DevModManager.msi</url>
   <changelog>https://github.com/ZeeOgre/ZO.DevModManager/releases/latest</changelog>
 </item>

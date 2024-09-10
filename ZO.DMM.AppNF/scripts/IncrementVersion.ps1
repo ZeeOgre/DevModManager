@@ -23,7 +23,6 @@ function Increment-Version {
     return $versionSegments -join '.'
 }
 
-
 function Update-CsprojVersion {
     param (
         [string]$newVersion,
@@ -98,8 +97,6 @@ function Update-SettingsFile {
 
 function Update-VersionTxtFile {
     param (
-        [xml]$xml,
-        [System.Xml.XmlNode]$currentVersionNode,
         [string]$newVersion,
         [string]$versionTxtFilePath
     )
@@ -108,8 +105,6 @@ function Update-VersionTxtFile {
     }
 
     Set-Content -Path $versionTxtFilePath -Value $newVersion -Encoding UTF8
-}
-    }
 }
 
 function Update-AppConfig {
@@ -126,15 +121,13 @@ function Update-AppConfig {
     $versionNode = $appConfigXml.SelectSingleNode("//applicationSettings/ZO.DMM.AppNF.Properties.Settings/setting[@name='version']/value")
     if ($versionNode -ne $null) {
         $versionNode.InnerText = $newVersion
-        Write-Output "Updated Version in csproj: $newVersion"
+        Write-Output "Updated Version in App.config: $newVersion"
     } else {
         throw "Error: Version node not found in App.config."
-    }
     }
 
     $appConfigXml.Save($appConfigFilePath)
 }
-        }
 
 function Update-AutoUpdaterXml {
     param (
@@ -150,12 +143,7 @@ function Update-AutoUpdaterXml {
     $versionNode = $xmlOutput.SelectSingleNode("//item/version")
     if ($versionNode -ne $null) {
         $versionNode.InnerText = $newVersion
-        Write-Output "Updated Version in App.config: $newVersion"
-        if ($WhatIf) {
-            Write-Output "WhatIf: $appConfigFilePath would be updated with new version $newVersion"
-        } else {
-            $appConfigXml.Save($appConfigFilePath)
-        }
+        Write-Output "Updated Version in AutoUpdater.xml: $newVersion"
     } else {
         throw "Error: Version node not found in AutoUpdater.xml."
     }
@@ -192,11 +180,9 @@ function Update-AipFile {
         throw "Error: ProductCode node not found in Installer.aip."
     }
 
-    if ($WhatIf) {
-        Write-Output "WhatIf: $aipFilePath would be updated with new version $newVersion and new ProductCode 1033:{$newGuid}"
-    } else {
     $aipXml.Save($aipFilePath)
 }
+
 function Update-AssemblyInfoFile {
     param (
         [string]$newVersion,
@@ -227,39 +213,6 @@ function Update-AssemblyInfoFile {
     # Write the modified content back to the file
     Set-Content -Path $assemblyInfoFilePath -Value $assemblyInfoLines -Encoding UTF8
 }
-
-function Update-AipFile {
-   param (
-       [string]$aipFilePath,
-       [string]$newVersion
-   )
-
-   # Load the XML
-   [xml]$xml = Get-Content $aipFilePath
-
-   # Read and output the old ProductVersion
-   $productVersionNode = $xml.SelectSingleNode("//ROW[@Property='ProductVersion']")
-   $oldVersion = $productVersionNode.GetAttribute("Value")
-   Write-Output "Old ProductVersion: $oldVersion"
-
-   # Update the ProductVersion
-   $productVersionNode.SetAttribute("Value", $newVersion)
-
-   # Read and output the old ProductCode
-   $productCodeNode = $xml.SelectSingleNode("//ROW[@Property='ProductCode']")
-   $oldGuid = $productCodeNode.GetAttribute("Value")
-   Write-Output "Old ProductCode: $oldGuid"
-
-   # Generate a new GUID for ProductCode
-   $newGuid = [guid]::NewGuid().ToString()
-   $productCodeNode.SetAttribute("Value", "1033:{$newGuid}")
-   Write-Output "New ProductCode: 1033:{$newGuid}"
-
-   # Save the updated XML
-   $xml.Save($aipFilePath)
-}
-
-
 
 $currentVersionData = Get-CurrentVersion -filePath $SettingsFile
 $currentVersion = $currentVersionData.Version
