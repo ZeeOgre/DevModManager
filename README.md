@@ -142,9 +142,7 @@ Github has free solutions that anyone can use. You can mark your repositories pr
 ### Open Game Folder
 Does what it says on the tin, opens the game folder in Windows Explorer.
 ### Load Order
-Because everyone does it a little different, I've built a Load Order manager of my own. This mixes the information from Plugins.txt and CreationCatalog.txt to provide a more robust view of what you've got installed.
-It's still very much a work in progress, so at this point the buttons don't even work.  I plan on having categories, and the ability to move entire categories up and down, in addition to actually writing the comments/categories into the Plugins.txt (even if it's only there for one go, until the game wipes them out.
-)
+This is JUST a preview of WIP - LOW will be coming soon
 
 ![Load Order Window](./ZO.DMM.AppNF/docs/img/dmm_loadorder_window.png)
 ## Rows
@@ -178,26 +176,28 @@ This will open the package window. Select the mod you want to package, and click
 If you haven't defined, or don't have a Bethesda ID, you can enter it here.  This will allow you to quickly open the mod page on Bethesda.net.  This is not required, but it's a nice feature to have.
 If it says "Bethesda" it means you haven't provided the Creations URL.
 When you look at a creation on Bethesda.net, the URL will look like this:
-![Bethesda Address Zohst](img/bethesda_address_zohst.png)
+![Bethesda Address Zohst](./ZO.DMM.AppNF/docs/img/bethesda_address_zohst.png)
 
 The GUID between "details" and the Name of the mod is the Bethesda ID. Keep everything up to the GUID, and paste it in to the Bethesda URL field.
-![Dmm Bethesda Url](img/dmm_bethesda_url.png)
+![Dmm Bethesda Url](./ZO.DMM.AppNF/docs/img/dmm_bethesda_url.png)
 
 ### Nexus ID
 Just like the Bethesda ID, if you have a Nexus ID, you can enter it here.  This will allow you to quickly open the mod page on Nexus.  This is not required, but it's a nice feature to have.
 If it says "Nexus" it means you haven't provided the Nexus ID.
 When you look at a mod on Nexus, the URL will look like this:	
 
-![Nexus Address Zohst](img/nexus_address_zohst.png)
+![Nexus Address Zohst](./ZO.DMM.AppNF/docs/img/nexus_address_zohst.png)
 
 The number at the end of the URL is the Nexus ID.  In this case, paste the whole URL into the Nexus URL field.
 
 ## Load Order Window
 ---
-![Dmm Loadorder Window](img/dmm_loadorder_window.png)
+![Dmm Loadorder Window](./ZO.DMM.AppNF/docs/img/dmm_loadorder_window.png)
 
-I've removed the load order window for now, but I'll be releasing it soon -- now that I know how to package it better :)
-
+This is a work in progress, but it will show you the load order of your mods, and allow you to change the order of them.  This is a feature that is not yet fully implemented.
+Plans include:
+LOOT import/export support
+User Defined Categories
 LoadOuts
 Plugins.txt and Starfield.ccc support.
 	I've done initial testing with Plugins.txt, and I can write the comment lines that will reflect your categories.  Unfortunately, Starfield at least strips them out every time you load the game. But, with our database here, you should be able to recreate that for sharing with others easily.
