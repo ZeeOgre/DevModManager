@@ -104,7 +104,7 @@ if (-not [string]::IsNullOrWhiteSpace($gitStatus)) {
 }
 
 # Handle release
-if ($configuration -eq 'Release') {
+if ($configuration -eq 'GitRelease') {
     git tag $tagName
     git push origin $tagName
     Write-Output "Tagged and pushed release: $tagName"
