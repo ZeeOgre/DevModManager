@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net481</TargetFramework>
@@ -20,7 +19,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <Version>0.0.2.0</Version>
+    <Version>0.0.3.0</Version>
     <!--<ApplicationVersion>$(Version)</ApplicationVersion>-->
     <!--<ApplicationRevision>0</ApplicationRevision>-->
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -31,7 +30,6 @@
     <!--<AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>-->
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
@@ -43,7 +41,6 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
@@ -67,7 +64,6 @@
   <ItemGroup>
     <None Remove="docs\img\ZeeOgre.ico" />
   </ItemGroup>
-
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -83,15 +79,12 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-
   <ItemGroup>
     <Resource Include="docs\img\ZeeOgre.ico" />
   </ItemGroup>
-
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8.1">
       <Visible>False</Visible>
@@ -104,11 +97,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="docs\img\ZeeOgre.ico" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.65" />
@@ -117,7 +108,6 @@
     <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
     <PackageReference Include="YamlDotNet" Version="16.1.0" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -125,7 +115,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

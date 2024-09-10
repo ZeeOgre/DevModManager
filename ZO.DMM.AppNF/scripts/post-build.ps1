@@ -70,22 +70,27 @@ if ($currentBranch -eq 'master') {
     }
 }
 
-# Commit and push changes
-git add .
-git commit -m "Automated commit for $configuration configuration"
-if ($?) {
-    Write-Output "Committed changes."
-} else {
-    Write-Error "Failed to commit changes."
-    exit 1
-}
+# Check if there are any changes before committing
+$gitStatus = git status --porcelain
+if (-not [string]::IsNullOrWhiteSpace($gitStatus)) {
+    git add .
+    git commit -m "Automated commit for $configuration configuration"
+    if ($?) {
+        Write-Output "Committed changes."
+    } else {
+        Write-Error "Failed to commit changes."
+        exit 1
+    }
 
-git push origin $currentBranch
-if ($?) {
-    Write-Output "Pushed changes to $currentBranch."
+    git push origin $currentBranch
+    if ($?) {
+        Write-Output "Pushed changes to $currentBranch."
+    } else {
+        Write-Error "Failed to push changes to $currentBranch."
+        exit 1
+    }
 } else {
-    Write-Error "Failed to push changes to $currentBranch."
-    exit 1
+    Write-Output "Nothing to commit, working tree clean."
 }
 
 # Handle release
@@ -105,11 +110,12 @@ if ($configuration -eq 'Release') {
 
     # Apply stashed changes
     git stash pop
+}
 
-    # Check if GitHub CLI is available
-    if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-        Write-Host "GitHub CLI (gh) is not installed or not in PATH. Skipping release creation."
-        exit 0
+# Check if GitHub CLI is available
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+    Write-Host "GitHub CLI (gh) is not installed or not in PATH. Skipping release creation."
+    exit 0
 }
 
 # Switch back to dev if needed
