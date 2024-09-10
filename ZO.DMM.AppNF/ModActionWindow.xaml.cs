@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,15 +9,15 @@ namespace ZO.DMM.AppNF
     {
         public string SelectedStage { get; private set; }
         private readonly ModItem _modItem;
-        private readonly ObservableCollection<string> _stages;
+        private readonly List<string> _stages;
 
         public string ActionType { get; private set; }
 
-        public ModActionWindow(ModItem modItem, ObservableCollection<string> stages, string actionType)
+        public ModActionWindow(ModItem modItem, string actionType)
         {
             InitializeComponent();
             _modItem = modItem;
-            _stages = stages;
+            _stages = ModItem.DB.GetDeployableStages();
             ActionType = actionType;
             DataContext = this;
 
@@ -85,7 +85,7 @@ namespace ZO.DMM.AppNF
         private void UpdateTargetStageComboBox()
         {
             var selectedSourceStage = SourceStageComboBox.SelectedItem as string;
-            var validStages = ModItem.DB.GetDeployableStages();
+            var validStages = _stages.ToList();
 
             if (selectedSourceStage != null)
             {
@@ -103,7 +103,7 @@ namespace ZO.DMM.AppNF
             if (ActionButton.Content.ToString() == "Deploy")
             {
                 // Handle deploy logic
-                ModStageManager.DeployStage(_modItem, selectedStage);
+                _ = ModStageManager.DeployStage(_modItem, selectedStage);
             }
             else if (ActionButton.Content.ToString() == "Package")
             {

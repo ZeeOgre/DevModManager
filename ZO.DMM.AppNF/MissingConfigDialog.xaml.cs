@@ -12,14 +12,14 @@ namespace ZO.DMM.AppNF
         private void CopySample_Click(object sender, RoutedEventArgs e)
         {
             // Logic to copy the sample configuration file
-            MessageBox.Show("Sample configuration file copied.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            _ = MessageBox.Show("Sample configuration file copied.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void SettingsWindow_Click(object sender, RoutedEventArgs e)
         {
             // Logic to open the settings window
             var settingsWindow = new SettingsWindow(SettingsLaunchSource.MissingConfigDialog);
-            settingsWindow.ShowDialog();
+            settingsWindow.Show();
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)

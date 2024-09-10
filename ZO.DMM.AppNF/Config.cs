@@ -99,7 +99,7 @@ namespace ZO.DMM.AppNF
             {
                 if (!Directory.Exists(localAppDataPath))
                 {
-                    Directory.CreateDirectory(localAppDataPath);
+                    _ = Directory.CreateDirectory(localAppDataPath);
                     return;
                 }
 
@@ -112,18 +112,18 @@ namespace ZO.DMM.AppNF
                         if (result == MessageBoxResult.Yes)
                         {
                             File.Copy(sampleDbPath, dbFilePath);
-                            MessageBox.Show("Sample data copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                            _ = MessageBox.Show("Sample data copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
                         else
                         {
-                            MessageBox.Show("Database file is missing. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            _ = MessageBox.Show("Database file is missing. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
                             return;
                         }
                     }
                     else
                     {
-                        MessageBox.Show("The database file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        _ = MessageBox.Show("The database file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
                         return;
                     }
@@ -135,11 +135,11 @@ namespace ZO.DMM.AppNF
                     if (File.Exists(sampleConfigPath))
                     {
                         File.Copy(sampleConfigPath, configFilePath);
-                        MessageBox.Show("Sample config copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                        _ = MessageBox.Show("Sample config copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
-                        MessageBox.Show("The config file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        _ = MessageBox.Show("The config file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
                         return;
                     }
@@ -241,6 +241,8 @@ namespace ZO.DMM.AppNF
 
         public static void SaveToDatabase()
         {
+            var config = Instance;
+
             using (var connection = DbManager.Instance.GetConnection())
             {
                 connection.Open();
@@ -248,77 +250,105 @@ namespace ZO.DMM.AppNF
                 {
                     using (var command = new SQLiteCommand(connection))
                     {
-                command.CommandText = "DELETE FROM Config";
-                _ = command.ExecuteNonQuery();
+                        command.CommandText = "DELETE FROM Config";
+                        _ = command.ExecuteNonQuery();
 
-                command.CommandText = @"
-                                INSERT INTO Config (
-                                    RepoFolder,
-                                    UseGit,
-                                    GitHubRepo,
-                                    UseModManager,
-                                    GameFolder,
-                                    ModStagingFolder,
-                                    ModManagerExecutable,
-                                    ModManagerParameters,
-                                    IDEExecutable,
-                                    LimitFileTypes,
-                                    PromoteIncludeFiletypes,
-                                    PackageExcludeFiletypes,
-                                    TimestampFormat,
-                                    MyNameSpace,
-                                    MyResourcePrefix,
-                                    ShowSaveMessage,
-                                    ShowOverwriteMessage,
-                                    NexusAPIKey,
-                                    ArchiveFormatID,
-                                    AutoCheckForUpdates
-                                ) VALUES (
-                                    @RepoFolder,
-                                    @UseGit,
-                                    @GitHubRepo,
-                                    @UseModManager,
-                                    @GameFolder,
-                                    @ModStagingFolder,
-                                    @ModManagerExecutable,
-                                    @ModManagerParameters,
-                                    @IdeExecutable,
-                                    @LimitFiletypes,
-                                    @PromoteIncludeFiletypes,
-                                    @PackageExcludeFiletypes,
-                                    @TimestampFormat,
-                                    @MyNameSpace,
-                                    @MyResourcePrefix,
-                                    @ShowSaveMessage,
-                                    @ShowOverwriteMessage,
-                                    @NexusAPIKey,
-                                    (SELECT ArchiveFormatID FROM ArchiveFormats WHERE FormatName = @ArchiveFormat),
-                                    @AutoCheckForUpdates
-                                )";
+                        command.CommandText = @"
+                                            INSERT INTO Config (
+                                                RepoFolder,
+                                                UseGit,
+                                                GitHubRepo,
+                                                UseModManager,
+                                                GameFolder,
+                                                ModStagingFolder,
+                                                ModManagerExecutable,
+                                                ModManagerParameters,
+                                                IDEExecutable,
+                                                LimitFileTypes,
+                                                PromoteIncludeFiletypes,
+                                                PackageExcludeFiletypes,
+                                                TimestampFormat,
+                                                MyNameSpace,
+                                                MyResourcePrefix,
+                                                ShowSaveMessage,
+                                                ShowOverwriteMessage,
+                                                NexusAPIKey,
+                                                ArchiveFormatID,
+                                                AutoCheckForUpdates
+                                            ) VALUES (
+                                                @RepoFolder,
+                                                @UseGit,
+                                                @GitHubRepo,
+                                                @UseModManager,
+                                                @GameFolder,
+                                                @ModStagingFolder,
+                                                @ModManagerExecutable,
+                                                @ModManagerParameters,
+                                                @IdeExecutable,
+                                                @LimitFiletypes,
+                                                @PromoteIncludeFiletypes,
+                                                @PackageExcludeFiletypes,
+                                                @TimestampFormat,
+                                                @MyNameSpace,
+                                                @MyResourcePrefix,
+                                                @ShowSaveMessage,
+                                                @ShowOverwriteMessage,
+                                                @NexusAPIKey,
+                                                (SELECT ArchiveFormatID FROM ArchiveFormats WHERE FormatName = @ArchiveFormat),
+                                                @AutoCheckForUpdates
+                                            )";
 
-                command.Parameters.AddWithValue("@RepoFolder", Instance.RepoFolder ?? (object)DBNull.Value);
-                _ = command.Parameters.AddWithValue("@UseGit", Instance.UseGit);
-                command.Parameters.AddWithValue("@GitHubRepo", Instance.GitHubRepo ?? (object)DBNull.Value);
-                _ = command.Parameters.AddWithValue("@UseModManager", Instance.UseModManager);
-                command.Parameters.AddWithValue("@GameFolder", Instance.GameFolder ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@ModStagingFolder", Instance.ModStagingFolder ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@ModManagerExecutable", Instance.ModManagerExecutable ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@ModManagerParameters", Instance.ModManagerParameters ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@IdeExecutable", Instance.IdeExecutable ?? (object)DBNull.Value);
-                _ = command.Parameters.AddWithValue("@LimitFiletypes", Instance.LimitFiletypes);
-                _ = command.Parameters.AddWithValue("@PromoteIncludeFiletypes", string.Join(",", Instance.PromoteIncludeFiletypes ?? Array.Empty<string>()));
-                _ = command.Parameters.AddWithValue("@PackageExcludeFiletypes", string.Join(",", Instance.PackageExcludeFiletypes ?? Array.Empty<string>()));
-                command.Parameters.AddWithValue("@TimestampFormat", Instance.TimestampFormat ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@MyNameSpace", Instance.MyNameSpace ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@MyResourcePrefix", Instance.MyResourcePrefix ?? (object)DBNull.Value);
-                _ = command.Parameters.AddWithValue("@ShowSaveMessage", Instance.ShowSaveMessage);
-                _ = command.Parameters.AddWithValue("@ShowOverwriteMessage", Instance.ShowOverwriteMessage);
-                command.Parameters.AddWithValue("@NexusAPIKey", Instance.NexusAPIKey ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@ArchiveFormat", Instance.ArchiveFormat ?? (object)DBNull.Value);
-                _ = command.Parameters.AddWithValue("@AutoCheckForUpdates", Instance.AutoCheckForUpdates);
+                        _ = command.Parameters.AddWithValue("@RepoFolder", config.RepoFolder ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@UseGit", config.UseGit);
+                        _ = command.Parameters.AddWithValue("@GitHubRepo", config.GitHubRepo ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@UseModManager", config.UseModManager);
+                        _ = command.Parameters.AddWithValue("@GameFolder", config.GameFolder ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ModStagingFolder", config.ModStagingFolder ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ModManagerExecutable", config.ModManagerExecutable ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ModManagerParameters", config.ModManagerParameters ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@IdeExecutable", config.IdeExecutable ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@LimitFiletypes", config.LimitFiletypes);
+                        _ = command.Parameters.AddWithValue("@PromoteIncludeFiletypes", string.Join(",", config.PromoteIncludeFiletypes ?? Array.Empty<string>()));
+                        _ = command.Parameters.AddWithValue("@PackageExcludeFiletypes", string.Join(",", config.PackageExcludeFiletypes ?? Array.Empty<string>()));
+                        _ = command.Parameters.AddWithValue("@TimestampFormat", config.TimestampFormat ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@MyNameSpace", config.MyNameSpace ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@MyResourcePrefix", config.MyResourcePrefix ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ShowSaveMessage", config.ShowSaveMessage);
+                        _ = command.Parameters.AddWithValue("@ShowOverwriteMessage", config.ShowOverwriteMessage);
+                        _ = command.Parameters.AddWithValue("@NexusAPIKey", config.NexusAPIKey ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ArchiveFormat", config.ArchiveFormat ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@AutoCheckForUpdates", config.AutoCheckForUpdates);
 
-                _ = command.ExecuteNonQuery();
-            }
+                        _ = command.ExecuteNonQuery();
+                    }
+
+                    if (config.ModStages != null && config.ModStages.Length > 0)
+                    {
+                        using (var deleteCommand = new SQLiteCommand("DELETE FROM Stages WHERE IsReserved = 0", connection))
+                        {
+                            _ = deleteCommand.ExecuteNonQuery();
+                        }
+
+                        foreach (var stage in config.ModStages)
+                        {
+                            var stageName = stage.TrimStart('*', '#');
+                            var isSource = stage.StartsWith("*");
+                            var isReserved = stage.StartsWith("#");
+
+                            using (var stageCommand = new SQLiteCommand(connection))
+                            {
+                                stageCommand.CommandText = @"
+                                                        INSERT OR REPLACE INTO Stages (StageName, IsSource, IsReserved) 
+                                                        VALUES (@StageName, @IsSource, @IsReserved)";
+                                _ = stageCommand.Parameters.AddWithValue("@StageName", stageName);
+                                _ = stageCommand.Parameters.AddWithValue("@IsSource", isSource);
+                                _ = stageCommand.Parameters.AddWithValue("@IsReserved", isReserved);
+
+                                _ = stageCommand.ExecuteNonQuery();
+                            }
+                        }
+                    }
+
                     transaction.Commit();
                 }
             }

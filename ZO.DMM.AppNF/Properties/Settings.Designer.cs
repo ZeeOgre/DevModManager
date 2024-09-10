@@ -34,20 +34,20 @@ namespace ZO.DMM.AppNF.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.0.19")]
-        public string version {
-            get {
-                return ((string)(this["version"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("https://github.com/ZeeOgre/ZO.DevModManager/releases/latest/download/AutoUpdater." +
             "xml")]
         public string UpdateUrl {
             get {
                 return ((string)(this["UpdateUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.0.1.0")]
+        public string version {
+            get {
+                return ((string)(this["version"]));
             }
         }
     }

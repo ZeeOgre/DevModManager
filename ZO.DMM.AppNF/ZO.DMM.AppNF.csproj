@@ -3,10 +3,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net481</TargetFramework>
-	<UseWPF>true</UseWPF>
-	<UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>ZO.DMM.AppNF</RootNamespace>
-    <AssemblyName>ZO.DMM.AppNF</AssemblyName>
+    <AssemblyName>DevModManager</AssemblyName>
     <ApplicationIcon>docs\img\ZeeOgre.ico</ApplicationIcon>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -20,11 +20,16 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>0.0.19.*</ApplicationVersion>
+    <Version>0.0.2.0</Version>
+    <!--<ApplicationVersion>$(Version)</ApplicationVersion>-->
+    <!--<ApplicationRevision>0</ApplicationRevision>-->
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <Configurations>Debug;Release;GitRelease</Configurations>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!--<AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>-->
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -49,7 +54,16 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='GitRelease|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\GitRelease\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="docs\img\ZeeOgre.ico" />
   </ItemGroup>
@@ -118,5 +132,60 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-
+  <ItemGroup>
+    <Content Include="data\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docs\**\*" CopyToOutputDirectory="OverwriteAlways" />
+    <Content Include="lib\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="RearrangeOutputFiles" AfterTargets="Build;Publish" BeforeTargets="PostBuildEvent">
+    <ItemGroup>
+      <DllFiles Include="$(OutputPath)**\*.dll" Exclude="$(OutputPath)DevModManager.dll;$(OutputPath)**\*.resources.dll;$(OutputPath)lib\**\*.*" />
+      <ResourceDllFiles Include="$(OutputPath)**\*.resources.dll" Exclude="$(OutputPath)locale\**\*.*" />
+    </ItemGroup>
+    <Move SourceFiles="@(DllFiles)" DestinationFolder="$(OutputPath)lib\%(RecursiveDir)" />
+    <MakeDir Directories="$(OutputPath)locale" />
+    <Move SourceFiles="@(ResourceDllFiles)" DestinationFolder="$(OutputPath)locale\%(RecursiveDir)" />
+    <RemoveEmptyDirectories RootDirectory="$(OutputPath)" />
+  </Target>
+  <Target Name="CopyConfigFile" AfterTargets="Build;Publish" BeforeTargets="PostBuildEvent">
+    <ItemGroup>
+      <ConfigFile Include="config\config.yaml" Condition="'$(Configuration)' == 'Debug'" />
+      <ConfigFile Include="config\config_sample.yaml" Condition="'$(Configuration)' != 'Debug'" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ConfigFile)" DestinationFiles="$(OutputPath)config\config.yaml" />
+  </Target>
+  <UsingTask TaskName="RemoveEmptyDirectories" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <RootDirectory ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+          foreach (var dir in Directory.GetDirectories(RootDirectory, "*", SearchOption.AllDirectories))
+          {
+            if (Directory.GetFiles(dir).Length == 0 && Directory.GetDirectories(dir).Length == 0)
+            {
+              Directory.Delete(dir, false);
+            }
+          }
+        ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name="SetEnvironmentVariables" AfterTargets="PostBuildEvent">
+    <Exec Command="setx AppNFConfiguration $(Configuration)" />
+    <Exec Command="setx AppNFOutputPath $(OutputPath)" />
+  </Target>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)' == 'GitRelease'">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File $(ProjectDir)scripts\IncrementVersion.ps1 -SettingsFile $(ProjectDir)Properties\Settings.settings -CsprojFilePath $(ProjectDir)ZO.DMM.AppNF.csproj -AppConfigFilePath $(ProjectDir)App.config -VersionTxtFilePath $(ProjectDir)Properties\version.txt -AipFilePath $(ProjectDir)Installer\DMMInstaller.aip -XmlOutputPath $(ProjectDir)Properties\AutoUpdater.xml -Configuration $(Configuration) -AssemblyInfoFilePath $(ProjectDir)Properties\AssemblyInfo.cs" />
+  </Target>
+  <Target Name="PostBuildMoveCheck" BeforeTargets="RunAdvancedInstaller">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\WaitForFileMove.ps1&quot; -filePath &quot;$(TargetDir)lib\x86\*.dll&quot; -timeoutInSeconds 60" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\WaitForFileMove.ps1&quot; -filePath &quot;$(TargetDir)lib\x64\*.dll&quot; -timeoutInSeconds 60" />
+  </Target>
+  <Target Name="RunAdvancedInstaller" AfterTargets="SetEnvironmentVariables" Condition="'$(Configuration)' == 'GitRelease'">
+    <Exec Command="%25ADVINST_COM%25 /build &quot;$(ProjectDir)installer\DMMInstaller.aip&quot; -buildslist &quot;AnyCPU_GitRelease&quot;" />
+  </Target>
+  <!--<Target Name="PostBuild" AfterTargets="RunAdvancedInstaller" Condition="'$(Configuration)' == 'GitRelease'">
+		<Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\post-build.ps1&quot; -configuration $(ConfigurationName) -msiFile &quot;$(ProjectDir)installer\output\DevModManager.msi&quot; -versionFile &quot;$(ProjectDir)Properties\version.txt&quot;" />
+	</Target>-->
 </Project>

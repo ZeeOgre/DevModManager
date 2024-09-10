@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoUpdaterDotNET;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -16,14 +17,16 @@ namespace ZO.DMM.AppNF
     {
         public static bool IsSettingsMode { get; private set; }
 
-        public static string Company { get; }
+        public static string CompanyName { get; }
+        public static string ProductName { get; }
         public static string PackageID { get; }
         public static string Version { get; }
 
         static App()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            Company = GetAssemblyAttribute<AssemblyCompanyAttribute>(assembly)?.Company ?? "Unknown Company";
+            CompanyName = GetAssemblyAttribute<AssemblyCompanyAttribute>(assembly)?.Company ?? "Unknown Company";
+            ProductName = GetAssemblyAttribute<AssemblyProductAttribute>(assembly)?.Product ?? "Unknown Product";
             PackageID = GetAssemblyAttribute<AssemblyProductAttribute>(assembly)?.Product ?? "Unknown Product";
             Version = assembly.GetName().Version?.ToString() ?? "0.0.0.0";
         }
@@ -141,7 +144,7 @@ namespace ZO.DMM.AppNF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error during auto-check: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show($"Error during auto-check: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -157,4 +160,4 @@ namespace ZO.DMM.AppNF
             AppDomain.CurrentDomain.SetData("PROBING_DIRECTORIES", probingPaths);
         }
     }
-}           
+}

@@ -118,7 +118,7 @@
         <StackPanel Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,25,0,5">
             <Label Content="Version:" VerticalAlignment="Center" Width="50"/>
             <TextBlock Name="VersionTextBlock" Width="100" Margin="5,0,0,0" Text="{x:Static local:App.Version}" 
-    HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
+HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
             <Button Content="Check for Updates" Click="CheckForUpdatesButton_Click" Width="150" Margin="10,0,0,0"/>
             <CheckBox Name="AutoCheckUpdatesCheckBox" Content="Automatically check at startup" Margin="10,0,0,0" 
        IsChecked="{Binding AutoCheckForUpdates, UpdateSourceTrigger=PropertyChanged}" 

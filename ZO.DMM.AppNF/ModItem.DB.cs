@@ -26,19 +26,19 @@ namespace ZO.DMM.AppNF
                                     (SELECT StageId FROM Stages WHERE StageName = @DeployedStage))";
                         using (var command = new SQLiteCommand(query, connection))
                         {
-                            command.Parameters.AddWithValue("@ModName", modItem.ModName);
-                            command.Parameters.AddWithValue("@ModFolderPath", modItem.ModFolderPath);
+                            _ = command.Parameters.AddWithValue("@ModName", modItem.ModName);
+                            _ = command.Parameters.AddWithValue("@ModFolderPath", modItem.ModFolderPath);
 
                             if (modItem.DeployedStage != null)
                             {
-                                command.Parameters.AddWithValue("@DeployedStage", modItem.DeployedStage);
+                                _ = command.Parameters.AddWithValue("@DeployedStage", modItem.DeployedStage);
                             }
                             else
                             {
-                                command.Parameters.AddWithValue("@DeployedStage", DBNull.Value);
+                                _ = command.Parameters.AddWithValue("@DeployedStage", DBNull.Value);
                             }
 
-                            command.ExecuteNonQuery();
+                            _ = command.ExecuteNonQuery();
                         }
 
                         // Insert or replace files
@@ -52,15 +52,15 @@ namespace ZO.DMM.AppNF
 
                             using (var command = new SQLiteCommand(query, connection))
                             {
-                                command.Parameters.AddWithValue("@ModName", modItem.ModName);
-                                command.Parameters.AddWithValue("@Stage", fileEntry.Value.Stage);
-                                command.Parameters.AddWithValue("@FullPath", Path.Combine(modItem.ModFolderPath, fileEntry.Value.RelativePath));
-                                command.Parameters.AddWithValue("@RelativePath", fileEntry.Value.RelativePath);
-                                command.Parameters.AddWithValue("@DTStamp", fileEntry.Value.Timestamp);
-                                command.Parameters.AddWithValue("@HASH", fileEntry.Value.Hash);
-                                command.Parameters.AddWithValue("@isArchive", 0); // Assuming these are not archive files
+                                _ = command.Parameters.AddWithValue("@ModName", modItem.ModName);
+                                _ = command.Parameters.AddWithValue("@Stage", fileEntry.Value.Stage);
+                                _ = command.Parameters.AddWithValue("@FullPath", Path.Combine(modItem.ModFolderPath, fileEntry.Value.RelativePath));
+                                _ = command.Parameters.AddWithValue("@RelativePath", fileEntry.Value.RelativePath);
+                                _ = command.Parameters.AddWithValue("@DTStamp", fileEntry.Value.Timestamp);
+                                _ = command.Parameters.AddWithValue("@HASH", fileEntry.Value.Hash);
+                                _ = command.Parameters.AddWithValue("@isArchive", 0); // Assuming these are not archive files
 
-                                command.ExecuteNonQuery();
+                                _ = command.ExecuteNonQuery();
                             }
                         }
 
@@ -88,15 +88,15 @@ namespace ZO.DMM.AppNF
 
                             using (var command = new SQLiteCommand(query, connection))
                             {
-                                command.Parameters.AddWithValue("@ModName", modItem.ModName);
-                                command.Parameters.AddWithValue("@Stage", archiveEntry.Value.Stage);
-                                command.Parameters.AddWithValue("@FullPath", archiveEntry.Value.Path);
-                                command.Parameters.AddWithValue("@RelativePath", DBNull.Value);
-                                command.Parameters.AddWithValue("@DTStamp", dtStamp);
-                                command.Parameters.AddWithValue("@HASH", DBNull.Value); // Assuming no hash for archives
-                                command.Parameters.AddWithValue("@isArchive", 1); // These are archive files
+                                _ = command.Parameters.AddWithValue("@ModName", modItem.ModName);
+                                _ = command.Parameters.AddWithValue("@Stage", archiveEntry.Value.Stage);
+                                _ = command.Parameters.AddWithValue("@FullPath", archiveEntry.Value.Path);
+                                _ = command.Parameters.AddWithValue("@RelativePath", DBNull.Value);
+                                _ = command.Parameters.AddWithValue("@DTStamp", dtStamp);
+                                _ = command.Parameters.AddWithValue("@HASH", DBNull.Value); // Assuming no hash for archives
+                                _ = command.Parameters.AddWithValue("@isArchive", 1); // These are archive files
 
-                                command.ExecuteNonQuery();
+                                _ = command.ExecuteNonQuery();
                             }
                         }
 
@@ -105,15 +105,37 @@ namespace ZO.DMM.AppNF
                         {
                             foreach (var stage in modItem.AvailableStages)
                             {
-                                query = @"
-                                    INSERT OR REPLACE INTO ModStages (ModID, StageID)
-                                    VALUES ((SELECT ModID FROM ModItems WHERE ModName = @ModName), 
-                                            (SELECT StageID FROM Stages WHERE StageName = @StageName))";
-                                using (var command = new SQLiteCommand(query, connection))
+                                // Check if the StageName exists in the Stages table
+                                string checkStageQuery = "SELECT StageID FROM Stages WHERE StageName = @StageName";
+                                int? stageId = null;
+                                using (var checkCommand = new SQLiteCommand(checkStageQuery, connection))
                                 {
-                                    command.Parameters.AddWithValue("@ModName", modItem.ModName);
-                                    command.Parameters.AddWithValue("@StageName", stage);
-                                    command.ExecuteNonQuery();
+                                    _ = checkCommand.Parameters.AddWithValue("@StageName", stage);
+                                    using (var reader = checkCommand.ExecuteReader())
+                                    {
+                                        if (reader.Read())
+                                        {
+                                            stageId = reader.GetInt32(0);
+                                        }
+                                    }
+                                }
+
+                                if (stageId.HasValue)
+                                {
+                                    string stageQuery = @"
+                INSERT OR REPLACE INTO ModStages (ModID, StageID)
+                VALUES ((SELECT ModID FROM ModItems WHERE ModName = @ModName), @StageID)";
+                                    using (var command = new SQLiteCommand(stageQuery, connection))
+                                    {
+                                        _ = command.Parameters.AddWithValue("@ModName", modItem.ModName);
+                                        _ = command.Parameters.AddWithValue("@StageID", stageId.Value);
+                                        _ = command.ExecuteNonQuery();
+                                    }
+                                }
+                                else
+                                {
+                                    // Log or handle the case where the StageName does not exist
+                                    Console.WriteLine($"StageName '{stage}' does not exist in the Stages table.");
                                 }
                             }
                         }
@@ -126,10 +148,10 @@ namespace ZO.DMM.AppNF
                                 VALUES ((SELECT ModID FROM ModItems WHERE ModName = @ModName), @NexusID, @BethesdaID)";
                             using (var command = new SQLiteCommand(query, connection))
                             {
-                                command.Parameters.AddWithValue("@ModName", modItem.ModName);
-                                command.Parameters.AddWithValue("@NexusID", string.IsNullOrEmpty(modItem.NexusUrl) ? (object)DBNull.Value : ExtractID(modItem.NexusUrl));
-                                command.Parameters.AddWithValue("@BethesdaID", string.IsNullOrEmpty(modItem.BethesdaUrl) ? (object)DBNull.Value : ExtractID(modItem.BethesdaUrl));
-                                command.ExecuteNonQuery();
+                                _ = command.Parameters.AddWithValue("@ModName", modItem.ModName);
+                                _ = command.Parameters.AddWithValue("@NexusID", string.IsNullOrEmpty(modItem.NexusUrl) ? (object)DBNull.Value : ExtractID(modItem.NexusUrl));
+                                _ = command.Parameters.AddWithValue("@BethesdaID", string.IsNullOrEmpty(modItem.BethesdaUrl) ? (object)DBNull.Value : ExtractID(modItem.BethesdaUrl));
+                                _ = command.ExecuteNonQuery();
                             }
                         }
 
@@ -199,7 +221,7 @@ namespace ZO.DMM.AppNF
                                 modItem.CurrentArchiveFiles[archive.Key] = archive.Value;
                             }
 
-                            GetModFiles(modItem);
+                            _ = GetModFiles(modItem);
                             modItem.AvailableStages = GetAvailableStages(modItem.ModName);
                             modItems.Add(modItem);
                         }
@@ -219,7 +241,7 @@ namespace ZO.DMM.AppNF
 
                     using (var command = new SQLiteCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@ModName", modName);
+                        _ = command.Parameters.AddWithValue("@ModName", modName);
                         using (var reader = command.ExecuteReader())
                         {
                             while (reader.Read())
@@ -301,9 +323,9 @@ namespace ZO.DMM.AppNF
 
                     using (var command = new SQLiteCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@ModName", modName);
-                        command.Parameters.AddWithValue("@NewStage", newStage);
-                        command.ExecuteNonQuery();
+                        _ = command.Parameters.AddWithValue("@ModName", modName);
+                        _ = command.Parameters.AddWithValue("@NewStage", newStage);
+                        _ = command.ExecuteNonQuery();
                     }
                 }
             }
@@ -317,7 +339,7 @@ namespace ZO.DMM.AppNF
 
                     using (var command = new SQLiteCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@ModName", modName);
+                        _ = command.Parameters.AddWithValue("@ModName", modName);
 
                         using (var reader = command.ExecuteReader())
                         {
@@ -350,7 +372,7 @@ namespace ZO.DMM.AppNF
 
                     using (var command = new SQLiteCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@ModName", modItem.ModName);
+                        _ = command.Parameters.AddWithValue("@ModName", modItem.ModName);
                         return Convert.ToInt32(command.ExecuteScalar());
                     }
                 }
@@ -368,7 +390,7 @@ namespace ZO.DMM.AppNF
 
                     using (var command = new SQLiteCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@ModID", modID);
+                        _ = command.Parameters.AddWithValue("@ModID", modID);
 
                         using (var reader = command.ExecuteReader())
                         {
@@ -399,7 +421,7 @@ namespace ZO.DMM.AppNF
 
                     using (var command = new SQLiteCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@ModID", modID);
+                        _ = command.Parameters.AddWithValue("@ModID", modID);
 
                         using (var reader = command.ExecuteReader())
                         {

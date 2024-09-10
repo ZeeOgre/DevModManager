@@ -376,4 +376,4 @@ FodyWeavers.xsd
 *.tmp.yml
 /App/scripts/post-build.ps1
 
-!ZO.DMM.Setup/ZO.DMM.Setup-SetupFiles/DevModManager.msi
+
