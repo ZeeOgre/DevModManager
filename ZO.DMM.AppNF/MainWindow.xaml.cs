@@ -19,11 +19,12 @@ namespace ZO.DMM.AppNF
 
         public MainWindow()
         {
+            this.Title = $"ZeeOgre's DevModManager ({App.Version})";
             InitializeComponent();
             Debug.WriteLine("MainWindow Initialize Complete");
             _viewModel = new MainWindowViewModel();
             Debug.WriteLine("MainWindow ViewModel Loaded");
-
+            
             DataContext = _viewModel;
             Debug.WriteLine("MainWindow DataContext Bound");
 
@@ -143,8 +144,8 @@ namespace ZO.DMM.AppNF
         {
             if (sender is Button button && button.Tag is ModItem modItem)
             {
-                List<string> updatedFiles = ModItem.Files.GetUpdatedGameFolderFiles(modItem);
-                var updatedFilesWindow = new UpdatedFilesWindow(modItem, updatedFiles);
+                
+                var updatedFilesWindow = new UpdatedFilesWindow(modItem);
                 _ = updatedFilesWindow.ShowDialog();
             }
             e.Handled = true;
@@ -165,7 +166,7 @@ namespace ZO.DMM.AppNF
             var modItem = button?.Tag as ModItem;
             if (modItem != null)
             {
-                var modActionWindow = new ModActionWindow(modItem, _viewModel.CurrentStages, "Promote");
+                var modActionWindow = new ModActionWindow(modItem,"Promote");
                 _ = modActionWindow.ShowDialog();
             }
             e.Handled = true;
@@ -177,7 +178,7 @@ namespace ZO.DMM.AppNF
             var modItem = button?.Tag as ModItem;
             if (modItem != null)
             {
-                var modActionWindow = new ModActionWindow(modItem, _viewModel.CurrentStages, "Package");
+                var modActionWindow = new ModActionWindow(modItem,"Package");
                 _ = modActionWindow.ShowDialog();
             }
             e.Handled = true;
@@ -187,7 +188,7 @@ namespace ZO.DMM.AppNF
         {
             if (sender is Button button && button.Tag is ModItem modItem)
             {
-                var modActionWindow = new ModActionWindow(modItem, _viewModel.CurrentStages, "Deploy");
+                var modActionWindow = new ModActionWindow(modItem, "Deploy");
                 if (modActionWindow.ShowDialog() == true)
                 {
                     var selectedStage = modActionWindow.SelectedStage;

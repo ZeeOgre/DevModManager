@@ -4,31 +4,58 @@ param (
     [string]$AppConfigFilePath,
     [string]$VersionTxtFilePath,
     [string]$AipFilePath,
-    [string]$XmlOutputPath = "./Properties/AutoUpdater.xml"
+    [string]$XmlOutputPath,
+    [string]$Configuration,
+    [string]$AssemblyInfoFilePath = "$(ProjectDir)Properties\AssemblyInfo.cs"
 )
 
-Write-Output "SettingsFile: $SettingsFile"
-Write-Output "CsprojFilePath: $CsprojFilePath"
-Write-Output "AppConfigFilePath: $AppConfigFilePath"
-Write-Output "VersionTxtFilePath: $VersionTxtFilePath"
-Write-Output "AipFilePath: $AipFilePath"
+function Increment-Version {
+    param (
+        [string]$version
+    )
+    
+    $versionSegments = $version.Split('.')
+    if ($versionSegments.Length -ne 4) {
+        throw "Version must have four segments (e.g., 1.0.0.0)"
+    }
+    
+    $versionSegments[3] = [int]$versionSegments[3] + 1
+    return $versionSegments -join '.'
+}
 
-# Resolve paths to absolute paths
-$ResolvedSettingsFile = (Resolve-Path -Path $SettingsFile).Path
-$ResolvedCsprojFilePath = (Resolve-Path -Path $CsprojFilePath).Path
-$ResolvedAppConfigFilePath = (Resolve-Path -Path $AppConfigFilePath).Path
-$ResolvedVersionTxtFilePath = (Resolve-Path -Path $VersionTxtFilePath).Path
-$ResolvedAipFilePath = (Resolve-Path -Path $AipFilePath).Path
-$ResolvedXmlFilePath = (Resolve-Path -Path $XmlOutputPath).Path
+function Update-CsprojVersion {
+    param (
+        [string]$newVersion,
+        [string]$csprojFilePath,
+        [switch]$WhatIf
+    )
+    if ([string]::IsNullOrEmpty($csprojFilePath)) {
+        throw "Csproj file path is empty or null."
+    }
+    
+    [xml]$csprojXml = [xml](Get-Content -Path $csprojFilePath -Raw -Encoding UTF8)
+    
+    $propertyGroupNode = $csprojXml.SelectSingleNode("//PropertyGroup")
+    if ($propertyGroupNode -eq $null) {
+        throw "Error: PropertyGroup node not found in csproj file."
+    }
 
-Write-Host "Resolved SettingsFile: $ResolvedSettingsFile"
-Write-Host "Resolved VersionTxtFilePath: $ResolvedVersionTxtFilePath"
-Write-Host "Resolved CsprojFilePath: $ResolvedCsprojFilePath"
-Write-Host "Resolved AppConfigFilePath: $ResolvedAppConfigFilePath"
-Write-Host "Resolved AipFilePath: $ResolvedAipFilePath"
-Write-Host "Resolved XmlFilePath: $ResolvedXmlFilePath"
+    $versionNode = $propertyGroupNode.SelectSingleNode("Version")
+    if ($versionNode -ne $null) {
+        $versionNode.InnerText = $newVersion
+    } else {
+        $newVersionNode = $csprojXml.CreateElement("Version")
+        $newVersionNode.InnerText = $newVersion
+        $propertyGroupNode.AppendChild($newVersionNode)
+    }
 
-# Function to load XML file
+    if ($WhatIf) {
+        Write-Output "WhatIf: $csprojFilePath would be updated with new version $newVersion"
+    } else {
+        $csprojXml.Save($csprojFilePath)
+    }
+}
+
 function Get-CurrentVersion {
     param (
         [string]$filePath
@@ -40,6 +67,9 @@ function Get-CurrentVersion {
     $namespaceManager.AddNamespace("ns", "http://schemas.microsoft.com/VisualStudio/2004/01/settings")
 
     $currentVersionNode = $xml.SelectSingleNode("//ns:Setting[@Name='version']/ns:Value", $namespaceManager)
+    if ($null -eq $currentVersionNode) {
+        throw "Version node not found in settings file."
+    }
     $currentVersion = $currentVersionNode.InnerText
 
     $result = [PSCustomObject]@{
@@ -51,237 +81,140 @@ function Get-CurrentVersion {
     return $result
 }
 
-# Function to increment the version
-function Increment-Version {
-    param (
-        [string]$currentVersion
-    )
-    $versionParts = $currentVersion -split '\.'
-    if ($versionParts.Length -eq 3) {
-        $newVersion = "$($versionParts[0]).$($versionParts[1]).$([int]$versionParts[2] + 1)"
-        return $newVersion
-    } else {
-        Write-Output "Error: Version format is incorrect. Expected format: X.X.X"
-        exit 1
-    }
-}
-
-# Function to update the version in the settings file
-function Update-SettingsVersion {
-    param (
-        [xml]$xml,
-        [System.Xml.XmlNode]$currentVersionNode,
-        [string]$newVersion,
-        [string]$settingsFile,
-        [switch]$WhatIf
-    )
-    
-    Write-Output "Updating settings file..."
-    Write-Output "Current Version Node: $currentVersionNode"
-    Write-Output "New Version: $newVersion"
-    Write-Output "Settings File: $settingsFile"
-    
-    $currentVersionNode.InnerText = $newVersion
-    
-    if ($WhatIf) {
-        Write-Output "WhatIf: $settingsFile would be updated with new version $newVersion"
-    } else {
-        if (![string]::IsNullOrEmpty($settingsFile)) {
-            $xml.Save($settingsFile)
-            Write-Output "Settings file updated successfully."
-        } else {
-            throw "Settings file path is empty or null."
-        }
-    }
-}
-
-# Function to update the version in the .csproj file
-function Update-CsprojVersion {
+function Update-SettingsFile {
     param (
         [string]$newVersion,
-        [string]$csprojFilePath,
-        [switch]$WhatIf
+        [string]$settingsFilePath
     )
-    if ([string]::IsNullOrEmpty($csprojFilePath)) {
-        throw "Csproj file path is empty or null."
+    if ([string]::IsNullOrEmpty($settingsFilePath)) {
+        throw "Settings file path is empty or null."
     }
-    
-    # Read the .csproj file with UTF-8 encoding
-    [xml]$csprojXml = [xml](Get-Content -Path $csprojFilePath -Raw -Encoding UTF8)
-    
-    $versionNode = $csprojXml.SelectSingleNode("//Version")
-    if ($versionNode -ne $null) {
-        $versionNode.InnerText = $newVersion
-        Write-Output "Updated Version in csproj: $newVersion"
-    } else {
-        $propertyGroupNode = $csprojXml.SelectSingleNode("//PropertyGroup")
-        if ($propertyGroupNode -ne $null) {
-            $newVersionNode = $csprojXml.CreateElement("Version")
-            $newVersionNode.InnerText = $newVersion
-            $propertyGroupNode.AppendChild($newVersionNode)
-            Write-Output "Created and updated Version node in csproj: $newVersion"
-        } else {
-            Write-Output "Error: PropertyGroup node not found in csproj file."
-            return
-        }
-    }
-    
-    if ($WhatIf) {
-        Write-Output "WhatIf: $csprojFilePath would be updated with new version $newVersion"
-    } else {
-        $maxRetries = 5
-        $retryCount = 0
-        $success = $false
 
-        while (-not $success -and $retryCount -lt $maxRetries) {
-            try {
-                # Write the .csproj file with UTF-8 encoding
-                $csprojXml.Save($csprojFilePath)
-                [System.IO.File]::WriteAllText($csprojFilePath, [System.IO.File]::ReadAllText($csprojFilePath), [System.Text.Encoding]::UTF8)
-                $success = $true
-            } catch {
-                $retryCount++
-                Write-Output "Attempt ${retryCount}: Failed to write to $csprojFilePath. Retrying in 1 second..."
-                Start-Sleep -Seconds 1
-            }
-        }
-
-        if (-not $success) {
-            throw "Failed to write to $csprojFilePath after $maxRetries attempts."
-        }
-    }
+    $currentVersionData = Get-CurrentVersion -filePath $settingsFilePath
+    $currentVersionData.Node.InnerText = $newVersion
+    $currentVersionData.Xml.Save($settingsFilePath)
 }
 
-# Function to update the version in the App.config file
-function Update-AppConfigVersion {
+function Update-VersionTxtFile {
     param (
         [string]$newVersion,
-        [string]$appConfigFilePath,
-        [switch]$WhatIf
-    )
-    if ([string]::IsNullOrEmpty($appConfigFilePath)) {
-        throw "App.config file path is empty or null."
-    }
-    [xml]$appConfigXml = Get-Content $appConfigFilePath
-    $versionNode = $appConfigXml.SelectSingleNode("//ZO.DMM.AppNF.Properties.Settings/setting[@name='version']/value")
-    if ($versionNode -ne $null) {
-        $versionNode.InnerText = $newVersion
-        Write-Output "Updated Version in App.config: $newVersion"
-        if ($WhatIf) {
-            Write-Output "WhatIf: $appConfigFilePath would be updated with new version $newVersion"
-        } else {
-            $appConfigXml.Save($appConfigFilePath)
-        }
-    } else {
-        Write-Output "Error: Version node not found in App.config file."
-    }
-}
-
-# Function to update the version in the version.txt file
-function Update-VersionTxt {
-    param (
-        [string]$newVersion,
-        [string]$versionTxtFilePath,
-        [switch]$WhatIf
+        [string]$versionTxtFilePath
     )
     if ([string]::IsNullOrEmpty($versionTxtFilePath)) {
         throw "Version.txt file path is empty or null."
     }
-    Write-Output "Updating version.txt file..."
-    if ($WhatIf) {
-        Write-Output "WhatIf: $versionTxtFilePath would be updated with new version $newVersion"
-    } else {
-        Set-Content -Path $versionTxtFilePath -Value $newVersion
-        Write-Output "version.txt file updated successfully."
-    }
+
+    Set-Content -Path $versionTxtFilePath -Value $newVersion -Encoding UTF8
 }
 
-# Function to update the version in the .aip file
-function Update-AipVersion {
+function Update-AppConfig {
     param (
         [string]$newVersion,
-        [string]$aipFilePath,
-        [switch]$WhatIf
+        [string]$appConfigFilePath
     )
-    if ([string]::IsNullOrEmpty($aipFilePath)) {
-        throw "AIP file path is empty or null."
-    }
-    
-    # Load the AIP file as XML
-    [xml]$aipXml = [xml](Get-Content -Path $aipFilePath -Raw -Encoding UTF8)
-    
-    # Find the ROW element with Property="ProductVersion"
-    $productVersionRow = $aipXml.SelectSingleNode("//ROW[@Property='ProductVersion']")
-    if ($productVersionRow -ne $null) {
-        $productVersionRow.Value = $newVersion
-        Write-Output "Updated ProductVersion in AIP: $newVersion"
-    } else {
-        Write-Output "Error: ProductVersion row not found in AIP file."
-        return
+    if ([string]::IsNullOrEmpty($appConfigFilePath)) {
+        throw "App.config file path is empty or null."
     }
 
-    # Generate a new GUID
-    $newGuid = [guid]::NewGuid().ToString().ToUpper()
+    [xml]$appConfigXml = [xml](Get-Content -Path $appConfigFilePath -Raw -Encoding UTF8)
     
-    # Find the ROW element with Property="ProductCode"
-    $productCodeRow = $aipXml.SelectSingleNode("//ROW[@Property='ProductCode']")
-    if ($productCodeRow -ne $null) {
-        $productCodeRow.Value = "1033:{$newGuid}"
-        Write-Output "Updated ProductCode in AIP: 1033:{$newGuid}"
+    $versionNode = $appConfigXml.SelectSingleNode("//applicationSettings/ZO.DMM.AppNF.Properties.Settings/setting[@name='version']/value")
+    if ($versionNode -ne $null) {
+        $versionNode.InnerText = $newVersion
     } else {
-        Write-Output "Error: ProductCode row not found in AIP file."
-        return
+        throw "Error: Version node not found in App.config."
     }
-    
-    if ($WhatIf) {
-        Write-Output "WhatIf: $aipFilePath would be updated with new version $newVersion and new ProductCode 1033:{$newGuid}"
-    } else {
-        $aipXml.Save($aipFilePath)
-        Write-Output "AIP file updated successfully."
-    }
+
+    $appConfigXml.Save($appConfigFilePath)
 }
 
-# Function to create the AutoUpdater XML file
-function Create-AutoUpdaterXml {
+function Update-AutoUpdaterXml {
     param (
-        [string]$version,
+        [string]$newVersion,
         [string]$xmlOutputPath
     )
-    $url = "https://github.com/ZeeOgre/ZO.DevModManager/releases/latest/download/DevModManager.msi"
-    $changelog = "https://github.com/ZeeOgre/ZO.DevModManager/releases/latest"
+    if ([string]::IsNullOrEmpty($xmlOutputPath)) {
+        throw "AutoUpdater.xml file path is empty or null."
+    }
 
-    $xmlContent = @"
-<?xml version="1.0" encoding="UTF-8"?>
-<item>
-  <version>$version</version>
-  <url>$url</url>
-  <changelog>$changelog</changelog>
-</item>
-"@
+    [xml]$xmlOutput = [xml](Get-Content -Path $xmlOutputPath -Raw -Encoding UTF8)
+    
+    $versionNode = $xmlOutput.SelectSingleNode("//item/version")
+    if ($versionNode -ne $null) {
+        $versionNode.InnerText = $newVersion
+    } else {
+        throw "Error: Version node not found in AutoUpdater.xml."
+    }
 
-    Set-Content -Path $xmlOutputPath -Value $xmlContent
-    Write-Output "AutoUpdater XML file created successfully at $xmlOutputPath."
+    $xmlOutput.Save($xmlOutputPath)
 }
 
-try {
-    # Main script execution
-    $result = Get-CurrentVersion -filePath $ResolvedSettingsFile
-    $currentVersion = $result.Version
-    $currentVersionNode = $result.Node
-    $xml = $result.Xml
-    $newVersion = Increment-Version -currentVersion $currentVersion
+function Update-AipFile {
+    param (
+        [string]$newVersion,
+        [string]$aipFilePath
+    )
+    if ([string]::IsNullOrEmpty($aipFilePath)) {
+        throw "Installer.aip file path is empty or null."
+    }
 
-    Update-SettingsVersion -xml $xml -currentVersionNode $currentVersionNode -newVersion $newVersion -settingsFile $ResolvedSettingsFile
-    Update-CsprojVersion -newVersion $newVersion -csprojFilePath $ResolvedCsprojFilePath
-    Update-AppConfigVersion -newVersion $newVersion -appConfigFilePath $ResolvedAppConfigFilePath
-    Update-VersionTxt -newVersion $newVersion -versionTxtFilePath $ResolvedVersionTxtFilePath
-    Update-AipVersion -newVersion $newVersion -aipFilePath $ResolvedAipFilePath
+    [xml]$aipXml = [xml](Get-Content -Path $aipFilePath -Raw -Encoding UTF8)
+    
+    $versionNode = $aipXml.SelectSingleNode("//COMPONENT[@name='ProductVersion']/@value")
+    if ($versionNode -ne $null) {
+        $versionNode.Value = $newVersion
+    } else {
+        throw "Error: Version node not found in Installer.aip."
+    }
 
-    # Create the AutoUpdater XML file
-    Create-AutoUpdaterXml -version $newVersion -xmlOutputPath $XmlOutputPath
-
-    Write-Output "Version incremented successfully to $newVersion"
-} catch {
-    Write-Output "Error: $_"
-    exit 1
+    $aipXml.Save($aipFilePath)
 }
+
+function Update-AssemblyInfoFile {
+    param (
+        [string]$newVersion,
+        [string]$assemblyInfoFilePath
+    )
+
+    if ([string]::IsNullOrEmpty($assemblyInfoFilePath)) {
+        throw "AssemblyInfo.cs file path is empty or null."
+    }
+
+    # Read all lines from AssemblyInfo.cs
+    $assemblyInfoLines = Get-Content -Path $assemblyInfoFilePath -Encoding UTF8
+
+    # Loop through each line and replace AssemblyVersion and AssemblyFileVersion
+    for ($i = 0; $i -lt $assemblyInfoLines.Length; $i++) {
+        if ($assemblyInfoLines[$i] -match 'AssemblyVersion') {
+            $assemblyInfoLines[$i] = "[assembly: AssemblyVersion(`"$newVersion`")]"
+        }
+        if ($assemblyInfoLines[$i] -match 'AssemblyFileVersion') {
+            $assemblyInfoLines[$i] = "[assembly: AssemblyFileVersion(`"$newVersion`")]"
+        }
+    }
+
+    # Output the updated AssemblyInfo content to verify
+    Write-Output "Updated AssemblyInfo content:"
+    $assemblyInfoLines | ForEach-Object { Write-Output $_ }
+
+    # Write the modified content back to the file
+    Set-Content -Path $assemblyInfoFilePath -Value $assemblyInfoLines -Encoding UTF8
+}
+
+
+
+
+$currentVersionData = Get-CurrentVersion -filePath $SettingsFile
+$currentVersion = $currentVersionData.Version
+
+$newVersion = Increment-Version -version $currentVersion
+
+Update-CsprojVersion -newVersion $newVersion -csprojFilePath $CsprojFilePath
+Update-SettingsFile -newVersion $newVersion -settingsFilePath $SettingsFile
+Update-VersionTxtFile -newVersion $newVersion -versionTxtFilePath $VersionTxtFilePath
+Update-AppConfig -newVersion $newVersion -appConfigFilePath $AppConfigFilePath
+Update-AutoUpdaterXml -newVersion $newVersion -xmlOutputPath $XmlOutputPath
+Update-AssemblyInfoFile -newVersion $newVersion -assemblyInfoFilePath $AssemblyInfoFilePath
+#Update-AipFile -newVersion $newVersion -aipFilePath $AipFilePath
+
+Write-Output "Version incremented to $newVersion"

@@ -105,15 +105,37 @@ namespace ZO.DMM.AppNF
                         {
                             foreach (var stage in modItem.AvailableStages)
                             {
-                                query = @"
-                                    INSERT OR REPLACE INTO ModStages (ModID, StageID)
-                                    VALUES ((SELECT ModID FROM ModItems WHERE ModName = @ModName), 
-                                            (SELECT StageID FROM Stages WHERE StageName = @StageName))";
-                                using (var command = new SQLiteCommand(query, connection))
+                                // Check if the StageName exists in the Stages table
+                                string checkStageQuery = "SELECT StageID FROM Stages WHERE StageName = @StageName";
+                                int? stageId = null;
+                                using (var checkCommand = new SQLiteCommand(checkStageQuery, connection))
                                 {
-                                    command.Parameters.AddWithValue("@ModName", modItem.ModName);
-                                    command.Parameters.AddWithValue("@StageName", stage);
-                                    command.ExecuteNonQuery();
+                                    checkCommand.Parameters.AddWithValue("@StageName", stage);
+                                    using (var reader = checkCommand.ExecuteReader())
+                                    {
+                                        if (reader.Read())
+                                        {
+                                            stageId = reader.GetInt32(0);
+                                        }
+                                    }
+                                }
+
+                                if (stageId.HasValue)
+                                {
+                                    string stageQuery = @"
+                INSERT OR REPLACE INTO ModStages (ModID, StageID)
+                VALUES ((SELECT ModID FROM ModItems WHERE ModName = @ModName), @StageID)";
+                                    using (var command = new SQLiteCommand(stageQuery, connection))
+                                    {
+                                        command.Parameters.AddWithValue("@ModName", modItem.ModName);
+                                        command.Parameters.AddWithValue("@StageID", stageId.Value);
+                                        command.ExecuteNonQuery();
+                                    }
+                                }
+                                else
+                                {
+                                    // Log or handle the case where the StageName does not exist
+                                    Console.WriteLine($"StageName '{stage}' does not exist in the Stages table.");
                                 }
                             }
                         }

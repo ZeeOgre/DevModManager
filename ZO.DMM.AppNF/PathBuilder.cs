@@ -97,6 +97,12 @@ namespace ZO.DMM.AppNF
 
         public static string GetRelativePath(string relativeTo, string path)
         {
+            // Ensure the relativeTo path ends with a directory separator
+            if (!relativeTo.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                relativeTo += Path.DirectorySeparatorChar;
+            }
+
             var uri = new Uri(relativeTo);
             var pathUri = new Uri(path);
 

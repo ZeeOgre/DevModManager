@@ -19,7 +19,7 @@ namespace ZO.DMM.AppNF
         {
             // Logic to open the settings window
             var settingsWindow = new SettingsWindow(SettingsLaunchSource.MissingConfigDialog);
-            settingsWindow.ShowDialog();
+            settingsWindow.Show();
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)

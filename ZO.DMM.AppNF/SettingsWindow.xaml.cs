@@ -94,10 +94,7 @@ namespace ZO.DMM.AppNF
                     }
                 }
                 _isSaveButtonClicked = true;
-                if (_launchSource != SettingsLaunchSource.CommandLine)
-                {
-                    DialogResult = true; // Only set DialogResult if not in command line mode
-                }
+               
                 HandleExitLogic();
             }
             catch (Exception ex)
@@ -127,10 +124,7 @@ namespace ZO.DMM.AppNF
                     return;
                 }
             }
-            if (_launchSource != SettingsLaunchSource.CommandLine)
-            {
-                DialogResult = true; // Only set DialogResult if not in command line mode
-            }
+
             switch (_launchSource)
             {
                 case SettingsLaunchSource.DatabaseInitialization:
