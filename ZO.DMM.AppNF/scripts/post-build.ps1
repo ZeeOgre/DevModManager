@@ -1,109 +1,111 @@
 param (
     [string]$configuration,
     [string]$msiFile,
-    [string]$versionFile
+    [string]$versionFile,
+    [bool]$manual = $false
 )
 
-# Read the version from Properties\version.txt
-$version = Get-Content -Path $versionFile -Raw
-$version = $version.Trim()
-$tag = "v$version"
+function Get-NewestTag {
+    $tags = git tag --sort=-v:refname
+    return $tags[0]
+}
 
-# Ensure we are in the correct directory
-cd $PSScriptRoot
+function Increment-Tag {
+    param (
+        [string]$tag
+    )
+    if ($tag -match "-m(\d+)$") {
+        $number = [int]$matches[1] + 1
+        return $tag -replace "-m\d+$", "-m$number"
+    } else {
+        return "$tag-m1"
+    }
+}
+
+# Ensure correct directory
+Set-Location $PSScriptRoot
 
 # Debugging output
-Write-Host "Current directory: $PSScriptRoot"
-Write-Host "Configuration: $configuration"
-Write-Host "MSI File: $msiFile"
-Write-Host "Version File: $versionFile"
+Write-Output "Current Directory: $(Get-Location)"
+Write-Output "Configuration: $configuration"
+Write-Output "MSI File: $msiFile"
+Write-Output "Version File: $versionFile"
+Write-Output "Manual Mode: $manual"
 
-# Derive XmlOutputPath from versionFile
-$xmlFile = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($versionFile), "AutoUpdater.xml")
-
-# Check for unresolved conflicts
-$conflicts = git ls-files -u
-if ($conflicts) {
-    Write-Host "Unresolved conflicts detected. Please resolve them before proceeding."
-    exit 1
+# Read version or set manual test tag
+if (-not $manual) {
+    $version = Get-Content $versionFile | Out-String
+    $version = $version.Trim()
+    $tagName = "v$version"
+} else {
+    $newestTag = Get-NewestTag
+    $tagName = Increment-Tag -tag $newestTag
 }
 
-# Ensure we are on the 'dev' branch
+Write-Output "Tag Name: $tagName"
+
+# Ensure on correct branch
 $currentBranch = git rev-parse --abbrev-ref HEAD
-Write-Host "Current branch: $currentBranch"
-if ($currentBranch -ne 'dev') {
-    Write-Host "Not on 'dev' branch. Switching to 'dev' branch."
+Write-Output "Current Branch: $currentBranch"
+
+if ($currentBranch -eq 'master') {
+    # Clobber down to dev
     git checkout dev
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to switch to 'dev' branch. Aborting."
-        exit 1
-    }
-}
-
-# Merge 'master' into 'dev'
-Write-Host "Merging 'master' into 'dev'."
-git merge master
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Merge conflicts detected. Please resolve them before proceeding."
-    exit 1
-}
-
-# Add all changes including the .msi and AutoUpdater.xml files
-git add .
-
-# Commit changes
-try {
-    git commit -m "Automated commit for $configuration build"
-} catch {
-    Write-Host "Error during commit: $_"
-    exit 1
-}
-
-# Push to 'dev' branch
-try {
-    git push origin dev
-} catch {
-    Write-Host "Error during push: $_"
-    exit 1
-}
-
-# If configuration is 'Release', merge to 'master' and tag
-if ($configuration -eq 'Release') {
-    # Stash local changes
-    git stash -u
-
-    git checkout master
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to switch to 'master' branch. Aborting."
-        exit 1
-    }
-    git merge dev
-
-    # Check for valid version
-    if ($version -match '^[0-9]+\.[0-9]+\.[0-9]+$') {
-        # Tag with the version
-        git tag $tag
-        git push origin master --tags
+    git merge -X theirs master
+    if ($?) {
+        Write-Output "Merged master into dev with conflicts resolved in favor of master."
     } else {
-        Write-Host "Invalid version format in $versionFile. Aborting."
+        Write-Error "Failed to merge master into dev."
         exit 1
     }
+} elseif ($currentBranch -eq 'dev') {
+    # Friendly merge up to master
+    git checkout master
+    git merge dev
+    if ($?) {
+        Write-Output "Merged dev into master."
+    } else {
+        Write-Error "Failed to merge dev into master."
+        exit 1
+    }
+}
 
+# Commit and push changes
+git add .
+git commit -m "Automated commit for $configuration configuration"
+if ($?) {
+    Write-Output "Committed changes."
+} else {
+    Write-Error "Failed to commit changes."
+    exit 1
+}
+
+git push origin $currentBranch
+if ($?) {
+    Write-Output "Pushed changes to $currentBranch."
+} else {
+    Write-Error "Failed to push changes to $currentBranch."
+    exit 1
+}
+
+# Handle release
+if ($configuration -eq 'Release') {
+    git tag $tagName
+    git push origin $tagName
+    Write-Output "Tagged and pushed release: $tagName"
+
+    # Create GitHub release
+    if (Get-Command gh -ErrorAction SilentlyContinue) {
+        gh release create $tagName $msiFile -t $tagName -n "Release $tagName"
+        Write-Output "Created GitHub release: $tagName"
+    } else {
+        Write-Error "GitHub CLI (gh) not found."
+        exit 1
+    }
+}
+
+# Switch back to dev if needed
+if ($currentBranch -eq 'dev') {
     git checkout dev
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to switch back to 'dev' branch. Aborting."
-        exit 1
-    }
-
-    # Apply stashed changes
-    git stash pop
-
-    # Check if GitHub CLI is available
-    if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-        Write-Host "GitHub CLI (gh) is not installed or not in PATH. Skipping release creation."
-        exit 0
-    }
-
-    # Create a release and set it as the latest
-    gh release create $tag $msiFile $xmlFile --title "Release $tag" --notes "Release notes for $tag" --latest --target master
+    Write-Output "Switched back to dev branch."
 }

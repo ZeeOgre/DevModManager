@@ -76,7 +76,7 @@ namespace ZO.DMM.AppNF
                 else
                 {
                     Debug.WriteLine("Loading configuration from database.");
-                    Config.LoadFromDatabase();
+                    _ = Config.LoadFromDatabase();
                 }
             }
             finally
@@ -181,9 +181,9 @@ namespace ZO.DMM.AppNF
             try
             {
                 var command = new SQLiteCommand("INSERT OR REPLACE INTO InitializationStatus (Id, IsInitialized, InitializationTime) VALUES (1, @IsInitialized, @InitializationTime)", connection);
-                command.Parameters.AddWithValue("@IsInitialized", status);
-                command.Parameters.AddWithValue("@InitializationTime", DateTime.UtcNow);
-                command.ExecuteNonQuery();
+                _ = command.Parameters.AddWithValue("@IsInitialized", status);
+                _ = command.Parameters.AddWithValue("@InitializationTime", DateTime.UtcNow);
+                _ = command.ExecuteNonQuery();
                 Debug.WriteLine($"Database marked as initialized: {status}");
             }
             finally
@@ -203,10 +203,10 @@ namespace ZO.DMM.AppNF
                 transaction.Commit();
 
                 var vacuumCommand = new SQLiteCommand("VACUUM;", connection);
-                vacuumCommand.ExecuteNonQuery();
+                _ = vacuumCommand.ExecuteNonQuery();
 
                 var reindexCommand = new SQLiteCommand("REINDEX;", connection);
-                reindexCommand.ExecuteNonQuery();
+                _ = reindexCommand.ExecuteNonQuery();
             }
             catch (Exception ex)
             {

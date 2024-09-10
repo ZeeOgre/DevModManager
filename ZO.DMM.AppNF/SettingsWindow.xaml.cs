@@ -46,7 +46,7 @@ namespace ZO.DMM.AppNF
                 Config.InitializeNewInstance();
 
                 // Load configuration from YAML
-                Config.LoadFromYaml();
+                _ = Config.LoadFromYaml();
 
                 // Populate the UI elements from the Config object
                 _viewModel.UpdateFromConfig();
@@ -68,7 +68,7 @@ namespace ZO.DMM.AppNF
                 // Validate the configuration
                 if (DbManager.IsSampleOrInvalidData(Config.Instance))
                 {
-                    MessageBox.Show("The configuration contains invalid or sample data. Please correct it before saving.", "Invalid Configuration", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    _ = MessageBox.Show("The configuration contains invalid or sample data. Please correct it before saving.", "Invalid Configuration", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -80,7 +80,7 @@ namespace ZO.DMM.AppNF
                 if (Config.Instance.ShowSaveMessage)
                 {
                     var configText = ConvertConfigToString();
-                    MessageBox.Show(configText, "Configuration Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _ = MessageBox.Show(configText, "Configuration Saved", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 // Prompt user to restart the application
@@ -90,17 +90,17 @@ namespace ZO.DMM.AppNF
                     if (restartResult == MessageBoxResult.Yes)
                     {
                         Application.Current.Shutdown();
-                        Process.Start(Application.ResourceAssembly.Location);
+                        _ = Process.Start(Application.ResourceAssembly.Location);
                     }
                 }
                 _isSaveButtonClicked = true;
-               
+
                 HandleExitLogic();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Exception during save: {ex.Message}");
-                MessageBox.Show($"An error occurred during save: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show($"An error occurred during save: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -134,7 +134,7 @@ namespace ZO.DMM.AppNF
                     var exePath = Process.GetCurrentProcess().MainModule?.FileName;
                     if (exePath != null)
                     {
-                        Process.Start(exePath);
+                        _ = Process.Start(exePath);
                         Application.Current.Shutdown();
                     }
                     break;
@@ -157,12 +157,12 @@ namespace ZO.DMM.AppNF
             {
                 try
                 {
-                    Config.LoadFromYaml(openFileDialog.FileName);
+                    _ = Config.LoadFromYaml(openFileDialog.FileName);
                     _viewModel.UpdateFromConfig();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"An error occurred while loading the YAML file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _ = MessageBox.Show($"An error occurred while loading the YAML file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

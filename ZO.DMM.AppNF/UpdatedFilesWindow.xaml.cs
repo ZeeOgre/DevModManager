@@ -48,7 +48,7 @@ namespace ZO.DMM.AppNF
                 checkBox.Checked += (s, e) => fileItem.IsSelected = true;
                 checkBox.Unchecked += (s, e) => fileItem.IsSelected = false;
 
-                FilesGrid.Children.Add(checkBox);
+                _ = FilesGrid.Children.Add(checkBox);
             }
         }
 
@@ -64,7 +64,7 @@ namespace ZO.DMM.AppNF
         {
             var selectedFiles = _fileItems.Where(item => item.IsSelected).Select(item => item.FullPath).ToList();
             CopyFilesToSourceFolder(selectedFiles);
-            MessageBox.Show("Selected files have been copied to the mod's source folder.", "Operation Completed", MessageBoxButton.OK, MessageBoxImage.Information);
+            _ = MessageBox.Show("Selected files have been copied to the mod's source folder.", "Operation Completed", MessageBoxButton.OK, MessageBoxImage.Information);
             Close();
         }
 
@@ -81,7 +81,7 @@ namespace ZO.DMM.AppNF
                 var destinationDir = Path.GetDirectoryName(destinationPath);
                 if (!Directory.Exists(destinationDir))
                 {
-                    Directory.CreateDirectory(destinationDir);
+                    _ = Directory.CreateDirectory(destinationDir);
                 }
                 File.Copy(sourcePath, destinationPath, true);
             }

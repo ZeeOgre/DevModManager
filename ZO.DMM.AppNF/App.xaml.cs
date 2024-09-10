@@ -1,9 +1,9 @@
-﻿using System;
+﻿using AutoUpdaterDotNET;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
-using AutoUpdaterDotNET;
 
 
 
@@ -143,7 +143,7 @@ namespace ZO.DMM.AppNF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error during auto-check: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show($"Error during auto-check: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -158,4 +158,4 @@ namespace ZO.DMM.AppNF
             AppDomain.CurrentDomain.SetData("PROBING_DIRECTORIES", probingPaths);
         }
     }
-}           
+}

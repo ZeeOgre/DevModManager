@@ -1,12 +1,12 @@
 param (
-    [string]$SettingsFile,
-    [string]$CsprojFilePath,
-    [string]$AppConfigFilePath,
-    [string]$VersionTxtFilePath,
-    [string]$AipFilePath,
-    [string]$XmlOutputPath,
+    [string]$SettingsFile = "..\Properties\Settings.settings",
+    [string]$CsprojFilePath = "..\ZO.DMM.AppNF.csproj",
+    [string]$AppConfigFilePath = "..\App.config",
+    [string]$VersionTxtFilePath = "..\Properties\version.txt",
+    [string]$AipFilePath = "..\installer\DMMInstaller.aip",
+    [string]$XmlOutputPath = "..\Properties\AutoUpdater.xml",
     [string]$Configuration,
-    [string]$AssemblyInfoFilePath = "$(ProjectDir)Properties\AssemblyInfo.cs"
+    [string]$AssemblyInfoFilePath = "..\Properties\AssemblyInfo.cs"
 )
 
 function Increment-Version {
@@ -19,9 +19,10 @@ function Increment-Version {
         throw "Version must have four segments (e.g., 1.0.0.0)"
     }
     
-    $versionSegments[3] = [int]$versionSegments[3] + 1
+    $versionSegments[2] = [int]$versionSegments[2] + 1
     return $versionSegments -join '.'
 }
+
 
 function Update-CsprojVersion {
     param (
@@ -160,16 +161,25 @@ function Update-AipFile {
 
     [xml]$aipXml = [xml](Get-Content -Path $aipFilePath -Raw -Encoding UTF8)
     
-    $versionNode = $aipXml.SelectSingleNode("//COMPONENT[@name='ProductVersion']/@value")
+    # Update ProductVersion
+    $versionNode = $aipXml.SelectSingleNode("//ROW[@Property='ProductVersion']")
     if ($versionNode -ne $null) {
-        $versionNode.Value = $newVersion
+        $versionNode.SetAttribute("Value", $newVersion)
     } else {
         throw "Error: Version node not found in Installer.aip."
     }
 
+    # Update ProductCode with a new GUID
+    $productCodeNode = $aipXml.SelectSingleNode("//ROW[@Property='ProductCode']")
+    if ($productCodeNode -ne $null) {
+        $newGuid = [guid]::NewGuid().ToString()
+        $productCodeNode.SetAttribute("Value", "1033:{$newGuid}")
+    } else {
+        throw "Error: ProductCode node not found in Installer.aip."
+    }
+
     $aipXml.Save($aipFilePath)
 }
-
 function Update-AssemblyInfoFile {
     param (
         [string]$newVersion,
@@ -201,6 +211,36 @@ function Update-AssemblyInfoFile {
     Set-Content -Path $assemblyInfoFilePath -Value $assemblyInfoLines -Encoding UTF8
 }
 
+function Update-AipFile {
+   param (
+       [string]$aipFilePath,
+       [string]$newVersion
+   )
+
+   # Load the XML
+   [xml]$xml = Get-Content $aipFilePath
+
+   # Read and output the old ProductVersion
+   $productVersionNode = $xml.SelectSingleNode("//ROW[@Property='ProductVersion']")
+   $oldVersion = $productVersionNode.GetAttribute("Value")
+   Write-Output "Old ProductVersion: $oldVersion"
+
+   # Update the ProductVersion
+   $productVersionNode.SetAttribute("Value", $newVersion)
+
+   # Read and output the old ProductCode
+   $productCodeNode = $xml.SelectSingleNode("//ROW[@Property='ProductCode']")
+   $oldGuid = $productCodeNode.GetAttribute("Value")
+   Write-Output "Old ProductCode: $oldGuid"
+
+   # Generate a new GUID for ProductCode
+   $newGuid = [guid]::NewGuid().ToString()
+   $productCodeNode.SetAttribute("Value", "1033:{$newGuid}")
+   Write-Output "New ProductCode: 1033:{$newGuid}"
+
+   # Save the updated XML
+   $xml.Save($aipFilePath)
+}
 
 
 
@@ -215,6 +255,6 @@ Update-VersionTxtFile -newVersion $newVersion -versionTxtFilePath $VersionTxtFil
 Update-AppConfig -newVersion $newVersion -appConfigFilePath $AppConfigFilePath
 Update-AutoUpdaterXml -newVersion $newVersion -xmlOutputPath $XmlOutputPath
 Update-AssemblyInfoFile -newVersion $newVersion -assemblyInfoFilePath $AssemblyInfoFilePath
-#Update-AipFile -newVersion $newVersion -aipFilePath $AipFilePath
+Update-AipFile -newVersion $newVersion -aipFilePath $AipFilePath
 
 Write-Output "Version incremented to $newVersion"

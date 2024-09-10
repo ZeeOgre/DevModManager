@@ -1,13 +1,9 @@
-﻿using AutoUpdaterDotNET;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
 using System.Windows.Navigation;
 using MessageBox = System.Windows.MessageBox;
 
@@ -24,7 +20,7 @@ namespace ZO.DMM.AppNF
             Debug.WriteLine("MainWindow Initialize Complete");
             _viewModel = new MainWindowViewModel();
             Debug.WriteLine("MainWindow ViewModel Loaded");
-            
+
             DataContext = _viewModel;
             Debug.WriteLine("MainWindow DataContext Bound");
 
@@ -45,7 +41,7 @@ namespace ZO.DMM.AppNF
             _viewModel.LoadModItems();
             Debug.WriteLine("MainWindow LoadModItems() complete");
 
-           if (Config.Instance.AutoCheckForUpdates)
+            if (Config.Instance.AutoCheckForUpdates)
             {
                 App.CheckForUpdates(this);
             }
@@ -144,7 +140,7 @@ namespace ZO.DMM.AppNF
         {
             if (sender is Button button && button.Tag is ModItem modItem)
             {
-                
+
                 var updatedFilesWindow = new UpdatedFilesWindow(modItem);
                 _ = updatedFilesWindow.ShowDialog();
             }
@@ -166,7 +162,7 @@ namespace ZO.DMM.AppNF
             var modItem = button?.Tag as ModItem;
             if (modItem != null)
             {
-                var modActionWindow = new ModActionWindow(modItem,"Promote");
+                var modActionWindow = new ModActionWindow(modItem, "Promote");
                 _ = modActionWindow.ShowDialog();
             }
             e.Handled = true;
@@ -178,7 +174,7 @@ namespace ZO.DMM.AppNF
             var modItem = button?.Tag as ModItem;
             if (modItem != null)
             {
-                var modActionWindow = new ModActionWindow(modItem,"Package");
+                var modActionWindow = new ModActionWindow(modItem, "Package");
                 _ = modActionWindow.ShowDialog();
             }
             e.Handled = true;
