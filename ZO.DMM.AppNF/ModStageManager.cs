@@ -22,13 +22,13 @@ namespace ZO.DMM.AppNF
             }
 
             // Copy included file types from sourcePath to targetPath
-            Directory.CreateDirectory(targetPath);
+            _ = Directory.CreateDirectory(targetPath);
             var filesToCopy = Directory.GetFiles(sourcePath, "*.*", SearchOption.TopDirectoryOnly)
                                        .Where(f => config.PromoteIncludeFiletypes.Any(ext => f.EndsWith(ext, StringComparison.OrdinalIgnoreCase)));
 
             if (!filesToCopy.Any())
             {
-                MessageBox.Show("There were no source files of the correct type. Have you created the .esm and .ba2 files yet?", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show("There were no source files of the correct type. Have you created the .esm and .ba2 files yet?", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
 
@@ -52,8 +52,8 @@ namespace ZO.DMM.AppNF
             string backupNexusPath = PathBuilder.GetPackageBackup(modItem.ModName);
             string nexusPath = PathBuilder.GetPackageDestination(modItem.ModName);
 
-            Directory.CreateDirectory(backupNexusPath);
-            Directory.CreateDirectory(nexusPath);
+            _ = Directory.CreateDirectory(backupNexusPath);
+            _ = Directory.CreateDirectory(nexusPath);
 
             // Create the dated zip file from the releasePath
             string datedZipFile = ModItem.Files.CreateBackup(releasePath, backupNexusPath);
@@ -88,7 +88,7 @@ namespace ZO.DMM.AppNF
             var targetPath = PathBuilder.GetModStagingFolder(modItem.ModName);
             var backupPath = PathBuilder.GetDeployBackupFolder(modItem.ModName);
 
-            ModItem.Files.CreateBackup(sourcePath, backupPath);
+            _ = ModItem.Files.CreateBackup(sourcePath, backupPath);
             ModItem.Files.CreateJunctionPoint(targetPath, sourcePath);
             modItem.ModDeploymentFolder = targetPath;
             modItem.DeployedStage = targetStage;

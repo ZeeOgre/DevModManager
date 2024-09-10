@@ -44,7 +44,7 @@ namespace ZO.DMM.AppNF.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.0.0.1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.0.1.0")]
         public string version {
             get {
                 return ((string)(this["version"]));

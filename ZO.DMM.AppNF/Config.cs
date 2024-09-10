@@ -1,9 +1,6 @@
-using Microsoft.Win32;
 using System;
 using System.Data.SQLite;
-using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -99,7 +96,7 @@ namespace ZO.DMM.AppNF
             {
                 if (!Directory.Exists(localAppDataPath))
                 {
-                    Directory.CreateDirectory(localAppDataPath);
+                    _ = Directory.CreateDirectory(localAppDataPath);
                     return;
                 }
 
@@ -112,18 +109,18 @@ namespace ZO.DMM.AppNF
                         if (result == MessageBoxResult.Yes)
                         {
                             File.Copy(sampleDbPath, dbFilePath);
-                            MessageBox.Show("Sample data copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                            _ = MessageBox.Show("Sample data copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
                         else
                         {
-                            MessageBox.Show("Database file is missing. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            _ = MessageBox.Show("Database file is missing. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
                             return;
                         }
                     }
                     else
                     {
-                        MessageBox.Show("The database file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        _ = MessageBox.Show("The database file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
                         return;
                     }
@@ -135,11 +132,11 @@ namespace ZO.DMM.AppNF
                     if (File.Exists(sampleConfigPath))
                     {
                         File.Copy(sampleConfigPath, configFilePath);
-                        MessageBox.Show("Sample config copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                        _ = MessageBox.Show("Sample config copied successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
-                        MessageBox.Show("The config file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        _ = MessageBox.Show("The config file is missing and no sample data is available. Please reinstall the application and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         Application.Current?.Dispatcher.Invoke(() => Application.Current.Shutdown());
                         return;
                     }
@@ -298,25 +295,25 @@ namespace ZO.DMM.AppNF
                                                 @AutoCheckForUpdates
                                             )";
 
-                        command.Parameters.AddWithValue("@RepoFolder", config.RepoFolder ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@RepoFolder", config.RepoFolder ?? (object)DBNull.Value);
                         _ = command.Parameters.AddWithValue("@UseGit", config.UseGit);
-                        command.Parameters.AddWithValue("@GitHubRepo", config.GitHubRepo ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@GitHubRepo", config.GitHubRepo ?? (object)DBNull.Value);
                         _ = command.Parameters.AddWithValue("@UseModManager", config.UseModManager);
-                        command.Parameters.AddWithValue("@GameFolder", config.GameFolder ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@ModStagingFolder", config.ModStagingFolder ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@ModManagerExecutable", config.ModManagerExecutable ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@ModManagerParameters", config.ModManagerParameters ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@IdeExecutable", config.IdeExecutable ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@GameFolder", config.GameFolder ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ModStagingFolder", config.ModStagingFolder ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ModManagerExecutable", config.ModManagerExecutable ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ModManagerParameters", config.ModManagerParameters ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@IdeExecutable", config.IdeExecutable ?? (object)DBNull.Value);
                         _ = command.Parameters.AddWithValue("@LimitFiletypes", config.LimitFiletypes);
                         _ = command.Parameters.AddWithValue("@PromoteIncludeFiletypes", string.Join(",", config.PromoteIncludeFiletypes ?? Array.Empty<string>()));
                         _ = command.Parameters.AddWithValue("@PackageExcludeFiletypes", string.Join(",", config.PackageExcludeFiletypes ?? Array.Empty<string>()));
-                        command.Parameters.AddWithValue("@TimestampFormat", config.TimestampFormat ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@MyNameSpace", config.MyNameSpace ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@MyResourcePrefix", config.MyResourcePrefix ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@TimestampFormat", config.TimestampFormat ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@MyNameSpace", config.MyNameSpace ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@MyResourcePrefix", config.MyResourcePrefix ?? (object)DBNull.Value);
                         _ = command.Parameters.AddWithValue("@ShowSaveMessage", config.ShowSaveMessage);
                         _ = command.Parameters.AddWithValue("@ShowOverwriteMessage", config.ShowOverwriteMessage);
-                        command.Parameters.AddWithValue("@NexusAPIKey", config.NexusAPIKey ?? (object)DBNull.Value);
-                        command.Parameters.AddWithValue("@ArchiveFormat", config.ArchiveFormat ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@NexusAPIKey", config.NexusAPIKey ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@ArchiveFormat", config.ArchiveFormat ?? (object)DBNull.Value);
                         _ = command.Parameters.AddWithValue("@AutoCheckForUpdates", config.AutoCheckForUpdates);
 
                         _ = command.ExecuteNonQuery();

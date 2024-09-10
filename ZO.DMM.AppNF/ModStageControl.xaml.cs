@@ -38,7 +38,7 @@ namespace ZO.DMM.AppNF
             catch (Exception ex)
             {
                 // Handle exceptions appropriately
-                MessageBox.Show($"Failed to load stages: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show($"Failed to load stages: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -73,11 +73,11 @@ namespace ZO.DMM.AppNF
                 // Check if either stage is an empty string
                 if (string.IsNullOrEmpty(sourceStage) || string.IsNullOrEmpty(destinationStage))
                 {
-                    MessageBox.Show("Both source and destination stages must be selected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _ = MessageBox.Show("Both source and destination stages must be selected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                ModStageManager.PromoteModStage(modItem, sourceStage, destinationStage);
+                _ = ModStageManager.PromoteModStage(modItem, sourceStage, destinationStage);
             }
         }
     }

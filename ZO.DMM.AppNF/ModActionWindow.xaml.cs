@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -104,7 +103,7 @@ namespace ZO.DMM.AppNF
             if (ActionButton.Content.ToString() == "Deploy")
             {
                 // Handle deploy logic
-                ModStageManager.DeployStage(_modItem, selectedStage);
+                _ = ModStageManager.DeployStage(_modItem, selectedStage);
             }
             else if (ActionButton.Content.ToString() == "Package")
             {

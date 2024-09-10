@@ -1,12 +1,11 @@
 ﻿using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Windows;
 
 [assembly: AssemblyTitle("DevModManager")]
 [assembly: AssemblyProduct("DevModManager")]
 [assembly: AssemblyCopyright("Copyright ©  2023")]
-[assembly: AssemblyVersion("0.0.0.8")]
-[assembly: AssemblyFileVersion("0.0.0.8")]
+[assembly: AssemblyVersion("0.0.2.0")]
+[assembly: AssemblyFileVersion("0.0.2.0")]
 
 [assembly: ThemeInfo(
         ResourceDictionaryLocation.None,            //where theme specific resource dictionaries are located

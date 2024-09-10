@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SQLite;
@@ -9,7 +8,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using AutoUpdaterDotNET;
 
 namespace ZO.DMM.AppNF
 {
@@ -27,7 +25,7 @@ namespace ZO.DMM.AppNF
             LoadAvailableArchiveFormats();
 
             LoadCommand = new RelayCommand(_ => LoadSettings());
-            
+
             CheckForUpdatesCommand = new RelayCommand(_ => App.CheckForUpdates(ParentWindow));
 
 
@@ -366,14 +364,14 @@ namespace ZO.DMM.AppNF
             AutoCheckForUpdates = Config.Instance.AutoCheckForUpdates;
         }
 
-        
+
 
         private void LaunchGameFolder()
         {
             if (!string.IsNullOrEmpty(Config.Instance.GameFolder) && Directory.Exists(Config.Instance.GameFolder))
             {
                 _ = MessageBox.Show("Launching game folder: " + Config.Instance.GameFolder, "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                Process.Start(new ProcessStartInfo
+                _ = Process.Start(new ProcessStartInfo
                 {
                     FileName = Config.Instance.GameFolder,
                     UseShellExecute = true,
@@ -382,7 +380,7 @@ namespace ZO.DMM.AppNF
             }
             else
             {
-                MessageBox.Show("Game folder is not set or does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show("Game folder is not set or does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

@@ -13,7 +13,7 @@
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <MapFileExtensions>true</MapFileExtensions>
-    <Version>0.0.0.8</Version>
+    <Version>0.0.2.0</Version>
     <!--<ApplicationVersion>$(Version)</ApplicationVersion>-->
     <!--<ApplicationRevision>0</ApplicationRevision>-->
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -49,7 +49,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\GitRelease\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -109,28 +109,19 @@
   <ItemGroup>
     <Content Include="data\**\*" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="docs\**\*" CopyToOutputDirectory="OverwriteAlways" />
+    <Content Include="lib\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\PublishProfiles\" />
-  </ItemGroup>
-  <Target Name="RearrangeOutputFiles" AfterTargets="Build;Publish">
+  <Target Name="RearrangeOutputFiles" AfterTargets="Build;Publish" BeforeTargets="PostBuildEvent">
     <ItemGroup>
-      <DllFiles Include="$(OutputPath)*.dll" Exclude="$(OutputPath)DevModManager.dll;$(OutputPath)x64\**\*;$(OutputPath)x86\**\*" />
-      <ResourceDllFiles Include="$(OutputPath)**\*.resources.dll" />
-      <X86Files Include="$(OutputPath)x86\**\*" />
-      <X64Files Include="$(OutputPath)x64\**\*" />
+      <DllFiles Include="$(OutputPath)**\*.dll" Exclude="$(OutputPath)DevModManager.dll;$(OutputPath)**\*.resources.dll;$(OutputPath)lib\**\*.*" />
+      <ResourceDllFiles Include="$(OutputPath)**\*.resources.dll" Exclude="$(OutputPath)locale\**\*.*" />
     </ItemGroup>
-    <MakeDir Directories="$(OutputPath)lib" />
-    <Move SourceFiles="@(DllFiles)" DestinationFolder="$(OutputPath)lib" />
+    <Move SourceFiles="@(DllFiles)" DestinationFolder="$(OutputPath)lib\%(RecursiveDir)" />
     <MakeDir Directories="$(OutputPath)locale" />
     <Move SourceFiles="@(ResourceDllFiles)" DestinationFolder="$(OutputPath)locale\%(RecursiveDir)" />
-    <MakeDir Directories="$(OutputPath)lib\x86" />
-    <MakeDir Directories="$(OutputPath)lib\x64" />
-    <Move SourceFiles="@(X86Files)" DestinationFolder="$(OutputPath)lib\x86\%(RecursiveDir)" />
-    <Move SourceFiles="@(X64Files)" DestinationFolder="$(OutputPath)lib\x64\%(RecursiveDir)" />
     <RemoveEmptyDirectories RootDirectory="$(OutputPath)" />
   </Target>
-  <Target Name="CopyConfigFile" AfterTargets="Build;Publish">
+  <Target Name="CopyConfigFile" AfterTargets="Build;Publish" BeforeTargets="PostBuildEvent">
     <ItemGroup>
       <ConfigFile Include="config\config.yaml" Condition="'$(Configuration)' == 'Debug'" />
       <ConfigFile Include="config\config_sample.yaml" Condition="'$(Configuration)' != 'Debug'" />
@@ -159,6 +150,16 @@
     <Exec Command="setx AppNFOutputPath $(OutputPath)" />
   </Target>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(Configuration)' == 'GitRelease'">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File $(ProjectDir)scripts\IncrementVersion.ps1 -SettingsFile $(ProjectDir)Properties\Settings.settings -CsprojFilePath $(ProjectDir)ZO.DMM.AppNF.csproj -AppConfigFilePath $(ProjectDir)App.config -VersionTxtFilePath $(ProjectDir)Properties\version.txt -AipFilePath $(ProjectDir)Installer\Installer.aip -XmlOutputPath $(ProjectDir)Properties\AutoUpdater.xml -Configuration $(Configuration) -AssemblyInfoFilePath $(ProjectDir)Properties\AssemblyInfo.cs" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File $(ProjectDir)scripts\IncrementVersion.ps1 -SettingsFile $(ProjectDir)Properties\Settings.settings -CsprojFilePath $(ProjectDir)ZO.DMM.AppNF.csproj -AppConfigFilePath $(ProjectDir)App.config -VersionTxtFilePath $(ProjectDir)Properties\version.txt -AipFilePath $(ProjectDir)Installer\DMMInstaller.aip -XmlOutputPath $(ProjectDir)Properties\AutoUpdater.xml -Configuration $(Configuration) -AssemblyInfoFilePath $(ProjectDir)Properties\AssemblyInfo.cs" />
   </Target>
+  <Target Name="PostBuildMoveCheck" BeforeTargets="RunAdvancedInstaller">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\WaitForFileMove.ps1&quot; -filePath &quot;$(TargetDir)lib\x86\*.dll&quot; -timeoutInSeconds 60" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\WaitForFileMove.ps1&quot; -filePath &quot;$(TargetDir)lib\x64\*.dll&quot; -timeoutInSeconds 60" />
+  </Target>
+  <Target Name="RunAdvancedInstaller" AfterTargets="SetEnvironmentVariables" Condition="'$(Configuration)' == 'GitRelease'">
+    <Exec Command="%25ADVINST_COM%25 /build &quot;$(ProjectDir)installer\DMMInstaller.aip&quot; -buildslist &quot;AnyCPU_GitRelease&quot;" />
+  </Target>
+  <!--<Target Name="PostBuild" AfterTargets="RunAdvancedInstaller" Condition="'$(Configuration)' == 'GitRelease'">
+		<Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\post-build.ps1&quot; -configuration $(ConfigurationName) -msiFile &quot;$(ProjectDir)installer\output\DevModManager.msi&quot; -versionFile &quot;$(ProjectDir)Properties\version.txt&quot;" />
+	</Target>-->
 </Project>
