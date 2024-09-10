@@ -1,5 +1,5 @@
 ﻿# **Dev Mod Manager**
-![Dev Mod Manager](./img/ZeeOgre_256x256.ico)
+![Dev Mod Manager](./ZO.DMM.AppNF/docs/img/ZeeOgre_256x256.ico)
 ---
 ## Description
 
@@ -12,7 +12,7 @@ We leverage existing mod managers to move the various versions of your mod in an
 ## Installation
 
 ## Acquisition 
-The latest release should be acquired from [Github](https://github.com/ZeeOgre/DevModManager/releases/latest/DevModManager.msi)
+The latest release should be acquired from [Github](https://github.com/ZeeOgre/ZO.DevModManager/releases/latest/download/DevModManager.msi)
 
 Currently investigating releasing on WinGet as well, and possibly also on Nexus.
 
@@ -59,10 +59,10 @@ The *Target* folder may be an intermediary testing/staging folder, or could be y
 
 Your ModManager does a great job of helping you find these folders. Vortex will show you the game folder, game settings folder etc... when you've got the game selected:
 
-![Vortex Game Settings](./img/vortex_mod_openmenu.png)
+![Vortex Game Settings](./ZO.DMM.AppNF/docs/img/vortex_mod_openmenu.png)
 
 When you're in the overall settings, you can find the mod staging folder:
-![Vortex Mod Staging Folder](./img/vortex_modstagingfolder.png)
+![Vortex Mod Staging Folder](./ZO.DMM.AppNF/docs/img/vortex_modstagingfolder.png)
 
 
 ## Configure the config.yaml
@@ -113,27 +113,27 @@ nexusAPIKey: <<Your Nexus APIKey – this is not necessary now, but is a placeho
 # The Interface
 ---
 ## Main Window
-![Main Window](./img/dmm_mainwindow.png)
+![Main Window](./ZO.DMM.AppNF/docs/img/dmm_mainwindow.png)
 ## Buttons
 ---
 ### Settings
 This will open the settings window, you should see this when you first launch the program if you didn't fill the config.yaml before first launch.
 
-![Settings Window](./img/dmm_settingswindow.png)
+![Settings Window](./ZO.DMM.AppNF/docs/img/dmm_settingswindow.png)
 
 If you close this window without clicking save, it will revert to the previous settings.
 
 ### Backup
 This button will create a backup of any mods in the Source folder.  It will create a timestamped zip/7z file in the Backup folder with the contents of the mod at that point in time.
 
-![Backup Window](./img/dmm_backupresults.png)
+![Backup Window](./ZO.DMM.AppNF/docs/img/dmm_backupresults.png)
 
 I've experimented with backing up only the files that have changed, but it's not reliable, so I'm backing up the whole thing.  This is a good practice to get into, as it will allow you to roll back to a previous version if you need to.
 
 ### Launch Mod Manager
 Whether you use Vortex, MO2 or whatever mod manager you use, this will launch it as long as you specified it correctly.  For Vortex in particular, if you need to make a custom game profile, you'll need to specify the launch parameters to get that to work.
 
-![Vortex Windows Properties](./img/vortex_windowsproperties.png)
+![Vortex Windows Properties](./ZO.DMM.AppNF/docs/img/vortex_windowsproperties.png)
 
 ### Launch IDE
 Starfield Creation Kit has a plugin for VSCode so that you can compile papyrus scripts in a much nicer environment than the CK.  This will launch your IDE, so you can work on your scripts. If you prefer Notepad, Notepad++, whatever you've specified, this will launch it for you.
@@ -142,11 +142,9 @@ Github has free solutions that anyone can use. You can mark your repositories pr
 ### Open Game Folder
 Does what it says on the tin, opens the game folder in Windows Explorer.
 ### Load Order
-Because everyone does it a little different, I've built a Load Order manager of my own. This mixes the information from Plugins.txt and CreationCatalog.txt to provide a more robust view of what you've got installed.
-It's still very much a work in progress, so at this point the buttons don't even work.  I plan on having categories, and the ability to move entire categories up and down, in addition to actually writing the comments/categories into the Plugins.txt (even if it's only there for one go, until the game wipes them out.
-)
+This is JUST a preview of WIP - LOW will be coming soon
 
-![Load Order Window](./img/dmm_loadorder_window.png)
+![Load Order Window](./ZO.DMM.AppNF/docs/img/dmm_loadorder_window.png)
 ## Rows
 ---
 ### Mod Name
@@ -154,7 +152,7 @@ This is the name of the mod, as it appears in the Source folder.  This is the na
 ### Current Stage
 If the mod is deployed, this will show you which stage is deployed. When you click on it you have the opportunity to change which (or none at all) stage of that mod is deployed to the Staging folder.
 
-![Deployed Window](./img/dmm_deploywindow.png)
+![Deployed Window](./ZO.DMM.AppNF/docs/img/dmm_deploywindow.png)
 
 ### Staged Folder
 This is the folder where the mod is currently staged.  If you click on it, it will open the folder in Windows Explorer.	
@@ -169,32 +167,32 @@ This button opens the backup folder for the mod.  This is where the backups are 
 This will open the promotion interface for your mod. Choose your source and target stages, and click the Promote button.  This will move the mod from one stage to another, and will also create a backup of the mod in the target stage.
 This will only move the "Allowed Filetypes" as specified in the config.yaml/Configuration screen.  If you have other files that need to be moved, you'll need to update these settings for them to get moved. If you've unchecked "Limit File Types" all the files in the folder will move over.
 
-![Promote Window](./img/dmm_promote_window.png)
+![Promote Window](./ZO.DMM.AppNF/docs/img/dmm_promote_window.png)
 ### Package
 This will open the package window. Select the mod you want to package, and click the Package button.  This will create a backup of the mod in the regular backup folder for that stage, as well as place a "clean" un-timestamped zip/7zip here for you to quickly upload to Nexus.
 
-![Package Window](./img/dmm_package_window.png)
+![Package Window](./ZO.DMM.AppNF/docs/img/dmm_package_window.png)
 ### Bethesda ID
 If you haven't defined, or don't have a Bethesda ID, you can enter it here.  This will allow you to quickly open the mod page on Bethesda.net.  This is not required, but it's a nice feature to have.
 If it says "Bethesda" it means you haven't provided the Creations URL.
 When you look at a creation on Bethesda.net, the URL will look like this:
-![Bethesda Address Zohst](img/bethesda_address_zohst.png)
+![Bethesda Address Zohst](./ZO.DMM.AppNF/docs/img/bethesda_address_zohst.png)
 
 The GUID between "details" and the Name of the mod is the Bethesda ID. Keep everything up to the GUID, and paste it in to the Bethesda URL field.
-![Dmm Bethesda Url](img/dmm_bethesda_url.png)
+![Dmm Bethesda Url](./ZO.DMM.AppNF/docs/img/dmm_bethesda_url.png)
 
 ### Nexus ID
 Just like the Bethesda ID, if you have a Nexus ID, you can enter it here.  This will allow you to quickly open the mod page on Nexus.  This is not required, but it's a nice feature to have.
 If it says "Nexus" it means you haven't provided the Nexus ID.
 When you look at a mod on Nexus, the URL will look like this:	
 
-![Nexus Address Zohst](img/nexus_address_zohst.png)
+![Nexus Address Zohst](./ZO.DMM.AppNF/docs/img/nexus_address_zohst.png)
 
 The number at the end of the URL is the Nexus ID.  In this case, paste the whole URL into the Nexus URL field.
 
 ## Load Order Window
 ---
-![Dmm Loadorder Window](img/dmm_loadorder_window.png)
+![Dmm Loadorder Window](./ZO.DMM.AppNF/docs/img/dmm_loadorder_window.png)
 
 This is a work in progress, but it will show you the load order of your mods, and allow you to change the order of them.  This is a feature that is not yet fully implemented.
 Plans include:
@@ -207,7 +205,7 @@ Plugins.txt and Starfield.ccc support.
 ## The Database
 The database is a simple SQLite database that stores the information about your mods.  It's stored in the same folder as the application, and is named `dmm.db`.  It's a simple database, and you can open it with any SQLite viewer, or even with the SQLite command line tool.  
 
-[Dev Mod Manager Db](img/DevModManager_db.dgml) this is the DGML file for the database, you can open it with Visual Studio, or any other DGML viewer.  It shows the relationships between the tables in the database.
+[Dev Mod Manager Db](./ZO.DMM.AppNF/docs/img/DevModManager_db.dgml) this is the DGML file for the database, you can open it with Visual Studio, or any other DGML viewer.  It shows the relationships between the tables in the database.
 
 ## The Future
 Enhanced Load Order Management
