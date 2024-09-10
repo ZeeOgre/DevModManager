@@ -40,9 +40,9 @@ if ($currentBranch -ne 'dev') {
     }
 }
 
-# Merge 'master' into 'dev'
+# Merge 'master' into 'dev' with --allow-unrelated-histories
 Write-Host "Merging 'master' into 'dev'."
-git merge master
+git merge master --allow-unrelated-histories
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Merge conflicts detected. Please resolve them before proceeding."
     exit 1
