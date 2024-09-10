@@ -32,7 +32,7 @@ namespace ZO.DMM.AppNF
         public static void SaveModItems(ObservableCollection<ModItem> modItems)
         {
             ModItem.DB.SaveToDatabase(modItems);
-            SaveToYaml(modItems);
+            //SaveToYaml(modItems);
         }
 
         private static void SaveToYaml(ObservableCollection<ModItem> modItems)
@@ -59,8 +59,8 @@ namespace ZO.DMM.AppNF
             if (modItems.Count > 0) return modItems;
 
             // Fallback to LoadFromYaml
-            modItems = LoadFromYaml();
-            if (modItems.Count > 0) return modItems;
+            // modItems = LoadFromYaml();
+            // if (modItems.Count > 0) return modItems;
 
             // Fallback to BuildModItems
             modItems = BuildModItems();
@@ -80,30 +80,30 @@ namespace ZO.DMM.AppNF
             return modItems;
         }
 
-        private static ObservableCollection<ModItem> LoadFromYaml()
-        {
-            var config = Config.Instance;
-            if (config.RepoFolder == null)
-            {
-                throw new InvalidOperationException("RepoFolder is not configured.");
-            }
+        //private static ObservableCollection<ModItem> LoadFromYaml()
+        //{
+        //    var config = Config.Instance;
+        //    if (config.RepoFolder == null)
+        //    {
+        //        throw new InvalidOperationException("RepoFolder is not configured.");
+        //    }
 
-            var yamlFilePath = Path.Combine(config.RepoFolder, "ModStatus.yaml");
+        //    var yamlFilePath = Path.Combine(config.RepoFolder, "ModStatus.yaml");
 
-            if (!File.Exists(yamlFilePath))
-            {
-                return new ObservableCollection<ModItem>();
-            }
+        //    if (!File.Exists(yamlFilePath))
+        //    {
+        //        return new ObservableCollection<ModItem>();
+        //    }
 
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
+        //    var deserializer = new DeserializerBuilder()
+        //        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+        //        .Build();
 
-            var yamlContent = File.ReadAllText(yamlFilePath);
-            var modItems = deserializer.Deserialize<ObservableCollection<ModItem>>(yamlContent);
+        //    var yamlContent = File.ReadAllText(yamlFilePath);
+        //    var modItems = deserializer.Deserialize<ObservableCollection<ModItem>>(yamlContent);
 
-            return modItems ?? new ObservableCollection<ModItem>();
-        }
+        //    return modItems ?? new ObservableCollection<ModItem>();
+        //}
 
         public static ObservableCollection<ModItem> BuildModItems()
         {
