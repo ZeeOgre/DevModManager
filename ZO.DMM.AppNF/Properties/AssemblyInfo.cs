@@ -3,9 +3,9 @@ using System.Windows;
 
 [assembly: AssemblyTitle("DevModManager")]
 [assembly: AssemblyProduct("DevModManager")]
-[assembly: AssemblyCopyright("Copyright ©  2023")]
-[assembly: AssemblyVersion("0.0.3.0")]
-[assembly: AssemblyFileVersion("0.0.3.0")]
+[assembly: AssemblyCopyright("Copyright © ZeeOgre  2024")]
+[assembly: AssemblyVersion("0.0.4.0")]
+[assembly: AssemblyFileVersion("0.0.4.0")]
 
 [assembly: ThemeInfo(
         ResourceDictionaryLocation.None,            //where theme specific resource dictionaries are located
