@@ -1,9 +1,39 @@
 param (
     [string]$configuration,
-    [string]$msiFile,
-    [string]$versionFile,
+    [string]$msiFile = "..\Installer\ZO.DevModManager.msi",
+    [string]$versionFile = "..\Properties\version.txt",
     [bool]$manual = $false
 )
+
+# Function to execute a command and handle errors
+function Execute-Command {
+    param (
+        [string]$command
+    )
+    Write-Output "Executing: $command"
+    $result = Invoke-Expression $command 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        if ($result -match "nothing to commit, working tree clean") {
+            Write-Output "Nothing to commit, working tree clean."
+        } else {
+            Write-Error "Command failed: $command"
+            Write-Error ($result -join "`n")
+            exit 1
+        }
+    }
+    Write-Output $result
+}
+
+# Ensure all changes are staged
+Execute-Command "git add -A"
+
+# Commit the changes
+try {
+    Execute-Command "git commit -m 'Post-build commit for configuration $configuration'"
+} catch {
+    Write-Error "Failed to commit changes."
+    exit 1
+}
 
 function Get-NewestTag {
     $tags = git tag --sort=-v:refname
@@ -15,7 +45,7 @@ function Increment-Tag {
         [string]$tag
     )
     if ($tag -match "-m(\d+)$") {
-        $number = [int]$matches[1] + 1
+        $number = [long]$matches[1] + 1
         return $tag -replace "-m\d+$", "-m$number"
     } else {
         return "$tag-m1"
@@ -44,72 +74,98 @@ if (-not $manual) {
 
 Write-Output "Tag Name: $tagName"
 
-# Ensure on correct branch
+# Ensure on correct branch and push dev if necessary
 $currentBranch = git rev-parse --abbrev-ref HEAD
 Write-Output "Current Branch: $currentBranch"
 
 if ($currentBranch -eq 'master') {
     # Clobber down to dev
-    git checkout dev
-    git merge -X theirs master
-    if ($?) {
-        Write-Output "Merged master into dev with conflicts resolved in favor of master."
-    } else {
-        Write-Error "Failed to merge master into dev."
-        exit 1
-    }
+    Execute-Command "git checkout dev"
+    Execute-Command "git merge -X ours master"
+    Write-Output "Merged master INTO dev with conflicts resolved in favor of dev."
+
+    # Push dev to origin to ensure it's up to date (Line to Add)
+    Execute-Command "git push origin dev"
+    Write-Output "Pushed dev branch to origin."
+
+    $currentBranch = 'dev'
 } elseif ($currentBranch -eq 'dev') {
+    # Push dev to origin to ensure it's up to date (Line to Add)
+    Execute-Command "git push origin dev"
+    Write-Output "Pushed dev branch to origin."
+
     # Friendly merge up to master
-    git checkout master
-    git merge dev
-    if ($?) {
-        Write-Output "Merged dev into master."
-    } else {
-        Write-Error "Failed to merge dev into master."
-        exit 1
-    }
+    Execute-Command "git checkout master"
+    Execute-Command "git merge dev"
+    Write-Output "Merged dev INTO master."
+    $currentBranch = 'master'
 }
 
 # Check if there are any changes before committing
 $gitStatus = git status --porcelain
 if (-not [string]::IsNullOrWhiteSpace($gitStatus)) {
-    git add .
-    git commit -m "Automated commit for $configuration configuration"
-    if ($?) {
-        Write-Output "Committed changes."
-    } else {
-        Write-Error "Failed to commit changes."
-        exit 1
-    }
+    Execute-Command "git add ."
+    Execute-Command "git commit -m 'Automated commit for $configuration configuration'"
+    Write-Output "Committed changes."
 
-    git push origin $currentBranch
-    if ($?) {
-        Write-Output "Pushed changes to $currentBranch."
-    } else {
-        Write-Error "Failed to push changes to $currentBranch."
-        exit 1
-    }
+    Execute-Command "git push origin $currentBranch"
+    Write-Output "Pushed changes to $currentBranch."
 } else {
     Write-Output "Nothing to commit, working tree clean."
 }
 
 # Handle release
-if ($configuration -eq 'Release') {
-    git tag $tagName
-    git push origin $tagName
+if ($configuration -eq 'GitRelease') {
+    # Delete existing local tag if it exists
+    $existingTag = git tag -l $tagName
+    if ($existingTag) {
+        Execute-Command "git tag -d $tagName"
+    }
+
+    Execute-Command "git tag $tagName"
+    # Push the tag to remote, force-pushing to overwrite if necessary
+try {
+    Execute-Command "git push --force origin $tagName"
+} catch {
+    Write-Error "Failed to push tag $tagName to origin."
+    exit 1
+}
     Write-Output "Tagged and pushed release: $tagName"
 
     # Create GitHub release
     if (Get-Command gh -ErrorAction SilentlyContinue) {
-        gh release create $tagName $msiFile -t $tagName -n "Release $tagName"
-        Write-Output "Created GitHub release: $tagName"
+        $autoUpdaterFile = "$(git rev-parse --show-toplevel)/Properties/AutoUpdater.xml"
+        if (Test-Path -Path $autoUpdaterFile) {
+            Execute-Command "gh release create $tagName $msiFile $autoUpdaterFile -t $tagName -n 'Release $tagName'"
+            Write-Output "Created GitHub release: $tagName with AutoUpdater.xml"
+        } else {
+            Write-Error "AutoUpdater.xml file not found at path: $autoUpdaterFile"
+            exit 1
+        }
     } else {
         Write-Error "GitHub CLI (gh) not found."
         exit 1
     }
 
-    # Apply stashed changes
-    git stash pop
+    # Check if there is a stash to pop
+    $stashList = git stash list
+    if (-not [string]::IsNullOrWhiteSpace($stashList)) {
+        Execute-Command "git stash pop"
+    } else {
+        Write-Output "No stash to pop."
+    }
+}
+
+# Push AutoUpdater.xml
+$autoUpdaterFile = "$(git rev-parse --show-toplevel)/Properties/AutoUpdater.xml"
+if (Test-Path -Path $autoUpdaterFile) {
+    Execute-Command "git add $autoUpdaterFile"
+    Execute-Command "git commit -m 'Update AutoUpdater.xml for $tagName'"
+    Execute-Command "git push origin $currentBranch"
+    Write-Output "Pushed AutoUpdater.xml changes."
+} else {
+    Write-Error "AutoUpdater.xml file not found at path: $autoUpdaterFile"
+    exit 1
 }
 
 # Check if GitHub CLI is available
@@ -120,6 +176,6 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
 
 # Switch back to dev if needed
 if ($currentBranch -eq 'dev') {
-    git checkout dev
+    Execute-Command "git checkout dev"
     Write-Output "Switched back to dev branch."
 }
