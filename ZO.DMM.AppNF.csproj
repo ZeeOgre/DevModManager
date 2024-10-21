@@ -21,7 +21,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <Version>0.0.11.0</Version>
+    <Version>0.0.12.0</Version>
     <!--<ApplicationVersion>$(Version)</ApplicationVersion>-->
     <!--<ApplicationRevision>0</ApplicationRevision>-->
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -171,6 +171,6 @@
     <Message Text="RunAdvancedInstaller target execution completed." Importance="high" />
   </Target>
   <Target Name="PostBuild" AfterTargets="RunAdvancedInstaller" Condition="'$(Configuration)' == 'GitRelease'">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\post-build.ps1&quot; -configuration $(ConfigurationName) -msiFile &quot;$(ProjectDir)installer\DevModManager.msi&quot; -versionFile &quot;$(ProjectDir)Properties\version.txt&quot;" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\post-build.ps1&quot; -configuration $(ConfigurationName) -msiFile &quot;$(ProjectDir)installer\ZO.DevModManager.msi&quot; -versionFile &quot;$(ProjectDir)Properties\version.txt&quot;" />
   </Target>
 </Project>
