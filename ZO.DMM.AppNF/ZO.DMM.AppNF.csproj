@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net481</TargetFramework>
@@ -19,7 +19,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <Version>0.0.3.0</Version>
+    <Version>0.0.5.0</Version>
     <!--<ApplicationVersion>$(Version)</ApplicationVersion>-->
     <!--<ApplicationRevision>0</ApplicationRevision>-->
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -168,8 +168,8 @@
     <Exec Command="powershell -ExecutionPolicy Bypass -File $(ProjectDir)scripts\IncrementVersion.ps1 -SettingsFile $(ProjectDir)Properties\Settings.settings -CsprojFilePath $(ProjectDir)ZO.DMM.AppNF.csproj -AppConfigFilePath $(ProjectDir)App.config -VersionTxtFilePath $(ProjectDir)Properties\version.txt -AipFilePath $(ProjectDir)Installer\DMMInstaller.aip -XmlOutputPath $(ProjectDir)Properties\AutoUpdater.xml -Configuration $(Configuration) -AssemblyInfoFilePath $(ProjectDir)Properties\AssemblyInfo.cs" />
   </Target>
   <Target Name="PostBuildMoveCheck" BeforeTargets="RunAdvancedInstaller">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\WaitForFileMove.ps1&quot; -filePath &quot;$(TargetDir)lib\x86\*.dll&quot; -timeoutInSeconds 60" />
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\WaitForFileMove.ps1&quot; -filePath &quot;$(TargetDir)lib\x64\*.dll&quot; -timeoutInSeconds 60" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\WaitForFileMove.ps1&quot; -filePath &quot;$(TargetDir)lib\*.dll&quot; -timeoutInSeconds 60" />
+    <!--<Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\WaitForFileMove.ps1&quot; -filePath &quot;$(TargetDir)lib\x64\*.dll&quot; -timeoutInSeconds 60" />-->
   </Target>
   <Target Name="RunAdvancedInstaller" AfterTargets="SetEnvironmentVariables" Condition="'$(Configuration)' == 'GitRelease'">
     <Exec Command="%25ADVINST_COM%25 /build &quot;$(ProjectDir)installer\DMMInstaller.aip&quot; -buildslist &quot;AnyCPU_GitRelease&quot;" />
