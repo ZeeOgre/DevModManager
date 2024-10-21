@@ -1,482 +1,482 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <DOCUMENT Type="Advanced Installer" CreateVersion="22.1" version="22.1" Modules="simple" RootPath="." Language="en" Id="{99B0BB94-2241-4C76-904D-6D3301FC6D99}">
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
-    <ROW Property="AI_APP_ARGS" Value="--settings"/>
-    <ROW Property="AI_APP_FILE" Value="[#DevModManager.exe]"/>
-    <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
-    <ROW Property="AI_PREDEF_LCONDS_PROPS" Value="AI_DETECTED_ADMIN_USER"/>
-    <ROW Property="AI_PROPPATH_PERBUILD_PB_PROJECT_PAT" Value="..\bin\GitRelease\net8.0-windows" MultiBuildValue="AnyCPU_Debug:..\bin\Debug\net8.0-windows#AnyCPU_Release:..\bin\Release\net8.0-windows"/>
-    <ROW Property="ALLUSERS" Value="1" MultiBuildValue="AnyCPU_Release:2"/>
-    <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
-    <ROW Property="CTRLS" Value="2"/>
-    <ROW Property="Manufacturer" Value="ZeeOgre"/>
-    <ROW Property="ProductCode" Value="1033:{4D678195-3F71-4B4A-B91C-B294294FD913} " Type="16"/>
-    <ROW Property="ProductLanguage" Value="1033"/>
-    <ROW Property="ProductName" Value="ZO.DevModManager"/>
-    <ROW Property="ProductVersion" Value="1.0.0" Options="4"/>
-    <ROW Property="RUNAPPLICATION" Value="1" Type="4"/>
-    <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
-    <ROW Property="UpgradeCode" Value="{EF0F26DB-4BF7-4C7C-B94E-72D24CF4E818}"/>
-    <ROW Property="WindowsType9X" MultiBuildValue="AnyCPU_Debug:Windows 9x/ME#AnyCPU_GitRelease:Windows 9x/ME#AnyCPU_Release:Windows 9x/ME" ValueLocId="-"/>
-    <ROW Property="WindowsType9XDisplay" MultiBuildValue="AnyCPU_Debug:Windows 9x/ME#AnyCPU_GitRelease:Windows 9x/ME#AnyCPU_Release:Windows 9x/ME" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT" MultiBuildValue="AnyCPU_Release:Windows 9x/ME/NT/2000/XP/Vista/Windows 7/Windows 8 x86/Windows 8.1 x86/Windows 10 x86" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT40" MultiBuildValue="AnyCPU_Debug:Windows NT 4.0#AnyCPU_GitRelease:Windows NT 4.0#AnyCPU_Release:Windows NT 4.0" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT40Display" MultiBuildValue="AnyCPU_Debug:Windows NT 4.0#AnyCPU_GitRelease:Windows NT 4.0#AnyCPU_Release:Windows NT 4.0" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT50" MultiBuildValue="AnyCPU_Debug:Windows 2000#AnyCPU_GitRelease:Windows 2000#AnyCPU_Release:Windows 2000" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT50Display" MultiBuildValue="AnyCPU_Debug:Windows 2000#AnyCPU_GitRelease:Windows 2000#AnyCPU_Release:Windows 2000" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT5X" MultiBuildValue="AnyCPU_Debug:Windows XP/2003#AnyCPU_GitRelease:Windows XP/2003#AnyCPU_Release:Windows XP/2003" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT5XDisplay" MultiBuildValue="AnyCPU_Debug:Windows XP/2003#AnyCPU_GitRelease:Windows XP/2003#AnyCPU_Release:Windows XP/2003" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT60" MultiBuildValue="AnyCPU_Debug:Windows Vista/Server 2008#AnyCPU_GitRelease:Windows Vista/Server 2008#AnyCPU_Release:Windows Vista/Server 2008" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT60Display" MultiBuildValue="AnyCPU_Debug:Windows Vista/Server 2008#AnyCPU_GitRelease:Windows Vista/Server 2008#AnyCPU_Release:Windows Vista/Server 2008" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT64" MultiBuildValue="AnyCPU_Release:Windows 7 x64, Windows Server 2008 R2 x64, Windows 8 x64, Windows Server 2012 x64, Windows 8.1 x64, Windows Server 2012 R2 x64" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNT64Display" MultiBuildValue="AnyCPU_Release:Windows 7 x64, Windows Server 2008 R2 x64, Windows 8 x64, Windows Server 2012 x64, Windows 8.1 x64, Windows Server 2012 R2 x64" ValueLocId="-"/>
-    <ROW Property="WindowsTypeNTDisplay" MultiBuildValue="AnyCPU_Release:32-bit Windows versions" ValueLocId="-"/>
+    <ROW Property="AI_APP_ARGS" Value="--settings" />
+    <ROW Property="AI_APP_FILE" Value="[#DevModManager.exe]" />
+    <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0" />
+    <ROW Property="AI_PREDEF_LCONDS_PROPS" Value="AI_DETECTED_ADMIN_USER" />
+    <ROW Property="AI_PROPPATH_PERBUILD_PB_PROJECT_PAT" Value="..\bin\GitRelease\net8.0-windows" MultiBuildValue="AnyCPU_Debug:..\bin\Debug\net8.0-windows#AnyCPU_Release:..\bin\Release\net8.0-windows" />
+    <ROW Property="ALLUSERS" Value="1" MultiBuildValue="AnyCPU_Release:2" />
+    <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*" />
+    <ROW Property="CTRLS" Value="2" />
+    <ROW Property="Manufacturer" Value="ZeeOgre" />
+    <ROW Property="ProductCode" Value="1033:{dfee07f3-ae4c-42b9-820d-904a4aba18dd}" Type="16" />
+    <ROW Property="ProductLanguage" Value="1033" />
+    <ROW Property="ProductName" Value="ZO.DevModManager" />
+    <ROW Property="ProductVersion" Value="0.0.10.0" Options="4" />
+    <ROW Property="RUNAPPLICATION" Value="1" Type="4" />
+    <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND" />
+    <ROW Property="UpgradeCode" Value="{EF0F26DB-4BF7-4C7C-B94E-72D24CF4E818}" />
+    <ROW Property="WindowsType9X" MultiBuildValue="AnyCPU_Debug:Windows 9x/ME#AnyCPU_GitRelease:Windows 9x/ME#AnyCPU_Release:Windows 9x/ME" ValueLocId="-" />
+    <ROW Property="WindowsType9XDisplay" MultiBuildValue="AnyCPU_Debug:Windows 9x/ME#AnyCPU_GitRelease:Windows 9x/ME#AnyCPU_Release:Windows 9x/ME" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT" MultiBuildValue="AnyCPU_Release:Windows 9x/ME/NT/2000/XP/Vista/Windows 7/Windows 8 x86/Windows 8.1 x86/Windows 10 x86" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT40" MultiBuildValue="AnyCPU_Debug:Windows NT 4.0#AnyCPU_GitRelease:Windows NT 4.0#AnyCPU_Release:Windows NT 4.0" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT40Display" MultiBuildValue="AnyCPU_Debug:Windows NT 4.0#AnyCPU_GitRelease:Windows NT 4.0#AnyCPU_Release:Windows NT 4.0" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT50" MultiBuildValue="AnyCPU_Debug:Windows 2000#AnyCPU_GitRelease:Windows 2000#AnyCPU_Release:Windows 2000" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT50Display" MultiBuildValue="AnyCPU_Debug:Windows 2000#AnyCPU_GitRelease:Windows 2000#AnyCPU_Release:Windows 2000" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT5X" MultiBuildValue="AnyCPU_Debug:Windows XP/2003#AnyCPU_GitRelease:Windows XP/2003#AnyCPU_Release:Windows XP/2003" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT5XDisplay" MultiBuildValue="AnyCPU_Debug:Windows XP/2003#AnyCPU_GitRelease:Windows XP/2003#AnyCPU_Release:Windows XP/2003" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT60" MultiBuildValue="AnyCPU_Debug:Windows Vista/Server 2008#AnyCPU_GitRelease:Windows Vista/Server 2008#AnyCPU_Release:Windows Vista/Server 2008" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT60Display" MultiBuildValue="AnyCPU_Debug:Windows Vista/Server 2008#AnyCPU_GitRelease:Windows Vista/Server 2008#AnyCPU_Release:Windows Vista/Server 2008" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT64" MultiBuildValue="AnyCPU_Release:Windows 7 x64, Windows Server 2008 R2 x64, Windows 8 x64, Windows Server 2012 x64, Windows 8.1 x64, Windows Server 2012 R2 x64" ValueLocId="-" />
+    <ROW Property="WindowsTypeNT64Display" MultiBuildValue="AnyCPU_Release:Windows 7 x64, Windows Server 2008 R2 x64, Windows 8 x64, Windows Server 2012 x64, Windows 8.1 x64, Windows Server 2012 R2 x64" ValueLocId="-" />
+    <ROW Property="WindowsTypeNTDisplay" MultiBuildValue="AnyCPU_Release:32-bit Windows versions" ValueLocId="-" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
-    <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
-    <ROW Directory="DesktopFolder" Directory_Parent="TARGETDIR" DefaultDir="DESKTO~1|DesktopFolder" IsPseudoRoot="1"/>
-    <ROW Directory="DevModManager_Dir" Directory_Parent="ZeeOgre_Dir" DefaultDir="DEVMOD~1|DevModManager"/>
-    <ROW Directory="LocalAppDataFolder" Directory_Parent="TARGETDIR" DefaultDir="LOCALA~1|LocalAppDataFolder" IsPseudoRoot="1"/>
-    <ROW Directory="SHORTCUTDIR" Directory_Parent="TARGETDIR" DefaultDir="SHORTC~1|SHORTCUTDIR" IsPseudoRoot="1"/>
-    <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
-    <ROW Directory="ZeeOgre_Dir" Directory_Parent="LocalAppDataFolder" DefaultDir="ZeeOgre"/>
-    <ROW Directory="ar_Dir" Directory_Parent="locale_Dir" DefaultDir="ar"/>
-    <ROW Directory="config_Dir" Directory_Parent="APPDIR" DefaultDir="config"/>
-    <ROW Directory="cs_Dir" Directory_Parent="locale_Dir" DefaultDir="cs"/>
-    <ROW Directory="da_Dir" Directory_Parent="locale_Dir" DefaultDir="da"/>
-    <ROW Directory="data_Dir" Directory_Parent="APPDIR" DefaultDir="data"/>
-    <ROW Directory="de_Dir" Directory_Parent="locale_Dir" DefaultDir="de"/>
-    <ROW Directory="docs_Dir" Directory_Parent="APPDIR" DefaultDir="docs"/>
-    <ROW Directory="es_Dir" Directory_Parent="locale_Dir" DefaultDir="es"/>
-    <ROW Directory="fr_Dir" Directory_Parent="locale_Dir" DefaultDir="fr"/>
-    <ROW Directory="img_Dir" Directory_Parent="docs_Dir" DefaultDir="img"/>
-    <ROW Directory="it_Dir" Directory_Parent="locale_Dir" DefaultDir="it"/>
-    <ROW Directory="jaJP_Dir" Directory_Parent="locale_Dir" DefaultDir="ja-JP"/>
-    <ROW Directory="ko_Dir" Directory_Parent="locale_Dir" DefaultDir="ko"/>
-    <ROW Directory="lib_1_Dir" Directory_Parent="unix_Dir" DefaultDir="lib"/>
-    <ROW Directory="lib_2_Dir" Directory_Parent="win_Dir" DefaultDir="lib"/>
-    <ROW Directory="lib_Dir" Directory_Parent="APPDIR" DefaultDir="lib"/>
-    <ROW Directory="linuxx64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="LINUX-~1|linux-x64"/>
-    <ROW Directory="locale_Dir" Directory_Parent="lib_Dir" DefaultDir="locale"/>
-    <ROW Directory="lv_Dir" Directory_Parent="locale_Dir" DefaultDir="lv"/>
-    <ROW Directory="native_1_Dir" Directory_Parent="osxx64_Dir" DefaultDir="native"/>
-    <ROW Directory="native_2_Dir" Directory_Parent="winarm64_Dir" DefaultDir="native"/>
-    <ROW Directory="native_3_Dir" Directory_Parent="winx64_Dir" DefaultDir="native"/>
-    <ROW Directory="native_4_Dir" Directory_Parent="winx86_Dir" DefaultDir="native"/>
-    <ROW Directory="native_Dir" Directory_Parent="linuxx64_Dir" DefaultDir="native"/>
-    <ROW Directory="netcoreapp2.1_1_Dir" Directory_Parent="lib_2_Dir" DefaultDir="NETCOR~1.1|netcoreapp2.1"/>
-    <ROW Directory="netcoreapp2.1_Dir" Directory_Parent="lib_1_Dir" DefaultDir="NETCOR~1.1|netcoreapp2.1"/>
-    <ROW Directory="nl_Dir" Directory_Parent="locale_Dir" DefaultDir="nl"/>
-    <ROW Directory="osxx64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="osx-x64"/>
-    <ROW Directory="pl_Dir" Directory_Parent="locale_Dir" DefaultDir="pl"/>
-    <ROW Directory="ptBR_Dir" Directory_Parent="locale_Dir" DefaultDir="pt-BR"/>
-    <ROW Directory="pt_Dir" Directory_Parent="locale_Dir" DefaultDir="pt"/>
-    <ROW Directory="ru_Dir" Directory_Parent="locale_Dir" DefaultDir="ru"/>
-    <ROW Directory="runtimes_Dir" Directory_Parent="lib_Dir" DefaultDir="runtimes"/>
-    <ROW Directory="sk_Dir" Directory_Parent="locale_Dir" DefaultDir="sk"/>
-    <ROW Directory="sv_Dir" Directory_Parent="locale_Dir" DefaultDir="sv"/>
-    <ROW Directory="th_Dir" Directory_Parent="locale_Dir" DefaultDir="th"/>
-    <ROW Directory="tr_Dir" Directory_Parent="locale_Dir" DefaultDir="tr"/>
-    <ROW Directory="unix_Dir" Directory_Parent="runtimes_Dir" DefaultDir="unix"/>
-    <ROW Directory="win_Dir" Directory_Parent="runtimes_Dir" DefaultDir="win"/>
-    <ROW Directory="winarm64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="WIN-AR~1|win-arm64"/>
-    <ROW Directory="winx64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="win-x64"/>
-    <ROW Directory="winx86_Dir" Directory_Parent="runtimes_Dir" DefaultDir="win-x86"/>
-    <ROW Directory="zhTW_Dir" Directory_Parent="locale_Dir" DefaultDir="zh-TW"/>
-    <ROW Directory="zh_Dir" Directory_Parent="locale_Dir" DefaultDir="zh"/>
+    <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1" />
+    <ROW Directory="DesktopFolder" Directory_Parent="TARGETDIR" DefaultDir="DESKTO~1|DesktopFolder" IsPseudoRoot="1" />
+    <ROW Directory="DevModManager_Dir" Directory_Parent="ZeeOgre_Dir" DefaultDir="DEVMOD~1|DevModManager" />
+    <ROW Directory="LocalAppDataFolder" Directory_Parent="TARGETDIR" DefaultDir="LOCALA~1|LocalAppDataFolder" IsPseudoRoot="1" />
+    <ROW Directory="SHORTCUTDIR" Directory_Parent="TARGETDIR" DefaultDir="SHORTC~1|SHORTCUTDIR" IsPseudoRoot="1" />
+    <ROW Directory="TARGETDIR" DefaultDir="SourceDir" />
+    <ROW Directory="ZeeOgre_Dir" Directory_Parent="LocalAppDataFolder" DefaultDir="ZeeOgre" />
+    <ROW Directory="ar_Dir" Directory_Parent="locale_Dir" DefaultDir="ar" />
+    <ROW Directory="config_Dir" Directory_Parent="APPDIR" DefaultDir="config" />
+    <ROW Directory="cs_Dir" Directory_Parent="locale_Dir" DefaultDir="cs" />
+    <ROW Directory="da_Dir" Directory_Parent="locale_Dir" DefaultDir="da" />
+    <ROW Directory="data_Dir" Directory_Parent="APPDIR" DefaultDir="data" />
+    <ROW Directory="de_Dir" Directory_Parent="locale_Dir" DefaultDir="de" />
+    <ROW Directory="docs_Dir" Directory_Parent="APPDIR" DefaultDir="docs" />
+    <ROW Directory="es_Dir" Directory_Parent="locale_Dir" DefaultDir="es" />
+    <ROW Directory="fr_Dir" Directory_Parent="locale_Dir" DefaultDir="fr" />
+    <ROW Directory="img_Dir" Directory_Parent="docs_Dir" DefaultDir="img" />
+    <ROW Directory="it_Dir" Directory_Parent="locale_Dir" DefaultDir="it" />
+    <ROW Directory="jaJP_Dir" Directory_Parent="locale_Dir" DefaultDir="ja-JP" />
+    <ROW Directory="ko_Dir" Directory_Parent="locale_Dir" DefaultDir="ko" />
+    <ROW Directory="lib_1_Dir" Directory_Parent="unix_Dir" DefaultDir="lib" />
+    <ROW Directory="lib_2_Dir" Directory_Parent="win_Dir" DefaultDir="lib" />
+    <ROW Directory="lib_Dir" Directory_Parent="APPDIR" DefaultDir="lib" />
+    <ROW Directory="linuxx64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="LINUX-~1|linux-x64" />
+    <ROW Directory="locale_Dir" Directory_Parent="lib_Dir" DefaultDir="locale" />
+    <ROW Directory="lv_Dir" Directory_Parent="locale_Dir" DefaultDir="lv" />
+    <ROW Directory="native_1_Dir" Directory_Parent="osxx64_Dir" DefaultDir="native" />
+    <ROW Directory="native_2_Dir" Directory_Parent="winarm64_Dir" DefaultDir="native" />
+    <ROW Directory="native_3_Dir" Directory_Parent="winx64_Dir" DefaultDir="native" />
+    <ROW Directory="native_4_Dir" Directory_Parent="winx86_Dir" DefaultDir="native" />
+    <ROW Directory="native_Dir" Directory_Parent="linuxx64_Dir" DefaultDir="native" />
+    <ROW Directory="netcoreapp2.1_1_Dir" Directory_Parent="lib_2_Dir" DefaultDir="NETCOR~1.1|netcoreapp2.1" />
+    <ROW Directory="netcoreapp2.1_Dir" Directory_Parent="lib_1_Dir" DefaultDir="NETCOR~1.1|netcoreapp2.1" />
+    <ROW Directory="nl_Dir" Directory_Parent="locale_Dir" DefaultDir="nl" />
+    <ROW Directory="osxx64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="osx-x64" />
+    <ROW Directory="pl_Dir" Directory_Parent="locale_Dir" DefaultDir="pl" />
+    <ROW Directory="ptBR_Dir" Directory_Parent="locale_Dir" DefaultDir="pt-BR" />
+    <ROW Directory="pt_Dir" Directory_Parent="locale_Dir" DefaultDir="pt" />
+    <ROW Directory="ru_Dir" Directory_Parent="locale_Dir" DefaultDir="ru" />
+    <ROW Directory="runtimes_Dir" Directory_Parent="lib_Dir" DefaultDir="runtimes" />
+    <ROW Directory="sk_Dir" Directory_Parent="locale_Dir" DefaultDir="sk" />
+    <ROW Directory="sv_Dir" Directory_Parent="locale_Dir" DefaultDir="sv" />
+    <ROW Directory="th_Dir" Directory_Parent="locale_Dir" DefaultDir="th" />
+    <ROW Directory="tr_Dir" Directory_Parent="locale_Dir" DefaultDir="tr" />
+    <ROW Directory="unix_Dir" Directory_Parent="runtimes_Dir" DefaultDir="unix" />
+    <ROW Directory="win_Dir" Directory_Parent="runtimes_Dir" DefaultDir="win" />
+    <ROW Directory="winarm64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="WIN-AR~1|win-arm64" />
+    <ROW Directory="winx64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="win-x64" />
+    <ROW Directory="winx86_Dir" Directory_Parent="runtimes_Dir" DefaultDir="win-x86" />
+    <ROW Directory="zhTW_Dir" Directory_Parent="locale_Dir" DefaultDir="zh-TW" />
+    <ROW Directory="zh_Dir" Directory_Parent="locale_Dir" DefaultDir="zh" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SideBySideGuidComponent">
-    <ROW Component="APPDIR" Value="{4BFCBDF0-F2FF-4651-8DE6-5DF0EC3962ED}"/>
-    <ROW Component="ProductInformation" Value="{63B74645-5771-4B88-B6B4-1BBBA55889E9}"/>
+    <ROW Component="APPDIR" Value="{4BFCBDF0-F2FF-4651-8DE6-5DF0EC3962ED}" />
+    <ROW Component="ProductInformation" Value="{63B74645-5771-4B88-B6B4-1BBBA55889E9}" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
-    <ROW Component="AI_INSTALLPERUSER" ComponentId="{FC7B96B3-B292-4147-9625-9482CD0B00A1}" Directory_="APPDIR" Attributes="260" KeyPath="AI_INSTALLPERUSER" Options="1"/>
-    <ROW Component="APPDIR" ComponentId="{4BFCBDF0-F2FF-4651-8DE6-5DF0EC3962ED}" Directory_="APPDIR" Attributes="0"/>
-    <ROW Component="AutoUpdater.NET.dll" ComponentId="{8E3761FF-1F2B-42C6-ADBD-0CB3BF541EA5}" Directory_="lib_Dir" Attributes="0" KeyPath="AutoUpdater.NET.dll"/>
-    <ROW Component="AutoUpdater.NET.resources.dll" ComponentId="{15390045-F9CA-4F26-A8DF-C2D4415D7212}" Directory_="ar_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_1" ComponentId="{A410B5F0-45DF-48CE-9E2B-EED3C7F6D1EE}" Directory_="cs_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_1"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_10" ComponentId="{43CB659C-72B7-4604-869F-44D86FAA0B64}" Directory_="nl_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_10"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_11" ComponentId="{32C4614E-A374-488D-AA61-80D3E17039DC}" Directory_="pl_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_11"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_12" ComponentId="{13FB2021-D5FB-43C7-A81D-16380DA50995}" Directory_="pt_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_12"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_13" ComponentId="{DCE490F9-5016-4C59-8F59-BE944C28D71F}" Directory_="ptBR_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_13"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_14" ComponentId="{8A272D79-A4F6-43D4-86EE-DD5FF52AD409}" Directory_="ru_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_14"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_15" ComponentId="{0EA4C078-F16E-4A96-B99F-3A28626BE3E8}" Directory_="sk_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_15"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_16" ComponentId="{F7E75C10-62CC-489A-8DE8-C06736C69C88}" Directory_="sv_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_16"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_17" ComponentId="{C7D3DA67-8C77-4657-9AEC-D811EAB689F7}" Directory_="th_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_17"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_18" ComponentId="{A387FDA8-C26A-4188-A5DF-5BC3B75188E4}" Directory_="tr_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_18"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_19" ComponentId="{26933661-70E9-43C5-8B02-E6EAD36AF3A8}" Directory_="zh_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_19"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_2" ComponentId="{3A3A42BD-D1D8-48E4-B126-158F881CCB45}" Directory_="da_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_2"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_20" ComponentId="{A63D05DD-5BE7-4CD7-BC68-89C8A3647520}" Directory_="zhTW_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_20"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_3" ComponentId="{2AA356D9-8059-42BA-BCBC-11DFD28F335C}" Directory_="de_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_3"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_4" ComponentId="{E9B153C1-AB2D-4125-8D1D-9D72A63D0ED0}" Directory_="es_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_4"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_5" ComponentId="{C900D1D8-38F9-4C1A-A462-97A059F66F3E}" Directory_="fr_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_5"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_6" ComponentId="{BAE3EFF0-F4DB-4A61-878B-C70E400780B7}" Directory_="it_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_6"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_7" ComponentId="{71502A47-C704-455E-9783-D170CAA3C517}" Directory_="jaJP_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_7"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_8" ComponentId="{E9D301F9-4D86-4371-B571-E68759CFDD69}" Directory_="ko_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_8"/>
-    <ROW Component="AutoUpdater.NET.resources.dll_9" ComponentId="{F3CF3C3E-35A4-40E5-9E8B-4EEADF1A214E}" Directory_="lv_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_9"/>
-    <ROW Component="ControlzEx.dll" ComponentId="{149A27C9-BA01-4EBA-BDEE-E006F4B19680}" Directory_="lib_Dir" Attributes="0" KeyPath="ControlzEx.dll"/>
-    <ROW Component="DevModManager.dll" ComponentId="{811FA4D4-E83A-46BC-83DD-284B822BA8BC}" Directory_="APPDIR" Attributes="0" KeyPath="DevModManager.dll"/>
-    <ROW Component="DevModManager.dll.config" ComponentId="{44C9DDC5-614D-4866-ADCE-261D71259F8A}" Directory_="APPDIR" Attributes="0" KeyPath="DevModManager.dll.config" Type="0"/>
-    <ROW Component="DevModManager.exe_1" ComponentId="{12B76302-4707-4DD4-B2DB-4CDCDE185988}" Directory_="APPDIR" Attributes="256" KeyPath="DevModManager.exe"/>
-    <ROW Component="EdgeJs.dll" ComponentId="{0253EAE2-34FD-4611-B84B-9DA2FDDCC050}" Directory_="lib_Dir" Attributes="0" KeyPath="EdgeJs.dll"/>
-    <ROW Component="EntityFramework.SqlServer.dll" ComponentId="{8DB531AD-4D65-4D1E-AC8A-BEF780D2A74E}" Directory_="lib_Dir" Attributes="0" KeyPath="EntityFramework.SqlServer.dll"/>
-    <ROW Component="EntityFramework.dll" ComponentId="{53305A2A-32F5-48D1-8AD6-9855B7154820}" Directory_="lib_Dir" Attributes="0" KeyPath="EntityFramework.dll"/>
-    <ROW Component="HtmlAgilityPack.dll" ComponentId="{26B4A218-9570-4D72-89F0-AB9C7C5E0BD2}" Directory_="lib_Dir" Attributes="0" KeyPath="HtmlAgilityPack.dll"/>
-    <ROW Component="LICENSE" ComponentId="{EFBEB50C-5B4F-4FED-956E-06D1FD435203}" Directory_="docs_Dir" Attributes="0" KeyPath="LICENSE" Type="0"/>
-    <ROW Component="MahApps.Metro.IconPacks.Core.dll" ComponentId="{A92881C3-A5FF-49E3-97B9-8B659D9EA5FD}" Directory_="lib_Dir" Attributes="0" KeyPath="MahApps.Metro.IconPacks.Core.dll"/>
-    <ROW Component="MahApps.Metro.IconPacks.Material.dll" ComponentId="{3877C36A-93E2-40D5-93D9-6AE3059AC438}" Directory_="lib_Dir" Attributes="0" KeyPath="MahApps.Metro.IconPacks.Material.dll"/>
-    <ROW Component="MahApps.Metro.dll" ComponentId="{92FBC546-78EF-4980-B65A-F21BCB66EEAE}" Directory_="lib_Dir" Attributes="0" KeyPath="MahApps.Metro.dll"/>
-    <ROW Component="MaterialDesignColors.dll" ComponentId="{9EB12EA6-C0B1-4373-8547-BCDBC37757DF}" Directory_="lib_Dir" Attributes="0" KeyPath="MaterialDesignColors.dll"/>
-    <ROW Component="MaterialDesignThemes.MahApps.dll" ComponentId="{E7AD58BA-DF1B-4594-B230-84D59C3E7244}" Directory_="lib_Dir" Attributes="0" KeyPath="MaterialDesignThemes.MahApps.dll"/>
-    <ROW Component="MaterialDesignThemes.Wpf.dll" ComponentId="{62AC9DD7-45AD-41F9-A2A2-EC5A4470F2AE}" Directory_="lib_Dir" Attributes="0" KeyPath="MaterialDesignThemes.Wpf.dll"/>
-    <ROW Component="Microsoft.DotNet.InternalAbstractions.dll" ComponentId="{5B4A7B74-40FB-4817-BE1E-85ECCFEEE718}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.DotNet.InternalAbstractions.dll"/>
-    <ROW Component="Microsoft.Extensions.DependencyModel.dll" ComponentId="{E857AE08-6FF6-448D-9CD9-36D8928B7750}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Extensions.DependencyModel.dll"/>
-    <ROW Component="Microsoft.Web.WebView2.Core.dll" ComponentId="{039113A1-F65A-489D-A500-3B894DC53C5D}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Web.WebView2.Core.dll"/>
-    <ROW Component="Microsoft.Web.WebView2.WinForms.dll" ComponentId="{AF07432A-BE99-4945-A510-F7FE04D7B402}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Web.WebView2.WinForms.dll"/>
-    <ROW Component="Microsoft.Web.WebView2.Wpf.dll" ComponentId="{83D3146E-AD34-4FAF-9B9C-A72DBF1FE3B0}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Web.WebView2.Wpf.dll"/>
-    <ROW Component="Microsoft.Xaml.Behaviors.dll" ComponentId="{37184E18-4417-4A6F-B0CC-A02AD00E3A06}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Xaml.Behaviors.dll"/>
-    <ROW Component="Newtonsoft.Json.dll" ComponentId="{15FD4DD6-256B-4971-B8D4-A3C591E23618}" Directory_="lib_Dir" Attributes="0" KeyPath="Newtonsoft.Json.dll"/>
-    <ROW Component="ProductInformation" ComponentId="{63B74645-5771-4B88-B6B4-1BBBA55889E9}" Directory_="APPDIR" Attributes="260" KeyPath="Version"/>
-    <ROW Component="SHORTCUTDIR" ComponentId="{356BD7BB-D94D-400F-AA47-3520186B8EA5}" Directory_="SHORTCUTDIR" Attributes="0"/>
-    <ROW Component="SQLite.Interop.dll" ComponentId="{81166B4C-F422-4EC7-BFC6-184FB5B95743}" Directory_="native_Dir" Attributes="0" KeyPath="SQLite.Interop.dll"/>
-    <ROW Component="SQLite.Interop.dll_1" ComponentId="{74B9BD6C-35D7-447F-A560-6FF09972FFBD}" Directory_="native_1_Dir" Attributes="0" KeyPath="SQLite.Interop.dll_1"/>
-    <ROW Component="SQLite.Interop.dll_2" ComponentId="{196B3857-3944-4D5F-861C-B44BE3ACAAF3}" Directory_="native_3_Dir" Attributes="256" KeyPath="SQLite.Interop.dll_2"/>
-    <ROW Component="SQLite.Interop.dll_3" ComponentId="{F1E6F1A2-1004-4A06-8809-C39D18387ADD}" Directory_="native_4_Dir" Attributes="0" KeyPath="SQLite.Interop.dll_3"/>
-    <ROW Component="SharpCompress.dll" ComponentId="{6B9B6D55-37F5-4E34-8022-10FAF27D8214}" Directory_="lib_Dir" Attributes="0" KeyPath="SharpCompress.dll"/>
-    <ROW Component="System.Data.SQLite.EF6.dll" ComponentId="{32417DDF-7371-4D9D-95F9-B3EAC7D37833}" Directory_="lib_Dir" Attributes="0" KeyPath="System.Data.SQLite.EF6.dll"/>
-    <ROW Component="System.Data.SQLite.dll" ComponentId="{69B4B3BA-FF00-4E3D-B47B-D989E96DC44D}" Directory_="lib_Dir" Attributes="0" KeyPath="System.Data.SQLite.dll"/>
-    <ROW Component="System.Data.SqlClient.dll" ComponentId="{140C4939-9410-4265-917E-90269841E72C}" Directory_="netcoreapp2.1_Dir" Attributes="0" KeyPath="System.Data.SqlClient.dll"/>
-    <ROW Component="System.Data.SqlClient.dll_1" ComponentId="{6ED15A2D-D223-4407-A8D1-89F854394020}" Directory_="netcoreapp2.1_1_Dir" Attributes="0" KeyPath="System.Data.SqlClient.dll_1"/>
-    <ROW Component="System.Data.SqlClient.dll_2" ComponentId="{F079CCF1-3C72-4978-992B-111B262D5ADC}" Directory_="lib_Dir" Attributes="0" KeyPath="System.Data.SqlClient.dll_2"/>
-    <ROW Component="System.Xml.XPath.XmlDocument.dll" ComponentId="{A014A3A9-5DEC-4B8F-8481-AF5C480933DA}" Directory_="lib_Dir" Attributes="0" KeyPath="System.Xml.XPath.XmlDocument.dll"/>
-    <ROW Component="WebView2Loader.dll" ComponentId="{151B5485-FB09-463E-A88F-8129B24985D0}" Directory_="native_2_Dir" Attributes="256" KeyPath="WebView2Loader.dll"/>
-    <ROW Component="WebView2Loader.dll_1" ComponentId="{EC13AE46-D9B9-4C74-9FF6-B59E9F39E2EC}" Directory_="native_3_Dir" Attributes="256" KeyPath="WebView2Loader.dll_1"/>
-    <ROW Component="WebView2Loader.dll_2" ComponentId="{E6E1379A-C2BA-48E1-BF94-9A7D11320969}" Directory_="native_4_Dir" Attributes="0" KeyPath="WebView2Loader.dll_2"/>
-    <ROW Component="YamlDotNet.dll" ComponentId="{8209E37F-8D1E-4B1B-928D-CA51AD6D1CEA}" Directory_="lib_Dir" Attributes="0" KeyPath="YamlDotNet.dll"/>
-    <ROW Component="ZstdSharp.dll" ComponentId="{B9A6CB98-E9C1-42C4-8485-571284671B02}" Directory_="lib_Dir" Attributes="0" KeyPath="ZstdSharp.dll"/>
-    <ROW Component="baseline.sql" ComponentId="{585FC7D2-73A7-4F8A-8407-2E3389E7C214}" Directory_="data_Dir" Attributes="0" KeyPath="baseline.sql" Type="0"/>
-    <ROW Component="bethesda_address_zohst.png" ComponentId="{32F447B7-DA2E-41B7-8DB7-2AC56125E69D}" Directory_="img_Dir" Attributes="0" KeyPath="bethesda_address_zohst.png" Type="0"/>
-    <ROW Component="config.yaml" ComponentId="{DDDF8379-30A2-47CA-988D-AF298E7FCEF4}" Directory_="config_Dir" Attributes="0" KeyPath="config.yaml" Type="0"/>
-    <ROW Component="config.yaml_1" ComponentId="{EC9C21F2-134C-42E1-A31E-E661EFD243E0}" Directory_="DevModManager_Dir" Attributes="0" KeyPath="config.yaml_1" Type="0"/>
-    <ROW Component="sni.dll" ComponentId="{1796688A-0AE8-48FC-954A-76A4134AEECC}" Directory_="native_2_Dir" Attributes="256" KeyPath="sni.dll"/>
-    <ROW Component="sni.dll_1" ComponentId="{739F39E8-81C7-4EC3-84DB-329098D4842C}" Directory_="native_3_Dir" Attributes="256" KeyPath="sni.dll_1"/>
-    <ROW Component="sni.dll_2" ComponentId="{4F1DDB88-7935-4EC3-95FF-65C984BB57B4}" Directory_="native_4_Dir" Attributes="0" KeyPath="sni.dll_2"/>
+    <ROW Component="AI_INSTALLPERUSER" ComponentId="{FC7B96B3-B292-4147-9625-9482CD0B00A1}" Directory_="APPDIR" Attributes="260" KeyPath="AI_INSTALLPERUSER" Options="1" />
+    <ROW Component="APPDIR" ComponentId="{4BFCBDF0-F2FF-4651-8DE6-5DF0EC3962ED}" Directory_="APPDIR" Attributes="0" />
+    <ROW Component="AutoUpdater.NET.dll" ComponentId="{8E3761FF-1F2B-42C6-ADBD-0CB3BF541EA5}" Directory_="lib_Dir" Attributes="0" KeyPath="AutoUpdater.NET.dll" />
+    <ROW Component="AutoUpdater.NET.resources.dll" ComponentId="{15390045-F9CA-4F26-A8DF-C2D4415D7212}" Directory_="ar_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll" />
+    <ROW Component="AutoUpdater.NET.resources.dll_1" ComponentId="{A410B5F0-45DF-48CE-9E2B-EED3C7F6D1EE}" Directory_="cs_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_1" />
+    <ROW Component="AutoUpdater.NET.resources.dll_10" ComponentId="{43CB659C-72B7-4604-869F-44D86FAA0B64}" Directory_="nl_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_10" />
+    <ROW Component="AutoUpdater.NET.resources.dll_11" ComponentId="{32C4614E-A374-488D-AA61-80D3E17039DC}" Directory_="pl_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_11" />
+    <ROW Component="AutoUpdater.NET.resources.dll_12" ComponentId="{13FB2021-D5FB-43C7-A81D-16380DA50995}" Directory_="pt_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_12" />
+    <ROW Component="AutoUpdater.NET.resources.dll_13" ComponentId="{DCE490F9-5016-4C59-8F59-BE944C28D71F}" Directory_="ptBR_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_13" />
+    <ROW Component="AutoUpdater.NET.resources.dll_14" ComponentId="{8A272D79-A4F6-43D4-86EE-DD5FF52AD409}" Directory_="ru_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_14" />
+    <ROW Component="AutoUpdater.NET.resources.dll_15" ComponentId="{0EA4C078-F16E-4A96-B99F-3A28626BE3E8}" Directory_="sk_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_15" />
+    <ROW Component="AutoUpdater.NET.resources.dll_16" ComponentId="{F7E75C10-62CC-489A-8DE8-C06736C69C88}" Directory_="sv_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_16" />
+    <ROW Component="AutoUpdater.NET.resources.dll_17" ComponentId="{C7D3DA67-8C77-4657-9AEC-D811EAB689F7}" Directory_="th_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_17" />
+    <ROW Component="AutoUpdater.NET.resources.dll_18" ComponentId="{A387FDA8-C26A-4188-A5DF-5BC3B75188E4}" Directory_="tr_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_18" />
+    <ROW Component="AutoUpdater.NET.resources.dll_19" ComponentId="{26933661-70E9-43C5-8B02-E6EAD36AF3A8}" Directory_="zh_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_19" />
+    <ROW Component="AutoUpdater.NET.resources.dll_2" ComponentId="{3A3A42BD-D1D8-48E4-B126-158F881CCB45}" Directory_="da_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_2" />
+    <ROW Component="AutoUpdater.NET.resources.dll_20" ComponentId="{A63D05DD-5BE7-4CD7-BC68-89C8A3647520}" Directory_="zhTW_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_20" />
+    <ROW Component="AutoUpdater.NET.resources.dll_3" ComponentId="{2AA356D9-8059-42BA-BCBC-11DFD28F335C}" Directory_="de_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_3" />
+    <ROW Component="AutoUpdater.NET.resources.dll_4" ComponentId="{E9B153C1-AB2D-4125-8D1D-9D72A63D0ED0}" Directory_="es_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_4" />
+    <ROW Component="AutoUpdater.NET.resources.dll_5" ComponentId="{C900D1D8-38F9-4C1A-A462-97A059F66F3E}" Directory_="fr_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_5" />
+    <ROW Component="AutoUpdater.NET.resources.dll_6" ComponentId="{BAE3EFF0-F4DB-4A61-878B-C70E400780B7}" Directory_="it_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_6" />
+    <ROW Component="AutoUpdater.NET.resources.dll_7" ComponentId="{71502A47-C704-455E-9783-D170CAA3C517}" Directory_="jaJP_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_7" />
+    <ROW Component="AutoUpdater.NET.resources.dll_8" ComponentId="{E9D301F9-4D86-4371-B571-E68759CFDD69}" Directory_="ko_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_8" />
+    <ROW Component="AutoUpdater.NET.resources.dll_9" ComponentId="{F3CF3C3E-35A4-40E5-9E8B-4EEADF1A214E}" Directory_="lv_Dir" Attributes="0" KeyPath="AutoUpdater.NET.resources.dll_9" />
+    <ROW Component="ControlzEx.dll" ComponentId="{149A27C9-BA01-4EBA-BDEE-E006F4B19680}" Directory_="lib_Dir" Attributes="0" KeyPath="ControlzEx.dll" />
+    <ROW Component="DevModManager.dll" ComponentId="{811FA4D4-E83A-46BC-83DD-284B822BA8BC}" Directory_="APPDIR" Attributes="0" KeyPath="DevModManager.dll" />
+    <ROW Component="DevModManager.dll.config" ComponentId="{44C9DDC5-614D-4866-ADCE-261D71259F8A}" Directory_="APPDIR" Attributes="0" KeyPath="DevModManager.dll.config" Type="0" />
+    <ROW Component="DevModManager.exe_1" ComponentId="{12B76302-4707-4DD4-B2DB-4CDCDE185988}" Directory_="APPDIR" Attributes="256" KeyPath="DevModManager.exe" />
+    <ROW Component="EdgeJs.dll" ComponentId="{0253EAE2-34FD-4611-B84B-9DA2FDDCC050}" Directory_="lib_Dir" Attributes="0" KeyPath="EdgeJs.dll" />
+    <ROW Component="EntityFramework.SqlServer.dll" ComponentId="{8DB531AD-4D65-4D1E-AC8A-BEF780D2A74E}" Directory_="lib_Dir" Attributes="0" KeyPath="EntityFramework.SqlServer.dll" />
+    <ROW Component="EntityFramework.dll" ComponentId="{53305A2A-32F5-48D1-8AD6-9855B7154820}" Directory_="lib_Dir" Attributes="0" KeyPath="EntityFramework.dll" />
+    <ROW Component="HtmlAgilityPack.dll" ComponentId="{26B4A218-9570-4D72-89F0-AB9C7C5E0BD2}" Directory_="lib_Dir" Attributes="0" KeyPath="HtmlAgilityPack.dll" />
+    <ROW Component="LICENSE" ComponentId="{EFBEB50C-5B4F-4FED-956E-06D1FD435203}" Directory_="docs_Dir" Attributes="0" KeyPath="LICENSE" Type="0" />
+    <ROW Component="MahApps.Metro.IconPacks.Core.dll" ComponentId="{A92881C3-A5FF-49E3-97B9-8B659D9EA5FD}" Directory_="lib_Dir" Attributes="0" KeyPath="MahApps.Metro.IconPacks.Core.dll" />
+    <ROW Component="MahApps.Metro.IconPacks.Material.dll" ComponentId="{3877C36A-93E2-40D5-93D9-6AE3059AC438}" Directory_="lib_Dir" Attributes="0" KeyPath="MahApps.Metro.IconPacks.Material.dll" />
+    <ROW Component="MahApps.Metro.dll" ComponentId="{92FBC546-78EF-4980-B65A-F21BCB66EEAE}" Directory_="lib_Dir" Attributes="0" KeyPath="MahApps.Metro.dll" />
+    <ROW Component="MaterialDesignColors.dll" ComponentId="{9EB12EA6-C0B1-4373-8547-BCDBC37757DF}" Directory_="lib_Dir" Attributes="0" KeyPath="MaterialDesignColors.dll" />
+    <ROW Component="MaterialDesignThemes.MahApps.dll" ComponentId="{E7AD58BA-DF1B-4594-B230-84D59C3E7244}" Directory_="lib_Dir" Attributes="0" KeyPath="MaterialDesignThemes.MahApps.dll" />
+    <ROW Component="MaterialDesignThemes.Wpf.dll" ComponentId="{62AC9DD7-45AD-41F9-A2A2-EC5A4470F2AE}" Directory_="lib_Dir" Attributes="0" KeyPath="MaterialDesignThemes.Wpf.dll" />
+    <ROW Component="Microsoft.DotNet.InternalAbstractions.dll" ComponentId="{5B4A7B74-40FB-4817-BE1E-85ECCFEEE718}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.DotNet.InternalAbstractions.dll" />
+    <ROW Component="Microsoft.Extensions.DependencyModel.dll" ComponentId="{E857AE08-6FF6-448D-9CD9-36D8928B7750}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Extensions.DependencyModel.dll" />
+    <ROW Component="Microsoft.Web.WebView2.Core.dll" ComponentId="{039113A1-F65A-489D-A500-3B894DC53C5D}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Web.WebView2.Core.dll" />
+    <ROW Component="Microsoft.Web.WebView2.WinForms.dll" ComponentId="{AF07432A-BE99-4945-A510-F7FE04D7B402}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Web.WebView2.WinForms.dll" />
+    <ROW Component="Microsoft.Web.WebView2.Wpf.dll" ComponentId="{83D3146E-AD34-4FAF-9B9C-A72DBF1FE3B0}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Web.WebView2.Wpf.dll" />
+    <ROW Component="Microsoft.Xaml.Behaviors.dll" ComponentId="{37184E18-4417-4A6F-B0CC-A02AD00E3A06}" Directory_="lib_Dir" Attributes="0" KeyPath="Microsoft.Xaml.Behaviors.dll" />
+    <ROW Component="Newtonsoft.Json.dll" ComponentId="{15FD4DD6-256B-4971-B8D4-A3C591E23618}" Directory_="lib_Dir" Attributes="0" KeyPath="Newtonsoft.Json.dll" />
+    <ROW Component="ProductInformation" ComponentId="{63B74645-5771-4B88-B6B4-1BBBA55889E9}" Directory_="APPDIR" Attributes="260" KeyPath="Version" />
+    <ROW Component="SHORTCUTDIR" ComponentId="{356BD7BB-D94D-400F-AA47-3520186B8EA5}" Directory_="SHORTCUTDIR" Attributes="0" />
+    <ROW Component="SQLite.Interop.dll" ComponentId="{81166B4C-F422-4EC7-BFC6-184FB5B95743}" Directory_="native_Dir" Attributes="0" KeyPath="SQLite.Interop.dll" />
+    <ROW Component="SQLite.Interop.dll_1" ComponentId="{74B9BD6C-35D7-447F-A560-6FF09972FFBD}" Directory_="native_1_Dir" Attributes="0" KeyPath="SQLite.Interop.dll_1" />
+    <ROW Component="SQLite.Interop.dll_2" ComponentId="{196B3857-3944-4D5F-861C-B44BE3ACAAF3}" Directory_="native_3_Dir" Attributes="256" KeyPath="SQLite.Interop.dll_2" />
+    <ROW Component="SQLite.Interop.dll_3" ComponentId="{F1E6F1A2-1004-4A06-8809-C39D18387ADD}" Directory_="native_4_Dir" Attributes="0" KeyPath="SQLite.Interop.dll_3" />
+    <ROW Component="SharpCompress.dll" ComponentId="{6B9B6D55-37F5-4E34-8022-10FAF27D8214}" Directory_="lib_Dir" Attributes="0" KeyPath="SharpCompress.dll" />
+    <ROW Component="System.Data.SQLite.EF6.dll" ComponentId="{32417DDF-7371-4D9D-95F9-B3EAC7D37833}" Directory_="lib_Dir" Attributes="0" KeyPath="System.Data.SQLite.EF6.dll" />
+    <ROW Component="System.Data.SQLite.dll" ComponentId="{69B4B3BA-FF00-4E3D-B47B-D989E96DC44D}" Directory_="lib_Dir" Attributes="0" KeyPath="System.Data.SQLite.dll" />
+    <ROW Component="System.Data.SqlClient.dll" ComponentId="{140C4939-9410-4265-917E-90269841E72C}" Directory_="netcoreapp2.1_Dir" Attributes="0" KeyPath="System.Data.SqlClient.dll" />
+    <ROW Component="System.Data.SqlClient.dll_1" ComponentId="{6ED15A2D-D223-4407-A8D1-89F854394020}" Directory_="netcoreapp2.1_1_Dir" Attributes="0" KeyPath="System.Data.SqlClient.dll_1" />
+    <ROW Component="System.Data.SqlClient.dll_2" ComponentId="{F079CCF1-3C72-4978-992B-111B262D5ADC}" Directory_="lib_Dir" Attributes="0" KeyPath="System.Data.SqlClient.dll_2" />
+    <ROW Component="System.Xml.XPath.XmlDocument.dll" ComponentId="{A014A3A9-5DEC-4B8F-8481-AF5C480933DA}" Directory_="lib_Dir" Attributes="0" KeyPath="System.Xml.XPath.XmlDocument.dll" />
+    <ROW Component="WebView2Loader.dll" ComponentId="{151B5485-FB09-463E-A88F-8129B24985D0}" Directory_="native_2_Dir" Attributes="256" KeyPath="WebView2Loader.dll" />
+    <ROW Component="WebView2Loader.dll_1" ComponentId="{EC13AE46-D9B9-4C74-9FF6-B59E9F39E2EC}" Directory_="native_3_Dir" Attributes="256" KeyPath="WebView2Loader.dll_1" />
+    <ROW Component="WebView2Loader.dll_2" ComponentId="{E6E1379A-C2BA-48E1-BF94-9A7D11320969}" Directory_="native_4_Dir" Attributes="0" KeyPath="WebView2Loader.dll_2" />
+    <ROW Component="YamlDotNet.dll" ComponentId="{8209E37F-8D1E-4B1B-928D-CA51AD6D1CEA}" Directory_="lib_Dir" Attributes="0" KeyPath="YamlDotNet.dll" />
+    <ROW Component="ZstdSharp.dll" ComponentId="{B9A6CB98-E9C1-42C4-8485-571284671B02}" Directory_="lib_Dir" Attributes="0" KeyPath="ZstdSharp.dll" />
+    <ROW Component="baseline.sql" ComponentId="{585FC7D2-73A7-4F8A-8407-2E3389E7C214}" Directory_="data_Dir" Attributes="0" KeyPath="baseline.sql" Type="0" />
+    <ROW Component="bethesda_address_zohst.png" ComponentId="{32F447B7-DA2E-41B7-8DB7-2AC56125E69D}" Directory_="img_Dir" Attributes="0" KeyPath="bethesda_address_zohst.png" Type="0" />
+    <ROW Component="config.yaml" ComponentId="{DDDF8379-30A2-47CA-988D-AF298E7FCEF4}" Directory_="config_Dir" Attributes="0" KeyPath="config.yaml" Type="0" />
+    <ROW Component="config.yaml_1" ComponentId="{EC9C21F2-134C-42E1-A31E-E661EFD243E0}" Directory_="DevModManager_Dir" Attributes="0" KeyPath="config.yaml_1" Type="0" />
+    <ROW Component="sni.dll" ComponentId="{1796688A-0AE8-48FC-954A-76A4134AEECC}" Directory_="native_2_Dir" Attributes="256" KeyPath="sni.dll" />
+    <ROW Component="sni.dll_1" ComponentId="{739F39E8-81C7-4EC3-84DB-329098D4842C}" Directory_="native_3_Dir" Attributes="256" KeyPath="sni.dll_1" />
+    <ROW Component="sni.dll_2" ComponentId="{4F1DDB88-7935-4EC3-95FF-65C984BB57B4}" Directory_="native_4_Dir" Attributes="0" KeyPath="sni.dll_2" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0"/>
-    <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" />
+    <ATTRIBUTE name="CurrentFeature" value="MainFeature" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
-    <ROW File="config.yaml" Component_="config.yaml" FileName="CONFIG~1.YAM|config.yaml" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;config\config.yaml" SelfReg="false"/>
-    <ROW File="baseline.sql" Component_="baseline.sql" FileName="baseline.sql" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;data\baseline.sql" SelfReg="false"/>
-    <ROW File="DevModManager.db" Component_="baseline.sql" FileName="DEVMOD~1.DB|DevModManager.db" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;data\DevModManager.db" SelfReg="false"/>
-    <ROW File="DevModManager.deps.json" Component_="DevModManager.dll.config" FileName="DEVMOD~1.JSO|DevModManager.deps.json" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.deps.json" SelfReg="false"/>
-    <ROW File="DevModManager.dll" Component_="DevModManager.dll" FileName="DEVMOD~1.DLL|DevModManager.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.dll" SelfReg="false"/>
-    <ROW File="DevModManager.dll.config" Component_="DevModManager.dll.config" FileName="DEVMOD~1.CON|DevModManager.dll.config" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.dll.config" SelfReg="false"/>
-    <ROW File="DevModManager.exe" Component_="DevModManager.exe_1" FileName="DEVMOD~1.EXE|DevModManager.exe" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.exe" SelfReg="false" DigSign="true"/>
-    <ROW File="DevModManager.pdb" Component_="DevModManager.exe_1" FileName="DEVMOD~1.PDB|DevModManager.pdb" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.pdb" SelfReg="false"/>
-    <ROW File="DevModManager.runtimeconfig.json" Component_="DevModManager.dll.config" FileName="DEVMOD~2.JSO|DevModManager.runtimeconfig.json" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.runtimeconfig.json" SelfReg="false"/>
-    <ROW File="bethesda_address_zohst.png" Component_="bethesda_address_zohst.png" FileName="BETHES~1.PNG|bethesda_address_zohst.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\bethesda_address_zohst.png" SelfReg="false"/>
-    <ROW File="DevModManager_db.dgml" Component_="bethesda_address_zohst.png" FileName="DEVMOD~1.DGM|DevModManager_db.dgml" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\DevModManager_db.dgml" SelfReg="false"/>
-    <ROW File="dmm_backupresults.png" Component_="bethesda_address_zohst.png" FileName="DMM_BA~1.PNG|dmm_backupresults.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_backupresults.png" SelfReg="false"/>
-    <ROW File="dmm_bethesda_url.png" Component_="bethesda_address_zohst.png" FileName="DMM_BE~1.PNG|dmm_bethesda_url.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_bethesda_url.png" SelfReg="false"/>
-    <ROW File="dmm_deploywindow.png" Component_="bethesda_address_zohst.png" FileName="DMM_DE~1.PNG|dmm_deploywindow.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_deploywindow.png" SelfReg="false"/>
-    <ROW File="dmm_loadorder_window.png" Component_="bethesda_address_zohst.png" FileName="DMM_LO~1.PNG|dmm_loadorder_window.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_loadorder_window.png" SelfReg="false"/>
-    <ROW File="dmm_mainwindow.png" Component_="bethesda_address_zohst.png" FileName="DMM_MA~1.PNG|dmm_mainwindow.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_mainwindow.png" SelfReg="false"/>
-    <ROW File="dmm_package_window.png" Component_="bethesda_address_zohst.png" FileName="DMM_PA~1.PNG|dmm_package_window.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_package_window.png" SelfReg="false"/>
-    <ROW File="dmm_promote_window.png" Component_="bethesda_address_zohst.png" FileName="DMM_PR~1.PNG|dmm_promote_window.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_promote_window.png" SelfReg="false"/>
-    <ROW File="dmm_settingswindow.png" Component_="bethesda_address_zohst.png" FileName="DMM_SE~1.PNG|dmm_settingswindow.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_settingswindow.png" SelfReg="false"/>
-    <ROW File="nexus_address_zohst.png" Component_="bethesda_address_zohst.png" FileName="NEXUS_~1.PNG|nexus_address_zohst.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\nexus_address_zohst.png" SelfReg="false"/>
-    <ROW File="vortex_modstagingfolder.png" Component_="bethesda_address_zohst.png" FileName="VORTEX~1.PNG|vortex_modstagingfolder.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\vortex_modstagingfolder.png" SelfReg="false"/>
-    <ROW File="vortex_mod_openmenu.png" Component_="bethesda_address_zohst.png" FileName="VORTEX~2.PNG|vortex_mod_openmenu.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\vortex_mod_openmenu.png" SelfReg="false"/>
-    <ROW File="vortex_windowsproperties.png" Component_="bethesda_address_zohst.png" FileName="VORTEX~3.PNG|vortex_windowsproperties.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\vortex_windowsproperties.png" SelfReg="false"/>
-    <ROW File="ZeeOgre.ico" Component_="bethesda_address_zohst.png" FileName="ZeeOgre.ico" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\ZeeOgre.ico" SelfReg="false"/>
-    <ROW File="ZeeOgre_256x256.ico" Component_="bethesda_address_zohst.png" FileName="ZEEOGR~1.ICO|ZeeOgre_256x256.ico" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\ZeeOgre_256x256.ico" SelfReg="false"/>
-    <ROW File="ZeeOgre_NoBackground.jpg" Component_="bethesda_address_zohst.png" FileName="ZEEOGR~1.JPG|ZeeOgre_NoBackground.jpg" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\ZeeOgre_NoBackground.jpg" SelfReg="false"/>
-    <ROW File="ZeeOgre_NoBackground_64x64.ico" Component_="bethesda_address_zohst.png" FileName="ZEEOGR~2.ICO|ZeeOgre_NoBackground_64x64.ico" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\ZeeOgre_NoBackground_64x64.ico" SelfReg="false"/>
-    <ROW File="LICENSE" Component_="LICENSE" FileName="LICENSE" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\LICENSE" SelfReg="false"/>
-    <ROW File="README.md" Component_="LICENSE" FileName="README.md" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\README.md" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.dll" Component_="AutoUpdater.NET.dll" FileName="AUTOUP~1.DLL|AutoUpdater.NET.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\AutoUpdater.NET.dll" SelfReg="false"/>
-    <ROW File="ControlzEx.dll" Component_="ControlzEx.dll" FileName="CONTRO~1.DLL|ControlzEx.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\ControlzEx.dll" SelfReg="false"/>
-    <ROW File="EdgeJs.dll" Component_="EdgeJs.dll" FileName="EdgeJs.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\EdgeJs.dll" SelfReg="false"/>
-    <ROW File="EntityFramework.dll" Component_="EntityFramework.dll" FileName="ENTITY~1.DLL|EntityFramework.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\EntityFramework.dll" SelfReg="false"/>
-    <ROW File="EntityFramework.SqlServer.dll" Component_="EntityFramework.SqlServer.dll" FileName="ENTITY~2.DLL|EntityFramework.SqlServer.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\EntityFramework.SqlServer.dll" SelfReg="false"/>
-    <ROW File="HtmlAgilityPack.dll" Component_="HtmlAgilityPack.dll" FileName="HTMLAG~1.DLL|HtmlAgilityPack.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\HtmlAgilityPack.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll" Component_="AutoUpdater.NET.resources.dll" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\ar\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_1" Component_="AutoUpdater.NET.resources.dll_1" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\cs\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_2" Component_="AutoUpdater.NET.resources.dll_2" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\da\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_3" Component_="AutoUpdater.NET.resources.dll_3" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\de\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_4" Component_="AutoUpdater.NET.resources.dll_4" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\es\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_5" Component_="AutoUpdater.NET.resources.dll_5" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\fr\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_6" Component_="AutoUpdater.NET.resources.dll_6" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\it\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_7" Component_="AutoUpdater.NET.resources.dll_7" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\ja-JP\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_8" Component_="AutoUpdater.NET.resources.dll_8" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\ko\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_9" Component_="AutoUpdater.NET.resources.dll_9" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\lv\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_10" Component_="AutoUpdater.NET.resources.dll_10" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\nl\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_11" Component_="AutoUpdater.NET.resources.dll_11" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\pl\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_12" Component_="AutoUpdater.NET.resources.dll_12" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\pt\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_13" Component_="AutoUpdater.NET.resources.dll_13" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\pt-BR\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_14" Component_="AutoUpdater.NET.resources.dll_14" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\ru\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_15" Component_="AutoUpdater.NET.resources.dll_15" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\sk\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_16" Component_="AutoUpdater.NET.resources.dll_16" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\sv\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_17" Component_="AutoUpdater.NET.resources.dll_17" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\th\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_18" Component_="AutoUpdater.NET.resources.dll_18" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\tr\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_19" Component_="AutoUpdater.NET.resources.dll_19" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\zh\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="AutoUpdater.NET.resources.dll_20" Component_="AutoUpdater.NET.resources.dll_20" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\zh-TW\AutoUpdater.NET.resources.dll" SelfReg="false"/>
-    <ROW File="MahApps.Metro.dll" Component_="MahApps.Metro.dll" FileName="MAHAPP~1.DLL|MahApps.Metro.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MahApps.Metro.dll" SelfReg="false"/>
-    <ROW File="MahApps.Metro.IconPacks.Core.dll" Component_="MahApps.Metro.IconPacks.Core.dll" FileName="MAHAPP~2.DLL|MahApps.Metro.IconPacks.Core.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MahApps.Metro.IconPacks.Core.dll" SelfReg="false"/>
-    <ROW File="MahApps.Metro.IconPacks.Material.dll" Component_="MahApps.Metro.IconPacks.Material.dll" FileName="MAHAPP~3.DLL|MahApps.Metro.IconPacks.Material.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MahApps.Metro.IconPacks.Material.dll" SelfReg="false"/>
-    <ROW File="MaterialDesignColors.dll" Component_="MaterialDesignColors.dll" FileName="MATERI~1.DLL|MaterialDesignColors.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MaterialDesignColors.dll" SelfReg="false"/>
-    <ROW File="MaterialDesignThemes.MahApps.dll" Component_="MaterialDesignThemes.MahApps.dll" FileName="MATERI~2.DLL|MaterialDesignThemes.MahApps.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MaterialDesignThemes.MahApps.dll" SelfReg="false"/>
-    <ROW File="MaterialDesignThemes.Wpf.dll" Component_="MaterialDesignThemes.Wpf.dll" FileName="MATERI~3.DLL|MaterialDesignThemes.Wpf.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MaterialDesignThemes.Wpf.dll" SelfReg="false"/>
-    <ROW File="Microsoft.DotNet.InternalAbstractions.dll" Component_="Microsoft.DotNet.InternalAbstractions.dll" FileName="MICROS~1.DLL|Microsoft.DotNet.InternalAbstractions.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.DotNet.InternalAbstractions.dll" SelfReg="false"/>
-    <ROW File="Microsoft.Extensions.DependencyModel.dll" Component_="Microsoft.Extensions.DependencyModel.dll" FileName="MICROS~2.DLL|Microsoft.Extensions.DependencyModel.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Extensions.DependencyModel.dll" SelfReg="false"/>
-    <ROW File="Microsoft.Web.WebView2.Core.dll" Component_="Microsoft.Web.WebView2.Core.dll" FileName="MICROS~3.DLL|Microsoft.Web.WebView2.Core.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Web.WebView2.Core.dll" SelfReg="false"/>
-    <ROW File="Microsoft.Web.WebView2.WinForms.dll" Component_="Microsoft.Web.WebView2.WinForms.dll" FileName="MICROS~4.DLL|Microsoft.Web.WebView2.WinForms.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Web.WebView2.WinForms.dll" SelfReg="false"/>
-    <ROW File="Microsoft.Web.WebView2.Wpf.dll" Component_="Microsoft.Web.WebView2.Wpf.dll" FileName="MICROS~5.DLL|Microsoft.Web.WebView2.Wpf.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Web.WebView2.Wpf.dll" SelfReg="false"/>
-    <ROW File="Microsoft.Xaml.Behaviors.dll" Component_="Microsoft.Xaml.Behaviors.dll" FileName="MICROS~6.DLL|Microsoft.Xaml.Behaviors.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Xaml.Behaviors.dll" SelfReg="false"/>
-    <ROW File="Newtonsoft.Json.dll" Component_="Newtonsoft.Json.dll" FileName="NEWTON~1.DLL|Newtonsoft.Json.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Newtonsoft.Json.dll" SelfReg="false"/>
-    <ROW File="SQLite.Interop.dll" Component_="SQLite.Interop.dll" FileName="SQLITE~1.DLL|SQLite.Interop.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\linux-x64\native\SQLite.Interop.dll" SelfReg="false"/>
-    <ROW File="SQLite.Interop.dll_1" Component_="SQLite.Interop.dll_1" FileName="SQLITE~1.DLL|SQLite.Interop.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\osx-x64\native\SQLite.Interop.dll" SelfReg="false"/>
-    <ROW File="System.Data.SqlClient.dll" Component_="System.Data.SqlClient.dll" FileName="SYSTEM~1.DLL|System.Data.SqlClient.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll" SelfReg="false"/>
-    <ROW File="System.Data.SqlClient.dll_1" Component_="System.Data.SqlClient.dll_1" FileName="SYSTEM~1.DLL|System.Data.SqlClient.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll" SelfReg="false"/>
-    <ROW File="sni.dll" Component_="sni.dll" FileName="sni.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-arm64\native\sni.dll" SelfReg="false"/>
-    <ROW File="WebView2Loader.dll" Component_="WebView2Loader.dll" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-arm64\native\WebView2Loader.dll" SelfReg="false"/>
-    <ROW File="sni.dll_1" Component_="sni.dll_1" FileName="sni.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x64\native\sni.dll" SelfReg="false"/>
-    <ROW File="SQLite.Interop.dll_2" Component_="SQLite.Interop.dll_2" FileName="SQLITE~1.DLL|SQLite.Interop.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x64\native\SQLite.Interop.dll" SelfReg="false"/>
-    <ROW File="WebView2Loader.dll_1" Component_="WebView2Loader.dll_1" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x64\native\WebView2Loader.dll" SelfReg="false"/>
-    <ROW File="sni.dll_2" Component_="sni.dll_2" FileName="sni.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x86\native\sni.dll" SelfReg="false"/>
-    <ROW File="SQLite.Interop.dll_3" Component_="SQLite.Interop.dll_3" FileName="SQLITE~1.DLL|SQLite.Interop.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x86\native\SQLite.Interop.dll" SelfReg="false"/>
-    <ROW File="WebView2Loader.dll_2" Component_="WebView2Loader.dll_2" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x86\native\WebView2Loader.dll" SelfReg="false"/>
-    <ROW File="SharpCompress.dll" Component_="SharpCompress.dll" FileName="SHARPC~1.DLL|SharpCompress.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\SharpCompress.dll" SelfReg="false"/>
-    <ROW File="System.Data.SqlClient.dll_2" Component_="System.Data.SqlClient.dll_2" FileName="SYSTEM~1.DLL|System.Data.SqlClient.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\System.Data.SqlClient.dll" SelfReg="false"/>
-    <ROW File="System.Data.SQLite.dll" Component_="System.Data.SQLite.dll" FileName="SYSTEM~2.DLL|System.Data.SQLite.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\System.Data.SQLite.dll" SelfReg="false"/>
-    <ROW File="System.Data.SQLite.EF6.dll" Component_="System.Data.SQLite.EF6.dll" FileName="SYSTEM~3.DLL|System.Data.SQLite.EF6.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\System.Data.SQLite.EF6.dll" SelfReg="false"/>
-    <ROW File="System.Xml.XPath.XmlDocument.dll" Component_="System.Xml.XPath.XmlDocument.dll" FileName="SYSTEM~4.DLL|System.Xml.XPath.XmlDocument.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\System.Xml.XPath.XmlDocument.dll" SelfReg="false"/>
-    <ROW File="YamlDotNet.dll" Component_="YamlDotNet.dll" FileName="YAMLDO~1.DLL|YamlDotNet.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\YamlDotNet.dll" SelfReg="false"/>
-    <ROW File="ZstdSharp.dll" Component_="ZstdSharp.dll" FileName="ZSTDSH~1.DLL|ZstdSharp.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\ZstdSharp.dll" SelfReg="false"/>
-    <ROW File="config.yaml_1" Component_="config.yaml_1" FileName="CONFIG~1.YAM|config.yaml" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;config\config.yaml" SelfReg="false"/>
-    <ROW File="DevModManager.db_1" Component_="config.yaml_1" FileName="DEVMOD~1.DB|DevModManager.db" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;data\DevModManager.db" SelfReg="false"/>
+    <ROW File="config.yaml" Component_="config.yaml" FileName="CONFIG~1.YAM|config.yaml" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;config\config.yaml" SelfReg="false" />
+    <ROW File="baseline.sql" Component_="baseline.sql" FileName="baseline.sql" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;data\baseline.sql" SelfReg="false" />
+    <ROW File="DevModManager.db" Component_="baseline.sql" FileName="DEVMOD~1.DB|DevModManager.db" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;data\DevModManager.db" SelfReg="false" />
+    <ROW File="DevModManager.deps.json" Component_="DevModManager.dll.config" FileName="DEVMOD~1.JSO|DevModManager.deps.json" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.deps.json" SelfReg="false" />
+    <ROW File="DevModManager.dll" Component_="DevModManager.dll" FileName="DEVMOD~1.DLL|DevModManager.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.dll" SelfReg="false" />
+    <ROW File="DevModManager.dll.config" Component_="DevModManager.dll.config" FileName="DEVMOD~1.CON|DevModManager.dll.config" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.dll.config" SelfReg="false" />
+    <ROW File="DevModManager.exe" Component_="DevModManager.exe_1" FileName="DEVMOD~1.EXE|DevModManager.exe" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.exe" SelfReg="false" DigSign="true" />
+    <ROW File="DevModManager.pdb" Component_="DevModManager.exe_1" FileName="DEVMOD~1.PDB|DevModManager.pdb" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.pdb" SelfReg="false" />
+    <ROW File="DevModManager.runtimeconfig.json" Component_="DevModManager.dll.config" FileName="DEVMOD~2.JSO|DevModManager.runtimeconfig.json" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;DevModManager.runtimeconfig.json" SelfReg="false" />
+    <ROW File="bethesda_address_zohst.png" Component_="bethesda_address_zohst.png" FileName="BETHES~1.PNG|bethesda_address_zohst.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\bethesda_address_zohst.png" SelfReg="false" />
+    <ROW File="DevModManager_db.dgml" Component_="bethesda_address_zohst.png" FileName="DEVMOD~1.DGM|DevModManager_db.dgml" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\DevModManager_db.dgml" SelfReg="false" />
+    <ROW File="dmm_backupresults.png" Component_="bethesda_address_zohst.png" FileName="DMM_BA~1.PNG|dmm_backupresults.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_backupresults.png" SelfReg="false" />
+    <ROW File="dmm_bethesda_url.png" Component_="bethesda_address_zohst.png" FileName="DMM_BE~1.PNG|dmm_bethesda_url.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_bethesda_url.png" SelfReg="false" />
+    <ROW File="dmm_deploywindow.png" Component_="bethesda_address_zohst.png" FileName="DMM_DE~1.PNG|dmm_deploywindow.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_deploywindow.png" SelfReg="false" />
+    <ROW File="dmm_loadorder_window.png" Component_="bethesda_address_zohst.png" FileName="DMM_LO~1.PNG|dmm_loadorder_window.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_loadorder_window.png" SelfReg="false" />
+    <ROW File="dmm_mainwindow.png" Component_="bethesda_address_zohst.png" FileName="DMM_MA~1.PNG|dmm_mainwindow.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_mainwindow.png" SelfReg="false" />
+    <ROW File="dmm_package_window.png" Component_="bethesda_address_zohst.png" FileName="DMM_PA~1.PNG|dmm_package_window.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_package_window.png" SelfReg="false" />
+    <ROW File="dmm_promote_window.png" Component_="bethesda_address_zohst.png" FileName="DMM_PR~1.PNG|dmm_promote_window.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_promote_window.png" SelfReg="false" />
+    <ROW File="dmm_settingswindow.png" Component_="bethesda_address_zohst.png" FileName="DMM_SE~1.PNG|dmm_settingswindow.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\dmm_settingswindow.png" SelfReg="false" />
+    <ROW File="nexus_address_zohst.png" Component_="bethesda_address_zohst.png" FileName="NEXUS_~1.PNG|nexus_address_zohst.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\nexus_address_zohst.png" SelfReg="false" />
+    <ROW File="vortex_modstagingfolder.png" Component_="bethesda_address_zohst.png" FileName="VORTEX~1.PNG|vortex_modstagingfolder.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\vortex_modstagingfolder.png" SelfReg="false" />
+    <ROW File="vortex_mod_openmenu.png" Component_="bethesda_address_zohst.png" FileName="VORTEX~2.PNG|vortex_mod_openmenu.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\vortex_mod_openmenu.png" SelfReg="false" />
+    <ROW File="vortex_windowsproperties.png" Component_="bethesda_address_zohst.png" FileName="VORTEX~3.PNG|vortex_windowsproperties.png" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\vortex_windowsproperties.png" SelfReg="false" />
+    <ROW File="ZeeOgre.ico" Component_="bethesda_address_zohst.png" FileName="ZeeOgre.ico" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\ZeeOgre.ico" SelfReg="false" />
+    <ROW File="ZeeOgre_256x256.ico" Component_="bethesda_address_zohst.png" FileName="ZEEOGR~1.ICO|ZeeOgre_256x256.ico" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\ZeeOgre_256x256.ico" SelfReg="false" />
+    <ROW File="ZeeOgre_NoBackground.jpg" Component_="bethesda_address_zohst.png" FileName="ZEEOGR~1.JPG|ZeeOgre_NoBackground.jpg" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\ZeeOgre_NoBackground.jpg" SelfReg="false" />
+    <ROW File="ZeeOgre_NoBackground_64x64.ico" Component_="bethesda_address_zohst.png" FileName="ZEEOGR~2.ICO|ZeeOgre_NoBackground_64x64.ico" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\img\ZeeOgre_NoBackground_64x64.ico" SelfReg="false" />
+    <ROW File="LICENSE" Component_="LICENSE" FileName="LICENSE" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\LICENSE" SelfReg="false" />
+    <ROW File="README.md" Component_="LICENSE" FileName="README.md" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;docs\README.md" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.dll" Component_="AutoUpdater.NET.dll" FileName="AUTOUP~1.DLL|AutoUpdater.NET.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\AutoUpdater.NET.dll" SelfReg="false" />
+    <ROW File="ControlzEx.dll" Component_="ControlzEx.dll" FileName="CONTRO~1.DLL|ControlzEx.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\ControlzEx.dll" SelfReg="false" />
+    <ROW File="EdgeJs.dll" Component_="EdgeJs.dll" FileName="EdgeJs.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\EdgeJs.dll" SelfReg="false" />
+    <ROW File="EntityFramework.dll" Component_="EntityFramework.dll" FileName="ENTITY~1.DLL|EntityFramework.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\EntityFramework.dll" SelfReg="false" />
+    <ROW File="EntityFramework.SqlServer.dll" Component_="EntityFramework.SqlServer.dll" FileName="ENTITY~2.DLL|EntityFramework.SqlServer.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\EntityFramework.SqlServer.dll" SelfReg="false" />
+    <ROW File="HtmlAgilityPack.dll" Component_="HtmlAgilityPack.dll" FileName="HTMLAG~1.DLL|HtmlAgilityPack.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\HtmlAgilityPack.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll" Component_="AutoUpdater.NET.resources.dll" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\ar\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_1" Component_="AutoUpdater.NET.resources.dll_1" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\cs\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_2" Component_="AutoUpdater.NET.resources.dll_2" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\da\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_3" Component_="AutoUpdater.NET.resources.dll_3" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\de\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_4" Component_="AutoUpdater.NET.resources.dll_4" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\es\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_5" Component_="AutoUpdater.NET.resources.dll_5" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\fr\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_6" Component_="AutoUpdater.NET.resources.dll_6" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\it\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_7" Component_="AutoUpdater.NET.resources.dll_7" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\ja-JP\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_8" Component_="AutoUpdater.NET.resources.dll_8" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\ko\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_9" Component_="AutoUpdater.NET.resources.dll_9" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\lv\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_10" Component_="AutoUpdater.NET.resources.dll_10" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\nl\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_11" Component_="AutoUpdater.NET.resources.dll_11" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\pl\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_12" Component_="AutoUpdater.NET.resources.dll_12" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\pt\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_13" Component_="AutoUpdater.NET.resources.dll_13" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\pt-BR\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_14" Component_="AutoUpdater.NET.resources.dll_14" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\ru\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_15" Component_="AutoUpdater.NET.resources.dll_15" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\sk\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_16" Component_="AutoUpdater.NET.resources.dll_16" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\sv\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_17" Component_="AutoUpdater.NET.resources.dll_17" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\th\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_18" Component_="AutoUpdater.NET.resources.dll_18" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\tr\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_19" Component_="AutoUpdater.NET.resources.dll_19" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\zh\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="AutoUpdater.NET.resources.dll_20" Component_="AutoUpdater.NET.resources.dll_20" FileName="AUTOUP~1.DLL|AutoUpdater.NET.resources.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\locale\zh-TW\AutoUpdater.NET.resources.dll" SelfReg="false" />
+    <ROW File="MahApps.Metro.dll" Component_="MahApps.Metro.dll" FileName="MAHAPP~1.DLL|MahApps.Metro.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MahApps.Metro.dll" SelfReg="false" />
+    <ROW File="MahApps.Metro.IconPacks.Core.dll" Component_="MahApps.Metro.IconPacks.Core.dll" FileName="MAHAPP~2.DLL|MahApps.Metro.IconPacks.Core.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MahApps.Metro.IconPacks.Core.dll" SelfReg="false" />
+    <ROW File="MahApps.Metro.IconPacks.Material.dll" Component_="MahApps.Metro.IconPacks.Material.dll" FileName="MAHAPP~3.DLL|MahApps.Metro.IconPacks.Material.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MahApps.Metro.IconPacks.Material.dll" SelfReg="false" />
+    <ROW File="MaterialDesignColors.dll" Component_="MaterialDesignColors.dll" FileName="MATERI~1.DLL|MaterialDesignColors.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MaterialDesignColors.dll" SelfReg="false" />
+    <ROW File="MaterialDesignThemes.MahApps.dll" Component_="MaterialDesignThemes.MahApps.dll" FileName="MATERI~2.DLL|MaterialDesignThemes.MahApps.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MaterialDesignThemes.MahApps.dll" SelfReg="false" />
+    <ROW File="MaterialDesignThemes.Wpf.dll" Component_="MaterialDesignThemes.Wpf.dll" FileName="MATERI~3.DLL|MaterialDesignThemes.Wpf.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\MaterialDesignThemes.Wpf.dll" SelfReg="false" />
+    <ROW File="Microsoft.DotNet.InternalAbstractions.dll" Component_="Microsoft.DotNet.InternalAbstractions.dll" FileName="MICROS~1.DLL|Microsoft.DotNet.InternalAbstractions.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.DotNet.InternalAbstractions.dll" SelfReg="false" />
+    <ROW File="Microsoft.Extensions.DependencyModel.dll" Component_="Microsoft.Extensions.DependencyModel.dll" FileName="MICROS~2.DLL|Microsoft.Extensions.DependencyModel.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Extensions.DependencyModel.dll" SelfReg="false" />
+    <ROW File="Microsoft.Web.WebView2.Core.dll" Component_="Microsoft.Web.WebView2.Core.dll" FileName="MICROS~3.DLL|Microsoft.Web.WebView2.Core.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Web.WebView2.Core.dll" SelfReg="false" />
+    <ROW File="Microsoft.Web.WebView2.WinForms.dll" Component_="Microsoft.Web.WebView2.WinForms.dll" FileName="MICROS~4.DLL|Microsoft.Web.WebView2.WinForms.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Web.WebView2.WinForms.dll" SelfReg="false" />
+    <ROW File="Microsoft.Web.WebView2.Wpf.dll" Component_="Microsoft.Web.WebView2.Wpf.dll" FileName="MICROS~5.DLL|Microsoft.Web.WebView2.Wpf.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Web.WebView2.Wpf.dll" SelfReg="false" />
+    <ROW File="Microsoft.Xaml.Behaviors.dll" Component_="Microsoft.Xaml.Behaviors.dll" FileName="MICROS~6.DLL|Microsoft.Xaml.Behaviors.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Microsoft.Xaml.Behaviors.dll" SelfReg="false" />
+    <ROW File="Newtonsoft.Json.dll" Component_="Newtonsoft.Json.dll" FileName="NEWTON~1.DLL|Newtonsoft.Json.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\Newtonsoft.Json.dll" SelfReg="false" />
+    <ROW File="SQLite.Interop.dll" Component_="SQLite.Interop.dll" FileName="SQLITE~1.DLL|SQLite.Interop.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\linux-x64\native\SQLite.Interop.dll" SelfReg="false" />
+    <ROW File="SQLite.Interop.dll_1" Component_="SQLite.Interop.dll_1" FileName="SQLITE~1.DLL|SQLite.Interop.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\osx-x64\native\SQLite.Interop.dll" SelfReg="false" />
+    <ROW File="System.Data.SqlClient.dll" Component_="System.Data.SqlClient.dll" FileName="SYSTEM~1.DLL|System.Data.SqlClient.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll" SelfReg="false" />
+    <ROW File="System.Data.SqlClient.dll_1" Component_="System.Data.SqlClient.dll_1" FileName="SYSTEM~1.DLL|System.Data.SqlClient.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll" SelfReg="false" />
+    <ROW File="sni.dll" Component_="sni.dll" FileName="sni.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-arm64\native\sni.dll" SelfReg="false" />
+    <ROW File="WebView2Loader.dll" Component_="WebView2Loader.dll" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-arm64\native\WebView2Loader.dll" SelfReg="false" />
+    <ROW File="sni.dll_1" Component_="sni.dll_1" FileName="sni.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x64\native\sni.dll" SelfReg="false" />
+    <ROW File="SQLite.Interop.dll_2" Component_="SQLite.Interop.dll_2" FileName="SQLITE~1.DLL|SQLite.Interop.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x64\native\SQLite.Interop.dll" SelfReg="false" />
+    <ROW File="WebView2Loader.dll_1" Component_="WebView2Loader.dll_1" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x64\native\WebView2Loader.dll" SelfReg="false" />
+    <ROW File="sni.dll_2" Component_="sni.dll_2" FileName="sni.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x86\native\sni.dll" SelfReg="false" />
+    <ROW File="SQLite.Interop.dll_3" Component_="SQLite.Interop.dll_3" FileName="SQLITE~1.DLL|SQLite.Interop.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x86\native\SQLite.Interop.dll" SelfReg="false" />
+    <ROW File="WebView2Loader.dll_2" Component_="WebView2Loader.dll_2" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\runtimes\win-x86\native\WebView2Loader.dll" SelfReg="false" />
+    <ROW File="SharpCompress.dll" Component_="SharpCompress.dll" FileName="SHARPC~1.DLL|SharpCompress.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\SharpCompress.dll" SelfReg="false" />
+    <ROW File="System.Data.SqlClient.dll_2" Component_="System.Data.SqlClient.dll_2" FileName="SYSTEM~1.DLL|System.Data.SqlClient.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\System.Data.SqlClient.dll" SelfReg="false" />
+    <ROW File="System.Data.SQLite.dll" Component_="System.Data.SQLite.dll" FileName="SYSTEM~2.DLL|System.Data.SQLite.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\System.Data.SQLite.dll" SelfReg="false" />
+    <ROW File="System.Data.SQLite.EF6.dll" Component_="System.Data.SQLite.EF6.dll" FileName="SYSTEM~3.DLL|System.Data.SQLite.EF6.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\System.Data.SQLite.EF6.dll" SelfReg="false" />
+    <ROW File="System.Xml.XPath.XmlDocument.dll" Component_="System.Xml.XPath.XmlDocument.dll" FileName="SYSTEM~4.DLL|System.Xml.XPath.XmlDocument.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\System.Xml.XPath.XmlDocument.dll" SelfReg="false" />
+    <ROW File="YamlDotNet.dll" Component_="YamlDotNet.dll" FileName="YAMLDO~1.DLL|YamlDotNet.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\YamlDotNet.dll" SelfReg="false" />
+    <ROW File="ZstdSharp.dll" Component_="ZstdSharp.dll" FileName="ZSTDSH~1.DLL|ZstdSharp.dll" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;lib\ZstdSharp.dll" SelfReg="false" />
+    <ROW File="config.yaml_1" Component_="config.yaml_1" FileName="CONFIG~1.YAM|config.yaml" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;config\config.yaml" SelfReg="false" />
+    <ROW File="DevModManager.db_1" Component_="config.yaml_1" FileName="DEVMOD~1.DB|DevModManager.db" Attributes="0" SourcePath="&lt;PB_PROJECT_PATH&gt;data\DevModManager.db" SelfReg="false" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.AiPersistentPropComponent">
-    <ROW Property="AI_INSTALLPERUSER" Registry="AI_INSTALLPERUSER" HklmSearch="AI_INSTALLPERUSER" HkcuSearch="AI_INSTALLPERUSER_1" Hklm64Search="AI_INSTALLPERUSER_2" Hkcu64Search="AI_INSTALLPERUSER_3"/>
+    <ROW Property="AI_INSTALLPERUSER" Registry="AI_INSTALLPERUSER" HklmSearch="AI_INSTALLPERUSER" HkcuSearch="AI_INSTALLPERUSER_1" Hklm64Search="AI_INSTALLPERUSER_2" Hkcu64Search="AI_INSTALLPERUSER_3" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.AppPathsComponent">
-    <ROW Name="PB_PROJECT_PATH" Path="[|AI_PROPPATH_PERBUILD_PB_PROJECT_PAT]" Type="2" Content="0"/>
+    <ROW Name="PB_PROJECT_PATH" Path="[|AI_PROPPATH_PERBUILD_PB_PROJECT_PAT]" Type="2" Content="0" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrapperUISequenceComponent">
-    <ROW Action="AI_DetectSoftware" Sequence="151"/>
+    <ROW Action="AI_DetectSoftware" Sequence="151" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="AnyCPU_Debug" BuildName="AnyCPU_Debug" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="ZO.DevModManager.debug" Languages="en" InstallationType="4" UseLargeSchema="true"/>
-    <ROW BuildKey="AnyCPU_GitRelease" BuildName="AnyCPU_GitRelease" BuildOrder="2" BuildType="0" PackageFolder="." PackageFileName="ZO.DevModManager" Languages="en" InstallationType="4" UseLargeSchema="true"/>
-    <ROW BuildKey="AnyCPU_Release" BuildName="AnyCPU_Release" BuildOrder="3" BuildType="0" PackageFolder="." PackageFileName="ZO.DevModManager.release" Languages="en" InstallationType="4" SummInfoMetadata="Page Count:450" UseLargeSchema="true" MsiPackageType="x64"/>
+    <ROW BuildKey="AnyCPU_Debug" BuildName="AnyCPU_Debug" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="ZO.DevModManager.debug" Languages="en" InstallationType="4" UseLargeSchema="true" />
+    <ROW BuildKey="AnyCPU_GitRelease" BuildName="AnyCPU_GitRelease" BuildOrder="2" BuildType="0" PackageFolder="." PackageFileName="ZO.DevModManager" Languages="en" InstallationType="4" UseLargeSchema="true" />
+    <ROW BuildKey="AnyCPU_Release" BuildName="AnyCPU_Release" BuildOrder="3" BuildType="0" PackageFolder="." PackageFileName="ZO.DevModManager.release" Languages="en" InstallationType="4" SummInfoMetadata="Page Count:450" UseLargeSchema="true" MsiPackageType="x64" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
-    <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
-    <ROW Path="&lt;AI_DICTS&gt;ui_en.ail"/>
+    <ROW Path="&lt;AI_DICTS&gt;ui.ail" />
+    <ROW Path="&lt;AI_DICTS&gt;ui_en.ail" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.FragmentComponent">
-    <ROW Fragment="CommonUI.aip" Path="&lt;AI_FRAGS&gt;CommonUI.aip"/>
-    <ROW Fragment="FolderDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\FolderDlg.aip"/>
-    <ROW Fragment="InstallTypeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\InstallTypeDlg.aip"/>
-    <ROW Fragment="MaintenanceTypeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceTypeDlg.aip"/>
-    <ROW Fragment="MaintenanceWelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceWelcomeDlg.aip"/>
-    <ROW Fragment="SequenceDialogs.aip" Path="&lt;AI_THEMES&gt;classic\fragments\SequenceDialogs.aip"/>
-    <ROW Fragment="Sequences.aip" Path="&lt;AI_FRAGS&gt;Sequences.aip"/>
-    <ROW Fragment="StaticUIStrings.aip" Path="&lt;AI_FRAGS&gt;StaticUIStrings.aip"/>
-    <ROW Fragment="Themes.aip" Path="&lt;AI_FRAGS&gt;Themes.aip"/>
-    <ROW Fragment="UI.aip" Path="&lt;AI_THEMES&gt;classic\fragments\UI.aip"/>
-    <ROW Fragment="Validation.aip" Path="&lt;AI_FRAGS&gt;Validation.aip"/>
-    <ROW Fragment="VerifyRemoveDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRemoveDlg.aip"/>
-    <ROW Fragment="VerifyRepairDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRepairDlg.aip"/>
-    <ROW Fragment="WelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\WelcomeDlg.aip"/>
+    <ROW Fragment="CommonUI.aip" Path="&lt;AI_FRAGS&gt;CommonUI.aip" />
+    <ROW Fragment="FolderDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\FolderDlg.aip" />
+    <ROW Fragment="InstallTypeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\InstallTypeDlg.aip" />
+    <ROW Fragment="MaintenanceTypeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceTypeDlg.aip" />
+    <ROW Fragment="MaintenanceWelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceWelcomeDlg.aip" />
+    <ROW Fragment="SequenceDialogs.aip" Path="&lt;AI_THEMES&gt;classic\fragments\SequenceDialogs.aip" />
+    <ROW Fragment="Sequences.aip" Path="&lt;AI_FRAGS&gt;Sequences.aip" />
+    <ROW Fragment="StaticUIStrings.aip" Path="&lt;AI_FRAGS&gt;StaticUIStrings.aip" />
+    <ROW Fragment="Themes.aip" Path="&lt;AI_FRAGS&gt;Themes.aip" />
+    <ROW Fragment="UI.aip" Path="&lt;AI_THEMES&gt;classic\fragments\UI.aip" />
+    <ROW Fragment="Validation.aip" Path="&lt;AI_FRAGS&gt;Validation.aip" />
+    <ROW Fragment="VerifyRemoveDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRemoveDlg.aip" />
+    <ROW Fragment="VerifyRepairDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRepairDlg.aip" />
+    <ROW Fragment="WelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\WelcomeDlg.aip" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiAppSearchComponent">
-    <ROW Property="AI_INSTALLPERUSER" Signature_="AI_INSTALLPERUSER"/>
-    <ROW Property="AI_INSTALLPERUSER" Signature_="AI_INSTALLPERUSER_1"/>
-    <ROW Property="AI_INSTALLPERUSER" Signature_="AI_INSTALLPERUSER_2"/>
-    <ROW Property="AI_INSTALLPERUSER" Signature_="AI_INSTALLPERUSER_3"/>
+    <ROW Property="AI_INSTALLPERUSER" Signature_="AI_INSTALLPERUSER" />
+    <ROW Property="AI_INSTALLPERUSER" Signature_="AI_INSTALLPERUSER_1" />
+    <ROW Property="AI_INSTALLPERUSER" Signature_="AI_INSTALLPERUSER_2" />
+    <ROW Property="AI_INSTALLPERUSER" Signature_="AI_INSTALLPERUSER_3" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
-    <ROW Name="SoftwareDetector.dll" SourcePath="&lt;AI_CUSTACTS&gt;SoftwareDetector.dll"/>
-    <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
+    <ROW Name="SoftwareDetector.dll" SourcePath="&lt;AI_CUSTACTS&gt;SoftwareDetector.dll" />
+    <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiControlEventComponent">
-    <ROW Dialog_="WelcomeDlg" Control_="Next" Event="NewDialog" Argument="InstallTypeDlg" Condition="AI_INSTALL" Ordering="1"/>
-    <ROW Dialog_="FolderDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_INSTALL" Ordering="201"/>
-    <ROW Dialog_="FolderDlg" Control_="Back" Event="NewDialog" Argument="InstallTypeDlg" Condition="AI_INSTALL" Ordering="1"/>
-    <ROW Dialog_="MaintenanceWelcomeDlg" Control_="Next" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="99"/>
-    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_MAINT" Ordering="198"/>
-    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="202"/>
-    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_INSTALL" Ordering="197"/>
-    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="201"/>
-    <ROW Dialog_="CustomizeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_MAINT" Ordering="101"/>
-    <ROW Dialog_="CustomizeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="1"/>
-    <ROW Dialog_="MaintenanceTypeDlg" Control_="ChangeButton" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="501"/>
-    <ROW Dialog_="MaintenanceTypeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceWelcomeDlg" Condition="AI_MAINT" Ordering="1"/>
-    <ROW Dialog_="MaintenanceTypeDlg" Control_="RemoveButton" Event="NewDialog" Argument="VerifyRemoveDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="601"/>
-    <ROW Dialog_="VerifyRemoveDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="1"/>
-    <ROW Dialog_="MaintenanceTypeDlg" Control_="RepairButton" Event="NewDialog" Argument="VerifyRepairDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="601"/>
-    <ROW Dialog_="VerifyRepairDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="1"/>
-    <ROW Dialog_="VerifyRepairDlg" Control_="Repair" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="399" Options="1"/>
-    <ROW Dialog_="VerifyRemoveDlg" Control_="Remove" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="299" Options="1"/>
-    <ROW Dialog_="PatchWelcomeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_PATCH" Ordering="201"/>
-    <ROW Dialog_="ResumeDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_RESUME" Ordering="299"/>
-    <ROW Dialog_="InstallTypeDlg" Control_="Next" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="101"/>
-    <ROW Dialog_="InstallTypeDlg" Control_="Back" Event="NewDialog" Argument="WelcomeDlg" Condition="AI_INSTALL" Ordering="1"/>
-    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_PATCH" Ordering="199"/>
-    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="PatchWelcomeDlg" Condition="AI_PATCH" Ordering="203"/>
+    <ROW Dialog_="WelcomeDlg" Control_="Next" Event="NewDialog" Argument="InstallTypeDlg" Condition="AI_INSTALL" Ordering="1" />
+    <ROW Dialog_="FolderDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_INSTALL" Ordering="201" />
+    <ROW Dialog_="FolderDlg" Control_="Back" Event="NewDialog" Argument="InstallTypeDlg" Condition="AI_INSTALL" Ordering="1" />
+    <ROW Dialog_="MaintenanceWelcomeDlg" Control_="Next" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="99" />
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_MAINT" Ordering="198" />
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="202" />
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_INSTALL" Ordering="197" />
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="201" />
+    <ROW Dialog_="CustomizeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_MAINT" Ordering="101" />
+    <ROW Dialog_="CustomizeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="1" />
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="ChangeButton" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="501" />
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceWelcomeDlg" Condition="AI_MAINT" Ordering="1" />
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="RemoveButton" Event="NewDialog" Argument="VerifyRemoveDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="601" />
+    <ROW Dialog_="VerifyRemoveDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="1" />
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="RepairButton" Event="NewDialog" Argument="VerifyRepairDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="601" />
+    <ROW Dialog_="VerifyRepairDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="1" />
+    <ROW Dialog_="VerifyRepairDlg" Control_="Repair" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="399" Options="1" />
+    <ROW Dialog_="VerifyRemoveDlg" Control_="Remove" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="299" Options="1" />
+    <ROW Dialog_="PatchWelcomeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_PATCH" Ordering="201" />
+    <ROW Dialog_="ResumeDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_RESUME" Ordering="299" />
+    <ROW Dialog_="InstallTypeDlg" Control_="Next" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="101" />
+    <ROW Dialog_="InstallTypeDlg" Control_="Back" Event="NewDialog" Argument="WelcomeDlg" Condition="AI_INSTALL" Ordering="1" />
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_PATCH" Ordering="199" />
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="PatchWelcomeDlg" Condition="AI_PATCH" Ordering="203" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
-    <ROW Directory_="APPDIR" Component_="APPDIR" ManualDelete="true"/>
-    <ROW Directory_="SHORTCUTDIR" Component_="SHORTCUTDIR" ManualDelete="false"/>
+    <ROW Directory_="APPDIR" Component_="APPDIR" ManualDelete="true" />
+    <ROW Directory_="SHORTCUTDIR" Component_="SHORTCUTDIR" ManualDelete="false" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
-    <ROW Action="AI_AuthorSinglePackage" Type="1" Source="aicustact.dll" Target="AI_AuthorSinglePackage" WithoutSeq="true"/>
-    <ROW Action="AI_DOWNGRADE" Type="19" Target="4010"/>
-    <ROW Action="AI_DetectSoftware" Type="257" Source="SoftwareDetector.dll" Target="OnDetectSoftware"/>
-    <ROW Action="AI_DpiContentScale" Type="1" Source="aicustact.dll" Target="DpiContentScale"/>
-    <ROW Action="AI_EnableDebugLog" Type="321" Source="aicustact.dll" Target="EnableDebugLog"/>
-    <ROW Action="AI_InstallModeCheck" Type="1" Source="aicustact.dll" Target="UpdateInstallMode" WithoutSeq="true"/>
-    <ROW Action="AI_LaunchApp" Type="1" Source="aicustact.dll" Target="LaunchApp"/>
-    <ROW Action="AI_PREPARE_UPGRADE" Type="65" Source="aicustact.dll" Target="PrepareUpgrade"/>
-    <ROW Action="AI_PRESERVE_INSTALL_TYPE" Type="65" Source="aicustact.dll" Target="PreserveInstallType"/>
-    <ROW Action="AI_RESTORE_LOCATION" Type="65" Source="aicustact.dll" Target="RestoreLocation"/>
-    <ROW Action="AI_ResolveKnownFolders" Type="1" Source="aicustact.dll" Target="AI_ResolveKnownFolders"/>
-    <ROW Action="AI_SETMIXINSTLOCATION" Type="1" Source="aicustact.dll" Target="MixedAllUsersInstallLocation"/>
-    <ROW Action="AI_SHOW_LOG" Type="65" Source="aicustact.dll" Target="LaunchLogFile" WithoutSeq="true"/>
-    <ROW Action="AI_STORE_LOCATION" Type="51" Source="ARPINSTALLLOCATION" Target="[APPDIR]"/>
-    <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]" MultiBuildTarget="AnyCPU_Debug:[AI_UserProgramFiles][Manufacturer]\[ProductName]#AnyCPU_GitRelease:[AI_UserProgramFiles][Manufacturer]\[ProductName]#AnyCPU_Release:[AI_UserProgramFiles][Manufacturer]\[ProductName]"/>
-    <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
-    <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
+    <ROW Action="AI_AuthorSinglePackage" Type="1" Source="aicustact.dll" Target="AI_AuthorSinglePackage" WithoutSeq="true" />
+    <ROW Action="AI_DOWNGRADE" Type="19" Target="4010" />
+    <ROW Action="AI_DetectSoftware" Type="257" Source="SoftwareDetector.dll" Target="OnDetectSoftware" />
+    <ROW Action="AI_DpiContentScale" Type="1" Source="aicustact.dll" Target="DpiContentScale" />
+    <ROW Action="AI_EnableDebugLog" Type="321" Source="aicustact.dll" Target="EnableDebugLog" />
+    <ROW Action="AI_InstallModeCheck" Type="1" Source="aicustact.dll" Target="UpdateInstallMode" WithoutSeq="true" />
+    <ROW Action="AI_LaunchApp" Type="1" Source="aicustact.dll" Target="LaunchApp" />
+    <ROW Action="AI_PREPARE_UPGRADE" Type="65" Source="aicustact.dll" Target="PrepareUpgrade" />
+    <ROW Action="AI_PRESERVE_INSTALL_TYPE" Type="65" Source="aicustact.dll" Target="PreserveInstallType" />
+    <ROW Action="AI_RESTORE_LOCATION" Type="65" Source="aicustact.dll" Target="RestoreLocation" />
+    <ROW Action="AI_ResolveKnownFolders" Type="1" Source="aicustact.dll" Target="AI_ResolveKnownFolders" />
+    <ROW Action="AI_SETMIXINSTLOCATION" Type="1" Source="aicustact.dll" Target="MixedAllUsersInstallLocation" />
+    <ROW Action="AI_SHOW_LOG" Type="65" Source="aicustact.dll" Target="LaunchLogFile" WithoutSeq="true" />
+    <ROW Action="AI_STORE_LOCATION" Type="51" Source="ARPINSTALLLOCATION" Target="[APPDIR]" />
+    <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]" MultiBuildTarget="AnyCPU_Debug:[AI_UserProgramFiles][Manufacturer]\[ProductName]#AnyCPU_GitRelease:[AI_UserProgramFiles][Manufacturer]\[ProductName]#AnyCPU_Release:[AI_UserProgramFiles][Manufacturer]\[ProductName]" />
+    <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]" />
+    <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatCompsComponent">
-    <ROW Feature_="MainFeature" Component_="APPDIR"/>
-    <ROW Feature_="MainFeature" Component_="ProductInformation"/>
-    <ROW Feature_="MainFeature" Component_="config.yaml"/>
-    <ROW Feature_="MainFeature" Component_="baseline.sql"/>
-    <ROW Feature_="MainFeature" Component_="DevModManager.dll"/>
-    <ROW Feature_="MainFeature" Component_="bethesda_address_zohst.png"/>
-    <ROW Feature_="MainFeature" Component_="LICENSE"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.dll"/>
-    <ROW Feature_="MainFeature" Component_="ControlzEx.dll"/>
-    <ROW Feature_="MainFeature" Component_="EdgeJs.dll"/>
-    <ROW Feature_="MainFeature" Component_="EntityFramework.dll"/>
-    <ROW Feature_="MainFeature" Component_="EntityFramework.SqlServer.dll"/>
-    <ROW Feature_="MainFeature" Component_="HtmlAgilityPack.dll"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_1"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_2"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_3"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_4"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_5"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_6"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_7"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_8"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_9"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_10"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_11"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_12"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_13"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_14"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_15"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_16"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_17"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_18"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_19"/>
-    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_20"/>
-    <ROW Feature_="MainFeature" Component_="MahApps.Metro.dll"/>
-    <ROW Feature_="MainFeature" Component_="MahApps.Metro.IconPacks.Core.dll"/>
-    <ROW Feature_="MainFeature" Component_="MahApps.Metro.IconPacks.Material.dll"/>
-    <ROW Feature_="MainFeature" Component_="MaterialDesignColors.dll"/>
-    <ROW Feature_="MainFeature" Component_="MaterialDesignThemes.MahApps.dll"/>
-    <ROW Feature_="MainFeature" Component_="MaterialDesignThemes.Wpf.dll"/>
-    <ROW Feature_="MainFeature" Component_="Microsoft.DotNet.InternalAbstractions.dll"/>
-    <ROW Feature_="MainFeature" Component_="Microsoft.Extensions.DependencyModel.dll"/>
-    <ROW Feature_="MainFeature" Component_="Microsoft.Web.WebView2.Core.dll"/>
-    <ROW Feature_="MainFeature" Component_="Microsoft.Web.WebView2.WinForms.dll"/>
-    <ROW Feature_="MainFeature" Component_="Microsoft.Web.WebView2.Wpf.dll"/>
-    <ROW Feature_="MainFeature" Component_="Microsoft.Xaml.Behaviors.dll"/>
-    <ROW Feature_="MainFeature" Component_="Newtonsoft.Json.dll"/>
-    <ROW Feature_="MainFeature" Component_="SQLite.Interop.dll"/>
-    <ROW Feature_="MainFeature" Component_="SQLite.Interop.dll_1"/>
-    <ROW Feature_="MainFeature" Component_="System.Data.SqlClient.dll"/>
-    <ROW Feature_="MainFeature" Component_="System.Data.SqlClient.dll_1"/>
-    <ROW Feature_="MainFeature" Component_="sni.dll"/>
-    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll"/>
-    <ROW Feature_="MainFeature" Component_="sni.dll_1"/>
-    <ROW Feature_="MainFeature" Component_="SQLite.Interop.dll_2"/>
-    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll_1"/>
-    <ROW Feature_="MainFeature" Component_="sni.dll_2"/>
-    <ROW Feature_="MainFeature" Component_="SQLite.Interop.dll_3"/>
-    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll_2"/>
-    <ROW Feature_="MainFeature" Component_="SharpCompress.dll"/>
-    <ROW Feature_="MainFeature" Component_="System.Data.SqlClient.dll_2"/>
-    <ROW Feature_="MainFeature" Component_="System.Data.SQLite.dll"/>
-    <ROW Feature_="MainFeature" Component_="System.Data.SQLite.EF6.dll"/>
-    <ROW Feature_="MainFeature" Component_="System.Xml.XPath.XmlDocument.dll"/>
-    <ROW Feature_="MainFeature" Component_="YamlDotNet.dll"/>
-    <ROW Feature_="MainFeature" Component_="ZstdSharp.dll"/>
-    <ROW Feature_="MainFeature" Component_="DevModManager.exe_1"/>
-    <ROW Feature_="MainFeature" Component_="DevModManager.dll.config"/>
-    <ROW Feature_="MainFeature" Component_="SHORTCUTDIR"/>
-    <ROW Feature_="MainFeature" Component_="config.yaml_1"/>
-    <ROW Feature_="MainFeature" Component_="AI_INSTALLPERUSER"/>
+    <ROW Feature_="MainFeature" Component_="APPDIR" />
+    <ROW Feature_="MainFeature" Component_="ProductInformation" />
+    <ROW Feature_="MainFeature" Component_="config.yaml" />
+    <ROW Feature_="MainFeature" Component_="baseline.sql" />
+    <ROW Feature_="MainFeature" Component_="DevModManager.dll" />
+    <ROW Feature_="MainFeature" Component_="bethesda_address_zohst.png" />
+    <ROW Feature_="MainFeature" Component_="LICENSE" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.dll" />
+    <ROW Feature_="MainFeature" Component_="ControlzEx.dll" />
+    <ROW Feature_="MainFeature" Component_="EdgeJs.dll" />
+    <ROW Feature_="MainFeature" Component_="EntityFramework.dll" />
+    <ROW Feature_="MainFeature" Component_="EntityFramework.SqlServer.dll" />
+    <ROW Feature_="MainFeature" Component_="HtmlAgilityPack.dll" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_1" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_2" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_3" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_4" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_5" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_6" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_7" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_8" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_9" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_10" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_11" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_12" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_13" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_14" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_15" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_16" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_17" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_18" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_19" />
+    <ROW Feature_="MainFeature" Component_="AutoUpdater.NET.resources.dll_20" />
+    <ROW Feature_="MainFeature" Component_="MahApps.Metro.dll" />
+    <ROW Feature_="MainFeature" Component_="MahApps.Metro.IconPacks.Core.dll" />
+    <ROW Feature_="MainFeature" Component_="MahApps.Metro.IconPacks.Material.dll" />
+    <ROW Feature_="MainFeature" Component_="MaterialDesignColors.dll" />
+    <ROW Feature_="MainFeature" Component_="MaterialDesignThemes.MahApps.dll" />
+    <ROW Feature_="MainFeature" Component_="MaterialDesignThemes.Wpf.dll" />
+    <ROW Feature_="MainFeature" Component_="Microsoft.DotNet.InternalAbstractions.dll" />
+    <ROW Feature_="MainFeature" Component_="Microsoft.Extensions.DependencyModel.dll" />
+    <ROW Feature_="MainFeature" Component_="Microsoft.Web.WebView2.Core.dll" />
+    <ROW Feature_="MainFeature" Component_="Microsoft.Web.WebView2.WinForms.dll" />
+    <ROW Feature_="MainFeature" Component_="Microsoft.Web.WebView2.Wpf.dll" />
+    <ROW Feature_="MainFeature" Component_="Microsoft.Xaml.Behaviors.dll" />
+    <ROW Feature_="MainFeature" Component_="Newtonsoft.Json.dll" />
+    <ROW Feature_="MainFeature" Component_="SQLite.Interop.dll" />
+    <ROW Feature_="MainFeature" Component_="SQLite.Interop.dll_1" />
+    <ROW Feature_="MainFeature" Component_="System.Data.SqlClient.dll" />
+    <ROW Feature_="MainFeature" Component_="System.Data.SqlClient.dll_1" />
+    <ROW Feature_="MainFeature" Component_="sni.dll" />
+    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll" />
+    <ROW Feature_="MainFeature" Component_="sni.dll_1" />
+    <ROW Feature_="MainFeature" Component_="SQLite.Interop.dll_2" />
+    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll_1" />
+    <ROW Feature_="MainFeature" Component_="sni.dll_2" />
+    <ROW Feature_="MainFeature" Component_="SQLite.Interop.dll_3" />
+    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll_2" />
+    <ROW Feature_="MainFeature" Component_="SharpCompress.dll" />
+    <ROW Feature_="MainFeature" Component_="System.Data.SqlClient.dll_2" />
+    <ROW Feature_="MainFeature" Component_="System.Data.SQLite.dll" />
+    <ROW Feature_="MainFeature" Component_="System.Data.SQLite.EF6.dll" />
+    <ROW Feature_="MainFeature" Component_="System.Xml.XPath.XmlDocument.dll" />
+    <ROW Feature_="MainFeature" Component_="YamlDotNet.dll" />
+    <ROW Feature_="MainFeature" Component_="ZstdSharp.dll" />
+    <ROW Feature_="MainFeature" Component_="DevModManager.exe_1" />
+    <ROW Feature_="MainFeature" Component_="DevModManager.dll.config" />
+    <ROW Feature_="MainFeature" Component_="SHORTCUTDIR" />
+    <ROW Feature_="MainFeature" Component_="config.yaml_1" />
+    <ROW Feature_="MainFeature" Component_="AI_INSTALLPERUSER" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
-    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
-    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
-    <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1501"/>
-    <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1399"/>
-    <ROW Action="AI_ResolveKnownFolders" Sequence="52"/>
-    <ROW Action="AI_EnableDebugLog" Sequence="51"/>
-    <ROW Action="AI_DetectSoftware" Sequence="101"/>
-    <ROW Action="AI_SETMIXINSTLOCATION" Sequence="748"/>
+    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210" />
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749" />
+    <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1501" />
+    <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1399" />
+    <ROW Action="AI_ResolveKnownFolders" Sequence="52" />
+    <ROW Action="AI_EnableDebugLog" Sequence="51" />
+    <ROW Action="AI_DetectSoftware" Sequence="101" />
+    <ROW Action="AI_SETMIXINSTLOCATION" Sequence="748" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstallUISequenceComponent">
-    <ROW Action="AI_PRESERVE_INSTALL_TYPE" Sequence="199"/>
-    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
-    <ROW Action="AI_ResolveKnownFolders" Sequence="53"/>
-    <ROW Action="AI_DpiContentScale" Sequence="52"/>
-    <ROW Action="AI_EnableDebugLog" Sequence="51"/>
-    <ROW Action="AI_DetectSoftware" Sequence="101"/>
-    <ROW Action="AI_SETMIXINSTLOCATION" Sequence="748"/>
+    <ROW Action="AI_PRESERVE_INSTALL_TYPE" Sequence="199" />
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749" />
+    <ROW Action="AI_ResolveKnownFolders" Sequence="53" />
+    <ROW Action="AI_DpiContentScale" Sequence="52" />
+    <ROW Action="AI_EnableDebugLog" Sequence="51" />
+    <ROW Action="AI_DetectSoftware" Sequence="101" />
+    <ROW Action="AI_SETMIXINSTLOCATION" Sequence="748" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiLaunchConditionsComponent">
-    <ROW Condition="( Version9X OR ( NOT VersionNT64 ) OR ( VersionNT64 AND ((VersionNT64 &lt;&gt; 601) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 601) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 602) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 602) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 603) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 603) OR (MsiNTProductType = 1)) ) )" Description="[ProductName] cannot be installed on the following Windows versions: [WindowsTypeNT64Display]." DescriptionLocId="AI.LaunchCondition.NoSpecificNT64" IsPredefined="true" Builds="AnyCPU_Release"/>
-    <ROW Condition="( Version9X OR VersionNT64 )" Description="[ProductName] cannot be installed on [WindowsTypeNTDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT" IsPredefined="true" Builds="AnyCPU_Release"/>
-    <ROW Condition="((VersionNT &lt;&gt; 501) AND (VersionNT &lt;&gt; 502))" Description="[ProductName] cannot be installed on [WindowsTypeNT5XDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT5X" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release"/>
-    <ROW Condition="(VersionNT &lt;&gt; 400)" Description="[ProductName] cannot be installed on [WindowsTypeNT40Display]." DescriptionLocId="AI.LaunchCondition.NoNT40" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release"/>
-    <ROW Condition="(VersionNT &lt;&gt; 500)" Description="[ProductName] cannot be installed on [WindowsTypeNT50Display]." DescriptionLocId="AI.LaunchCondition.NoNT50" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release"/>
-    <ROW Condition="(VersionNT &lt;&gt; 600)" Description="[ProductName] cannot be installed on [WindowsTypeNT60Display]." DescriptionLocId="AI.LaunchCondition.NoNT60" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release"/>
-    <ROW Condition="VersionNT" Description="[ProductName] cannot be installed on [WindowsType9XDisplay]." DescriptionLocId="AI.LaunchCondition.No9X" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release"/>
+    <ROW Condition="( Version9X OR ( NOT VersionNT64 ) OR ( VersionNT64 AND ((VersionNT64 &lt;&gt; 601) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 601) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 602) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 602) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 603) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 603) OR (MsiNTProductType = 1)) ) )" Description="[ProductName] cannot be installed on the following Windows versions: [WindowsTypeNT64Display]." DescriptionLocId="AI.LaunchCondition.NoSpecificNT64" IsPredefined="true" Builds="AnyCPU_Release" />
+    <ROW Condition="( Version9X OR VersionNT64 )" Description="[ProductName] cannot be installed on [WindowsTypeNTDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT" IsPredefined="true" Builds="AnyCPU_Release" />
+    <ROW Condition="((VersionNT &lt;&gt; 501) AND (VersionNT &lt;&gt; 502))" Description="[ProductName] cannot be installed on [WindowsTypeNT5XDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT5X" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release" />
+    <ROW Condition="(VersionNT &lt;&gt; 400)" Description="[ProductName] cannot be installed on [WindowsTypeNT40Display]." DescriptionLocId="AI.LaunchCondition.NoNT40" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release" />
+    <ROW Condition="(VersionNT &lt;&gt; 500)" Description="[ProductName] cannot be installed on [WindowsTypeNT50Display]." DescriptionLocId="AI.LaunchCondition.NoNT50" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release" />
+    <ROW Condition="(VersionNT &lt;&gt; 600)" Description="[ProductName] cannot be installed on [WindowsTypeNT60Display]." DescriptionLocId="AI.LaunchCondition.NoNT60" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release" />
+    <ROW Condition="VersionNT" Description="[ProductName] cannot be installed on [WindowsType9XDisplay]." DescriptionLocId="AI.LaunchCondition.No9X" IsPredefined="true" Builds="AnyCPU_Debug;AnyCPU_GitRelease;AnyCPU_Release" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiRegLocatorComponent">
-    <ROW Signature_="AI_INSTALLPERUSER" Root="2" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Type="2"/>
-    <ROW Signature_="AI_INSTALLPERUSER_1" Root="1" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Type="2"/>
-    <ROW Signature_="AI_INSTALLPERUSER_2" Root="2" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Type="18"/>
-    <ROW Signature_="AI_INSTALLPERUSER_3" Root="1" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Type="18"/>
+    <ROW Signature_="AI_INSTALLPERUSER" Root="2" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Type="2" />
+    <ROW Signature_="AI_INSTALLPERUSER_1" Root="1" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Type="2" />
+    <ROW Signature_="AI_INSTALLPERUSER_2" Root="2" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Type="18" />
+    <ROW Signature_="AI_INSTALLPERUSER_3" Root="1" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Type="18" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiRegsComponent">
-    <ROW Registry="AI_INSTALLPERUSER" Root="-1" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Value="[AI_INSTALLPERUSER]" Component_="AI_INSTALLPERUSER"/>
-    <ROW Registry="Manufacturer" Root="-1" Key="Software\[Manufacturer]" Name="\"/>
-    <ROW Registry="Path" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Path" Value="[APPDIR]" Component_="ProductInformation"/>
-    <ROW Registry="ProductName" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="\"/>
-    <ROW Registry="Software" Root="-1" Key="Software" Name="\"/>
-    <ROW Registry="UpgradeCode" Root="-1" Key="Software\[Manufacturer]\[UpgradeCode]" Name="\"/>
-    <ROW Registry="Version" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Version" Value="[ProductVersion]" Component_="ProductInformation"/>
+    <ROW Registry="AI_INSTALLPERUSER" Root="-1" Key="Software\[Manufacturer]\[UpgradeCode]" Name="AI_INSTALLPERUSER" Value="[AI_INSTALLPERUSER]" Component_="AI_INSTALLPERUSER" />
+    <ROW Registry="Manufacturer" Root="-1" Key="Software\[Manufacturer]" Name="\" />
+    <ROW Registry="Path" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Path" Value="[APPDIR]" Component_="ProductInformation" />
+    <ROW Registry="ProductName" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="\" />
+    <ROW Registry="Software" Root="-1" Key="Software" Name="\" />
+    <ROW Registry="UpgradeCode" Root="-1" Key="Software\[Manufacturer]\[UpgradeCode]" Name="\" />
+    <ROW Registry="Version" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Version" Value="[ProductVersion]" Component_="ProductInformation" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiShortsComponent">
-    <ROW Shortcut="ZO.DMMSettings" Directory_="SHORTCUTDIR" Name="ZO~1.DMM|ZO.DMM Settings" Component_="DevModManager.exe_1" Target="[#DevModManager.exe]" Arguments="--settings" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR"/>
-    <ROW Shortcut="ZO.DevModManager" Directory_="SHORTCUTDIR" Name="ZO~1.DEV|ZO.DevModManager" Component_="DevModManager.exe_1" Target="[#DevModManager.exe]" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR"/>
-    <ROW Shortcut="ZO.DevModManager_1" Directory_="DesktopFolder" Name="ZO~1.DEV|ZO.DevModManager" Component_="DevModManager.exe_1" Target="[#DevModManager.exe]" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR"/>
+    <ROW Shortcut="ZO.DMMSettings" Directory_="SHORTCUTDIR" Name="ZO~1.DMM|ZO.DMM Settings" Component_="DevModManager.exe_1" Target="[#DevModManager.exe]" Arguments="--settings" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR" />
+    <ROW Shortcut="ZO.DevModManager" Directory_="SHORTCUTDIR" Name="ZO~1.DEV|ZO.DevModManager" Component_="DevModManager.exe_1" Target="[#DevModManager.exe]" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR" />
+    <ROW Shortcut="ZO.DevModManager_1" Directory_="DesktopFolder" Name="ZO~1.DEV|ZO.DevModManager" Component_="DevModManager.exe_1" Target="[#DevModManager.exe]" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiThemeComponent">
-    <ATTRIBUTE name="UsedTheme" value="classic"/>
+    <ATTRIBUTE name="UsedTheme" value="classic" />
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiUpgradeComponent">
-    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="0.0.1" VersionMax="[|ProductVersion]" Attributes="257" ActionProperty="OLDPRODUCTS"/>
-    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND"/>
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="0.0.1" VersionMax="[|ProductVersion]" Attributes="257" ActionProperty="OLDPRODUCTS" />
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND" />
   </COMPONENT>
 </DOCUMENT>
