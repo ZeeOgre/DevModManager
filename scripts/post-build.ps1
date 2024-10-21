@@ -1,7 +1,7 @@
 param (
     [string]$configuration,
-    [string]$msiFile,
-    [string]$versionFile,
+    [string]$msiFile = "..\Installer\ZO.DevModManager.msi",
+    [string]$versionFile = "..\Properties\version.txt",
     [bool]$manual = $false
 )
 
@@ -45,7 +45,7 @@ function Increment-Tag {
         [string]$tag
     )
     if ($tag -match "-m(\d+)$") {
-        $number = [int]$matches[1] + 1
+        $number = [long]$matches[1] + 1
         return $tag -replace "-m\d+$", "-m$number"
     } else {
         return "$tag-m1"
@@ -74,20 +74,31 @@ if (-not $manual) {
 
 Write-Output "Tag Name: $tagName"
 
-# Ensure on correct branch
+# Ensure on correct branch and push dev if necessary
 $currentBranch = git rev-parse --abbrev-ref HEAD
 Write-Output "Current Branch: $currentBranch"
 
 if ($currentBranch -eq 'master') {
     # Clobber down to dev
     Execute-Command "git checkout dev"
-    Execute-Command "git merge -X theirs master"
-    Write-Output "Merged master into dev with conflicts resolved in favor of master."
+    Execute-Command "git merge -X ours master"
+    Write-Output "Merged master INTO dev with conflicts resolved in favor of dev."
+
+    # Push dev to origin to ensure it's up to date (Line to Add)
+    Execute-Command "git push origin dev"
+    Write-Output "Pushed dev branch to origin."
+
+    $currentBranch = 'dev'
 } elseif ($currentBranch -eq 'dev') {
+    # Push dev to origin to ensure it's up to date (Line to Add)
+    Execute-Command "git push origin dev"
+    Write-Output "Pushed dev branch to origin."
+
     # Friendly merge up to master
     Execute-Command "git checkout master"
     Execute-Command "git merge dev"
-    Write-Output "Merged dev into master."
+    Write-Output "Merged dev INTO master."
+    $currentBranch = 'master'
 }
 
 # Check if there are any changes before committing
@@ -112,12 +123,18 @@ if ($configuration -eq 'GitRelease') {
     }
 
     Execute-Command "git tag $tagName"
-    Execute-Command "git push origin $tagName"
+    # Push the tag to remote, force-pushing to overwrite if necessary
+try {
+    Execute-Command "git push --force origin $tagName"
+} catch {
+    Write-Error "Failed to push tag $tagName to origin."
+    exit 1
+}
     Write-Output "Tagged and pushed release: $tagName"
 
     # Create GitHub release
     if (Get-Command gh -ErrorAction SilentlyContinue) {
-        $autoUpdaterFile = "$(git rev-parse --show-toplevel)\App\Properties\AutoUpdater.xml"
+        $autoUpdaterFile = "$(git rev-parse --show-toplevel)/Properties/AutoUpdater.xml"
         if (Test-Path -Path $autoUpdaterFile) {
             Execute-Command "gh release create $tagName $msiFile $autoUpdaterFile -t $tagName -n 'Release $tagName'"
             Write-Output "Created GitHub release: $tagName with AutoUpdater.xml"
@@ -140,7 +157,7 @@ if ($configuration -eq 'GitRelease') {
 }
 
 # Push AutoUpdater.xml
-$autoUpdaterFile = "$(git rev-parse --show-toplevel)\App\Properties\AutoUpdater.xml"
+$autoUpdaterFile = "$(git rev-parse --show-toplevel)/Properties/AutoUpdater.xml"
 if (Test-Path -Path $autoUpdaterFile) {
     Execute-Command "git add $autoUpdaterFile"
     Execute-Command "git commit -m 'Update AutoUpdater.xml for $tagName'"
