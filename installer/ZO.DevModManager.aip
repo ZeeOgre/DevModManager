@@ -10,10 +10,10 @@
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*" />
     <ROW Property="CTRLS" Value="2" />
     <ROW Property="Manufacturer" Value="ZeeOgre" />
-    <ROW Property="ProductCode" Value="1033:{9796bbe9-8563-4ba5-bbdc-248dd826a71d}" Type="16" />
+    <ROW Property="ProductCode" Value="1033:{0a91e231-4a19-4683-94d3-53f5c9ba1c05}" Type="16" />
     <ROW Property="ProductLanguage" Value="1033" />
     <ROW Property="ProductName" Value="ZO.DevModManager" />
-    <ROW Property="ProductVersion" Value="0.0.11.0" Options="4" />
+    <ROW Property="ProductVersion" Value="0.0.12.0" Options="4" />
     <ROW Property="RUNAPPLICATION" Value="1" Type="4" />
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND" />
     <ROW Property="UpgradeCode" Value="{EF0F26DB-4BF7-4C7C-B94E-72D24CF4E818}" />
