@@ -85,12 +85,16 @@ if ($currentBranch -eq 'master') {
     Write-Output "Merged master INTO dev with conflicts resolved in favor of dev."
     $currentBranch = 'dev'
 } elseif ($currentBranch -eq 'dev') {
-    # Friendly merge up to master
+    # Friendly merge up to master (locally)
     Execute-Command "git checkout master"
     Execute-Command "git merge -X theirs dev"
     Write-Output "Merged dev INTO master with conflicts resolved in favor of dev."
     $currentBranch = 'master'
 }
+
+# Always push dev branch changes
+Execute-Command "git push origin dev"
+Write-Output "Pushed dev branch to origin."
 
 # Check if there are any changes before committing
 $gitStatus = git status --porcelain
@@ -98,15 +102,16 @@ if (-not [string]::IsNullOrWhiteSpace($gitStatus)) {
     Execute-Command "git add ."
     Execute-Command "git commit -m 'Automated commit for $configuration configuration'"
     Write-Output "Committed changes."
-
-    Execute-Command "git push origin $currentBranch"
-    Write-Output "Pushed changes to $currentBranch."
 } else {
     Write-Output "Nothing to commit, working tree clean."
 }
 
 # Handle release
 if ($configuration -eq 'GitRelease') {
+    # Push master branch changes only during GitRelease
+    Execute-Command "git push origin master"
+    Write-Output "Pushed master branch to origin."
+
     # Delete existing local tag if it exists
     $existingTag = git tag -l $tagName
     if ($existingTag) {
@@ -115,12 +120,12 @@ if ($configuration -eq 'GitRelease') {
 
     Execute-Command "git tag $tagName"
     # Push the tag to remote, force-pushing to overwrite if necessary
-try {
-    Execute-Command "git push --force origin $tagName"
-} catch {
-    Write-Error "Failed to push tag $tagName to origin."
-    exit 1
-}
+    try {
+        Execute-Command "git push --force origin $tagName"
+    } catch {
+        Write-Error "Failed to push tag $tagName to origin."
+        exit 1
+    }
     Write-Output "Tagged and pushed release: $tagName"
 
     # Create GitHub release
@@ -152,8 +157,13 @@ $autoUpdaterFile = "$(git rev-parse --show-toplevel)/Properties/AutoUpdater.xml"
 if (Test-Path -Path $autoUpdaterFile) {
     Execute-Command "git add $autoUpdaterFile"
     Execute-Command "git commit -m 'Update AutoUpdater.xml for $tagName'"
-    Execute-Command "git push origin $currentBranch"
-    Write-Output "Pushed AutoUpdater.xml changes."
+    if ($configuration -eq 'GitRelease') {
+        Execute-Command "git push origin master"
+        Write-Output "Pushed AutoUpdater.xml changes to master."
+    } else {
+        Execute-Command "git push origin dev"
+        Write-Output "Pushed AutoUpdater.xml changes to dev."
+    }
 } else {
     Write-Error "AutoUpdater.xml file not found at path: $autoUpdaterFile"
     exit 1
