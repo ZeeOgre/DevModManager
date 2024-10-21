@@ -14,10 +14,10 @@
     <ROW Property="ARPURLUPDATEINFO" Value="https://github.com/ZeeOgre/ZO.DevModManager/releases/latest" />
     <ROW Property="CTRLS" Value="2" />
     <ROW Property="Manufacturer" Value="ZeeOgre" />
-    <ROW Property="ProductCode" Value="1033:{431ae7fa-5ca5-412a-93db-c096b674b1f3}" Type="16" />
+    <ROW Property="ProductCode" Value="1033:{2f0d72b1-695a-4e75-bcb7-dc4bf5e05b66}" Type="16" />
     <ROW Property="ProductLanguage" Value="1033" />
     <ROW Property="ProductName" Value="DevModManager" />
-    <ROW Property="ProductVersion" Value="0.0.5.0" Options="4" />
+    <ROW Property="ProductVersion" Value="0.0.6.0" Options="4" />
     <ROW Property="RUNAPPLICATION" Value="1" Type="4" />
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND" />
     <ROW Property="UpgradeCode" Value="{D1037AAC-4F39-4EAF-B91F-2A365424D0F7}" />
