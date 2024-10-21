@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SQLite;
@@ -293,9 +294,35 @@ namespace ZO.DMM.AppNF
 
         public void LoadOrder()
         {
-            // Placeholder for launching LoadOrderWindow as a standalone application
-            _ = MessageBox.Show("LoadOrderWindow will be launched as a standalone application.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-            // Process.Start("LoadOrderWindow.exe"); // Uncomment and provide the correct path to the standalone application
+            string loadOrderManagerPath = GetLoadOrderManagerPathFromRegistry();
+
+            if (string.IsNullOrEmpty(loadOrderManagerPath) || !File.Exists(loadOrderManagerPath))
+            {
+                var openFileDialog = new OpenFileDialog
+                {
+                    Filter = "Executable Files (*.exe)|*.exe",
+                    Title = "Locate LoadOrderManager.exe",
+                    FileName = "LoadOrderManager.exe"
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    loadOrderManagerPath = openFileDialog.FileName;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(loadOrderManagerPath) && File.Exists(loadOrderManagerPath))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = loadOrderManagerPath,
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                MessageBox.Show("LoadOrderManager.exe not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public bool IsModFolderAccessible(ModItem modItem)
@@ -303,6 +330,26 @@ namespace ZO.DMM.AppNF
             return !string.IsNullOrEmpty(modItem.DeployedStage) &&
                    !string.IsNullOrEmpty(modItem.ModDeploymentFolder) &&
                    Directory.Exists(PathBuilder.GetModStagingFolder(modItem.ModName));
+        }
+        private string GetLoadOrderManagerPathFromRegistry()
+        {
+            const string registryKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\ZeeOgre\ZO.LoadOrderManager";
+            const string registryValue = "Path";
+
+            try
+            {
+                var installPath = (string)Microsoft.Win32.Registry.GetValue(registryKey, registryValue, null);
+                if (!string.IsNullOrEmpty(installPath))
+                {
+                    return Path.Combine(installPath, "LoadOrderManager.exe");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error reading registry: {ex.Message}");
+            }
+
+            return string.Empty;
         }
     }
 }
