@@ -374,6 +374,12 @@ FodyWeavers.xsd
 # Temporary YAML files
 *.tmp.yaml
 *.tmp.yml
-/App/scripts/post-build.ps1
 
+# PostSharp build output
+#/App/scripts/post-build.ps1
+
+# Ignore Installer cache
+[Ii]nstaller/*-cache/
+[Ii]nstaller/*-cache/**
+[Ii]nstaller/*-cache/**/*
 
