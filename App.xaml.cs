@@ -4,6 +4,8 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using ZO.DMM.AppNF.Properties;
+using Microsoft.Win32;
+using ControlzEx.Theming;
 
 
 namespace ZO.DMM.AppNF
@@ -41,8 +43,9 @@ namespace ZO.DMM.AppNF
             Debug.WriteLine("Application_Startup called");
             var updateUrl = ZO.DMM.AppNF.Properties.Settings.Default.UpdateUrl;
 
-
             Config.VerifyLocalAppDataFiles();
+
+            SetThemeBasedOnSystem();
 
             if (Array.Exists(e.Args, arg => arg.Equals("--settings", StringComparison.OrdinalIgnoreCase)))
             {
@@ -67,8 +70,6 @@ namespace ZO.DMM.AppNF
         {
             try
             {
-
-
                 Debug.WriteLine("Initializing database...");
                 DbManager.Instance.Initialize();
                 Debug.WriteLine("Database initialized.");
@@ -108,7 +109,6 @@ namespace ZO.DMM.AppNF
             }
         }
 
-
         private static Assembly? OnAssemblyResolve(object? sender, ResolveEventArgs args)
         {
             string probingPaths = Settings.Default.ProbingPaths;
@@ -128,10 +128,8 @@ namespace ZO.DMM.AppNF
             return null;
         }
 
-
         public static void CheckForUpdates(Window owner)
         {
-
             try
             {
                 AutoUpdater.SetOwner(owner);
@@ -149,7 +147,6 @@ namespace ZO.DMM.AppNF
             }
         }
 
-
         private static T? GetAssemblyAttribute<T>(Assembly assembly) where T : Attribute
         {
             return (T?)Attribute.GetCustomAttribute(assembly, typeof(T));
@@ -159,6 +156,73 @@ namespace ZO.DMM.AppNF
         {
             string probingPaths = ZO.DMM.AppNF.Properties.Settings.Default.ProbingPaths;
             AppDomain.CurrentDomain.SetData("PROBING_DIRECTORIES", probingPaths);
+        }
+
+        private void SetThemeBasedOnSystem()
+        {
+            var isDarkTheme = IsSystemInDarkMode();
+            ApplyCustomTheme(isDarkTheme);
+        }
+
+        private bool IsSystemInDarkMode()
+        {
+            const string registryKey = @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+            const string registryValue = "AppsUseLightTheme";
+
+            object? registryValueObject = Registry.GetValue(registryKey, registryValue, null);
+            if (registryValueObject is int registryValueInt)
+            {
+                return registryValueInt == 0; // 0 means dark mode, 1 means light mode
+            }
+
+            return false; // Default to light mode if the registry key is not found
+        }
+
+        public void ApplyCustomTheme(bool isDarkMode)
+        {
+            var theme = isDarkMode ? ThemeManager.BaseColorDarkConst : ThemeManager.BaseColorLightConst;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // Remove existing Resource Dictionaries related to themes.
+                var existingDictionaries = Application.Current.Resources.MergedDictionaries.ToList();
+                foreach (var dictionary in existingDictionaries)
+                {
+                    if (dictionary.Source != null &&
+                        (dictionary.Source.OriginalString.Contains("MaterialDesignTheme.Light.xaml") ||
+                         dictionary.Source.OriginalString.Contains("MaterialDesignTheme.Dark.xaml") ||
+                         dictionary.Source.OriginalString.Contains("MahApps.Metro;component/Styles/Themes/Light.Blue.xaml") ||
+                         dictionary.Source.OriginalString.Contains("MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml") ||
+                         dictionary.Source.OriginalString.Contains("Themes/ColorsLight.xaml") ||
+                         dictionary.Source.OriginalString.Contains("Themes/ColorsDark.xaml")))
+                    {
+                        _ = Application.Current.Resources.MergedDictionaries.Remove(dictionary);
+                    }
+                }
+
+                // Load new theme dictionaries based on the selected mode
+                var materialDesignResourcePath = isDarkMode
+                    ? "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml"
+                    : "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml";
+
+                var mahAppsResourcePath = isDarkMode
+                    ? "pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml"
+                    : "pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml";
+
+                var customColorResourcePath = isDarkMode
+                    ? "pack://application:,,,/Themes/ColorsDark.xaml"
+                    : "pack://application:,,,/Themes/ColorsLight.xaml";
+
+                Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary() { Source = new Uri(materialDesignResourcePath) });
+                Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary() { Source = new Uri(mahAppsResourcePath) });
+                Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary() { Source = new Uri(customColorResourcePath) });
+
+                // Apply MahApps theme
+                _ = ThemeManager.Current.ChangeThemeBaseColor(Application.Current, theme);
+                _ = ThemeManager.Current.ChangeThemeColorScheme(Application.Current, "Blue");
+
+                // Restart the application to apply the new theme
+                //RestartApplication();
+            });
         }
     }
 }

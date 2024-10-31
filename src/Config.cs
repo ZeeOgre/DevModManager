@@ -54,6 +54,13 @@ namespace ZO.DMM.AppNF
         public bool ShowOverwriteMessage { get; set; }
         public string NexusAPIKey { get; set; } = string.Empty;
         public bool AutoCheckForUpdates { get; set; }
+        public bool DarkMode { get; set; } = true;
+        public string GitHubUsername { get; set; }
+        [YamlIgnore]
+        public string GitHubToken { get; set; }
+        [YamlIgnore]
+        public DateTime? GitHubTokenExpiration { get; set; }
+        public bool GitHubAuthenticated { get; set; }
 
         public static void Initialize()
         {
@@ -225,7 +232,11 @@ namespace ZO.DMM.AppNF
                                 NexusAPIKey = reader["NexusAPIKey"] != DBNull.Value ? reader["NexusAPIKey"].ToString() : string.Empty,
                                 ModStages = reader["ModStages"] != DBNull.Value ? reader["ModStages"].ToString().Split(new char[] { ',' }) : new string[0],
                                 ArchiveFormat = reader["ArchiveFormat"] != DBNull.Value ? reader["ArchiveFormat"].ToString() : string.Empty,
-                                AutoCheckForUpdates = Convert.ToBoolean(reader["AutoCheckForUpdates"])
+                                AutoCheckForUpdates = Convert.ToBoolean(reader["AutoCheckForUpdates"]),
+                                DarkMode = Convert.ToBoolean(reader["DarkMode"]),
+                                GitHubUsername = reader["GitHubUsername"] != DBNull.Value ? reader["GitHubUsername"].ToString() : string.Empty,
+                                GitHubToken = reader["GitHubToken"] != DBNull.Value ? reader["GitHubToken"].ToString() : string.Empty,
+                                GitHubTokenExpiration = reader["GitHubTokenExpiration"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["GitHubTokenExpiration"]) : null
                             };
                         }
                     }
@@ -250,7 +261,7 @@ namespace ZO.DMM.AppNF
                         _ = command.ExecuteNonQuery();
 
                         command.CommandText = @"
-                                            INSERT INTO Config (
+                                            INSERT OR REPLACE INTO Config (
                                                 RepoFolder,
                                                 UseGit,
                                                 GitHubRepo,
@@ -270,7 +281,11 @@ namespace ZO.DMM.AppNF
                                                 ShowOverwriteMessage,
                                                 NexusAPIKey,
                                                 ArchiveFormatID,
-                                                AutoCheckForUpdates
+                                                AutoCheckForUpdates,
+                                                DarkMode,
+                                                GitHubUsername,
+                                                GitHubToken,
+                                                GitHubTokenExpiration
                                             ) VALUES (
                                                 @RepoFolder,
                                                 @UseGit,
@@ -291,7 +306,11 @@ namespace ZO.DMM.AppNF
                                                 @ShowOverwriteMessage,
                                                 @NexusAPIKey,
                                                 (SELECT ArchiveFormatID FROM ArchiveFormats WHERE FormatName = @ArchiveFormat),
-                                                @AutoCheckForUpdates
+                                                @AutoCheckForUpdates,
+                                                @DarkMode,
+                                                @GitHubUsername,
+                                                @GitHubToken,
+                                                @GitHubTokenExpiration
                                             )";
 
                         _ = command.Parameters.AddWithValue("@RepoFolder", config.RepoFolder ?? (object)DBNull.Value);
@@ -313,7 +332,11 @@ namespace ZO.DMM.AppNF
                         _ = command.Parameters.AddWithValue("@ShowOverwriteMessage", config.ShowOverwriteMessage);
                         _ = command.Parameters.AddWithValue("@NexusAPIKey", config.NexusAPIKey ?? (object)DBNull.Value);
                         _ = command.Parameters.AddWithValue("@ArchiveFormat", config.ArchiveFormat ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@DarkMode", config.DarkMode);
                         _ = command.Parameters.AddWithValue("@AutoCheckForUpdates", config.AutoCheckForUpdates);
+                        _ = command.Parameters.AddWithValue("@GitHubUsername", config.GitHubUsername ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@GitHubToken", config.GitHubToken ?? (object)DBNull.Value);
+                        _ = command.Parameters.AddWithValue("@GitHubTokenExpiration", config.GitHubTokenExpiration.HasValue ? config.GitHubTokenExpiration.Value.ToString("o") : (object)DBNull.Value);
 
                         _ = command.ExecuteNonQuery();
                     }

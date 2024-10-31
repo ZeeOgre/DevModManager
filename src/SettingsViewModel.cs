@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using LibGit2Sharp;
 
 namespace ZO.DMM.AppNF
 {
@@ -14,6 +15,20 @@ namespace ZO.DMM.AppNF
         private Config _config;
         private string _archiveFormat;
         public Window ParentWindow { get; set; }
+
+
+        private string _gitHubUsername;
+        private string _tokenExpiration;
+        private bool _authenticated;
+        public string GitHubUsername
+        {
+            get => _gitHubUsername;
+            set
+            {
+                _gitHubUsername = value;
+                OnPropertyChanged();
+            }
+        }
 
         public SettingsViewModel()
         {
@@ -25,15 +40,38 @@ namespace ZO.DMM.AppNF
             LoadCommand = new RelayCommand(_ => LoadSettings());
 
             CheckForUpdatesCommand = new RelayCommand(_ => App.CheckForUpdates(ParentWindow));
+            CloneRepoCommand = new RelayCommand(_ => CloneRepo());
 
 
             LoadSettings();
+        }
+        public string TokenExpiration
+        {
+            get => _tokenExpiration;
+            set
+            {
+                _tokenExpiration = value;
+                OnPropertyChanged(nameof(TokenExpiration));
+            }
+        }
+
+        public bool GitHubAuthenticated
+        {
+            get => _authenticated;
+            set
+            {
+                _authenticated = value;
+                OnPropertyChanged(nameof(GitHubAuthenticated));
+            }
         }
 
         public ICommand SaveCommand { get; }
         public ICommand LoadCommand { get; }
         public ICommand LaunchGameFolderCommand { get; }
         public ICommand CheckForUpdatesCommand { get; }
+        public ICommand CloneRepoCommand { get; }
+        //public ICommand LoadSettingsCommand { get; } = new RelayCommand(_ => LoadSettings());
+        //public ICommand SaveSettingsCommand { get; } = new RelayCommand(_ => SaveSettings());
 
         public bool AutoCheckForUpdates
         {
@@ -46,7 +84,7 @@ namespace ZO.DMM.AppNF
         }
 
         public ObservableCollection<string> AvailableArchiveFormats { get; private set; }
-
+        
         private void LoadAvailableArchiveFormats()
         {
             string query = "SELECT FormatName FROM ArchiveFormats;";
@@ -98,10 +136,42 @@ namespace ZO.DMM.AppNF
             ShowOverwriteMessage = config.ShowOverwriteMessage;
             NexusAPIKey = config.NexusAPIKey;
             AutoCheckForUpdates = config.AutoCheckForUpdates;
+            DarkMode = config.DarkMode;
+            GitHubUsername = config.GitHubUsername;
+            GitHubToken = config.GitHubToken;
+            GitHubTokenExpiration = config.GitHubTokenExpiration;
+            GitHubAuthenticated = config.GitHubAuthenticated;   
+
 
             OnPropertyChanged(null);
         }
 
+
+        public bool DarkMode {
+            get => _config.DarkMode;
+            set
+            {
+                _config.DarkMode = value;
+                OnPropertyChanged();
+            }
+        }
+        public string GitHubToken {
+            get => _config.GitHubToken;
+            set
+            {
+                _config.GitHubToken = value;
+                OnPropertyChanged();
+            }
+        }
+        public DateTime? GitHubTokenExpiration {
+            get => _config.GitHubTokenExpiration;
+            set
+            {
+                _config.GitHubTokenExpiration = value;
+                OnPropertyChanged();
+            }
+        }
+        
         public string RepoFolder
         {
             get => _config.RepoFolder;
@@ -330,6 +400,11 @@ namespace ZO.DMM.AppNF
             Config.Instance.ModStages = ModStages.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             Config.Instance.ArchiveFormat = ArchiveFormat;
             Config.Instance.AutoCheckForUpdates = AutoCheckForUpdates;
+            Config.Instance.DarkMode = DarkMode;
+            Config.Instance.GitHubUsername = GitHubUsername;
+            Config.Instance.GitHubToken = GitHubToken;
+            Config.Instance.GitHubTokenExpiration = GitHubTokenExpiration;
+            Config.Instance.GitHubAuthenticated = GitHubAuthenticated;    
 
             // Save to YAML and Database
             Config.SaveToYaml();
@@ -360,6 +435,13 @@ namespace ZO.DMM.AppNF
             NexusAPIKey = Config.Instance.NexusAPIKey;
             ArchiveFormat = Config.Instance.ArchiveFormat;
             AutoCheckForUpdates = Config.Instance.AutoCheckForUpdates;
+            DarkMode = Config.Instance.DarkMode;
+            GitHubUsername = Config.Instance.GitHubUsername;
+            GitHubToken = Config.Instance.GitHubToken;
+            GitHubTokenExpiration = Config.Instance.GitHubTokenExpiration;
+            GitHubAuthenticated = Config.Instance.GitHubAuthenticated;
+
+
         }
 
 
@@ -381,6 +463,33 @@ namespace ZO.DMM.AppNF
                 _ = MessageBox.Show("Game folder is not set or does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        
+        private void CloneRepo()
+        {
+            if (string.IsNullOrEmpty(GitHubRepo) || string.IsNullOrEmpty(RepoFolder))
+            {
+                MessageBox.Show("GitHub repository URL or local repository folder is not set.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                // Ensure the RepoFolder exists
+                if (!Directory.Exists(RepoFolder))
+                {
+                    Directory.CreateDirectory(RepoFolder);
+                }
+
+                // Clone the repository
+                LibGit2Sharp.Repository.Clone(GitHubRepo, RepoFolder);
+                MessageBox.Show("Repository cloned successfully.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to clone the repository: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -1,8 +1,20 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
+using MahApps.Metro.Controls;
+using MaterialDesignThemes.Wpf;
+using Octokit;
+using Octokit.Internal;
+using Application = System.Windows.Application;
+using System.Net;
+
 
 namespace ZO.DMM.AppNF
 {
@@ -16,11 +28,12 @@ namespace ZO.DMM.AppNF
         MainWindow
     }
 
-    public partial class SettingsWindow : Window
+    public partial class SettingsWindow : MetroWindow
     {
         private SettingsViewModel _viewModel;
         private bool _isSaveButtonClicked;
         private readonly SettingsLaunchSource _launchSource;
+        private GitHubClient _gitHubClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsWindow"/> class.
@@ -50,6 +63,102 @@ namespace ZO.DMM.AppNF
                 _viewModel.UpdateFromConfig();
                 DataContext = _viewModel;
             }
+        }
+
+
+        //  GH Client ID Ov23liI5VnvjIcTPKLIk
+        //  GH API Secret c0bbaa6651d29ca1f0368ac3924d0e00dce3acb9
+
+
+        private async Task AuthenticateUserWithGitHub()
+        {
+            try
+            {
+                var clientId = "Ov23liI5VnvjIcTPKLIk";
+                var clientSecret = "c0bbaa6651d29ca1f0368ac3924d0e00dce3acb9";
+                var oauthClient = new GitHubClient(new ProductHeaderValue("ZO.DevModManager"));
+
+                var request = new OauthLoginRequest(clientId)
+                {
+                    Scopes = { "repo", "user" },
+                    RedirectUri = new Uri("http://localhost:53306/")
+                };
+
+                var authorizeUrl = oauthClient.Oauth.GetGitHubLoginUrl(request);
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = authorizeUrl.ToString(),
+                    UseShellExecute = true
+                });
+
+                var httpListener = new HttpListener();
+                httpListener.Prefixes.Add("http://localhost:53306/");
+                httpListener.Start();
+
+                // Wait for the callback from GitHub
+                var context = await httpListener.GetContextAsync();
+                var code = context.Request.QueryString["code"];
+
+                if (string.IsNullOrEmpty(code))
+                {
+                    MessageBox.Show("Failed to receive authorization code from GitHub.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Send a response back to the browser
+                var response = context.Response;
+                string responseString = "<html><body>Authentication successful! You can close this window.</body></html>";
+                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+                response.ContentLength64 = buffer.Length;
+                var output = response.OutputStream;
+                output.Write(buffer, 0, buffer.Length);
+                output.Close();
+
+                // Exchange the code for an access token
+                var tokenRequest = new OauthTokenRequest(clientId, clientSecret, code);
+                var token = await oauthClient.Oauth.CreateAccessToken(tokenRequest);
+
+                if (!string.IsNullOrEmpty(token.AccessToken))
+                {
+                    _viewModel.GitHubTokenExpiration = DateTime.UtcNow.AddDays(90);
+                    _gitHubClient = new GitHubClient(new ProductHeaderValue("ZO.DevModManager"))
+                    {
+                        Credentials = new Octokit.Credentials(token.AccessToken)
+                    };
+
+                    var user = await _gitHubClient.User.Current();
+                    _viewModel.GitHubUsername = user.Login;
+                    _viewModel.GitHubAuthenticated = true;
+
+                    Config.Instance.GitHubToken = token.AccessToken;
+                    Config.Instance.GitHubUsername = user.Login;
+                    Config.Instance.GitHubTokenExpiration = _viewModel.GitHubTokenExpiration;
+                    Config.Instance.GitHubAuthenticated = true;
+
+                    Config.SaveToDatabase();
+
+                    MessageBox.Show($"Authenticated as {user.Login}", "Authentication Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Authentication failed. Please try again.", "Authentication Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+                httpListener.Stop();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error during authentication: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+
+
+        private void AuthenticateButton_Click(object sender, RoutedEventArgs e)
+        {
+            _ = AuthenticateUserWithGitHub();
         }
 
         private void CheckForUpdatesButton_Click(object sender, RoutedEventArgs e)
