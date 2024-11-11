@@ -77,16 +77,39 @@ namespace ZO.DMM.AppNF
                 var relativePath = PathBuilder.GetRelativePath(dataFolder, file);
                 var destinationPath = Path.Combine(modFolderPath, relativePath);
                 var destinationDir = Path.GetDirectoryName(destinationPath);
+
                 if (!Directory.Exists(destinationDir))
                 {
                     _ = Directory.CreateDirectory(destinationDir);
                 }
-                File.Copy(sourcePath, destinationPath, true);
+
+                try
+                {
+                    var sourceFileInfo = new FileInfo(sourcePath);
+                    var destinationFileInfo = new FileInfo(destinationPath);
+
+                    // Check if the destination file exists and compare properties
+                    if (destinationFileInfo.Exists)
+                    {
+                        if (sourceFileInfo.Length == destinationFileInfo.Length &&
+                            sourceFileInfo.LastWriteTime == destinationFileInfo.LastWriteTime)
+                        {
+                            // Skip copying if the files are the same
+                            continue;
+                        }
+                    }
+
+                    File.Copy(sourcePath, destinationPath, true);
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show($"Error copying file {sourcePath}: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
-    }
 
-    public class FileItem
+    }
+        public class FileItem
     {
         public bool IsSelected { get; set; }
         public string FileName { get; set; }

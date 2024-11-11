@@ -196,7 +196,7 @@ namespace ZO.DMM.AppNF
                 DateTime referenceTimestamp = ParseFileTimestamp(latestFile);
                 string[] files = Directory.GetFiles(dataFolder, "*.*", SearchOption.AllDirectories);
 
-                List<string> excludedExtensions = new List<string> { ".dmp", ".json", ".log" };
+                List<string> excludedExtensions = new List<string> { ".dmp", ".json", ".log", ".vortex_backup",""};
                 List<string> newerFiles = new List<string>();
 
                 foreach (string file in files)
