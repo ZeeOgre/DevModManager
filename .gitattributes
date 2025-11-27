@@ -89,6 +89,20 @@
 *.pdb  binary
 
 ###############################################################################
+# behavior for database and installer / archive files
+###############################################################################
+*.db   binary
+*.pdb  binary
+
+# Large artifacts => Git LFS
+*.msi filter=lfs diff=lfs merge=lfs -text
+*.ba2 filter=lfs diff=lfs merge=lfs -text
+*.7z  filter=lfs diff=lfs merge=lfs -text
+# optional, if you ever want these in LFS too:
+#*.zip filter=lfs diff=lfs merge=lfs -text
+
+
+###############################################################################
 # behavior for XAML files
 #
 # Treat XAML files as text.

@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- Targeting -->
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<Deterministic>true</Deterministic>
+
+		<!-- Identity / metadata -->
+		<AssemblyName>DevModManager.Core</AssemblyName>
+		<RootNamespace>DevModManager.Core</RootNamespace>
+		<Title>DevModManager Core Functions</Title>
+		<!-- Keep description on one line to avoid odd whitespace in some tooling -->
+		<Description>Core logic for DevModManager: a mod manager designed first for Starfield to help mod developers manage mod lifecycle (DEV → TEST → STAGING → PROD) with Git / GitHub integration.</Description>
+		<Authors>ZeeOgre</Authors>
+		<Company>ZeeOgre / ModdersMilk</Company>
+		<Product>DevModManager</Product>
+		<Copyright>© 2025 ZeeOgre</Copyright>
+
+		<!-- Versioning -->
+		<Version>0.1.0</Version>
+		<FileVersion>0.1.0.0</FileVersion>
+		<!-- Consider keeping AssemblyVersion more stable and only bumping on breaking changes -->
+		<AssemblyVersion>0.1.0.0</AssemblyVersion>
+
+		<!-- Licensing / package metadata -->
+		<PackageId>DevModManager.Core</PackageId>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/ZeeOgre/DevModManager</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/ZeeOgre/DevModManager.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+
+		<!-- NuGet packing: disabled by default -->
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+		<!-- Docs / warnings -->
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+	</PropertyGroup>
+
+	<!-- Include root README in the eventual NuGet package (if/when you pack) -->
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+</Project>
