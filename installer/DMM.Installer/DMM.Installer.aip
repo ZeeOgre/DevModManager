@@ -2,17 +2,99 @@
 <DOCUMENT Type="Advanced Installer" CreateVersion="23.2" version="23.2" Modules="simple" RootPath="." Language="en" Id="{2AA6D7A1-65D8-4358-B9DF-CD6C93B277BB}">
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Base.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Controls.ColorPicker.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Controls.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.DesignerSupport.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Desktop.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Diagnostics.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Dialogs.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Fonts.Inter.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.FreeDesktop.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Markup.Xaml.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Markup.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Metal.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.MicroCom.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Native.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.OpenGL.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Remote.Protocol.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Skia.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Themes.Fluent.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Themes.Simple.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Vulkan.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Win32.Automation.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.Win32.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.X11.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Avalonia.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_DevModManager.Avalonia.deps.json" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_DevModManager.Avalonia.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_DevModManager.Avalonia.exe" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_DevModManager.Avalonia.runtimeconfig.json" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_DevModManager.Core.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_DevModManager.Core.xml" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_HarfBuzzSharp.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_MicroCom.Runtime.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_SkiaSharp.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_System.IO.Pipelines.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_Tmds.DBus.Protocol.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_av_libglesv2.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_libHarfBuzzSharp.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_DIR_PERBUILD_libSkiaSharp.dll" Value="..\..\src\DevModManager.Avalonia\bin\Release\net8.0\publish\win-x64"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Base.dll" Value="Avalonia.Base.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Controls.ColorPicker.dll" Value="Avalonia.Controls.ColorPicker.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Controls.dll" Value="Avalonia.Controls.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.DesignerSupport.dll" Value="Avalonia.DesignerSupport.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Desktop.dll" Value="Avalonia.Desktop.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Diagnostics.dll" Value="Avalonia.Diagnostics.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Dialogs.dll" Value="Avalonia.Dialogs.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Fonts.Inter.dll" Value="Avalonia.Fonts.Inter.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.FreeDesktop.dll" Value="Avalonia.FreeDesktop.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Markup.Xaml.dll" Value="Avalonia.Markup.Xaml.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Markup.dll" Value="Avalonia.Markup.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Metal.dll" Value="Avalonia.Metal.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.MicroCom.dll" Value="Avalonia.MicroCom.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Native.dll" Value="Avalonia.Native.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.OpenGL.dll" Value="Avalonia.OpenGL.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Remote.Protocol.dll" Value="Avalonia.Remote.Protocol.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Skia.dll" Value="Avalonia.Skia.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Themes.Fluent.dll" Value="Avalonia.Themes.Fluent.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Themes.Simple.dll" Value="Avalonia.Themes.Simple.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Vulkan.dll" Value="Avalonia.Vulkan.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Win32.Automation.dll" Value="Avalonia.Win32.Automation.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Win32.dll" Value="Avalonia.Win32.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.X11.dll" Value="Avalonia.X11.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Avalonia.dll" Value="Avalonia.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.deps.json" Value="DevModManager.Avalonia.deps.json"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.dll" Value="DevModManager.Avalonia.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.exe" Value="DevModManager.Avalonia.exe"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.runtimeconfig.json" Value="DevModManager.Avalonia.runtimeconfig.json"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Core.dll" Value="DevModManager.Core.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Core.xml" Value="DevModManager.Core.xml"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_HarfBuzzSharp.dll" Value="HarfBuzzSharp.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_MicroCom.Runtime.dll" Value="MicroCom.Runtime.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_SkiaSharp.dll" Value="SkiaSharp.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_System.IO.Pipelines.dll" Value="System.IO.Pipelines.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_Tmds.DBus.Protocol.dll" Value="Tmds.DBus.Protocol.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_av_libglesv2.dll" Value="av_libglesv2.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_libHarfBuzzSharp.dll" Value="libHarfBuzzSharp.dll"/>
+    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_libSkiaSharp.dll" Value="libSkiaSharp.dll"/>
     <ROW Property="ALLUSERS" Value="1"/>
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
-    <ROW Property="Manufacturer" Value="Your Company"/>
-    <ROW Property="ProductCode" Value="1033:{9ECE7215-AC8C-4994-A3B0-568BE812EE1D} " Type="16"/>
+    <ROW Property="ARPCONTACT" Value="zeeogre@zeeogre.com"/>
+    <ROW Property="ARPHELPLINK" Value="https://github.com/ZeeOgre/DevModManager/issues"/>
+    <ROW Property="ARPPRODUCTICON" Value="ZeeOgre.exe" Type="8"/>
+    <ROW Property="ARPURLINFOABOUT" Value="https://github.com/ZeeOgre/DevModManager"/>
+    <ROW Property="ARPURLUPDATEINFO" Value="https://github.com/ZeeOgre/DevModManager/releases"/>
+    <ROW Property="Manufacturer" Value="ZeeOgre"/>
+    <ROW Property="ProductCode" Value="1033:{AA26E3AE-2D57-422D-8588-B6D742740CA0} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
-    <ROW Property="ProductName" Value="Your Application"/>
-    <ROW Property="ProductVersion" Value="1.0.0" Options="32"/>
+    <ROW Property="ProductName" Value="DevModManager"/>
+    <ROW Property="ProductVersion" Value="0.1.0" Options="4"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{BB035261-C178-4F91-B784-368269B2080E}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
     <ROW Property="WindowsType9XDisplay" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT" MultiBuildValue="DefaultBuild:Windows 9x/ME/NT/2000/XP/Vista/Windows 7/Windows 8 x86/Windows 8.1 x86/Windows 10 x86" ValueLocId="-"/>
     <ROW Property="WindowsTypeNT40" MultiBuildValue="DefaultBuild:Windows NT 4.0" ValueLocId="-"/>
     <ROW Property="WindowsTypeNT40Display" MultiBuildValue="DefaultBuild:Windows NT 4.0" ValueLocId="-"/>
     <ROW Property="WindowsTypeNT50" MultiBuildValue="DefaultBuild:Windows 2000" ValueLocId="-"/>
@@ -21,9 +103,13 @@
     <ROW Property="WindowsTypeNT5XDisplay" MultiBuildValue="DefaultBuild:Windows XP/2003" ValueLocId="-"/>
     <ROW Property="WindowsTypeNT60" MultiBuildValue="DefaultBuild:Windows Vista/Server 2008" ValueLocId="-"/>
     <ROW Property="WindowsTypeNT60Display" MultiBuildValue="DefaultBuild:Windows Vista/Server 2008" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT64" MultiBuildValue="DefaultBuild:Windows 7 x64, Windows Server 2008 R2 x64, Windows 8 x64, Windows Server 2012 x64, Windows 8.1 x64, Windows Server 2012 R2 x64, Windows Server x64" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT64Display" MultiBuildValue="DefaultBuild:Windows 7 x64, Windows Server 2008 R2 x64, Windows 8 x64, Windows Server 2012 x64, Windows 8.1 x64, Windows Server 2012 R2 x64, Windows Server x64" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNTDisplay" MultiBuildValue="DefaultBuild:32-bit Windows versions" ValueLocId="-"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
     <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1" DirectoryOptions="3"/>
+    <ROW Directory="DevModManager.Avalonia_Dir" Directory_Parent="APPDIR" DefaultDir="DEVMOD~1.AVA|DevModManager.Avalonia" DirectoryOptions="3"/>
     <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SideBySideGuidComponent">
@@ -32,14 +118,96 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
     <ROW Component="APPDIR" ComponentId="{FD3654C8-D056-4AD4-816C-EFE18CA26B86}" Directory_="APPDIR" Attributes="0"/>
-    <ROW Component="ProductInformation" ComponentId="{B6B98695-E0AE-45B5-9FAD-51865CDEB930}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
+    <ROW Component="DevModManager.Avalonia_PrimaryOutput" ComponentId="{FD01E4CE-5280-430B-AE7F-86FB40442E68}" Directory_="DevModManager.Avalonia_Dir" Attributes="256" KeyPath="DevModManager.Avalonia.dll"/>
+    <ROW Component="DevModManager.Avalonia_PublishOutput" ComponentId="{B7B75F1F-FF83-463C-8D85-53D8E5D5EF2F}" Directory_="DevModManager.Avalonia_Dir" Attributes="256" KeyPath="Tmds.DBus.Protocol.dll"/>
+    <ROW Component="ProductInformation" ComponentId="{B6B98695-E0AE-45B5-9FAD-51865CDEB930}" Directory_="APPDIR" Attributes="260" KeyPath="Version"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
     <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="DevModManager.Avalonia.dll" Component_="DevModManager.Avalonia_PrimaryOutput" FileName="DEVMOD~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_DevModManager.Avalonia.dll&gt;" SelfReg="false"/>
+    <ROW File="av_libglesv2.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AV_LIB~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_av_libglesv2.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_av_libglesv2.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Base.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALON~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Base.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Base.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Controls.ColorPicker.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALON~3.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Controls.ColorPicker.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Controls.ColorPicker.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Controls.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALON~4.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Controls.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Controls.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.DesignerSupport.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALON~5.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.DesignerSupport.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.DesignerSupport.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Desktop.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALON~6.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Desktop.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Desktop.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Diagnostics.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALON~7.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Diagnostics.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Diagnostics.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Dialogs.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALON~8.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Dialogs.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Dialogs.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Fonts.Inter.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALON~9.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Fonts.Inter.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Fonts.Inter.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.FreeDesktop.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~10.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.FreeDesktop.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.FreeDesktop.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Markup.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~11.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Markup.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Markup.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Markup.Xaml.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~12.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Markup.Xaml.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Markup.Xaml.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Metal.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~13.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Metal.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Metal.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.MicroCom.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~14.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.MicroCom.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.MicroCom.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Native.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~15.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Native.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Native.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.OpenGL.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~16.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.OpenGL.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.OpenGL.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Remote.Protocol.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~17.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Remote.Protocol.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Remote.Protocol.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Skia.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~18.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Skia.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Skia.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Themes.Fluent.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~19.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Themes.Fluent.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Themes.Fluent.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Themes.Simple.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~20.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Themes.Simple.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Themes.Simple.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Vulkan.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~21.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Vulkan.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Vulkan.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Win32.Automation.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~22.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Win32.Automation.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Win32.Automation.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.Win32.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~23.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Win32.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.Win32.dll&gt;" SelfReg="false"/>
+    <ROW File="Avalonia.X11.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="AVALO~24.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.X11.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Avalonia.X11.dll&gt;" SelfReg="false"/>
+    <ROW File="DevModManager.Avalonia.deps.json" Component_="DevModManager.Avalonia_PublishOutput" FileName="DEVMOD~2.JSO|[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.deps.json]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_DevModManager.Avalonia.deps.json&gt;" SelfReg="false"/>
+    <ROW File="DevModManager.Avalonia.exe" Component_="DevModManager.Avalonia_PublishOutput" FileName="DEVMOD~2.EXE|[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.exe]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_DevModManager.Avalonia.exe&gt;" SelfReg="false" DigSign="true"/>
+    <ROW File="DevModManager.Avalonia.runtimeconfig.json" Component_="DevModManager.Avalonia_PublishOutput" FileName="DEVMOD~3.JSO|[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.runtimeconfig.json]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_DevModManager.Avalonia.runtimeconfig.json&gt;" SelfReg="false"/>
+    <ROW File="DevModManager.Core.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="DEVMOD~3.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Core.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_DevModManager.Core.dll&gt;" SelfReg="false"/>
+    <ROW File="DevModManager.Core.xml" Component_="DevModManager.Avalonia_PublishOutput" FileName="DEVMOD~2.XML|[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Core.xml]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_DevModManager.Core.xml&gt;" SelfReg="false"/>
+    <ROW File="HarfBuzzSharp.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="HARFBU~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_HarfBuzzSharp.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_HarfBuzzSharp.dll&gt;" SelfReg="false"/>
+    <ROW File="libHarfBuzzSharp.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="LIBHAR~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_libHarfBuzzSharp.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_libHarfBuzzSharp.dll&gt;" SelfReg="false"/>
+    <ROW File="libSkiaSharp.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="LIBSKI~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_libSkiaSharp.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_libSkiaSharp.dll&gt;" SelfReg="false"/>
+    <ROW File="MicroCom.Runtime.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="MICROC~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_MicroCom.Runtime.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_MicroCom.Runtime.dll&gt;" SelfReg="false"/>
+    <ROW File="SkiaSharp.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="SKIASH~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_SkiaSharp.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_SkiaSharp.dll&gt;" SelfReg="false"/>
+    <ROW File="System.IO.Pipelines.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="SYSTEM~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_System.IO.Pipelines.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_System.IO.Pipelines.dll&gt;" SelfReg="false"/>
+    <ROW File="Tmds.DBus.Protocol.dll" Component_="DevModManager.Avalonia_PublishOutput" FileName="TMDSDB~2.DLL|[|AI_PROPPATH_FILENAME_PERBUILD_Tmds.DBus.Protocol.dll]" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_Tmds.DBus.Protocol.dll&gt;" SelfReg="false"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.AppPathsComponent">
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Base.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Base.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Base.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Controls.ColorPicker.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Controls.ColorPicker.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Controls.ColorPicker.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Controls.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Controls.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Controls.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.DesignerSupport.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.DesignerSupport.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.DesignerSupport.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Desktop.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Desktop.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Desktop.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Diagnostics.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Diagnostics.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Diagnostics.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Dialogs.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Dialogs.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Dialogs.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Fonts.Inter.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Fonts.Inter.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Fonts.Inter.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.FreeDesktop.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.FreeDesktop.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.FreeDesktop.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Markup.Xaml.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Markup.Xaml.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Markup.Xaml.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Markup.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Markup.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Markup.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Metal.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Metal.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Metal.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.MicroCom.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.MicroCom.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.MicroCom.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Native.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Native.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Native.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.OpenGL.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.OpenGL.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.OpenGL.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Remote.Protocol.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Remote.Protocol.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Remote.Protocol.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Skia.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Skia.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Skia.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Themes.Fluent.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Themes.Fluent.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Themes.Fluent.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Themes.Simple.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Themes.Simple.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Themes.Simple.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Vulkan.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Vulkan.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Vulkan.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Win32.Automation.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Win32.Automation.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Win32.Automation.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.Win32.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.Win32.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.Win32.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.X11.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.X11.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.X11.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Avalonia.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Avalonia.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Avalonia.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_DevModManager.Avalonia.deps.json" Path="[|AI_PROPPATH_DIR_PERBUILD_DevModManager.Avalonia.deps.json]\[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.deps.json]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_DevModManager.Avalonia.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_DevModManager.Avalonia.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_DevModManager.Avalonia.exe" Path="[|AI_PROPPATH_DIR_PERBUILD_DevModManager.Avalonia.exe]\[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.exe]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_DevModManager.Avalonia.runtimeconfig.json" Path="[|AI_PROPPATH_DIR_PERBUILD_DevModManager.Avalonia.runtimeconfig.json]\[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Avalonia.runtimeconfig.json]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_DevModManager.Core.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_DevModManager.Core.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Core.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_DevModManager.Core.xml" Path="[|AI_PROPPATH_DIR_PERBUILD_DevModManager.Core.xml]\[|AI_PROPPATH_FILENAME_PERBUILD_DevModManager.Core.xml]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_HarfBuzzSharp.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_HarfBuzzSharp.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_HarfBuzzSharp.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_MicroCom.Runtime.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_MicroCom.Runtime.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_MicroCom.Runtime.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_SkiaSharp.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_SkiaSharp.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_SkiaSharp.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_System.IO.Pipelines.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_System.IO.Pipelines.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_System.IO.Pipelines.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_Tmds.DBus.Protocol.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_Tmds.DBus.Protocol.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_Tmds.DBus.Protocol.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_av_libglesv2.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_av_libglesv2.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_av_libglesv2.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_libHarfBuzzSharp.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_libHarfBuzzSharp.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_libHarfBuzzSharp.dll]" Type="2" Content="0"/>
+    <ROW Name="AI_APPPATH_PERBUILD_libSkiaSharp.dll" Path="[|AI_PROPPATH_DIR_PERBUILD_libSkiaSharp.dll]\[|AI_PROPPATH_FILENAME_PERBUILD_libSkiaSharp.dll]" Type="2" Content="0"/>
+  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" Languages="en" InstallationType="4" UseLargeSchema="true"/>
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" Languages="en" InstallationType="4" SummInfoMetadata="Page Count:450" UseLargeSchema="true" MsiPackageType="x64"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
     <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
@@ -101,13 +269,18 @@
     <ROW Action="AI_ResolveKnownFolders" Type="1" Source="aicustact.dll" Target="AI_ResolveKnownFolders"/>
     <ROW Action="AI_SHOW_LOG" Type="65" Source="aicustact.dll" Target="LaunchLogFile" WithoutSeq="true"/>
     <ROW Action="AI_STORE_LOCATION" Type="51" Source="ARPINSTALLLOCATION" Target="[APPDIR]"/>
-    <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]"/>
+    <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]" MultiBuildTarget="DefaultBuild:[ProgramFiles64Folder][Manufacturer]\[ProductName]"/>
     <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
     <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatCompsComponent">
     <ROW Feature_="MainFeature" Component_="APPDIR"/>
     <ROW Feature_="MainFeature" Component_="ProductInformation"/>
+    <ROW Feature_="MainFeature" Component_="DevModManager.Avalonia_PrimaryOutput"/>
+    <ROW Feature_="MainFeature" Component_="DevModManager.Avalonia_PublishOutput"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
+    <ROW Name="ZeeOgre.exe" SourcePath="..\..\legacy\docs\img\ZeeOgre.ico" Index="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
     <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
@@ -125,6 +298,8 @@
     <ROW Action="AI_EnableDebugLog" Sequence="51"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiLaunchConditionsComponent">
+    <ROW Condition="( Version9X OR ( NOT VersionNT64 ) OR ( VersionNT64 AND ((VersionNT64 &lt;&gt; 601) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 601) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 602) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 602) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 603) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 603) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 1000 AND VersionNT64 &lt;&gt; 1100) OR (MsiNTProductType = 1)) ) )" Description="[ProductName] cannot be installed on the following Windows versions: [WindowsTypeNT64Display]." DescriptionLocId="AI.LaunchCondition.NoSpecificNT64" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="( Version9X OR VersionNT64 )" Description="[ProductName] cannot be installed on [WindowsTypeNTDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT" IsPredefined="true" Builds="DefaultBuild"/>
     <ROW Condition="((VersionNT &lt;&gt; 501) AND (VersionNT &lt;&gt; 502))" Description="[ProductName] cannot be installed on [WindowsTypeNT5XDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT5X" IsPredefined="true" Builds="DefaultBuild"/>
     <ROW Condition="(VersionNT &lt;&gt; 400)" Description="[ProductName] cannot be installed on [WindowsTypeNT40Display]." DescriptionLocId="AI.LaunchCondition.NoNT40" IsPredefined="true" Builds="DefaultBuild"/>
     <ROW Condition="(VersionNT &lt;&gt; 500)" Description="[ProductName] cannot be installed on [WindowsTypeNT50Display]." DescriptionLocId="AI.LaunchCondition.NoNT50" IsPredefined="true" Builds="DefaultBuild"/>
@@ -144,5 +319,45 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiUpgradeComponent">
     <ROW UpgradeCode="[|UpgradeCode]" VersionMin="0.0.1" VersionMax="[|ProductVersion]" Attributes="257" ActionProperty="OLDPRODUCTS"/>
     <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.VsProjectComponent">
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="av_libglesv2.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Base.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Controls.ColorPicker.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Controls.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.DesignerSupport.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Desktop.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Diagnostics.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Dialogs.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Fonts.Inter.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.FreeDesktop.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Markup.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Markup.Xaml.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Metal.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.MicroCom.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Native.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.OpenGL.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Remote.Protocol.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Skia.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Themes.Fluent.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Themes.Simple.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Vulkan.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Win32.Automation.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.Win32.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Avalonia.X11.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="DevModManager.Avalonia.deps.json"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="DevModManager.Avalonia.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="DevModManager.Avalonia.exe"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="DevModManager.Avalonia.runtimeconfig.json"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="DevModManager.Core.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="DevModManager.Core.xml"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="HarfBuzzSharp.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="libHarfBuzzSharp.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="libSkiaSharp.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="MicroCom.Runtime.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="SkiaSharp.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="System.IO.Pipelines.dll"/>
+    <ROW ProjectId="{7d23acda-08b7-4e3b-a9e8-cbe3073090f9}" ProjectName="DevModManager.Avalonia" OutputGroup="PublishOutput" OutputFile="Tmds.DBus.Protocol.dll"/>
   </COMPONENT>
 </DOCUMENT>
