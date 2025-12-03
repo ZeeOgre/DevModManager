@@ -1,68 +1,63 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<!-- Targeting -->
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<Deterministic>true</Deterministic>
-
-		<!-- Win-specific bits -->
-		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-
-		<!-- Avalonia -->
-		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-
-		<!-- Identity / metadata -->
-		<AssemblyName>DevModManager.Avalonia</AssemblyName>
-		<RootNamespace>DevModManager.Avalonia</RootNamespace>
-		<Title>Dev Mod Manager</Title>
-		<Description>Desktop UI for DevModManager: a Starfield-first mod manager that helps mod developers manage lifecycle (DEV → TEST → STAGING → PROD) with Git / GitHub integration.</Description>
-		<Authors>ZeeOgre</Authors>
-		<Company>ZeeOgre / ModdersMilk</Company>
-		<Product>DevModManager</Product>
-		<Copyright>© 2025 ZeeOgre</Copyright>
-
-		<!-- Versioning (keep these in sync with Core + MSI) -->
-		<Version>0.1.0</Version>
-		<FileVersion>0.1.0.0</FileVersion>
-		<AssemblyVersion>0.1.0.0</AssemblyVersion>
-
-		<!-- Package / repo metadata (useful later even if you never ship a NuGet) -->
-		<PackageId>DevModManager.Avalonia</PackageId>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/ZeeOgre/DevModManager</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/ZeeOgre/DevModManager.git</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-	</PropertyGroup>
-
-	<!-- Optional: extra DEBUG define for UI-only debugging if you ever want it -->
-	<!--
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DefineConstants>$(DefineConstants);DEBUG_UI</DefineConstants>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AssemblyName>DevModManager</AssemblyName>
+    <RootNamespace>DevModManager.Avalonia</RootNamespace>
+    <Title>Dev Mod Manager</Title>
+    <Description>Desktop UI for DevModManager: a Starfield-first mod manager that helps mod developers manage lifecycle (DEV → TEST → STAGING → PROD) with Git / GitHub integration.</Description>
+    <Authors>ZeeOgre</Authors>
+    <Company>ZeeOgre / ModdersMilk</Company>
+    <Product>DevModManager</Product>
+    <Copyright>© 2025 ZeeOgre</Copyright>
+    <Version>0.1.0</Version>
+    <FileVersion>0.1.0.0</FileVersion>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <PackageId>DevModManager.Avalonia</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/ZeeOgre/DevModManager</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ZeeOgre/DevModManager.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <ApplicationIcon>ZeeOgre.ico</ApplicationIcon>
   </PropertyGroup>
-  -->
 
-	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.3.0" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
-		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
-		<!-- Remove diagnostics from non-Debug builds -->
-		<PackageReference Include="Avalonia.Diagnostics" Version="11.3.0">
-			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
-			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
-		</PackageReference>
-	</ItemGroup>
+  <ItemGroup>
+    <Content Include="ZeeOgre.ico" />
+  </ItemGroup>
 
-	<!-- Reference to your core logic -->
-	<ItemGroup>
-		<ProjectReference Include="..\DevModManager.Core\DevModManager.Core.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.3.9" />
+    <!-- Removed commercial packages for now:
+    <PackageReference Include="Avalonia.Controls.Markdown" Version="11.3.2" />
+    <PackageReference Include="Avalonia.Controls.WebView" Version="11.3.15" />
+    -->
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.9">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DevModManager.Core\DevModManager.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Converters\" />
+    <Folder Include="Resources\" />
+    <Folder Include="Views\Controls\" />
+  </ItemGroup>
 </Project>

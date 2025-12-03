@@ -21,4 +21,6 @@ namespace DevModManager.Avalonia
             base.OnFrameworkInitializationCompleted();
         }
     }
+
+
 }

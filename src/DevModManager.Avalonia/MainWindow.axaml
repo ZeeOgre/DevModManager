@@ -1,9 +1,196 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:d="https://github.com/avaloniaui"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:local="clr-namespace:DevModManager.Avalonia"
+        mc:Ignorable="d"
         x:Class="DevModManager.Avalonia.MainWindow"
-        Title="DevModManager.Avalonia">
-    Welcome to Avalonia!
+        Width="1100"
+        Height="420"
+        d:DesignWidth="1100"
+        d:DesignHeight="420"
+        Padding="8"
+        Title="DevModManager"
+        d:DataContext="{d:DesignInstance Type=local:MainWindowDesignViewModel, IsDesignTimeCreatable=True}">
+
+  <!-- Simplified design-time context -->
+  <d:Design.Data>
+    <x:Type TypeName="object">
+      <x:Members>
+        <x:Member Name="AppTitle" Type="x:String" Value="DevModManager v &lt;2.0&gt;" />
+        <x:Member Name="GameFolders" Type="x:Object">
+          <x:Array Type="x:String">
+            <x:String>M:\Starfield_1.14</x:String>
+            <x:String>D:\Games\Starfield</x:String>
+          </x:Array>
+        </x:Member>
+        <x:Member Name="SelectedGameFolder" Type="x:String" Value="M:\Starfield_1.14" />
+        <x:Member Name="States" Type="x:Object">
+          <x:Array Type="x:String">
+            <x:String>DEV</x:String>
+            <x:String>TEST</x:String>
+            <x:String>STAGING</x:String>
+            <x:String>PROD</x:String>
+            <x:String>&lt;NONE&gt;</x:String>
+          </x:Array>
+        </x:Member>
+      </x:Members>
+    </x:Type>
+  </d:Design.Data>
+
+  <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
+
+    <!-- TOP BAR -->
+    <Border Grid.Row="0" Padding="4" Margin="0,0,0,4">
+      <Grid ColumnDefinitions="Auto,12,Auto,8,Auto,4,Auto,8,Auto,8,Auto,*">
+        <TextBlock Grid.Column="0"
+                   Text="{Binding AppTitle}"
+                   VerticalAlignment="Center"
+                   FontWeight="Bold"/>
+        <Button Grid.Column="2"
+                Content="Open Game Data"
+                Margin="0,0,4,0" />
+        <TextBlock Grid.Column="4"
+                   Text="Active Game Folder"
+                   VerticalAlignment="Center"
+                   Margin="0,0,4,0"/>
+        <ComboBox Grid.Column="6"
+                  Width="200"
+                  ItemsSource="{Binding GameFolders}"
+                  SelectedItem="{Binding SelectedGameFolder}" />
+        <Button Grid.Column="8"
+                Content="Launch LOM"
+                Margin="4,0" />
+        <Button Grid.Column="10"
+                Content="Edit Plugins"
+                Margin="4,0" />
+      </Grid>
+    </Border>
+
+    <!-- MAIN GRID / TABLE -->
+    <Border Grid.Row="1" BorderBrush="#404040" BorderThickness="1">
+      <DataGrid AutoGenerateColumns="False"
+                HeadersVisibility="Column"
+                IsReadOnly="False"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                CanUserResizeRows="False"
+                GridLinesVisibility="All"
+                d:ItemsSource="{x:Array}">
+        <d:ItemsSource>
+          <x:Array Type="x:Object">
+            <x:Type TypeName="object">
+              <x:Members>
+                <x:Member Name="Name" Type="x:String" Value="ZeeOgresEnhancedOutposts" />
+                <x:Member Name="State" Type="x:String" Value="DEV" />
+                <x:Member Name="LastModified" Type="x:String" Value="2025-11-12 08:57" />
+                <x:Member Name="IsActive" Type="x:Boolean" Value="false" />
+                <x:Member Name="OnCreations" Type="x:Boolean" Value="false" />
+                <x:Member Name="OnNexus" Type="x:Boolean" Value="false" />
+                <x:Member Name="HasGitRepo" Type="x:Boolean" Value="true" />
+              </x:Members>
+            </x:Type>
+            <x:Type TypeName="object">
+              <x:Members>
+                <x:Member Name="Name" Type="x:String" Value="ZeeOgresConstellationDropCrate" />
+                <x:Member Name="State" Type="x:String" Value="PROD" />
+                <x:Member Name="LastModified" Type="x:String" Value="2024-11-30 18:30" />
+                <x:Member Name="IsActive" Type="x:Boolean" Value="true" />
+                <x:Member Name="OnCreations" Type="x:Boolean" Value="true" />
+                <x:Member Name="OnNexus" Type="x:Boolean" Value="false" />
+                <x:Member Name="HasGitRepo" Type="x:Boolean" Value="false" />
+              </x:Members>
+            </x:Type>
+          </x:Array>
+        </d:ItemsSource>
+
+        <DataGrid.Columns>
+          <DataGridTemplateColumn Header="Mod Name" Width="*">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Name}"
+                           TextDecorations="Underline"
+                           Foreground="#4FA3FF"
+                           Cursor="Hand" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <DataGridTemplateColumn Header="State" Width="100">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <ComboBox ItemsSource="{Binding DataContext.States, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                          SelectedItem="{Binding State}"
+                          Width="90" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <DataGridTextColumn Header="Last modified"
+                              Width="150"
+                              Binding="{Binding LastModified}" />
+
+          <DataGridTemplateColumn Header="Active" Width="70">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <CheckBox IsChecked="{Binding IsActive}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <DataGridTemplateColumn Header="Creations" Width="90">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <CheckBox IsChecked="{Binding OnCreations}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <DataGridTemplateColumn Header="Nexus" Width="70">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <CheckBox IsChecked="{Binding OnNexus}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <DataGridTemplateColumn Header="Git Repo" Width="80">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <CheckBox IsChecked="{Binding HasGitRepo}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+        </DataGrid.Columns>
+      </DataGrid>
+    </Border>
+
+    <!-- BOTTOM BAR -->
+    <Border Grid.Row="2" Margin="0,4,0,0" Padding="4">
+      <Grid ColumnDefinitions="Auto,4,Auto,12,Auto,4,Auto,12,Auto,*">
+        <TextBlock Grid.Column="0"
+                   Text="Launch CK:"
+                   VerticalAlignment="Center"
+                   Margin="0,0,4,0"/>
+        <ComboBox Grid.Column="2" Width="220" />
+        <TextBlock Grid.Column="4"
+                   Text="Launch XEdit:"
+                   VerticalAlignment="Center"
+                   Margin="0,0,4,0"/>
+        <ComboBox Grid.Column="6" Width="180" />
+        <Button Grid.Column="8"
+                Content="Launch Game"
+                HorizontalAlignment="Left" />
+      </Grid>
+    </Border>
+
+  </Grid>
 </Window>

@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using DevModManager.Core.ViewModels;
 
 namespace DevModManager.Avalonia
 {
@@ -7,6 +8,7 @@ namespace DevModManager.Avalonia
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new MainWindowViewModel();
         }
     }
 }
