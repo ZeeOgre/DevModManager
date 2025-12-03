@@ -2,7 +2,6 @@
 # Set default behavior to automatically normalize line endings.
 ###############################################################################
 * text=auto
-
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
@@ -11,7 +10,6 @@
 # Note: This is only used by command line
 ###############################################################################
 #*.cs     diff=csharp
-
 ###############################################################################
 # Set the merge driver for project and solution files
 #
@@ -34,18 +32,15 @@
 *.modelproj merge=binary
 *.sqlproj   merge=binary
 *.wwaproj   merge=binary
-
 ###############################################################################
 # Normalize line endings for PowerShell scripts
 ###############################################################################
 *.ps1 text eol=lf
-
 ###############################################################################
 # Treat WiX files as binary to prevent merge conflicts
 ###############################################################################
 *.wxs merge=binary
 *.wixproj merge=binary
-
 ###############################################################################
 # behavior for image files
 #
@@ -54,7 +49,6 @@
 #*.jpg   binary
 #*.png   binary
 #*.gif   binary
-
 ###############################################################################
 # diff behavior for common document formats
 # 
@@ -72,13 +66,11 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
-
 ###############################################################################
 # Treat YAML files as text
 ###############################################################################
 *.yaml text
 *.yml text
-
 ###############################################################################
 # behavior for database and installer files
 #
@@ -87,24 +79,21 @@
 *.db   binary
 *.msi  binary
 *.pdb  binary
-
 ###############################################################################
 # behavior for database and installer / archive files
 ###############################################################################
 *.db   binary
 *.pdb  binary
-
 # Large artifacts => Git LFS
 *.msi filter=lfs diff=lfs merge=lfs -text
 *.ba2 filter=lfs diff=lfs merge=lfs -text
 *.7z  filter=lfs diff=lfs merge=lfs -text
 # optional, if you ever want these in LFS too:
 #*.zip filter=lfs diff=lfs merge=lfs -text
-
-
 ###############################################################################
 # behavior for XAML files
 #
 # Treat XAML files as text.
 ###############################################################################
 *.xaml text
+*.zip filter=lfs diff=lfs merge=lfs -text
