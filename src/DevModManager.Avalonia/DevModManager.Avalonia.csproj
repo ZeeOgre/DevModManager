@@ -49,6 +49,11 @@
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.1.1" />
+    <PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9" />
+    <PackageReference Include="Xaml.Behaviors.Interactions.DragAndDrop" Version="11.3.9" />
+    <PackageReference Include="Xaml.Behaviors.Interactivity" Version="11.3.9" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,6 +63,7 @@
   <ItemGroup>
     <Folder Include="Converters\" />
     <Folder Include="Resources\" />
+    <Folder Include="ViewModels\" />
     <Folder Include="Views\Controls\" />
   </ItemGroup>
 </Project>

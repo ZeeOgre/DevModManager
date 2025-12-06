@@ -1,196 +1,133 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="https://github.com/avaloniaui"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DevModManager.Avalonia"
         mc:Ignorable="d"
+        xmlns:vm="clr-namespace:DevModManager.Core.ViewModels;assembly=DevModManager.Core"
         x:Class="DevModManager.Avalonia.MainWindow"
-        Width="1100"
-        Height="420"
-        d:DesignWidth="1100"
-        d:DesignHeight="420"
+        x:DataType="vm:MainWindowViewModel"
+        Width="1200"
+        Height="480"
+        d:DesignWidth="1200"
+        d:DesignHeight="480"
         Padding="8"
-        Title="DevModManager"
-        d:DataContext="{d:DesignInstance Type=local:MainWindowDesignViewModel, IsDesignTimeCreatable=True}">
+        Title="DevModManager">
 
-  <!-- Simplified design-time context -->
-  <d:Design.Data>
-    <x:Type TypeName="object">
-      <x:Members>
-        <x:Member Name="AppTitle" Type="x:String" Value="DevModManager v &lt;2.0&gt;" />
-        <x:Member Name="GameFolders" Type="x:Object">
-          <x:Array Type="x:String">
-            <x:String>M:\Starfield_1.14</x:String>
-            <x:String>D:\Games\Starfield</x:String>
-          </x:Array>
-        </x:Member>
-        <x:Member Name="SelectedGameFolder" Type="x:String" Value="M:\Starfield_1.14" />
-        <x:Member Name="States" Type="x:Object">
-          <x:Array Type="x:String">
-            <x:String>DEV</x:String>
-            <x:String>TEST</x:String>
-            <x:String>STAGING</x:String>
-            <x:String>PROD</x:String>
-            <x:String>&lt;NONE&gt;</x:String>
-          </x:Array>
-        </x:Member>
-      </x:Members>
-    </x:Type>
-  </d:Design.Data>
+  <!-- Rows: Titlebar, Active Game Folder (centered), Button row, Content, Bottom bar -->
+  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" ColumnDefinitions="*">
 
-  <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
+    <!-- DISTINCTIVE TITLEBAR -->
+    <Border Grid.Row="0" Background="#2B2F3A" Padding="12" CornerRadius="6">
+      <TextBlock Text="{Binding AppTitle}"
+                 Foreground="White"
+                 FontSize="16"
+                 FontWeight="Bold"
+                 VerticalAlignment="Center" />
+    </Border>
 
-    <!-- TOP BAR -->
-    <Border Grid.Row="0" Padding="4" Margin="0,0,0,4">
-      <Grid ColumnDefinitions="Auto,12,Auto,8,Auto,4,Auto,8,Auto,8,Auto,*">
-        <TextBlock Grid.Column="0"
-                   Text="{Binding AppTitle}"
-                   VerticalAlignment="Center"
-                   FontWeight="Bold"/>
-        <Button Grid.Column="2"
-                Content="Open Game Data"
-                Margin="0,0,4,0" />
-        <TextBlock Grid.Column="4"
-                   Text="Active Game Folder"
-                   VerticalAlignment="Center"
-                   Margin="0,0,4,0"/>
-        <ComboBox Grid.Column="6"
-                  Width="200"
-                  ItemsSource="{Binding GameFolders}"
-                  SelectedItem="{Binding SelectedGameFolder}" />
-        <Button Grid.Column="8"
-                Content="Launch LOM"
-                Margin="4,0" />
-        <Button Grid.Column="10"
-                Content="Edit Plugins"
-                Margin="4,0" />
+    <!-- ACTIVE GAME FOLDER (centered) -->
+    <Border Grid.Row="1" Padding="6" Margin="0,8,0,0">
+      <Grid ColumnDefinitions="*,Auto,*">
+        <TextBlock Grid.Column="1" Text="Active Game Folder" VerticalAlignment="Center" Margin="0,0,6,0" HorizontalAlignment="Center"/>
+        <ComboBox Grid.Column="1" Width="420" Name="ActiveGameFolderComboBox" ItemsSource="{Binding GameFolders}" SelectedItem="{Binding SelectedGameFolder, Mode=TwoWay}" HorizontalAlignment="Center" Margin="120,18,120,0"/>
       </Grid>
     </Border>
 
-    <!-- MAIN GRID / TABLE -->
-    <Border Grid.Row="1" BorderBrush="#404040" BorderThickness="1">
-      <DataGrid AutoGenerateColumns="False"
-                HeadersVisibility="Column"
-                IsReadOnly="False"
-                CanUserAddRows="False"
-                CanUserDeleteRows="False"
-                CanUserResizeRows="False"
-                GridLinesVisibility="All"
-                d:ItemsSource="{x:Array}">
-        <d:ItemsSource>
-          <x:Array Type="x:Object">
-            <x:Type TypeName="object">
-              <x:Members>
-                <x:Member Name="Name" Type="x:String" Value="ZeeOgresEnhancedOutposts" />
-                <x:Member Name="State" Type="x:String" Value="DEV" />
-                <x:Member Name="LastModified" Type="x:String" Value="2025-11-12 08:57" />
-                <x:Member Name="IsActive" Type="x:Boolean" Value="false" />
-                <x:Member Name="OnCreations" Type="x:Boolean" Value="false" />
-                <x:Member Name="OnNexus" Type="x:Boolean" Value="false" />
-                <x:Member Name="HasGitRepo" Type="x:Boolean" Value="true" />
-              </x:Members>
-            </x:Type>
-            <x:Type TypeName="object">
-              <x:Members>
-                <x:Member Name="Name" Type="x:String" Value="ZeeOgresConstellationDropCrate" />
-                <x:Member Name="State" Type="x:String" Value="PROD" />
-                <x:Member Name="LastModified" Type="x:String" Value="2024-11-30 18:30" />
-                <x:Member Name="IsActive" Type="x:Boolean" Value="true" />
-                <x:Member Name="OnCreations" Type="x:Boolean" Value="true" />
-                <x:Member Name="OnNexus" Type="x:Boolean" Value="false" />
-                <x:Member Name="HasGitRepo" Type="x:Boolean" Value="false" />
-              </x:Members>
-            </x:Type>
-          </x:Array>
-        </d:ItemsSource>
+    <!-- BUTTON ROW (all primary buttons moved here; CK/xEdit are kept in bottom tools) -->
+    <Border Grid.Row="2" Padding="6" Margin="0,8,0,8">
+      <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+        <!-- Left-aligned actions -->
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Content="Open Game Data" Command="{Binding OpenGameDataCommand}" />
+          <!-- add more left-side actions here later -->
+        </StackPanel>
 
-        <DataGrid.Columns>
-          <DataGridTemplateColumn Header="Mod Name" Width="*">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding Name}"
-                           TextDecorations="Underline"
-                           Foreground="#4FA3FF"
-                           Cursor="Hand" />
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
+        <!-- center intentionally left empty so active folder remains visually centered above -->
 
-          <DataGridTemplateColumn Header="State" Width="100">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <ComboBox ItemsSource="{Binding DataContext.States, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                          SelectedItem="{Binding State}"
-                          Width="90" />
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
-
-          <DataGridTextColumn Header="Last modified"
-                              Width="150"
-                              Binding="{Binding LastModified}" />
-
-          <DataGridTemplateColumn Header="Active" Width="70">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <CheckBox IsChecked="{Binding IsActive}"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Center" />
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
-
-          <DataGridTemplateColumn Header="Creations" Width="90">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <CheckBox IsChecked="{Binding OnCreations}"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Center" />
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
-
-          <DataGridTemplateColumn Header="Nexus" Width="70">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <CheckBox IsChecked="{Binding OnNexus}"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Center" />
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
-
-          <DataGridTemplateColumn Header="Git Repo" Width="80">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <CheckBox IsChecked="{Binding HasGitRepo}"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Center" />
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
-        </DataGrid.Columns>
-      </DataGrid>
+        <!-- Right-aligned quick actions (kept minimal here; Edit Plugins + Launch LOM moved to bottom) -->
+        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <!-- top section keeps only lightweight quick actions; Edit Plugins + Launch LOM moved to bottom tools -->
+        </StackPanel>
+      </Grid>
     </Border>
 
-    <!-- BOTTOM BAR -->
-    <Border Grid.Row="2" Margin="0,4,0,0" Padding="4">
-      <Grid ColumnDefinitions="Auto,4,Auto,12,Auto,4,Auto,12,Auto,*">
-        <TextBlock Grid.Column="0"
-                   Text="Launch CK:"
-                   VerticalAlignment="Center"
-                   Margin="0,0,4,0"/>
-        <ComboBox Grid.Column="2" Width="220" />
-        <TextBlock Grid.Column="4"
-                   Text="Launch XEdit:"
-                   VerticalAlignment="Center"
-                   Margin="0,0,4,0"/>
-        <ComboBox Grid.Column="6" Width="180" />
-        <Button Grid.Column="8"
-                Content="Launch Game"
-                HorizontalAlignment="Left" />
+    <!-- MAIN GRID / ItemsControl -->
+    <Border Grid.Row="3" BorderBrush="#404040" BorderThickness="1" Padding="6">
+      <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Column headers: adjusted widths -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,140,260,80,80" Margin="0,0,0,8">
+          <TextBlock Grid.Column="0" Text="Mod Name" FontWeight="Bold" />
+          <TextBlock Grid.Column="1" Text="Current Stage" FontWeight="Bold" HorizontalAlignment="Center"/>
+          <TextBlock Grid.Column="2" Text="Bethesda ID" FontWeight="Bold" HorizontalAlignment="Center"/>
+          <TextBlock Grid.Column="3" Text="Nexus ID" FontWeight="Bold" HorizontalAlignment="Center"/>
+          <TextBlock Grid.Column="4" Text="Monitor" FontWeight="Bold" HorizontalAlignment="Center"/>
+        </Grid>
+
+        <Rectangle Grid.Row="1" Height="1" Fill="#c0c0c0" />
+
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding Mods}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:ModItemViewModel">
+              <Border BorderBrush="#c8c8c8" BorderThickness="1" Padding="8" Margin="0,0,0,4">
+                <Border.ContextMenu>
+                  <ContextMenu>
+                    <MenuItem Header="Open Backup Folder" Command="{Binding OpenBackupCommand}" />
+                    <MenuItem Header="Promote" Command="{Binding PromoteCommand}" />
+                    <MenuItem Header="Package" Command="{Binding PackageCommand}" />
+                  </ContextMenu>
+                </Border.ContextMenu>
+
+                <Grid ColumnDefinitions="*,140,260,80,80" VerticalAlignment="Center">
+                  <Button Grid.Column="0"
+                          Content="{Binding Name}"
+                          Command="{Binding OpenFolderCommand}"
+                          Background="Transparent"
+                          BorderBrush="Transparent"
+                          Foreground="#4FA3FF"
+                          Padding="0"
+                          HorizontalAlignment="Left" />
+
+                  <ComboBox Grid.Column="1"
+                            Width="120"
+                            SelectedItem="{Binding Stage, Mode=TwoWay}">
+                    <ComboBoxItem>DEV</ComboBoxItem>
+                    <ComboBoxItem>TEST</ComboBoxItem>
+                    <ComboBoxItem>STAGING</ComboBoxItem>
+                    <ComboBoxItem>PROD</ComboBoxItem>
+                  </ComboBox>
+
+                  <!-- Bethesda is GUID (wide), Nexus narrow numeric or text -->
+                  <TextBlock Grid.Column="2" Text="{Binding BethesdaId}" Foreground="#4FA3FF" TextDecorations="Underline" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                  <TextBlock Grid.Column="3" Text="{Binding NexusId}" Foreground="#4FA3FF" TextDecorations="Underline" HorizontalAlignment="Center"/>
+                  <RadioButton Grid.Column="4" IsChecked="{Binding IsMonitored, Mode=TwoWay}" GroupName="MonitorGroup" HorizontalAlignment="Center" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Grid>
+    </Border>
+
+    <!-- BOTTOM BAR: tools and CK/xEdit. Move Edit Plugins + Launch LOM here (right). -->
+    <Border Grid.Row="4" Padding="6" Margin="0,8,0,0">
+      <Grid ColumnDefinitions="Auto,8,Auto,12,Auto,*,Auto,Auto">
+        <TextBlock Grid.Column="0" Text="Tools:" VerticalAlignment="Center" />
+        <Button Grid.Column="2" Content="Open GitHub" Command="{Binding OpenModDetailsCommand}" />
+
+        <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8">
+          <Button Content="Launch CK ▾" />
+          <Button Content="Launch xEdit ▾" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+          <Button Content="Edit Plugins" Command="{Binding EditPluginsCommand}" />
+          <Button Content="Launch LOM" Command="{Binding LaunchLomCommand}" />
+        </StackPanel>
+
+        <Button Grid.Column="7" Content="Launch Game" Command="{Binding LaunchGameCommand}" HorizontalAlignment="Right" />
       </Grid>
     </Border>
 
   </Grid>
-</Window>
+</Window>   
