@@ -37,8 +37,11 @@ namespace DmmDep
         public string PluginPath { get; set; } = "";
         public string? GameRootOverride { get; set; }
         public string? XboxDataOverride { get; set; }
-        public string? TifRootOverride { get; set; } = "..\\..\\Source\\TGATextures";
-        public string? ScriptsRootOverride { get; set; } = "Scripts";
+
+        // IMPORTANT: overrides are now truly optional (no default path here).
+        public string? TifRootOverride { get; set; }
+        public string? ScriptsRootOverride { get; set; }
+
         public bool TestMode { get; set; } // --test switch
     }
 
@@ -87,13 +90,40 @@ namespace DmmDep
                 string xboxDataRoot = options.XboxDataOverride ?? InferXboxDataRoot(gameRoot, iniPath);
                 Console.WriteLine($"XboxData : {xboxDataRoot}");
 
-                // TIF root: ..\..\Source\TGATextures from game root, unless overridden
-                string tifRoot = options.TifRootOverride ??
-                                 Path.GetFullPath(Path.Combine(gameRoot, "..", "..", "Source", "TGATextures"));
+                // TIF root:
+                //   - If override provided:
+                //       * rooted path -> use as-is
+                //       * relative   -> resolve relative to gameRoot
+                //   - Else: default to "..\\..\\Source\\TGATextures" from gameRoot
+                string tifRoot;
+                if (!string.IsNullOrEmpty(options.TifRootOverride))
+                {
+                    tifRoot = Path.IsPathRooted(options.TifRootOverride)
+                        ? options.TifRootOverride
+                        : Path.GetFullPath(Path.Combine(gameRoot, options.TifRootOverride));
+                }
+                else
+                {
+                    tifRoot = Path.GetFullPath(Path.Combine(gameRoot, "..", "..", "Source", "TGATextures"));
+                }
                 Console.WriteLine($"TifRoot  : {tifRoot}");
 
-                // Scripts root
-                string scriptsRoot = options.ScriptsRootOverride ?? Path.Combine(dataRoot, "Scripts");
+                // Scripts root:
+                //   - If override provided:
+                //       * rooted path -> use as-is
+                //       * relative   -> resolve relative to gameRoot
+                //   - Else: Data\\Scripts
+                string scriptsRoot;
+                if (!string.IsNullOrEmpty(options.ScriptsRootOverride))
+                {
+                    scriptsRoot = Path.IsPathRooted(options.ScriptsRootOverride)
+                        ? options.ScriptsRootOverride
+                        : Path.GetFullPath(Path.Combine(gameRoot, options.ScriptsRootOverride));
+                }
+                else
+                {
+                    scriptsRoot = Path.Combine(dataRoot, "Scripts");
+                }
                 string scriptsSourceRoot = Path.Combine(scriptsRoot, "Source");
                 Console.WriteLine($"Scripts  : {scriptsRoot}");
 
@@ -481,7 +511,6 @@ namespace DmmDep
                     if (File.Exists(fullPex) && pexSet.Add(pexRel))
                         AddFile(manifest, achlistPaths, pexRel, FileKind.Pex, "script-pex-or-import", gameRoot, xboxDataRoot);
                 }
-;
 
                 // Second pass: imports from PSC
                 var pscSetSnapshot = new HashSet<string>(pscSet, StringComparer.OrdinalIgnoreCase);
@@ -509,7 +538,6 @@ namespace DmmDep
                 }
 
                 Console.WriteLine($"[6] After PSC imports: {pscSet.Count} PSC, {pexSet.Count} PEX");
-
 
                 // ---- Outputs ----
 
@@ -545,8 +573,8 @@ namespace DmmDep
             Console.WriteLine("Options:");
             Console.WriteLine("  --gameroot <path>     Override inferred game root (parent of Data).");
             Console.WriteLine("  --xboxdata <path>     Override XBOX Data root (default from CreationKit.ini).");
-            Console.WriteLine("  --tifroot <path>      Override TIF root (default ..\\..\\Source\\TGATextures).");
-            Console.WriteLine("  --scriptsroot <path>  Override Data\\Scripts root.");
+            Console.WriteLine("  --tifroot <path>      Override TIF root (default ..\\..\\Source\\TGATextures from game root).");
+            Console.WriteLine("  --scriptsroot <path>  Override Data\\Scripts root (relative to game root if not rooted).");
             Console.WriteLine("  --test                Write .achlist.test instead of .achlist.");
         }
 
@@ -983,8 +1011,6 @@ namespace DmmDep
             return NormalizeRel(Path.Combine("Data", "Scripts", path + ".pex"));
         }
 
-
-
         // Find colon-delimited tokens in plugin that correspond to valid scripts
         private static HashSet<string> ExtractScriptNamesFromPlugin(byte[] pluginBytes, string gameRoot)
         {
@@ -1062,7 +1088,6 @@ namespace DmmDep
 
             return all;
         }
-
 
         private static void CollectMatDdsTokensFromJson(JsonElement element, List<string> tokens)
         {

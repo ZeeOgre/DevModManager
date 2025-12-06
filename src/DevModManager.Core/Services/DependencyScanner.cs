@@ -35,6 +35,8 @@ namespace DevModManager.Core.Services
         public string PluginPath { get; set; } = "";
         public string? GameRootOverride { get; set; }
         public string? XboxDataOverride { get; set; }
+
+        // Match Program.cs: overrides optional, relative resolved from game root
         public string? TifRootOverride { get; set; }
         public string? ScriptsRootOverride { get; set; }
     }
@@ -73,8 +75,33 @@ namespace DevModManager.Core.Services
                 throw new InvalidOperationException("CreationKit.ini / CreationKitCustom.ini not found. Use XboxDataOverride to specify XBOX Data root.");
 
             string xboxDataRoot = options.XboxDataOverride ?? InferXboxDataRoot(gameRoot, iniPath);
-            string tifRoot = options.TifRootOverride ??
-                             Path.GetFullPath(Path.Combine(gameRoot, "..", "..", "Source", "TGATextures"));
+
+            // Resolve TIF root like Program.cs
+            string tifRoot;
+            if (!string.IsNullOrEmpty(options.TifRootOverride))
+            {
+                tifRoot = Path.IsPathRooted(options.TifRootOverride)
+                    ? options.TifRootOverride
+                    : Path.GetFullPath(Path.Combine(gameRoot, options.TifRootOverride));
+            }
+            else
+            {
+                tifRoot = Path.GetFullPath(Path.Combine(gameRoot, "..", "..", "Source", "TGATextures"));
+            }
+
+            // Resolve Scripts root like Program.cs
+            string scriptsRoot;
+            if (!string.IsNullOrEmpty(options.ScriptsRootOverride))
+            {
+                scriptsRoot = Path.IsPathRooted(options.ScriptsRootOverride)
+                    ? options.ScriptsRootOverride
+                    : Path.GetFullPath(Path.Combine(gameRoot, options.ScriptsRootOverride));
+            }
+            else
+            {
+                scriptsRoot = Path.Combine(dataRoot, "Scripts");
+            }
+            string scriptsSourceRoot = Path.Combine(scriptsRoot, "Source");
 
             string pluginName = Path.GetFileNameWithoutExtension(pluginPath);
 
@@ -217,7 +244,7 @@ namespace DevModManager.Core.Services
                 }
             }
 
-            // 2) NIF -> MAT + MeshPath stems
+            // 2) NIF -> MAT + MeshPath + RIG
             foreach (var nifRel in nifRelPaths)
             {
                 string full = Path.Combine(gameRoot, nifRel);
@@ -272,7 +299,7 @@ namespace DevModManager.Core.Services
                 }
             }
 
-            // 3) MATs -> DDS tokens
+            // 3) MATs -> DDS tokens (PC present policy)
             foreach (var matRel in matRelPaths)
             {
                 string fullMat = Path.Combine(gameRoot, matRel);
@@ -303,19 +330,9 @@ namespace DevModManager.Core.Services
                     string fullTexPc = Path.Combine(gameRoot, ddsRel);
                     bool pcExists = File.Exists(fullTexPc);
 
-                    string? xbCandidate = null;
-                    bool xbExists = false;
-                    if (ddsRel.StartsWith("Data\\Textures", StringComparison.OrdinalIgnoreCase))
-                    {
-                        xbCandidate = Path.Combine(xboxDataRoot, GetRelativePath(Path.Combine(gameRoot, "Data"), fullTexPc));
-                        xbExists = File.Exists(xbCandidate);
-                    }
+                    if (!pcExists) continue;
 
-                    // Policy: both missing -> silent skip; one missing -> warn; both present -> add; add only if PC exists
-                    if (!pcExists && !xbExists)
-                        continue;
-
-                    if (pcExists && found.Add(ddsRel))
+                    if (found.Add(ddsRel))
                     {
                         hasCustomTextures = true;
                         AddFile(manifest, achlistPaths, ddsRel, FileKind.Texture, $"mat:{matRel}", gameRoot, xboxDataRoot);
@@ -333,50 +350,26 @@ namespace DevModManager.Core.Services
             // 5) Voice assets
             CollectVoiceAssets(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot);
 
-            // 6) Scripts (VMAD names + PSC imports)
-            static string ToPscRel(string name) =>
-                NormalizeRel(Path.Combine("Data", "Scripts", "Source", name.Replace(':', '\\') + ".psc"));
-            static string ToPexRel(string name) =>
-                NormalizeRel(Path.Combine("Data", "Scripts", name.Replace(':', '\\') + ".pex"));
+            // 6) Scripts (colon-delimited tokens + PSC imports)
+            var rootScriptNames = ExtractScriptNamesFromPlugin(pluginBytes, gameRoot);
+            var allScriptNames = ExpandScriptImports(rootScriptNames, gameRoot);
 
-            var vmadNames = ExtractVmadPexNames(pluginBytes);
             var pscSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var pexSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var vm in vmadNames)
+            foreach (var name in allScriptNames)
             {
-                string pscRel = ToPscRel(vm);
-                string pexRel = ToPexRel(vm);
+                string pscRel = ScriptNameToPscRel(name);
+                string pexRel = ScriptNameToPexRel(name);
 
-                if (File.Exists(Path.Combine(gameRoot, pscRel)) && pscSet.Add(pscRel))
-                    AddBackupOnlyFile(manifest, pscRel, "vmad-psc");
-
-                if (File.Exists(Path.Combine(gameRoot, pexRel)) && pexSet.Add(pexRel))
-                    AddFile(manifest, achlistPaths, pexRel, FileKind.Pex, "vmad-pex", gameRoot, xboxDataRoot);
-            }
-
-            var pscSetSnapshot = new HashSet<string>(pscSet, StringComparer.OrdinalIgnoreCase);
-            var importRegex = new Regex(@"^\s*import\s+([A-Za-z0-9_:.]+)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
-            foreach (var pscRel in pscSetSnapshot)
-            {
                 string fullPsc = Path.Combine(gameRoot, pscRel);
-                if (!File.Exists(fullPsc)) continue;
+                string fullPex = Path.Combine(gameRoot, pexRel);
 
-                string text = File.ReadAllText(fullPsc);
-                foreach (Match m in importRegex.Matches(text))
-                {
-                    string importName = m.Groups[1].Value.Trim();
+                if (File.Exists(fullPsc) && pscSet.Add(pscRel))
+                    AddBackupOnlyFile(manifest, pscRel, "script-psc-or-import");
 
-                    string impPscRel = ToPscRel(importName);
-                    string impPexRel = ToPexRel(importName);
-
-                    if (File.Exists(Path.Combine(gameRoot, impPscRel)) && pscSet.Add(impPscRel))
-                        AddBackupOnlyFile(manifest, impPscRel, "psc-import");
-
-                    if (File.Exists(Path.Combine(gameRoot, impPexRel)) && pexSet.Add(impPexRel))
-                        AddFile(manifest, achlistPaths, impPexRel, FileKind.Pex, "pex-from-psc-import", gameRoot, xboxDataRoot);
-                }
+                if (File.Exists(fullPex) && pexSet.Add(pexRel))
+                    AddFile(manifest, achlistPaths, pexRel, FileKind.Pex, "script-pex-or-import", gameRoot, xboxDataRoot);
             }
 
             var elapsed = DateTime.UtcNow - start;
@@ -389,7 +382,7 @@ namespace DevModManager.Core.Services
             };
         }
 
-        // Helpers (logging suppressed)
+        // Helpers
         private static string? FindCreationKitIni(string gameRoot)
         {
             string custom = Path.Combine(gameRoot, "CreationKitCustom.ini");
@@ -669,6 +662,7 @@ namespace DevModManager.Core.Services
             }
         }
 
+        // TIF mapping: mirror includes "<plugin>.esm"
         private static void TryAddInterfaceTifForTexture(
             DependencyManifest manifest,
             string relTexturePath,
@@ -719,71 +713,70 @@ namespace DevModManager.Core.Services
             }
         }
 
-        private static HashSet<string> ExtractVmadPexNames(byte[] pluginBytes)
+        // Script discovery
+        private static string ScriptNameToPscRel(string name)
+        {
+            string path = name.Replace(':', '\\');
+            return NormalizeRel(Path.Combine("Data", "Scripts", "Source", path + ".psc"));
+        }
+
+        private static string ScriptNameToPexRel(string name)
+        {
+            string path = name.Replace(':', '\\');
+            return NormalizeRel(Path.Combine("Data", "Scripts", path + ".pex"));
+        }SocketsHttpConnectionContext git integra
+
+        private static HashSet<string> ExtractScriptNamesFromPlugin(byte[] pluginBytes, string gameRoot)
         {
             var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             string text = Encoding.ASCII.GetString(pluginBytes);
 
-            var scriptNameRegex = new Regex(@"""ScriptName""\s*:\s*""([A-Za-z0-9_:.]+)""", RegexOptions.IgnoreCase);
-            foreach (Match m in scriptNameRegex.Matches(text))
-            {
-                string name = m.Groups[1].Value.Trim();
-                if (!string.IsNullOrWhiteSpace(name))
-                    names.Add(name);
-            }
+            var rx = new Regex(@"\b([A-Za-z0-9_]+(?::[A-Za-z0-9_]+)+)\b", RegexOptions.Multiline);
 
-            var pexRegex = new Regex(@"\b([A-Za-z0-9_:.]+)\.pex\b", RegexOptions.IgnoreCase);
-            foreach (Match m in pexRegex.Matches(text))
+            foreach (Match m in rx.Matches(text))
             {
-                string name = m.Groups[1].Value.Trim();
-                if (!string.IsNullOrWhiteSpace(name))
-                    names.Add(name);
+                string candidate = m.Groups[1].Value.Trim();
+                if (candidate.Length == 0) continue;
+
+                string fullPsc = Path.Combine(gameRoot, ScriptNameToPscRel(candidate));
+                string fullPex = Path.Combine(gameRoot, ScriptNameToPexRel(candidate));
+
+                if (File.Exists(fullPsc) || File.Exists(fullPex))
+                    names.Add(candidate);
             }
 
             return names;
         }
 
-        private static void CollectMatDdsTokensFromJson(JsonElement element, List<string> tokens)
+        private static HashSet<string> ExpandScriptImports(HashSet<string> rootNames, string gameRoot)
         {
-            switch (element.ValueKind)
+            var all = new HashSet<string>(rootNames, StringComparer.OrdinalIgnoreCase);
+            var queue = new Queue<string>(rootNames);
+
+            var importRegex = new Regex(@"^\s*import\s+([A-Za-z0-9_:.]+)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+            while (queue.Count > 0)
             {
-                case JsonValueKind.Object:
-                    foreach (var prop in element.EnumerateObject())
-                    {
-                        if ((prop.NameEquals("File") || prop.NameEquals("FileName")) &&
-                            prop.Value.ValueKind == JsonValueKind.String)
-                        {
-                            string? val = prop.Value.GetString();
-                            if (!string.IsNullOrWhiteSpace(val) &&
-                                val.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
-                            {
-                                tokens.Add(val);
-                            }
-                        }
-                        CollectMatDdsTokensFromJson(prop.Value, tokens);
-                    }
-                    break;
+                string name = queue.Dequeue();
+                string fullPsc = Path.Combine(gameRoot, ScriptNameToPscRel(name));
+                if (!File.Exists(fullPsc)) continue;
 
-                case JsonValueKind.Array:
-                    foreach (var item in element.EnumerateArray())
-                        CollectMatDdsTokensFromJson(item, tokens);
-                    break;
+                string text = File.ReadAllText(fullPsc);
+                foreach (Match m in importRegex.Matches(text))
+                {
+                    string importName = m.Groups[1].Value.Trim();
+                    if (importName.Length == 0) continue;
+
+                    string fullImpPsc = Path.Combine(gameRoot, ScriptNameToPscRel(importName));
+                    string fullImpPex = Path.Combine(gameRoot, ScriptNameToPexRel(importName));
+                    bool exists = File.Exists(fullImpPsc) || File.Exists(fullImpPex);
+
+                    if (exists && all.Add(importName))
+                        queue.Enqueue(importName);
+                }
             }
-        }
 
-        private static string? NormalizeDdsPathFromMat(string raw)
-        {
-            if (string.IsNullOrWhiteSpace(raw)) return null;
-            string s = raw.Replace('/', '\\').Replace("\\\\", "\\").Trim();
-
-            int idxDataTex = s.IndexOf("Data\\Textures\\", StringComparison.OrdinalIgnoreCase);
-            if (idxDataTex >= 0) return NormalizeRel(s.Substring(idxDataTex));
-
-            int idxTextures = s.IndexOf("Textures\\", StringComparison.OrdinalIgnoreCase);
-            if (idxTextures >= 0) return NormalizeRel(Path.Combine("Data", s.Substring(idxTextures)));
-
-            if (!s.EndsWith(".dds", StringComparison.OrdinalIgnoreCase)) return null;
-            return NormalizeRel(Path.Combine("Data", "Textures", s.TrimStart('\\')));
+            return all;
         }
     }
 }
