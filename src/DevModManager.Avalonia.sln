@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevModManager.Core", "DevMo
 EndProject
 Project("{840C416C-B8F3-42BC-B0DD-F6BB14C9F8CB}") = "DMM.Installer", "..\installer\DMM.Installer\DMM.Installer.aiproj", "{26E803CB-D426-453B-9738-2A520D76B345}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevModDependencies", "DevModDependencies\DevModDependencies.csproj", "{1D9AFA11-68DC-4084-B336-763B03EEA2DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,12 @@ Global
 		{26E803CB-D426-453B-9738-2A520D76B345}.DefaultBuild|Any CPU.Build.0 = DefaultBuild
 		{26E803CB-D426-453B-9738-2A520D76B345}.Release|Any CPU.ActiveCfg = DefaultBuild
 		{26E803CB-D426-453B-9738-2A520D76B345}.Release|Any CPU.Build.0 = DefaultBuild
+		{1D9AFA11-68DC-4084-B336-763B03EEA2DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D9AFA11-68DC-4084-B336-763B03EEA2DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D9AFA11-68DC-4084-B336-763B03EEA2DA}.DefaultBuild|Any CPU.ActiveCfg = Release|Any CPU
+		{1D9AFA11-68DC-4084-B336-763B03EEA2DA}.DefaultBuild|Any CPU.Build.0 = Release|Any CPU
+		{1D9AFA11-68DC-4084-B336-763B03EEA2DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D9AFA11-68DC-4084-B336-763B03EEA2DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

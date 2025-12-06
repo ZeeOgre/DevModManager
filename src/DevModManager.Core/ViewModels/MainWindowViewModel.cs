@@ -1,5 +1,6 @@
 ﻿using DevModManager.Core.Models;
 using DevModManager.Core.Utility;
+using DevModManager.Core.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -31,6 +32,13 @@ namespace DevModManager.Core.ViewModels
         public ICommand LaunchGameCommand { get; }
         public ICommand OpenModDetailsCommand { get; }
 
+        private DependencyManifest? _currentManifest;
+        public DependencyManifest? CurrentManifest
+        {
+            get => _currentManifest;
+            set => _currentManifest = value;
+        }
+
         public MainWindowViewModel()
         {
             // Commands (no-ops for now)
@@ -53,6 +61,14 @@ namespace DevModManager.Core.ViewModels
             Mods.Add(new ModDatum { Name = "zeeogresoutposttutorial_part5_unique-organics", State = "<NONE>", LastModified = DateTime.Parse("2025-11-12 08:57"), IsActive = false, OnCreations = false, OnNexus = false, HasGitRepo = false });
             Mods.Add(new ModDatum { Name = "zeeogresoutposttutorial_part6_all-resources", State = "DEV", LastModified = DateTime.Parse("2021-09-05 12:34"), IsActive = false, OnCreations = false, OnNexus = false, HasGitRepo = false });
             Mods.Add(new ModDatum { Name = "ZeeOgresConstellationDropCrate", State = "PROD", LastModified = DateTime.Parse("2024-11-30 18:30"), IsActive = true, OnCreations = true, OnNexus = false, HasGitRepo = false });
+        }
+
+        private async void ScanForDependencies(string pluginPath)
+        {
+            var scanner = new DependencyScanner();
+            var result = await Task.Run(() => scanner.Scan(new DependencyScanOptions { PluginPath = pluginPath, GameRootOverride = SelectedGameFolder }));
+                    CurrentManifest = result.Manifest;
+            // bind Achlist and Diagnostics to the UI
         }
     }
 

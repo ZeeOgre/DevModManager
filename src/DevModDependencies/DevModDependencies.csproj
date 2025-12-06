@@ -1,10 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <AssemblyName>dmmdeps</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <EnableDefaultItems>true</EnableDefaultItems>
   </PropertyGroup>
 
+  <!-- Automatically publish on Release builds, avoiding target cycles -->
+  <Target Name="AutoPublishOnRelease" AfterTargets="Build" Condition="'$(Configuration)'=='Release'">
+    <PropertyGroup>
+      <_PublishOut>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\publish</_PublishOut>
+    </PropertyGroup>
+    <Exec Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c $(Configuration) -r $(RuntimeIdentifier) --no-build -o &quot;$(_PublishOut)&quot;" />
+    <Message Text="Auto-published to $(_PublishOut)" Importance="High" />
+  </Target>
 </Project>
