@@ -8,6 +8,9 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <EnableDefaultItems>true</EnableDefaultItems>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="References\" />
+  </ItemGroup>
 
   <!-- Automatically publish on Release builds, avoiding target cycles -->
   <Target Name="AutoPublishOnRelease" AfterTargets="Build" Condition="'$(Configuration)'=='Release'">

@@ -304,7 +304,7 @@ namespace DmmDep
                             {
                                 if (matRelPaths.Add(rel))
                                 {
-                                    Console.WriteLine($"[2] Found MAT '{rel}' in NIF '{nifRel}'");
+                                    //Console.WriteLine($"[2] Found MAT '{rel}' in NIF '{nifRel}'");
                                 }
                             }
                             else
@@ -910,7 +910,7 @@ namespace DmmDep
             sw.Flush();
         }
 
-        // Full-path-aware TIF mapping for interface + terrain textures
+        // Full-path-aware TIF mapping for interface + terrain textures (mirror includes "<plugin>.esm")
         private static void TryAddInterfaceTifForTexture(
             DependencyManifest manifest,
             string relTexturePath,
@@ -921,15 +921,18 @@ namespace DmmDep
 
             string relUnderTextures = relTexturePath.Substring("Data\\Textures\\".Length);
 
-            // Interface: TifRoot\Interface\...
+            // Interface: mirror includes "<plugin>.esm" directory
             if (relUnderTextures.StartsWith("Interface\\", StringComparison.OrdinalIgnoreCase))
             {
-                string tifSubPath = Path.ChangeExtension(relUnderTextures, ".tif"); // Interface\...\foo.tif
+                // Example:
+                // DDS: Data\Textures\Interface\InventoryIcons\<Plugin>.esm\...\foo.dds
+                // TIF: Source\TGATextures\Interface\InventoryIcons\<Plugin>.esm\...\foo.tif
+                string tifSubPath = Path.ChangeExtension(relUnderTextures, ".tif");
                 string tifFull = Path.Combine(tifRoot, tifSubPath);
                 if (File.Exists(tifFull))
                 {
                     string relTifPc = NormalizeRel(Path.Combine("Source", "TGATextures", tifSubPath));
-                    if (!manifest.Files.Any(f => f.PcPath.Equals(relTifPc, StringComparison.OrdinalIgnoreCase)))
+                    if (!manifest.Files.Any(f => string.Equals(f.PcPath, relTifPc, StringComparison.OrdinalIgnoreCase)))
                     {
                         manifest.Files.Add(new FileEntry
                         {
@@ -941,7 +944,6 @@ namespace DmmDep
                     }
                 }
             }
-            // Terrain overlay masks: TifRoot\Terrain\OverlayMasks\<name>.tif
             else if (relUnderTextures.StartsWith("Terrain\\OverlayMasks\\", StringComparison.OrdinalIgnoreCase))
             {
                 string fileName = Path.GetFileNameWithoutExtension(relUnderTextures) + ".tif";
@@ -949,7 +951,7 @@ namespace DmmDep
                 if (File.Exists(tifFull))
                 {
                     string relTifPc = NormalizeRel(Path.Combine("Source", "TGATextures", "Terrain", "OverlayMasks", fileName));
-                    if (!manifest.Files.Any(f => f.PcPath.Equals(relTifPc, StringComparison.OrdinalIgnoreCase)))
+                    if (!manifest.Files.Any(f => string.Equals(f.PcPath, relTifPc, StringComparison.OrdinalIgnoreCase)))
                     {
                         manifest.Files.Add(new FileEntry
                         {
