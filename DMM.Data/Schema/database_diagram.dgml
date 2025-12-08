@@ -1,0 +1,541 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="Database" Label="DevModManager.db" Category="Database" Group="Expanded" />
+    <Node Id="ActiveMod" Label="ActiveMod" Category="Table" Group="Collapsed" />
+    <Node Id="ActiveMod_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="ActiveMod_GameProfileId" Label="GameProfileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ActiveMod_ModId" Label="ModId" Category="Field Foreign" Description="bigint" />
+    <Node Id="AssetHandler" Label="AssetHandler" Category="Table" Group="Collapsed" />
+    <Node Id="AssetHandler_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="AssetHandler_Class" Label="Class" Category="Field" Description="text" />
+    <Node Id="AssetHandler_ToolId" Label="ToolId" Category="Field Foreign" Description="bigint" />
+    <Node Id="AssetKind" Label="AssetKind" Category="Table" Group="Collapsed" />
+    <Node Id="AssetKind_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="AssetKind_Name" Label="Name" Category="Field" Description="text" />
+    <Node Id="AssetKind_DefaultArchiveName" Label="DefaultArchiveName" Category="Field Optional" Description="text" />
+    <Node Id="AssetKind_DefaultDataPath" Label="DefaultDataPath" Category="Field Optional" Description="text" />
+    <Node Id="Config" Label="Config" Category="Table" Group="Collapsed" />
+    <Node Id="Config_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="Config_ConfigName" Label="ConfigName" Category="Field Optional" Description="text" />
+    <Node Id="Config_LocalRepoFolderId" Label="LocalRepoFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Config_UseGit" Label="UseGit" Category="Field" Description="bigint" />
+    <Node Id="Config_GitHubRepo" Label="GitHubRepo" Category="Field Optional" Description="text" />
+    <Node Id="Config_GitHubUsername" Label="GitHubUsername" Category="Field Optional" Description="text" />
+    <Node Id="Config_GitHubToken" Label="GitHubToken" Category="Field Optional" Description="text" />
+    <Node Id="Config_GitHubTokenExpiration" Label="GitHubTokenExpiration" Category="Field Optional" Description="text" />
+    <Node Id="Config_GitEachModSeparate" Label="GitEachModSeparate" Category="Field" Description="bigint" />
+    <Node Id="Config_UseModManager" Label="UseModManager" Category="Field" Description="bigint" />
+    <Node Id="Config_DefaultGameProfile" Label="DefaultGameProfile" Category="Field Foreign" Description="bigint" />
+    <Node Id="Config_DefaultArchiveFormat" Label="DefaultArchiveFormat" Category="Field Foreign" Description="bigint" />
+    <Node Id="Config_TimestampFormat" Label="TimestampFormat" Category="Field Optional" Description="text" />
+    <Node Id="Config_MyNameSpace" Label="MyNameSpace" Category="Field Optional" Description="text" />
+    <Node Id="Config_MyResourcePrefix" Label="MyResourcePrefix" Category="Field Optional" Description="text" />
+    <Node Id="Config_ShowSaveMessage" Label="ShowSaveMessage" Category="Field Optional" Description="bigint" />
+    <Node Id="Config_ShowOverwriteMessage" Label="ShowOverwriteMessage" Category="Field" Description="bigint" />
+    <Node Id="Config_NexusAPIKey" Label="NexusAPIKey" Category="Field Optional" Description="text" />
+    <Node Id="Config_AutoCheckForUpdates" Label="AutoCheckForUpdates" Category="Field" Description="bigint" />
+    <Node Id="Config_DarkMode" Label="DarkMode" Category="Field" Description="bigint" />
+    <Node Id="ExternalIds" Label="ExternalIds" Category="Table" Group="Collapsed" />
+    <Node Id="ExternalIds_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="ExternalIds_modId" Label="modId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ExternalIds_BethesdaId" Label="BethesdaId" Category="Field Optional" Description="text" />
+    <Node Id="ExternalIds_NexusId" Label="NexusId" Category="Field Optional" Description="text" />
+    <Node Id="ExternalTools" Label="ExternalTools" Category="Table" Group="Collapsed" />
+    <Node Id="ExternalTools_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="ExternalTools_Name" Label="Name" Category="Field Optional" Description="text" />
+    <Node Id="ExternalTools_baseFolderId" Label="baseFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ExternalTools_deployFolderId" Label="deployFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ExternalTools_Arguments" Label="Arguments" Category="Field Optional" Description="text" />
+    <Node Id="ExternalTools_AdditionalArguments" Label="AdditionalArguments" Category="Field Optional" Description="bigint" />
+    <Node Id="ExternalTools_CheckDeploy" Label="CheckDeploy" Category="Field" Description="bigint" />
+    <Node Id="FileDependency" Label="FileDependency" Category="Table" Group="Collapsed" />
+    <Node Id="FileDependency_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="FileDependency_FileInfoId" Label="FileInfoId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileDependency_DependentFileInfoId" Label="DependentFileInfoId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileFolderDeploymentState" Label="FileFolderDeploymentState" Category="Table" Group="Collapsed" />
+    <Node Id="FileFolderDeploymentState_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="FileFolderDeploymentState_FileInfoId" Label="FileInfoId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileFolderDeploymentState_FolderId" Label="FolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileFolderDeploymentState_GameProfileId" Label="GameProfileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileInfo" Label="FileInfo" Category="Table" Group="Collapsed" />
+    <Node Id="FileInfo_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="FileInfo_Name" Label="Name" Category="Field" Description="text" />
+    <Node Id="FileInfo_DTStamp" Label="DTStamp" Category="Field" Description="datetime" />
+    <Node Id="FileInfo_Size" Label="Size" Category="Field" Description="numeric(53,0)" />
+    <Node Id="FileInfo_Hash" Label="Hash" Category="Field Optional" Description="image" />
+    <Node Id="FileInfo_GameId" Label="GameId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileInfo_ArchiveFileId" Label="ArchiveFileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileInfo_JunctionSourceId" Label="JunctionSourceId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileInfo_RelativeFolderId" Label="RelativeFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileInfo_FileTypeId" Label="FileTypeId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileInfo_ModId" Label="ModId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileStage" Label="FileStage" Category="Table" Group="Collapsed" />
+    <Node Id="FileStage_FileInfoId" Label="FileInfoId" Category="Field Primary" Description="bigint" />
+    <Node Id="FileStage_StageId" Label="StageId" Category="Field Primary" Description="bigint" />
+    <Node Id="FileType" Label="FileType" Category="Table" Group="Collapsed" />
+    <Node Id="FileType_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="FileType_FileExtension" Label="FileExtension" Category="Field" Description="text" />
+    <Node Id="FileType_Regex" Label="Regex" Category="Field Optional" Description="text" />
+    <Node Id="FileType_IsArchive" Label="IsArchive" Category="Field Optional" Description="bigint" />
+    <Node Id="FileType_ExcludeBA2" Label="ExcludeBA2" Category="Field Optional" Description="bigint" />
+    <Node Id="FileType_isModFile" Label="isModFile" Category="Field Optional" Description="bigint" />
+    <Node Id="FileType_ExcludeBackup" Label="ExcludeBackup" Category="Field Optional" Description="bigint" />
+    <Node Id="FileType_PlatformId" Label="PlatformId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileType_GameProfileId" Label="GameProfileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileType_AssetKindId" Label="AssetKindId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FileTypeAssetHandler" Label="FileTypeAssetHandler" Category="Table" Group="Collapsed" />
+    <Node Id="FileTypeAssetHandler_FileTypeId" Label="FileTypeId" Category="Field Primary" Description="bigint" />
+    <Node Id="FileTypeAssetHandler_AssetHandlerId" Label="AssetHandlerId" Category="Field Primary" Description="bigint" />
+    <Node Id="FolderRole" Label="FolderRole" Category="Table" Group="Collapsed" />
+    <Node Id="FolderRole_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="FolderRole_Name" Label="Name" Category="Field" Description="text" />
+    <Node Id="FolderRole_IncludeInBackup" Label="IncludeInBackup" Category="Field" Description="bigint" />
+    <Node Id="FolderRole_PlatformId" Label="PlatformId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FolderRole_IsRepoFolder" Label="IsRepoFolder" Category="Field" Description="bigint" />
+    <Node Id="FolderRole_IsToolFolder" Label="IsToolFolder" Category="Field" Description="bigint" />
+    <Node Id="FolderRole_isPlatformSpecifc" Label="isPlatformSpecifc" Category="Field Optional" Description="bigint" />
+    <Node Id="Folders" Label="Folders" Category="Table" Group="Collapsed" />
+    <Node Id="Folders_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="Folders_Path" Label="Path" Category="Field" Description="text" />
+    <Node Id="Folders_Description" Label="Description" Category="Field Optional" Description="text" />
+    <Node Id="Folders_ParentFolderId" Label="ParentFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Folders_JunctionSourceId" Label="JunctionSourceId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Folders_FolderTypeId" Label="FolderTypeId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Folders_FolderRoleId" Label="FolderRoleId" Category="Field Foreign" Description="bigint" />
+    <Node Id="FolderType" Label="FolderType" Category="Table" Group="Collapsed" />
+    <Node Id="FolderType_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="FolderType_Name" Label="Name" Category="Field" Description="text" />
+    <Node Id="FolderTypeFiles" Label="FolderTypeFiles" Category="Table" Group="Collapsed" />
+    <Node Id="FolderTypeFiles_FolderTypeId" Label="FolderTypeId" Category="Field Primary" Description="bigint" />
+    <Node Id="FolderTypeFiles_FileTypeId" Label="FileTypeId" Category="Field Primary" Description="bigint" />
+    <Node Id="FolderTypeKinds" Label="FolderTypeKinds" Category="Table" Group="Collapsed" />
+    <Node Id="FolderTypeKinds_FolderTypeId" Label="FolderTypeId" Category="Field Primary" Description="bigint" />
+    <Node Id="FolderTypeKinds_AssetKindId" Label="AssetKindId" Category="Field Primary" Description="bigint" />
+    <Node Id="FolderTypeRoles" Label="FolderTypeRoles" Category="Table" Group="Collapsed" />
+    <Node Id="FolderTypeRoles_FolderRoleId" Label="FolderRoleId" Category="Field Primary" Description="bigint" />
+    <Node Id="FolderTypeRoles_FileTypeId" Label="FileTypeId" Category="Field Primary" Description="bigint" />
+    <Node Id="Game" Label="Game" Category="Table" Group="Collapsed" />
+    <Node Id="Game_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="Game_Name" Label="Name" Category="Field" Description="text" />
+    <Node Id="Game_Executable" Label="Executable" Category="Field Optional" Description="text" />
+    <Node Id="Game_NexusKeyword" Label="NexusKeyword" Category="Field Optional" Description="text" />
+    <Node Id="Game_BethesdaKeyword" Label="BethesdaKeyword" Category="Field Optional" Description="text" />
+    <Node Id="Game_GameSettingsFolderId" Label="GameSettingsFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Game_GameSaveFolderId" Label="GameSaveFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Game_GameLocalSettingsFolderId" Label="GameLocalSettingsFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Game_GamePluginsTxtId" Label="GamePluginsTxtId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Game_GameSettingsIniId" Label="GameSettingsIniId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Game_GameCustomSettingsIniId" Label="GameCustomSettingsIniId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Game_CreationKitSettingsIniId" Label="CreationKitSettingsIniId" Category="Field Foreign" Description="bigint" />
+    <Node Id="Game_CreationKitCustomSettingsIniId" Label="CreationKitCustomSettingsIniId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameProfile" Label="GameProfile" Category="Table" Group="Collapsed" />
+    <Node Id="GameProfile_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameProfile_Name" Label="Name" Category="Field" Description="text" />
+    <Node Id="GameProfile_GameId" Label="GameId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameProfile_GameFolderId" Label="GameFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameProfile_GameVersionId" Label="GameVersionId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameProfile_GameDataFolderId" Label="GameDataFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameProfile_GameXboxFolderId" Label="GameXboxFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameProfile_GamePlaystationFolderId" Label="GamePlaystationFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameProfile_TifFolderId" Label="TifFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameProfile_GameVersionRepoId" Label="GameVersionRepoId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameSource" Label="GameSource" Category="Table" Group="Collapsed" />
+    <Node Id="GameSource_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameSource_Name" Label="Name" Category="Field Optional" Description="text" />
+    <Node Id="GameSource_SourceGameId" Label="SourceGameId" Category="Field Optional" Description="text" />
+    <Node Id="GameSource_URL" Label="URL" Category="Field Optional" Description="text" />
+    <Node Id="GameSource_URI" Label="URI" Category="Field Optional" Description="text" />
+    <Node Id="GameSource_SourceRepoId" Label="SourceRepoId" Category="Field Optional" Description="text" />
+    <Node Id="GameVersion" Label="GameVersion" Category="Table" Group="Collapsed" />
+    <Node Id="GameVersion_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameVersion_Version" Label="Version" Category="Field Optional" Description="text" />
+    <Node Id="GameVersion_GameId" Label="GameId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameVersion_GameSource" Label="GameSource" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameVersion_VersionRepo" Label="VersionRepo" Category="Field Optional" Description="text" />
+    <Node Id="GameVersionFiles" Label="GameVersionFiles" Category="Table" Group="Collapsed" />
+    <Node Id="GameVersionFiles_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameVersionFiles_FileId" Label="FileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameVersionFiles_ArchiveId" Label="ArchiveId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameVersionFiles_GameVersionId" Label="GameVersionId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameVersionFiles_ModId" Label="ModId" Category="Field Foreign" Description="bigint" />
+    <Node Id="InitializationStatus" Label="InitializationStatus" Category="Table" Group="Collapsed" />
+    <Node Id="InitializationStatus_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="InitializationStatus_IsInitialized" Label="IsInitialized" Category="Field" Description="bigint" />
+    <Node Id="InitializationStatus_InitializationTime" Label="InitializationTime" Category="Field" Description="text" />
+    <Node Id="ModItems" Label="ModItems" Category="Table" Group="Collapsed" />
+    <Node Id="ModItems_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="ModItems_ModName" Label="ModName" Category="Field" Description="text" />
+    <Node Id="ModItems_ModFolderPath" Label="ModFolderPath" Category="Field" Description="text" />
+    <Node Id="ModItems_CurrentStageID" Label="CurrentStageID" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModItems_isBaseline" Label="isBaseline" Category="Field" Description="bigint" />
+    <Node Id="ModItems_isManaged" Label="isManaged" Category="Field" Description="bigint" />
+    <Node Id="ModRepoFolder" Label="ModRepoFolder" Category="Table" Group="Collapsed" />
+    <Node Id="ModRepoFolder_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="ModRepoFolder_RepoFolderPathId" Label="RepoFolderPathId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModRepoFolder_SubModuleUrl" Label="SubModuleUrl" Category="Field Optional" Description="text" />
+    <Node Id="ModRepoFolder_LinkedFilesFolderId" Label="LinkedFilesFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModRepoFolder_BackupFolderId" Label="BackupFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModRepoFolder_MetaFilesFolderId" Label="MetaFilesFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModRepository" Label="ModRepository" Category="Table" Group="Collapsed" />
+    <Node Id="ModRepository_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="ModRepository_ModId" Label="ModId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModRepository_RepoUrl" Label="RepoUrl" Category="Field" Description="text" />
+    <Node Id="ModRepository_ParentRepoId" Label="ParentRepoId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModRepository_isDLC" Label="isDLC" Category="Field" Description="bigint" />
+    <Node Id="ModRepository_isBaseline" Label="isBaseline" Category="Field" Description="bigint" />
+    <Node Id="ModRepository_LocalFolderId" Label="LocalFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModRepository_IsSubmodule" Label="IsSubmodule" Category="Field" Description="bigint" />
+    <Node Id="ModRepository_DefaultBranchId" Label="DefaultBranchId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ModStages" Label="ModStages" Category="Table" Group="Collapsed" />
+    <Node Id="ModStages_ModId" Label="ModId" Category="Field Primary" Description="bigint" />
+    <Node Id="ModStages_StageID" Label="StageID" Category="Field Primary" Description="bigint" />
+    <Node Id="Platform" Label="Platform" Category="Table" Group="Collapsed" />
+    <Node Id="Platform_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="Platform_Name" Label="Name" Category="Field Optional" Description="text" />
+    <Node Id="Platform_ArchiveNamePattern" Label="ArchiveNamePattern" Category="Field Optional" Description="text" />
+    <Node Id="ReservedFolderNames" Label="ReservedFolderNames" Category="Table" Group="Collapsed" />
+    <Node Id="ReservedFolderNames_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="ReservedFolderNames_Name" Label="Name" Category="Field" Description="text" />
+    <Node Id="StageBranchMapping" Label="StageBranchMapping" Category="Table" Group="Collapsed" />
+    <Node Id="StageBranchMapping_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="StageBranchMapping_ModRepositoryId" Label="ModRepositoryId" Category="Field Foreign" Description="bigint" />
+    <Node Id="StageBranchMapping_StageId" Label="StageId" Category="Field Foreign" Description="bigint" />
+    <Node Id="StageBranchMapping_BranchName" Label="BranchName" Category="Field" Description="text" />
+    <Node Id="Stages" Label="Stages" Category="Table" Group="Collapsed" />
+    <Node Id="Stages_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="Stages_StageName" Label="StageName" Category="Field" Description="text" />
+    <Node Id="Stages_IsSource" Label="IsSource" Category="Field Optional" Description="bigint" />
+    <Node Id="Stages_IsReserved" Label="IsReserved" Category="Field Optional" Description="bigint" />
+    <Node Id="ToolDeploymentState" Label="ToolDeploymentState" Category="Table" Group="Collapsed" />
+    <Node Id="ToolDeploymentState_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="ToolDeploymentState_ExternalToolId" Label="ExternalToolId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ToolDeploymentState_GameProfileId" Label="GameProfileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="ToolDeploymentState_IsDeployed" Label="IsDeployed" Category="Field" Description="bigint" />
+    <Node Id="UrlRule" Label="UrlRule" Category="Table" Group="Collapsed" />
+    <Node Id="UrlRule_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="UrlRule_Name" Label="Name" Category="Field Optional" Description="text" />
+    <Node Id="UrlRule_URLRule" Label="URLRule" Category="Field" Description="text" />
+  </Nodes>
+  <Links>
+    <Link Source="Database" Target="ActiveMod" Category="Contains" />
+    <Link Source="ActiveMod" Target="ActiveMod_id" Category="Contains" />
+    <Link Source="ActiveMod" Target="ActiveMod_GameProfileId" Category="Contains" />
+    <Link Source="ActiveMod" Target="ActiveMod_ModId" Category="Contains" />
+    <Link Source="ActiveMod_ModId" Target="ModItems_id" Label="FK_ActiveMod_0_0" Category="Foreign Key" />
+    <Link Source="ActiveMod_GameProfileId" Target="GameProfile_id" Label="FK_ActiveMod_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="AssetHandler" Category="Contains" />
+    <Link Source="AssetHandler" Target="AssetHandler_id" Category="Contains" />
+    <Link Source="AssetHandler" Target="AssetHandler_Class" Category="Contains" />
+    <Link Source="AssetHandler" Target="AssetHandler_ToolId" Category="Contains" />
+    <Link Source="AssetHandler_ToolId" Target="ExternalTools_id" Label="FK_AssetHandler_0_0" Category="Foreign Key" />
+    <Link Source="Database" Target="AssetKind" Category="Contains" />
+    <Link Source="AssetKind" Target="AssetKind_id" Category="Contains" />
+    <Link Source="AssetKind" Target="AssetKind_Name" Category="Contains" />
+    <Link Source="AssetKind" Target="AssetKind_DefaultArchiveName" Category="Contains" />
+    <Link Source="AssetKind" Target="AssetKind_DefaultDataPath" Category="Contains" />
+    <Link Source="Database" Target="Config" Category="Contains" />
+    <Link Source="Config" Target="Config_id" Category="Contains" />
+    <Link Source="Config" Target="Config_ConfigName" Category="Contains" />
+    <Link Source="Config" Target="Config_LocalRepoFolderId" Category="Contains" />
+    <Link Source="Config" Target="Config_UseGit" Category="Contains" />
+    <Link Source="Config" Target="Config_GitHubRepo" Category="Contains" />
+    <Link Source="Config" Target="Config_GitHubUsername" Category="Contains" />
+    <Link Source="Config" Target="Config_GitHubToken" Category="Contains" />
+    <Link Source="Config" Target="Config_GitHubTokenExpiration" Category="Contains" />
+    <Link Source="Config" Target="Config_GitEachModSeparate" Category="Contains" />
+    <Link Source="Config" Target="Config_UseModManager" Category="Contains" />
+    <Link Source="Config" Target="Config_DefaultGameProfile" Category="Contains" />
+    <Link Source="Config" Target="Config_DefaultArchiveFormat" Category="Contains" />
+    <Link Source="Config" Target="Config_TimestampFormat" Category="Contains" />
+    <Link Source="Config" Target="Config_MyNameSpace" Category="Contains" />
+    <Link Source="Config" Target="Config_MyResourcePrefix" Category="Contains" />
+    <Link Source="Config" Target="Config_ShowSaveMessage" Category="Contains" />
+    <Link Source="Config" Target="Config_ShowOverwriteMessage" Category="Contains" />
+    <Link Source="Config" Target="Config_NexusAPIKey" Category="Contains" />
+    <Link Source="Config" Target="Config_AutoCheckForUpdates" Category="Contains" />
+    <Link Source="Config" Target="Config_DarkMode" Category="Contains" />
+    <Link Source="Config_DefaultArchiveFormat" Target="FileType_id" Label="FK_Config_0_0" Category="Foreign Key" />
+    <Link Source="Config_DefaultGameProfile" Target="GameProfile_id" Label="FK_Config_1_0" Category="Foreign Key" />
+    <Link Source="Config_LocalRepoFolderId" Target="Folders_id" Label="FK_Config_2_0" Category="Foreign Key" />
+    <Link Source="Database" Target="ExternalIds" Category="Contains" />
+    <Link Source="ExternalIds" Target="ExternalIds_id" Category="Contains" />
+    <Link Source="ExternalIds" Target="ExternalIds_modId" Category="Contains" />
+    <Link Source="ExternalIds" Target="ExternalIds_BethesdaId" Category="Contains" />
+    <Link Source="ExternalIds" Target="ExternalIds_NexusId" Category="Contains" />
+    <Link Source="ExternalIds_modId" Target="ModItems_id" Label="FK_ExternalIds_0_0" Category="Foreign Key" />
+    <Link Source="Database" Target="ExternalTools" Category="Contains" />
+    <Link Source="ExternalTools" Target="ExternalTools_id" Category="Contains" />
+    <Link Source="ExternalTools" Target="ExternalTools_Name" Category="Contains" />
+    <Link Source="ExternalTools" Target="ExternalTools_baseFolderId" Category="Contains" />
+    <Link Source="ExternalTools" Target="ExternalTools_deployFolderId" Category="Contains" />
+    <Link Source="ExternalTools" Target="ExternalTools_Arguments" Category="Contains" />
+    <Link Source="ExternalTools" Target="ExternalTools_AdditionalArguments" Category="Contains" />
+    <Link Source="ExternalTools" Target="ExternalTools_CheckDeploy" Category="Contains" />
+    <Link Source="ExternalTools_deployFolderId" Target="Folders_id" Label="FK_ExternalTools_0_0" Category="Foreign Key" />
+    <Link Source="ExternalTools_baseFolderId" Target="Folders_id" Label="FK_ExternalTools_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FileDependency" Category="Contains" />
+    <Link Source="FileDependency" Target="FileDependency_id" Category="Contains" />
+    <Link Source="FileDependency" Target="FileDependency_FileInfoId" Category="Contains" />
+    <Link Source="FileDependency" Target="FileDependency_DependentFileInfoId" Category="Contains" />
+    <Link Source="FileDependency_DependentFileInfoId" Target="FileInfo_id" Label="FK_FileDependency_0_0" Category="Foreign Key" />
+    <Link Source="FileDependency_FileInfoId" Target="FileInfo_id" Label="FK_FileDependency_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FileFolderDeploymentState" Category="Contains" />
+    <Link Source="FileFolderDeploymentState" Target="FileFolderDeploymentState_id" Category="Contains" />
+    <Link Source="FileFolderDeploymentState" Target="FileFolderDeploymentState_FileInfoId" Category="Contains" />
+    <Link Source="FileFolderDeploymentState" Target="FileFolderDeploymentState_FolderId" Category="Contains" />
+    <Link Source="FileFolderDeploymentState" Target="FileFolderDeploymentState_GameProfileId" Category="Contains" />
+    <Link Source="FileFolderDeploymentState_GameProfileId" Target="GameProfile_id" Label="FK_FileFolderDeploymentState_0_0" Category="Foreign Key" />
+    <Link Source="FileFolderDeploymentState_FolderId" Target="Folders_id" Label="FK_FileFolderDeploymentState_1_0" Category="Foreign Key" />
+    <Link Source="FileFolderDeploymentState_FileInfoId" Target="FileInfo_id" Label="FK_FileFolderDeploymentState_2_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FileInfo" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_id" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_Name" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_DTStamp" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_Size" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_Hash" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_GameId" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_ArchiveFileId" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_JunctionSourceId" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_RelativeFolderId" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_FileTypeId" Category="Contains" />
+    <Link Source="FileInfo" Target="FileInfo_ModId" Category="Contains" />
+    <Link Source="FileInfo_ModId" Target="ModItems_id" Label="FK_FileInfo_0_0" Category="Foreign Key" />
+    <Link Source="FileInfo_FileTypeId" Target="FileType_id" Label="FK_FileInfo_1_0" Category="Foreign Key" />
+    <Link Source="FileInfo_RelativeFolderId" Target="Folders_id" Label="FK_FileInfo_2_0" Category="Foreign Key" />
+    <Link Source="FileInfo_JunctionSourceId" Target="FileInfo_id" Label="FK_FileInfo_3_0" Category="Foreign Key" />
+    <Link Source="FileInfo_ArchiveFileId" Target="FileInfo_id" Label="FK_FileInfo_4_0" Category="Foreign Key" />
+    <Link Source="FileInfo_GameId" Target="Game_id" Label="FK_FileInfo_5_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FileStage" Category="Contains" />
+    <Link Source="FileStage" Target="FileStage_FileInfoId" Category="Contains" />
+    <Link Source="FileStage" Target="FileStage_StageId" Category="Contains" />
+    <Link Source="FileStage_FileInfoId" Target="FileInfo_id" Label="FK_FileStage_0_0" Category="Foreign Key" />
+    <Link Source="FileStage_StageId" Target="Stages_id" Label="FK_FileStage_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FileType" Category="Contains" />
+    <Link Source="FileType" Target="FileType_id" Category="Contains" />
+    <Link Source="FileType" Target="FileType_FileExtension" Category="Contains" />
+    <Link Source="FileType" Target="FileType_Regex" Category="Contains" />
+    <Link Source="FileType" Target="FileType_IsArchive" Category="Contains" />
+    <Link Source="FileType" Target="FileType_ExcludeBA2" Category="Contains" />
+    <Link Source="FileType" Target="FileType_isModFile" Category="Contains" />
+    <Link Source="FileType" Target="FileType_ExcludeBackup" Category="Contains" />
+    <Link Source="FileType" Target="FileType_PlatformId" Category="Contains" />
+    <Link Source="FileType" Target="FileType_GameProfileId" Category="Contains" />
+    <Link Source="FileType" Target="FileType_AssetKindId" Category="Contains" />
+    <Link Source="FileType_AssetKindId" Target="AssetKind_id" Label="FK_FileType_0_0" Category="Foreign Key" />
+    <Link Source="FileType_GameProfileId" Target="GameProfile_id" Label="FK_FileType_1_0" Category="Foreign Key" />
+    <Link Source="FileType_PlatformId" Target="Platform_id" Label="FK_FileType_2_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FileTypeAssetHandler" Category="Contains" />
+    <Link Source="FileTypeAssetHandler" Target="FileTypeAssetHandler_FileTypeId" Category="Contains" />
+    <Link Source="FileTypeAssetHandler" Target="FileTypeAssetHandler_AssetHandlerId" Category="Contains" />
+    <Link Source="FileTypeAssetHandler_AssetHandlerId" Target="AssetHandler_id" Label="FK_FileTypeAssetHandler_0_0" Category="Foreign Key" />
+    <Link Source="FileTypeAssetHandler_FileTypeId" Target="FileType_id" Label="FK_FileTypeAssetHandler_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FolderRole" Category="Contains" />
+    <Link Source="FolderRole" Target="FolderRole_id" Category="Contains" />
+    <Link Source="FolderRole" Target="FolderRole_Name" Category="Contains" />
+    <Link Source="FolderRole" Target="FolderRole_IncludeInBackup" Category="Contains" />
+    <Link Source="FolderRole" Target="FolderRole_PlatformId" Category="Contains" />
+    <Link Source="FolderRole" Target="FolderRole_IsRepoFolder" Category="Contains" />
+    <Link Source="FolderRole" Target="FolderRole_IsToolFolder" Category="Contains" />
+    <Link Source="FolderRole" Target="FolderRole_isPlatformSpecifc" Category="Contains" />
+    <Link Source="FolderRole_PlatformId" Target="Platform_id" Label="FK_FolderRole_0_0" Category="Foreign Key" />
+    <Link Source="Database" Target="Folders" Category="Contains" />
+    <Link Source="Folders" Target="Folders_id" Category="Contains" />
+    <Link Source="Folders" Target="Folders_Path" Category="Contains" />
+    <Link Source="Folders" Target="Folders_Description" Category="Contains" />
+    <Link Source="Folders" Target="Folders_ParentFolderId" Category="Contains" />
+    <Link Source="Folders" Target="Folders_JunctionSourceId" Category="Contains" />
+    <Link Source="Folders" Target="Folders_FolderTypeId" Category="Contains" />
+    <Link Source="Folders" Target="Folders_FolderRoleId" Category="Contains" />
+    <Link Source="Folders_FolderRoleId" Target="FolderRole_id" Label="FK_Folders_0_0" Category="Foreign Key" />
+    <Link Source="Folders_FolderTypeId" Target="FolderType_id" Label="FK_Folders_1_0" Category="Foreign Key" />
+    <Link Source="Folders_JunctionSourceId" Target="Folders_id" Label="FK_Folders_2_0" Category="Foreign Key" />
+    <Link Source="Folders_ParentFolderId" Target="Folders_id" Label="FK_Folders_3_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FolderType" Category="Contains" />
+    <Link Source="FolderType" Target="FolderType_id" Category="Contains" />
+    <Link Source="FolderType" Target="FolderType_Name" Category="Contains" />
+    <Link Source="Database" Target="FolderTypeFiles" Category="Contains" />
+    <Link Source="FolderTypeFiles" Target="FolderTypeFiles_FolderTypeId" Category="Contains" />
+    <Link Source="FolderTypeFiles" Target="FolderTypeFiles_FileTypeId" Category="Contains" />
+    <Link Source="FolderTypeFiles_FileTypeId" Target="FileType_id" Label="FK_FolderTypeFiles_0_0" Category="Foreign Key" />
+    <Link Source="FolderTypeFiles_FolderTypeId" Target="FolderType_id" Label="FK_FolderTypeFiles_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FolderTypeKinds" Category="Contains" />
+    <Link Source="FolderTypeKinds" Target="FolderTypeKinds_FolderTypeId" Category="Contains" />
+    <Link Source="FolderTypeKinds" Target="FolderTypeKinds_AssetKindId" Category="Contains" />
+    <Link Source="FolderTypeKinds_AssetKindId" Target="AssetKind_id" Label="FK_FolderTypeKinds_0_0" Category="Foreign Key" />
+    <Link Source="FolderTypeKinds_FolderTypeId" Target="FolderType_id" Label="FK_FolderTypeKinds_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="FolderTypeRoles" Category="Contains" />
+    <Link Source="FolderTypeRoles" Target="FolderTypeRoles_FolderRoleId" Category="Contains" />
+    <Link Source="FolderTypeRoles" Target="FolderTypeRoles_FileTypeId" Category="Contains" />
+    <Link Source="FolderTypeRoles_FileTypeId" Target="FileType_id" Label="FK_FolderTypeRoles_0_0" Category="Foreign Key" />
+    <Link Source="FolderTypeRoles_FolderRoleId" Target="FolderRole_id" Label="FK_FolderTypeRoles_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="Game" Category="Contains" />
+    <Link Source="Game" Target="Game_id" Category="Contains" />
+    <Link Source="Game" Target="Game_Name" Category="Contains" />
+    <Link Source="Game" Target="Game_Executable" Category="Contains" />
+    <Link Source="Game" Target="Game_NexusKeyword" Category="Contains" />
+    <Link Source="Game" Target="Game_BethesdaKeyword" Category="Contains" />
+    <Link Source="Game" Target="Game_GameSettingsFolderId" Category="Contains" />
+    <Link Source="Game" Target="Game_GameSaveFolderId" Category="Contains" />
+    <Link Source="Game" Target="Game_GameLocalSettingsFolderId" Category="Contains" />
+    <Link Source="Game" Target="Game_GamePluginsTxtId" Category="Contains" />
+    <Link Source="Game" Target="Game_GameSettingsIniId" Category="Contains" />
+    <Link Source="Game" Target="Game_GameCustomSettingsIniId" Category="Contains" />
+    <Link Source="Game" Target="Game_CreationKitSettingsIniId" Category="Contains" />
+    <Link Source="Game" Target="Game_CreationKitCustomSettingsIniId" Category="Contains" />
+    <Link Source="Game_CreationKitCustomSettingsIniId" Target="FileInfo_id" Label="FK_Game_0_0" Category="Foreign Key" />
+    <Link Source="Game_CreationKitSettingsIniId" Target="FileInfo_id" Label="FK_Game_1_0" Category="Foreign Key" />
+    <Link Source="Game_GameCustomSettingsIniId" Target="FileInfo_id" Label="FK_Game_2_0" Category="Foreign Key" />
+    <Link Source="Game_GameSettingsIniId" Target="FileInfo_id" Label="FK_Game_3_0" Category="Foreign Key" />
+    <Link Source="Game_GamePluginsTxtId" Target="FileInfo_id" Label="FK_Game_4_0" Category="Foreign Key" />
+    <Link Source="Game_GameLocalSettingsFolderId" Target="Folders_id" Label="FK_Game_5_0" Category="Foreign Key" />
+    <Link Source="Game_GameSaveFolderId" Target="Folders_id" Label="FK_Game_6_0" Category="Foreign Key" />
+    <Link Source="Game_GameSettingsFolderId" Target="Folders_id" Label="FK_Game_7_0" Category="Foreign Key" />
+    <Link Source="Database" Target="GameProfile" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_id" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_Name" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_GameId" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_GameFolderId" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_GameVersionId" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_GameDataFolderId" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_GameXboxFolderId" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_GamePlaystationFolderId" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_TifFolderId" Category="Contains" />
+    <Link Source="GameProfile" Target="GameProfile_GameVersionRepoId" Category="Contains" />
+    <Link Source="GameProfile_GameVersionRepoId" Target="ModRepository_id" Label="FK_GameProfile_0_0" Category="Foreign Key" />
+    <Link Source="GameProfile_TifFolderId" Target="Folders_id" Label="FK_GameProfile_1_0" Category="Foreign Key" />
+    <Link Source="GameProfile_GamePlaystationFolderId" Target="Folders_id" Label="FK_GameProfile_2_0" Category="Foreign Key" />
+    <Link Source="GameProfile_GameXboxFolderId" Target="Folders_id" Label="FK_GameProfile_3_0" Category="Foreign Key" />
+    <Link Source="GameProfile_GameDataFolderId" Target="Folders_id" Label="FK_GameProfile_4_0" Category="Foreign Key" />
+    <Link Source="GameProfile_GameVersionId" Target="GameVersion_id" Label="FK_GameProfile_5_0" Category="Foreign Key" />
+    <Link Source="GameProfile_GameFolderId" Target="Folders_id" Label="FK_GameProfile_6_0" Category="Foreign Key" />
+    <Link Source="GameProfile_GameId" Target="Game_id" Label="FK_GameProfile_7_0" Category="Foreign Key" />
+    <Link Source="Database" Target="GameSource" Category="Contains" />
+    <Link Source="GameSource" Target="GameSource_id" Category="Contains" />
+    <Link Source="GameSource" Target="GameSource_Name" Category="Contains" />
+    <Link Source="GameSource" Target="GameSource_SourceGameId" Category="Contains" />
+    <Link Source="GameSource" Target="GameSource_URL" Category="Contains" />
+    <Link Source="GameSource" Target="GameSource_URI" Category="Contains" />
+    <Link Source="GameSource" Target="GameSource_SourceRepoId" Category="Contains" />
+    <Link Source="Database" Target="GameVersion" Category="Contains" />
+    <Link Source="GameVersion" Target="GameVersion_id" Category="Contains" />
+    <Link Source="GameVersion" Target="GameVersion_Version" Category="Contains" />
+    <Link Source="GameVersion" Target="GameVersion_GameId" Category="Contains" />
+    <Link Source="GameVersion" Target="GameVersion_GameSource" Category="Contains" />
+    <Link Source="GameVersion" Target="GameVersion_VersionRepo" Category="Contains" />
+    <Link Source="GameVersion_GameSource" Target="GameSource_id" Label="FK_GameVersion_0_0" Category="Foreign Key" />
+    <Link Source="GameVersion_GameId" Target="Game_id" Label="FK_GameVersion_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="GameVersionFiles" Category="Contains" />
+    <Link Source="GameVersionFiles" Target="GameVersionFiles_id" Category="Contains" />
+    <Link Source="GameVersionFiles" Target="GameVersionFiles_FileId" Category="Contains" />
+    <Link Source="GameVersionFiles" Target="GameVersionFiles_ArchiveId" Category="Contains" />
+    <Link Source="GameVersionFiles" Target="GameVersionFiles_GameVersionId" Category="Contains" />
+    <Link Source="GameVersionFiles" Target="GameVersionFiles_ModId" Category="Contains" />
+    <Link Source="GameVersionFiles_ModId" Target="ModItems_id" Label="FK_GameVersionFiles_0_0" Category="Foreign Key" />
+    <Link Source="GameVersionFiles_GameVersionId" Target="GameVersion_id" Label="FK_GameVersionFiles_1_0" Category="Foreign Key" />
+    <Link Source="GameVersionFiles_ArchiveId" Target="FileInfo_id" Label="FK_GameVersionFiles_2_0" Category="Foreign Key" />
+    <Link Source="GameVersionFiles_FileId" Target="FileInfo_id" Label="FK_GameVersionFiles_3_0" Category="Foreign Key" />
+    <Link Source="Database" Target="InitializationStatus" Category="Contains" />
+    <Link Source="InitializationStatus" Target="InitializationStatus_id" Category="Contains" />
+    <Link Source="InitializationStatus" Target="InitializationStatus_IsInitialized" Category="Contains" />
+    <Link Source="InitializationStatus" Target="InitializationStatus_InitializationTime" Category="Contains" />
+    <Link Source="Database" Target="ModItems" Category="Contains" />
+    <Link Source="ModItems" Target="ModItems_id" Category="Contains" />
+    <Link Source="ModItems" Target="ModItems_ModName" Category="Contains" />
+    <Link Source="ModItems" Target="ModItems_ModFolderPath" Category="Contains" />
+    <Link Source="ModItems" Target="ModItems_CurrentStageID" Category="Contains" />
+    <Link Source="ModItems" Target="ModItems_isBaseline" Category="Contains" />
+    <Link Source="ModItems" Target="ModItems_isManaged" Category="Contains" />
+    <Link Source="ModItems_CurrentStageID" Target="Stages_id" Label="FK_ModItems_0_0" Category="Foreign Key" />
+    <Link Source="Database" Target="ModRepoFolder" Category="Contains" />
+    <Link Source="ModRepoFolder" Target="ModRepoFolder_id" Category="Contains" />
+    <Link Source="ModRepoFolder" Target="ModRepoFolder_RepoFolderPathId" Category="Contains" />
+    <Link Source="ModRepoFolder" Target="ModRepoFolder_SubModuleUrl" Category="Contains" />
+    <Link Source="ModRepoFolder" Target="ModRepoFolder_LinkedFilesFolderId" Category="Contains" />
+    <Link Source="ModRepoFolder" Target="ModRepoFolder_BackupFolderId" Category="Contains" />
+    <Link Source="ModRepoFolder" Target="ModRepoFolder_MetaFilesFolderId" Category="Contains" />
+    <Link Source="ModRepoFolder_MetaFilesFolderId" Target="Folders_id" Label="FK_ModRepoFolder_0_0" Category="Foreign Key" />
+    <Link Source="ModRepoFolder_BackupFolderId" Target="Folders_id" Label="FK_ModRepoFolder_1_0" Category="Foreign Key" />
+    <Link Source="ModRepoFolder_LinkedFilesFolderId" Target="Folders_id" Label="FK_ModRepoFolder_2_0" Category="Foreign Key" />
+    <Link Source="ModRepoFolder_RepoFolderPathId" Target="Folders_id" Label="FK_ModRepoFolder_3_0" Category="Foreign Key" />
+    <Link Source="Database" Target="ModRepository" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_id" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_ModId" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_RepoUrl" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_ParentRepoId" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_isDLC" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_isBaseline" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_LocalFolderId" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_IsSubmodule" Category="Contains" />
+    <Link Source="ModRepository" Target="ModRepository_DefaultBranchId" Category="Contains" />
+    <Link Source="ModRepository_DefaultBranchId" Target="StageBranchMapping_id" Label="FK_ModRepository_0_0" Category="Foreign Key" />
+    <Link Source="ModRepository_LocalFolderId" Target="Folders_id" Label="FK_ModRepository_1_0" Category="Foreign Key" />
+    <Link Source="ModRepository_ParentRepoId" Target="ModRepository_id" Label="FK_ModRepository_2_0" Category="Foreign Key" />
+    <Link Source="ModRepository_ModId" Target="ModItems_id" Label="FK_ModRepository_3_0" Category="Foreign Key" />
+    <Link Source="Database" Target="ModStages" Category="Contains" />
+    <Link Source="ModStages" Target="ModStages_ModId" Category="Contains" />
+    <Link Source="ModStages" Target="ModStages_StageID" Category="Contains" />
+    <Link Source="ModStages_ModId" Target="ModItems_id" Label="FK_ModStages_0_0" Category="Foreign Key" />
+    <Link Source="ModStages_StageID" Target="Stages_id" Label="FK_ModStages_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="Platform" Category="Contains" />
+    <Link Source="Platform" Target="Platform_id" Category="Contains" />
+    <Link Source="Platform" Target="Platform_Name" Category="Contains" />
+    <Link Source="Platform" Target="Platform_ArchiveNamePattern" Category="Contains" />
+    <Link Source="Database" Target="ReservedFolderNames" Category="Contains" />
+    <Link Source="ReservedFolderNames" Target="ReservedFolderNames_id" Category="Contains" />
+    <Link Source="ReservedFolderNames" Target="ReservedFolderNames_Name" Category="Contains" />
+    <Link Source="Database" Target="StageBranchMapping" Category="Contains" />
+    <Link Source="StageBranchMapping" Target="StageBranchMapping_id" Category="Contains" />
+    <Link Source="StageBranchMapping" Target="StageBranchMapping_ModRepositoryId" Category="Contains" />
+    <Link Source="StageBranchMapping" Target="StageBranchMapping_StageId" Category="Contains" />
+    <Link Source="StageBranchMapping" Target="StageBranchMapping_BranchName" Category="Contains" />
+    <Link Source="StageBranchMapping_StageId" Target="Stages_id" Label="FK_StageBranchMapping_0_0" Category="Foreign Key" />
+    <Link Source="StageBranchMapping_ModRepositoryId" Target="ModRepository_id" Label="FK_StageBranchMapping_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="Stages" Category="Contains" />
+    <Link Source="Stages" Target="Stages_id" Category="Contains" />
+    <Link Source="Stages" Target="Stages_StageName" Category="Contains" />
+    <Link Source="Stages" Target="Stages_IsSource" Category="Contains" />
+    <Link Source="Stages" Target="Stages_IsReserved" Category="Contains" />
+    <Link Source="Database" Target="ToolDeploymentState" Category="Contains" />
+    <Link Source="ToolDeploymentState" Target="ToolDeploymentState_id" Category="Contains" />
+    <Link Source="ToolDeploymentState" Target="ToolDeploymentState_ExternalToolId" Category="Contains" />
+    <Link Source="ToolDeploymentState" Target="ToolDeploymentState_GameProfileId" Category="Contains" />
+    <Link Source="ToolDeploymentState" Target="ToolDeploymentState_IsDeployed" Category="Contains" />
+    <Link Source="ToolDeploymentState_GameProfileId" Target="GameProfile_id" Label="FK_ToolDeploymentState_0_0" Category="Foreign Key" />
+    <Link Source="ToolDeploymentState_ExternalToolId" Target="ExternalTools_id" Label="FK_ToolDeploymentState_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="UrlRule" Category="Contains" />
+    <Link Source="UrlRule" Target="UrlRule_id" Category="Contains" />
+    <Link Source="UrlRule" Target="UrlRule_Name" Category="Contains" />
+    <Link Source="UrlRule" Target="UrlRule_URLRule" Category="Contains" />
+  </Links>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Table" ValueLabel="True">
+      <Condition Expression="HasCategory('Table')" />
+      <Setter Property="Background" Value="#FFC0C0C0" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Schema" ValueLabel="True">
+      <Condition Expression="HasCategory('Schema')" />
+      <Setter Property="Background" Value="#FF7F9169" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Field Primary" ValueLabel="True">
+      <Condition Expression="HasCategory('Field Primary')" />
+      <Setter Property="Background" Value="#FF008000" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Field Optional" ValueLabel="True">
+      <Condition Expression="HasCategory('Field Optional')" />
+      <Setter Property="Background" Value="#FF808040" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Field Foreign" ValueLabel="True">
+      <Condition Expression="HasCategory('Field Foreign')" />
+      <Setter Property="Background" Value="#FF8080FF" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Field" ValueLabel="True">
+      <Condition Expression="HasCategory('Field')" />
+      <Setter Property="Background" Value="#FFC0A000" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Database" ValueLabel="True">
+      <Condition Expression="HasCategory('Database')" />
+      <Setter Property="Background" Value="#FFFFFFFF" />
+    </Style>
+  </Styles>
+</DirectedGraph>

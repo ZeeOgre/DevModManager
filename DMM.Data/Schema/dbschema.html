@@ -1,0 +1,1752 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>DevModManager.db Database Schema</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <style type="text/css">
+                    body { background-color: #fff; color: #000; font-family: Consolas, monospace}
+                    a:link { color: #03d; }
+                    a:visited { color: #039; }
+                    a:hover { color: #09f; }
+                    table { border-collapse: collapse; width: 100%; }
+                    table caption { color: #666; text-align: right; font-size: 65%; margin-bottom: .5ex; }
+                    table td, table th { border: solid 1px #666; border-collapse: collapse; padding: .3ex .5ex; vertical-align: top; }
+                    table tbody tr:hover { background-color: #ffc; }
+                    table thead th { text-align: left; background-color: #ccc; }
+                    table tbody th { text-align: left; white-space: nowrap; }
+                    .table { page-break-inside: avoid; }
+                    .pk { float: right; cursor: arrow; color: #999; }
+                    .type { white-space: nowrap; }
+                    .null { text-align: center; }
+                    .flag { white-space: nowrap; font-size: 70%; display: inline-block; border: solid 1px #ccc; padding: .25ex .5ex; background-color: #ddd; margin-right: 1ex; }
+                    .tocref { float: right; text-decoration: none; font-weight: normal; }
+                    .footer { text-align: center; margin-top: 1em; font-size: 80%;}
+                    li.view:before { content: "VIEW"; font-size: 70%; display: inline-block; border: solid 1px #ccc; padding: .25ex .5ex; background-color: #ddd; margin-right: 1ex; }
+                    @media print {
+                    body { font-size: .8em; }
+                    #toc, .tocref { display: none; }
+                    a:link, a:visited { color: #000; text-decoration: none; }
+                    }
+                </style>
+  </head>
+  <body>
+    <h1>DevModManager.db Database Schema</h1>
+    <div id="toc">
+      <ul>
+        <li class="table"><a href="#ActiveMod">ActiveMod</a></li>
+        <li class="table"><a href="#AssetHandler">AssetHandler</a></li>
+        <li class="table"><a href="#AssetKind">AssetKind</a></li>
+        <li class="table"><a href="#Config">Config</a></li>
+        <li class="table"><a href="#ExternalIds">ExternalIds</a></li>
+        <li class="table"><a href="#ExternalTools">ExternalTools</a></li>
+        <li class="table"><a href="#FileDependency">FileDependency</a></li>
+        <li class="table"><a href="#FileFolderDeploymentState">FileFolderDeploymentState</a></li>
+        <li class="table"><a href="#FileInfo">FileInfo</a></li>
+        <li class="table"><a href="#FileStage">FileStage</a></li>
+        <li class="table"><a href="#FileType">FileType</a></li>
+        <li class="table"><a href="#FileTypeAssetHandler">FileTypeAssetHandler</a></li>
+        <li class="table"><a href="#FolderRole">FolderRole</a></li>
+        <li class="table"><a href="#Folders">Folders</a></li>
+        <li class="table"><a href="#FolderType">FolderType</a></li>
+        <li class="table"><a href="#FolderTypeFiles">FolderTypeFiles</a></li>
+        <li class="table"><a href="#FolderTypeKinds">FolderTypeKinds</a></li>
+        <li class="table"><a href="#FolderTypeRoles">FolderTypeRoles</a></li>
+        <li class="table"><a href="#Game">Game</a></li>
+        <li class="table"><a href="#GameProfile">GameProfile</a></li>
+        <li class="table"><a href="#GameSource">GameSource</a></li>
+        <li class="table"><a href="#GameVersion">GameVersion</a></li>
+        <li class="table"><a href="#GameVersionFiles">GameVersionFiles</a></li>
+        <li class="table"><a href="#InitializationStatus">InitializationStatus</a></li>
+        <li class="table"><a href="#ModItems">ModItems</a></li>
+        <li class="table"><a href="#ModRepoFolder">ModRepoFolder</a></li>
+        <li class="table"><a href="#ModRepository">ModRepository</a></li>
+        <li class="table"><a href="#ModStages">ModStages</a></li>
+        <li class="table"><a href="#Platform">Platform</a></li>
+        <li class="table"><a href="#ReservedFolderNames">ReservedFolderNames</a></li>
+        <li class="table"><a href="#StageBranchMapping">StageBranchMapping</a></li>
+        <li class="table"><a href="#Stages">Stages</a></li>
+        <li class="table"><a href="#ToolDeploymentState">ToolDeploymentState</a></li>
+        <li class="table"><a href="#UrlRule">UrlRule</a></li>
+      </ul>
+    </div>
+    <div class="table">
+      <h2 id=""><a href="#toc" class="tocref">⇧</a>
+        Database Properties
+      </h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="type">Database</td>
+            <td class="type">S:\gitrepos\moddersmilk\zeeogre\devmodmanager\src\DevModManager.Core\Data\DevModManager.db</td>
+          </tr>
+          <tr>
+            <td class="type">ServerVersion</td>
+            <td class="type">3.46.1</td>
+          </tr>
+          <tr>
+            <td class="type">DatabaseSize</td>
+            <td class="type">264 KB</td>
+          </tr>
+          <tr>
+            <td class="type">Created</td>
+            <td class="type">12/3/2025 2:38 PM</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ActiveMod"><a href="#toc" class="tocref">⇧</a>Table ActiveMod</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_ActiveMod">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>GameProfileId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ActiveMod_1_0">⇨ <a href="#GameProfile">GameProfile</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>ModId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ActiveMod_0_0">⇨ <a href="#ModItems">ModItems</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="AssetHandler"><a href="#toc" class="tocref">⇧</a>Table AssetHandler</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_AssetHandler">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Class</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>ToolId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_AssetHandler_0_0">⇨ <a href="#ExternalTools">ExternalTools</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="AssetKind"><a href="#toc" class="tocref">⇧</a>Table AssetKind</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_AssetKind">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>DefaultArchiveName</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>DefaultDataPath</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="Config"><a href="#toc" class="tocref">⇧</a>Table Config</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_Config">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>ConfigName</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>LocalRepoFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Config_2_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>UseGit</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 1</span></td>
+          </tr>
+          <tr>
+            <th>GitHubRepo</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>GitHubUsername</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>GitHubToken</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>GitHubTokenExpiration</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>GitEachModSeparate</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 1</span></td>
+          </tr>
+          <tr>
+            <th>UseModManager</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 1</span></td>
+          </tr>
+          <tr>
+            <th>DefaultGameProfile</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Config_1_0">⇨ <a href="#GameProfile">GameProfile</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>DefaultArchiveFormat</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Config_0_0">⇨ <a href="#FileType">FileType</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>TimestampFormat</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>MyNameSpace</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>MyResourcePrefix</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>ShowSaveMessage</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>ShowOverwriteMessage</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>NexusAPIKey</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>AutoCheckForUpdates</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 1</span></td>
+          </tr>
+          <tr>
+            <th>DarkMode</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 1</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ExternalIds"><a href="#toc" class="tocref">⇧</a>Table ExternalIds</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_ExternalIds">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>modId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ExternalIds_0_0">⇨ <a href="#ModItems">ModItems</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>BethesdaId</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>NexusId</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ExternalTools"><a href="#toc" class="tocref">⇧</a>Table ExternalTools</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_ExternalTools">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>baseFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_ExternalTools_1_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>deployFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_ExternalTools_0_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>Arguments</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>AdditionalArguments</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>CheckDeploy</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FileDependency"><a href="#toc" class="tocref">⇧</a>Table FileDependency</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_FileDependency">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>FileInfoId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileDependency_1_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>DependentFileInfoId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileDependency_0_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FileFolderDeploymentState"><a href="#toc" class="tocref">⇧</a>Table FileFolderDeploymentState</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_FileFolderDeploymentState">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>FileInfoId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileFolderDeploymentState_2_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>FolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileFolderDeploymentState_1_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameProfileId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileFolderDeploymentState_0_0">⇨ <a href="#GameProfile">GameProfile</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FileInfo"><a href="#toc" class="tocref">⇧</a>Table FileInfo</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_FileInfo">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>DTStamp</th>
+            <td class="type">datetime</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>Size</th>
+            <td class="type">numeric (53, 0)</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>Hash</th>
+            <td class="type">image</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>GameId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileInfo_5_0">⇨ <a href="#Game">Game</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>ArchiveFileId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileInfo_4_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>JunctionSourceId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileInfo_3_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>RelativeFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileInfo_2_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>FileTypeId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileInfo_1_0">⇨ <a href="#FileType">FileType</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>ModId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileInfo_0_0">⇨ <a href="#ModItems">ModItems</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FileStage"><a href="#toc" class="tocref">⇧</a>Table FileStage</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FileStage_1">◆</span>FileInfoId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FileStage_0_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FileStage_1">◆</span>StageId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FileStage_1_0">⇨ <a href="#Stages">Stages</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FileType"><a href="#toc" class="tocref">⇧</a>Table FileType</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_FileType">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>FileExtension</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>Regex</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>IsArchive</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>ExcludeBA2</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag">DEFAULT 1</span></td>
+          </tr>
+          <tr>
+            <th>isModFile</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>ExcludeBackup</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>PlatformId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileType_2_0">⇨ <a href="#Platform">Platform</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameProfileId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileType_1_0">⇨ <a href="#GameProfile">GameProfile</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>AssetKindId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FileType_0_0">⇨ <a href="#AssetKind">AssetKind</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FileTypeAssetHandler"><a href="#toc" class="tocref">⇧</a>Table FileTypeAssetHandler</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FileTypeAssetHandler_1">◆</span>FileTypeId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FileTypeAssetHandler_1_0">⇨ <a href="#FileType">FileType</a>.id</span></td>
+          </tr>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FileTypeAssetHandler_1">◆</span>AssetHandlerId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FileTypeAssetHandler_0_0">⇨ <a href="#AssetHandler">AssetHandler</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FolderRole"><a href="#toc" class="tocref">⇧</a>Table FolderRole</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_FolderRole">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>IncludeInBackup</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 1</span></td>
+          </tr>
+          <tr>
+            <th>PlatformId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_FolderRole_0_0">⇨ <a href="#Platform">Platform</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>IsRepoFolder</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>IsToolFolder</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>isPlatformSpecifc</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="Folders"><a href="#toc" class="tocref">⇧</a>Table Folders</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_Folders">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Path</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>ParentFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Folders_3_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>JunctionSourceId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Folders_2_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>FolderTypeId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_Folders_1_0">⇨ <a href="#FolderType">FolderType</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>FolderRoleId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_Folders_0_0">⇨ <a href="#FolderRole">FolderRole</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FolderType"><a href="#toc" class="tocref">⇧</a>Table FolderType</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_FolderType">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FolderTypeFiles"><a href="#toc" class="tocref">⇧</a>Table FolderTypeFiles</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FolderTypeFiles_1">◆</span>FolderTypeId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FolderTypeFiles_1_0">⇨ <a href="#FolderType">FolderType</a>.id</span></td>
+          </tr>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FolderTypeFiles_1">◆</span>FileTypeId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FolderTypeFiles_0_0">⇨ <a href="#FileType">FileType</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FolderTypeKinds"><a href="#toc" class="tocref">⇧</a>Table FolderTypeKinds</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FolderTypeKinds_1">◆</span>FolderTypeId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FolderTypeKinds_1_0">⇨ <a href="#FolderType">FolderType</a>.id</span></td>
+          </tr>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FolderTypeKinds_1">◆</span>AssetKindId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FolderTypeKinds_0_0">⇨ <a href="#AssetKind">AssetKind</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="FolderTypeRoles"><a href="#toc" class="tocref">⇧</a>Table FolderTypeRoles</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FolderTypeRoles_1">◆</span>FolderRoleId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FolderTypeRoles_1_0">⇨ <a href="#FolderRole">FolderRole</a>.id</span></td>
+          </tr>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_FolderTypeRoles_1">◆</span>FileTypeId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_FolderTypeRoles_0_0">⇨ <a href="#FileType">FileType</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="Game"><a href="#toc" class="tocref">⇧</a>Table Game</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_Game">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>Executable</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>NexusKeyword</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>BethesdaKeyword</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>GameSettingsFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Game_7_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameSaveFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Game_6_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameLocalSettingsFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Game_5_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GamePluginsTxtId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Game_4_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameSettingsIniId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Game_3_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameCustomSettingsIniId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Game_2_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>CreationKitSettingsIniId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Game_1_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>CreationKitCustomSettingsIniId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_Game_0_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="GameProfile"><a href="#toc" class="tocref">⇧</a>Table GameProfile</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_GameProfile">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>GameId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_GameProfile_7_0">⇨ <a href="#Game">Game</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_GameProfile_6_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameVersionId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameProfile_5_0">⇨ <a href="#GameVersion">GameVersion</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameDataFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameProfile_4_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameXboxFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameProfile_3_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GamePlaystationFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameProfile_2_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>TifFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameProfile_1_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameVersionRepoId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameProfile_0_0">⇨ <a href="#ModRepository">ModRepository</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="GameSource"><a href="#toc" class="tocref">⇧</a>Table GameSource</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_GameSource">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>SourceGameId</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>URL</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>URI</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>SourceRepoId</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="GameVersion"><a href="#toc" class="tocref">⇧</a>Table GameVersion</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_GameVersion">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Version</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>GameId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameVersion_1_0">⇨ <a href="#Game">Game</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameSource</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameVersion_0_0">⇨ <a href="#GameSource">GameSource</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>VersionRepo</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="GameVersionFiles"><a href="#toc" class="tocref">⇧</a>Table GameVersionFiles</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_GameVersionFiles">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>FileId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameVersionFiles_3_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>ArchiveId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameVersionFiles_2_0">⇨ <a href="#FileInfo">FileInfo</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameVersionId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameVersionFiles_1_0">⇨ <a href="#GameVersion">GameVersion</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>ModId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_GameVersionFiles_0_0">⇨ <a href="#ModItems">ModItems</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="InitializationStatus"><a href="#toc" class="tocref">⇧</a>Table InitializationStatus</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_InitializationStatus">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>IsInitialized</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>InitializationTime</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ModItems"><a href="#toc" class="tocref">⇧</a>Table ModItems</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_ModItems">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>ModName</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>ModFolderPath</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>CurrentStageID</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_ModItems_0_0">⇨ <a href="#Stages">Stages</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>isBaseline</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>isManaged</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ModRepoFolder"><a href="#toc" class="tocref">⇧</a>Table ModRepoFolder</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_ModRepoFolder">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>RepoFolderPathId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ModRepoFolder_3_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>SubModuleUrl</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>LinkedFilesFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ModRepoFolder_2_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>BackupFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ModRepoFolder_1_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>MetaFilesFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ModRepoFolder_0_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ModRepository"><a href="#toc" class="tocref">⇧</a>Table ModRepository</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_ModRepository">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>ModId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ModRepository_3_0">⇨ <a href="#ModItems">ModItems</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>RepoUrl</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>ParentRepoId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_ModRepository_2_0">⇨ <a href="#ModRepository">ModRepository</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>isDLC</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>isBaseline</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>LocalFolderId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_ModRepository_1_0">⇨ <a href="#Folders">Folders</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>IsSubmodule</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 1</span></td>
+          </tr>
+          <tr>
+            <th>DefaultBranchId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_ModRepository_0_0">⇨ <a href="#StageBranchMapping">StageBranchMapping</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ModStages"><a href="#toc" class="tocref">⇧</a>Table ModStages</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_ModStages_1">◆</span>ModId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ModStages_0_0">⇨ <a href="#ModItems">ModItems</a>.id</span></td>
+          </tr>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_autoindex_ModStages_1">◆</span>StageID</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_ModStages_1_0">⇨ <a href="#Stages">Stages</a>.id</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="Platform"><a href="#toc" class="tocref">⇧</a>Table Platform</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_Platform">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>ArchiveNamePattern</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ReservedFolderNames"><a href="#toc" class="tocref">⇧</a>Table ReservedFolderNames</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_ReservedFolderNames">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="StageBranchMapping"><a href="#toc" class="tocref">⇧</a>Table StageBranchMapping</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_StageBranchMapping">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>ModRepositoryId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_StageBranchMapping_1_0">⇨ <a href="#ModRepository">ModRepository</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>StageId</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag" title="FK_StageBranchMapping_0_0">⇨ <a href="#Stages">Stages</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>BranchName</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="Stages"><a href="#toc" class="tocref">⇧</a>Table Stages</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_Stages">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>StageName</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>IsSource</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+          <tr>
+            <th>IsReserved</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="ToolDeploymentState"><a href="#toc" class="tocref">⇧</a>Table ToolDeploymentState</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_ToolDeploymentState">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>ExternalToolId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_ToolDeploymentState_1_0">⇨ <a href="#ExternalTools">ExternalTools</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>GameProfileId</th>
+            <td class="type">bigint</td>
+            <td class="null">☒</td>
+            <td><span class="flag" title="FK_ToolDeploymentState_0_0">⇨ <a href="#GameProfile">GameProfile</a>.id</span></td>
+          </tr>
+          <tr>
+            <th>IsDeployed</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">DEFAULT 0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table">
+      <h2 id="UrlRule"><a href="#toc" class="tocref">⇧</a>Table UrlRule</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30ex">Name</th>
+            <th style="width:20ex">Type</th>
+            <th style="width:4ex">NULL</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="pk" title="PRIMARY KEY sqlite_master_PK_UrlRule">◆</span>id</th>
+            <td class="type">bigint</td>
+            <td class="null">☐</td>
+            <td><span class="flag">IDENTITY (1,1)</span></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td class="type">text</td>
+            <td class="null">☒</td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <th>URLRule</th>
+            <td class="type">text</td>
+            <td class="null">☐</td>
+            <td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="footer">
+                    Generated by <a href="http://SqlDbDoc.codeplex.com/">DB&gt;doc</a> and <a href="https://github.com/ErikEJ/SqlCeToolbox">SQLite/SQL Server Compact Toolbox</a> on
+                    December 08, 2025, 15:05:26</div>
+  </body>
+</html>
