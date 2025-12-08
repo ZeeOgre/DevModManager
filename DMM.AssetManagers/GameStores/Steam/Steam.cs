@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SteamKit2;
 
-namespace DMM.AssetManagers.Steam
+namespace DMM.AssetManagers.GameStores.Steam
 {
 	public sealed class SteamGame
 	{

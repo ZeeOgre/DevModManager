@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS FileInfo (
     DTStamp          DATETIME NOT NULL,
     Size             NUMERIC  NOT NULL,
     Hash             BLOB     NULL,
-    GameId           INTEGER  REFERENCES Game (id) ON DELETE RESTRICT
+    GameId           INTEGER  REFERENCES Game (id) ON DELETE CASCADE
                                                    ON UPDATE CASCADE,
     ArchiveFileId    INTEGER  REFERENCES FileInfo (id) ON DELETE SET NULL
                                                        ON UPDATE CASCADE,
@@ -244,9 +244,9 @@ CREATE TABLE IF NOT EXISTS FileType (
                           DEFAULT (0),
     ExcludeBackup INTEGER CONSTRAINT bool CHECK (ExcludeBackup IN (0, 1) ) 
                           DEFAULT (0),
-    PlatformId    INTEGER REFERENCES Platform (id) ON DELETE RESTRICT
+    PlatformId    INTEGER REFERENCES Platform (id) ON DELETE CASCADE
                                                    ON UPDATE CASCADE,
-    GameProfileId INTEGER REFERENCES GameProfile (id) ON DELETE RESTRICT
+    GameProfileId INTEGER REFERENCES GameProfile (id) ON DELETE CASCADE
                                                       ON UPDATE CASCADE,
     AssetKindId   INTEGER REFERENCES AssetKind (id) ON DELETE SET NULL
                                                     ON UPDATE CASCADE
@@ -312,7 +312,7 @@ CREATE TABLE IF NOT EXISTS FolderRole (
     IncludeInBackup   INTEGER NOT NULL
                               DEFAULT 1
                               CHECK (IncludeInBackup IN (0, 1) ),
-    PlatformId        INTEGER REFERENCES Platform (id) ON DELETE RESTRICT
+    PlatformId        INTEGER REFERENCES Platform (id) ON DELETE CASCADE
                                                        ON UPDATE CASCADE,
     IsRepoFolder      INTEGER NOT NULL
                               DEFAULT 0
@@ -320,7 +320,7 @@ CREATE TABLE IF NOT EXISTS FolderRole (
     IsToolFolder      INTEGER NOT NULL
                               DEFAULT 0
                               CHECK (IsToolFolder IN (0, 1) ),
-    isPlatformSpecifc INTEGER GENERATED ALWAYS AS (PlatformId > 0) 
+    isPlatformSpecifc INTEGER GENERATED ALWAYS AS (PlatformId } 0) 
 );
 
 INSERT INTO FolderRole (id, Name, IncludeInBackup, PlatformId, IsRepoFolder, IsToolFolder) VALUES (0, 'GameRoot', 0, 0, 0, 0);
@@ -509,7 +509,7 @@ CREATE TABLE IF NOT EXISTS GameProfile (
     GameFolderId            INTEGER NOT NULL
                                     REFERENCES Folders (id) ON DELETE CASCADE
                                                             ON UPDATE CASCADE,
-    GameVersionId           INTEGER REFERENCES GameVersion (id) ON DELETE RESTRICT
+    GameVersionId           INTEGER REFERENCES GameVersion (id) ON DELETE CASCADE
                                                                 ON UPDATE CASCADE,
     GameDataFolderId        INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
@@ -517,7 +517,7 @@ CREATE TABLE IF NOT EXISTS GameProfile (
     GameXboxFolderId        INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
                                                             ON UPDATE CASCADE,
-    GamePlaystationFolderId INTEGER REFERENCES Folders (id) ON DELETE RESTRICT
+    GamePlaystationFolderId INTEGER REFERENCES Folders (id) ON DELETE CASCADE
                                                             ON UPDATE CASCADE,
     TifFolderId             INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
@@ -560,12 +560,12 @@ DROP TABLE IF EXISTS GameVersionFiles;
 
 CREATE TABLE IF NOT EXISTS GameVersionFiles (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    FileId        INTEGER REFERENCES FileInfo (id) ON DELETE RESTRICT
+    FileId        INTEGER REFERENCES FileInfo (id) ON DELETE CASCADE
                                                    ON UPDATE CASCADE,
     ArchiveId     INTEGER REFERENCES FileInfo (id),
-    GameVersionId INTEGER REFERENCES GameVersion (id) ON DELETE RESTRICT
+    GameVersionId INTEGER REFERENCES GameVersion (id) ON DELETE CASCADE
                                                       ON UPDATE CASCADE,
-    ModId         INTEGER REFERENCES ModItems (id) ON DELETE RESTRICT
+    ModId         INTEGER REFERENCES ModItems (id) ON DELETE CASCADE
                                                    ON UPDATE CASCADE
 );
 
@@ -616,13 +616,13 @@ CREATE TABLE IF NOT EXISTS ModRepoFolder (
                                                         ON UPDATE CASCADE,
     SubModuleUrl        TEXT    NULL,
     LinkedFilesFolderId INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE RESTRICT
+                                REFERENCES Folders (id) ON DELETE CASCADE
                                                         ON UPDATE CASCADE,
     BackupFolderId      INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE RESTRICT
+                                REFERENCES Folders (id) ON DELETE CASCADE
                                                         ON UPDATE CASCADE,
     MetaFilesFolderId   INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE RESTRICT
+                                REFERENCES Folders (id) ON DELETE CASCADE
                                                         ON UPDATE CASCADE
 );
 
@@ -637,7 +637,7 @@ CREATE TABLE IF NOT EXISTS ModRepository (
                             REFERENCES ModItems (id) ON DELETE CASCADE
                                                      ON UPDATE CASCADE,
     RepoUrl         TEXT    NOT NULL,
-    ParentRepoId    INTEGER REFERENCES ModRepository (id) ON DELETE RESTRICT
+    ParentRepoId    INTEGER REFERENCES ModRepository (id) ON DELETE CASCADE
                                                           ON UPDATE CASCADE,
     isDLC           INTEGER NOT NULL
                             DEFAULT (0) 
