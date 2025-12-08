@@ -1,0 +1,47 @@
+Content Manifest for Depot 1716741 
+
+Manifest ID / date     : 1844812871651601030 / 07/18/2025 17:22:18 
+Total number of files  : 37 
+Total number of chunks : 277 
+Total bytes on disk    : 269370312 
+Total bytes compressed : 115598912 
+
+
+          Size Chunks File SHA                                 Flags Name
+        421792      1 6a18d16d82454d29c741851e93085e4d9461863e     0 bink2w64.dll
+        616328      1 af3f02d4bb739de9949a2db2261450f9a7a2f037     0 clang_rt.asan_dynamic-x86_64.dll
+       5492160      6 ff3e68d1d6886ab81199495e389e9fced01c9297     0 D3D12\D3D12Core.dll
+       9351104      9 ece3dc807bdc27744a459117045f0a7fec07ef21     0 D3D12\d3d12SDKLayers.dll
+          4271      1 4a0cca17d84641c2d955eafdfeb300130b235fb6     0 DefaultGlobalGraphicsSettings.json
+        166240      1 5bf5dc2caa0ed69d49da31531a40db944455d885     0 DejaInsight.x64.dll
+          2702      1 c01f48868630dad1f746d23273361dfcc0c71b94     0 High.ini
+        245288      1 e134e5622f5368139ce9710b55d0df327eba3cdd     0 libHttpClient.GDK.dll
+      67777552     66 fe291f3291db2f111d781562fef11990224ae16d     0 libxess.dll
+          2742      1 9d5df531c02b2fa8bf9fd50fb323193d9b59218a     0 Low.ini
+          2700      1 22b708211a4be4d073fc6f1fbb410631ddae4846     0 Medium.ini
+      15539680     15 8bde58c81e00e1b5ba95c3fa447b542cd846f8f4     0 NRD.dll
+         57816      1 d51488e3b5afaa86bc94cb8e23e36e7ab2a78a75     0 NvLowLatencyVk.dll
+      51716136     50 5f1ec953437f83f751b9275fde2f912262bab513     0 nvngx_dlss.dll
+      12582456     12 2f9c21932f8a521879c3832bc9daf2612e73e19e     0 nvngx_dlssg.dll
+        615384      1 0b95a0b507157cb305defc4bc801e3654d4d2aa7     0 sl.common.dll
+        204256      1 db269b9b20413626f70a6f9f747eda0a29678a0c     0 sl.dlss.dll
+        365024      1 98179f186d9b6700c64b5c4b4919742883bb7b2f     0 sl.dlss_g.dll
+        510936      1 7b961c6a619d8dbf2c98fa598c6175363e492625     0 sl.interposer.dll
+        926176      1 3298e9e5978509b99a1cae2285ea849b9ed3784a     0 sl.nis.dll
+        218080      1 91c6cca5bc0304eb7a1f5cda69785f45fd3d6d8d     0 sl.nrd.dll
+        144864      1 8fdf14e883ca6bdc24242f97839e5926b0a530df     0 sl.reflex.dll
+        336848      1 3112f4e4c3ebfb7da59170c129888189d0023015     0 ssce5564.dll
+     101564840     97 96971d5fae43499aaffe74f7d1090401c324a607     0 Starfield.exe
+          1931      1 64e7e819b60b7662abddcfd2900a1a84287da01f     0 Starfield.ini
+           156      1 b5dcb38fffc4a2cd3a9cd74fe8e41017daef1859     0 Starfield_de.ini
+           156      1 395b66f05af634d3e171ebc12715b2f937478f8c     0 Starfield_es.ini
+           156      1 105a6495ddb13ab519c0787ca138b6f23791fb77     0 Starfield_fr.ini
+            25      1 afe6715099075a4104d779d3df56bedd04a73091     0 Starfield_it.ini
+           156      1 329f047106fa7a961b2c6e566f4d3175afb75b64     0 Starfield_ja.ini
+            25      1 51f8500b479324989164ed0c601d663cb2dc5b72     0 Starfield_pl.ini
+            27      1 be0fcf0e1006daf0b65d992fb6bde378730246ec     0 Starfield_ptbr.ini
+            29      1 70459ea87d1361a2963453eedf65d396907f1847     0 Starfield_zhhans.ini
+        298384      1 39cac2889d8ca497ee0d8434fc9f6966f18fa336     0 steam_api64.dll
+          2744      1 499d8a1a80c1c11570c9d138b66e1096639d020c     0 Ultra.ini
+          2940      1 0ce5a05298e22b392a63d36ec083bb1add99303a     0 VeryLow.ini
+        198208      1 cbdc7bb4692f4caa3f4219ea840fdbafd3fb51ed     0 XCurl.dll

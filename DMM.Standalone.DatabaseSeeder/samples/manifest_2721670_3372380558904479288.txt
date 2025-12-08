@@ -1,0 +1,15 @@
+Content Manifest for Depot 2721670 
+
+Manifest ID / date     : 3372380558904479288 / 04/25/2025 22:07:18 
+Total number of files  : 5 
+Total number of chunks : 10214 
+Total bytes on disk    : 10711718245 
+Total bytes compressed : 6805012544 
+
+
+          Size Chunks File SHA                                 Flags Name
+    4294957834   4219 789ff716f2bf213a61ee85529173b6161f9790fd     0 Data\ShatteredSpace - Main01.ba2
+    1440719520   1400 9471573481d60c62c3f7bcebab23f7aa7fa23ff9     0 Data\ShatteredSpace - Main02.ba2
+    3339946355   3251 8152d618aa1972fb9ec4a2bb3fef37dc4fdc5c8b     0 Data\ShatteredSpace - Textures.ba2
+    1134850707   1084 2a646c7d25cf4e8bfa05149bb34c4b5b24526cdd     0 Data\ShatteredSpace - Voices_en.ba2
+     501243829    479 76055183a5d18b0272700ddace6757d7fea188b7     0 Data\ShatteredSpace.esm

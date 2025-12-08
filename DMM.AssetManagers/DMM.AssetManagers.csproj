@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="MAT\" />
+    <Folder Include="BA2\" />
+    <Folder Include="GameStores\" />
+    <Folder Include="Papyrus\" />
+    <Folder Include="NIF\" />
+    <Folder Include="TES\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.26100.7175" />
+  </ItemGroup>
+
+</Project>

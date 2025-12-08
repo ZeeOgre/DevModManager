@@ -1,0 +1,1405 @@
+Content Manifest for Depot 2722711 
+
+Manifest ID / date     : 3533270317117975849 / 08/05/2025 22:25:57 
+Total number of files  : 1395 
+Total number of chunks : 3575 
+Total bytes on disk    : 2538265679 
+Total bytes compressed : 1847648256 
+
+
+          Size Chunks File SHA                                 Flags Name
+             0      0 0000000000000000000000000000000000000000    40 Config
+             0      0 0000000000000000000000000000000000000000    40 Config\Images
+         24451      1 ed3dab39ba281e2c1d6870e468e41231970b609e     0 Config\Images\Logo150x150.png
+          3482      1 9a3982024bf7c0304125320e0339d15eec01d808     0 Config\Images\Logo44x44.png
+         99438      1 f6b0981278a25e2ef617293c92ea32b55a9a7592     0 Config\Images\Logo480x480.png
+         13149      1 6c01d34f4bcec129ba42ed5deb5caee63ea3b02a     0 Config\Images\LogoStore100x100.png
+       2794116      3 63ed066f1134cd80285a8016a11e7cd5ab68d67f     0 Config\Images\SplashScreen1920x1080.png
+          3569      1 bf55c4f6166d0fa2eaea71235837edc3b20b180e     0 Config\Images\TaskBarIcon.png
+     239231840    229 306617dc928b96fac726f6e4fbb1db1f373e272c     0 CreationKit.exe
+          2451      1 79860ca86ed09defbafed2c9d1ff1f3257eef517     0 CreationKit.ini
+             0      0 0000000000000000000000000000000000000000    40 Data
+     109992652    105 3371b9b67cec2dcc50c260772014c08efee4c580     0 Data\CreationKit - Shaders.ba2
+             0      0 0000000000000000000000000000000000000000    40 Data\DataViews
+             0      0 0000000000000000000000000000000000000000    40 Data\DataViews\ObjectWindow
+             0      0 0000000000000000000000000000000000000000    40 Data\DataViews\ObjectWindow\_common
+           481      1 0cd6fcef0739c802b6853d6433c9d480b896509f     0 Data\DataViews\ObjectWindow\_common\Loc-Dungeons.filter
+           481      1 583e1eea48d34a9d2004d9d17f1d31d20eb80de8     0 Data\DataViews\ObjectWindow\_common\Loc-OEWorlds.filter
+          1032      1 6e8e3c9c0b6c50e030ccc273486be58362137751     0 Data\DataViews\ObjectWindow\_common\Planets-Life.filter
+             0      0 0000000000000000000000000000000000000000    40 Data\EditorFiles
+             0      0 0000000000000000000000000000000000000000    40 Data\EditorFiles\Bundles
+         26725      1 4af350201d66498c1140e00b4e4e916d1d883656     0 Data\EditorFiles\Bundles\Age & Lifetime.pofx
+         22159      1 28208ee536971cb4ffbcdf2504cacbd22b1ffdd4     0 Data\EditorFiles\Bundles\Alpha Curve with EmitterCycle.pofx
+         16155      1 e7826063dbe589add32b05bf7b080284304e1089     0 Data\EditorFiles\Bundles\AlphaByCurve.pofx
+          8243      1 dc91b31e849701b351f127ed1ef32baf3a727760     0 Data\EditorFiles\Bundles\Basic Init.pofx
+         40218      1 e2128e6dc5ed27a2739bcec396d77e88eaa2b789     0 Data\EditorFiles\Bundles\BiDirectionalRotation.pofx
+          6758      1 16280540bba8a1e98cef67f0eb1cf9dd06e003f0     0 Data\EditorFiles\Bundles\Cylinder.pofx
+         13233      1 9fc5eb3d02611e448acf825958573ebb9bd92feb     0 Data\EditorFiles\Bundles\Drag.pofx
+         28734      1 3be57d56e08cfcddde773dacbfd162379dff4056     0 Data\EditorFiles\Bundles\Flipbook Settings with Curve.pofx
+         22307      1 cc4aaf0f4de19429781b793b08b79ab3547bb8d2     0 Data\EditorFiles\Bundles\Flipbook Settings.pofx
+          4933      1 e64ab2d0b56a6d2ad9545c34c3bf8b29ba6bdcbf     0 Data\EditorFiles\Bundles\FlipBook.pofx
+         20843      1 d3754046ffbf5aaf165c01d033d90a0b9cf7d651     0 Data\EditorFiles\Bundles\Flipbook_TimeBased_OverAge.pofx
+         15002      1 0a7dae345e9f515a70e635daae31cc3e14072d5f     0 Data\EditorFiles\Bundles\GAME_Wind_AsForce.pofx
+         16113      1 ce10dbef8b505f30b8742b4273e800fc17d860c4     0 Data\EditorFiles\Bundles\GAME_Wind_AsVelocity.pofx
+         12745      1 23f31680e5472fcb6c7822f22b50214b93ebbb79     0 Data\EditorFiles\Bundles\Gravity.pofx
+         31616      1 a09b5e6e8ce94f89c37cbba84eb939c23deb4f05     0 Data\EditorFiles\Bundles\Line Attractor.pofx
+         31309      1 09aeed5a5ac2ae72fd1da6575e53c0292b309072     0 Data\EditorFiles\Bundles\Point Attractor.pofx
+          4426      1 65f559bde8a55bd0fc729b685df1df7b385ab69d     0 Data\EditorFiles\Bundles\Ribbon.pofx
+          6752      1 94657dea3d229d1a1584a2df3f3aee3bf0b8a28e     0 Data\EditorFiles\Bundles\Rotation.pofx
+         24464      1 64a14b8d338c52eca91d1b7d298f5eea8c2b0b4e     0 Data\EditorFiles\Bundles\Scale Parameters.pofx
+         27846      1 c61dff0dee33399b9e31823a228c63c06422f5e0     0 Data\EditorFiles\Bundles\ScaleBySpawnShape.pofx
+         15579      1 97a8b61673eb60ef5a6bab631a37dd188b9c6263     0 Data\EditorFiles\Bundles\StretchByVelocity.pofx
+         71008      1 bfecc09ff196e1f2ec6e3f97aba7761bc1402b42     0 Data\EditorFiles\Bundles\Turbulence_SineBased.pofx
+         19725      1 04dc6724526a954d7265854841d9882bc7b3a520     0 Data\EditorFiles\Bundles\UVScroll.pofx
+             0      0 0000000000000000000000000000000000000000    40 Data\EditorFiles\Bundles\Variables
+          6577      1 90eba25f946c7022950da61f9fbe0beb7732323b     0 Data\EditorFiles\Bundles\Variables\BeamProjectileVars.pofx
+         38078      1 825b88b803986e4940e1526ed34cab1135cf0bf3     0 Data\EditorFiles\Bundles\Variables\EmitterProjectileVars.pofx
+         35859      1 7731999453dedae47e0a023a77d6581be328c843     0 Data\EditorFiles\Bundles\Velocity.pofx
+             0      0 0000000000000000000000000000000000000000    40 Data\EditorFiles\Particles
+           133      1 633e50bfdd9cbb405e54abc5024388e8027a7d1f     0 Data\EditorFiles\Particles\ParticlesLODCurves.json
+          3912      1 40d073f2b0a7e8a896033826b67bc8386ac356f6     0 Data\EditorFiles\Particles\ParticlesLODPresets.json
+             0      0 0000000000000000000000000000000000000000    40 Data\EditorFiles\Primitives
+         27235      1 b44c8b015e95627d27b49a59b15d6125bd3af9ff     0 Data\EditorFiles\Primitives\VCPreviewCube01.nif
+         18089      1 990dc49e216c2b25079da25f9ece618247633e1a     0 Data\EditorFiles\Primitives\VCPreviewCylinder01.nif
+          2395      1 85d4f05415520dd7d59377fa2be7b07506ade86b     0 Data\EditorFiles\Primitives\VCPreviewPlane01.nif
+         21377      1 b0eaf4c9ef3d8f8ccac59b0343c992d4b052f4aa     0 Data\EditorFiles\Primitives\VCPreviewSphere01.nif
+             0      0 0000000000000000000000000000000000000000    40 Data\EditorFiles\RuleTemplates
+             0      0 0000000000000000000000000000000000000000    40 Data\EditorFiles\RuleTemplates\Bundles
+          1495      1 0facffc49710b459225ae52e35017ce3f164c7c6     0 Data\EditorFiles\RuleTemplates\Bundles\Age & Lifetime.json
+          1449      1 1fd1a4567f0c6adb37f6465b2e08b0d85f3c48cc     0 Data\EditorFiles\RuleTemplates\Bundles\Basic Init.json
+          2307      1 a3013e04d5d98543b9e855e208cb2338132c8d5a     0 Data\EditorFiles\RuleTemplates\Bundles\BiDirectionalRotation.json
+           768      1 809c4eb5025f040b0a7b0d8d04ee2f852c2858f4     0 Data\EditorFiles\RuleTemplates\Bundles\Drag.json
+           504      1 6c3b1d0160691ac274ce21577e05bd051ae35b2d     0 Data\EditorFiles\RuleTemplates\Bundles\Gravity.json
+          1327      1 ae59ff586a5c3ba5b2a3e4a03959734747d030a8     0 Data\EditorFiles\RuleTemplates\Bundles\Line Attractor.json
+          1136      1 77d7eecf5581e893c70e150cf1fe1c4a2f6f7b1d     0 Data\EditorFiles\RuleTemplates\Bundles\Point Attractor.json
+           489      1 a5ffbc954e7bbbbd20edc388eda15ec044d8da4f     0 Data\EditorFiles\RuleTemplates\Bundles\Ribbon.json
+           958      1 29540f4288a88b4cc5cdb1d2ae8d77c16ae439a8     0 Data\EditorFiles\RuleTemplates\Bundles\Rotation.json
+          2215      1 1f127f78e0f43ca2a4d16bd5bc7a0b031a2eefbd     0 Data\EditorFiles\RuleTemplates\Bundles\UVScroll.json
+           824      1 08d986976fbd3199311c41e020b497531b15a72d     0 Data\EditorFiles\RuleTemplates\Bundles\Velocity.json
+             0      0 0000000000000000000000000000000000000000    40 Data\EditorFiles\RuleTemplates\ShaderModels
+          3014      1 13f715372c354ed4c22cc694e4a378d662714d32     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEffect.json
+          3139      1 2c724c03764dcc32dd55af35cf6ff1df32b650a4     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEffectEmissive.json
+          3862      1 8103b26d052043411ca383c42c513dae3efe2681     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEffectEmissiveOnly.json
+          4225      1 87aefdd77ef3aa807c1fe119623593a6440362c7     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEffectEmissiveOnlyRemap.json
+          3303      1 b4bc6e75073a2c82f062a5a0945a92a8f062658e     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEffectEmissiveRemap.json
+          2994      1 2874a84da52b49538614a2a76d6380f437a3a763     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEffectGlass.json
+          3098      1 5fdfec8516c87a8e34e36651e5f49661de545365     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEffectGlassNoFrost.json
+          3451      1 aef3f6d6c937ef718fcbba0ca4bfda78c9d34586     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEffectRemap.json
+           524      1 d75afe5f441feb878c3e589f9ce12b8494615a49     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerEyebrow.json
+          2168      1 041dc95e276c60427b1c9c0302d17019e1303b0f     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerMouth.json
+          3452      1 f8fcb5859e2dddbe3e86f966cfa05a81e51948f8     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerPlanetDecal.json
+          2552      1 1d6252b37065b8ae38609311078fbee497bd0f04     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerStandard.json
+          3231      1 0a67aa87b4246e6f55f5b149455cb5ec7a351173     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerStandardDecal.json
+          3441      1 4abe98c417b2ca221f75e5663002b52f31139df9     0 Data\EditorFiles\RuleTemplates\ShaderModels\1LayerStandardDecalEmissive.json
+          4584      1 34329891ee6d92d42d26f8695f7628b73d464855     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerEffect.json
+          6598      1 dd42c1dd0ffed1364707d7d4ab3a1e607733cdf1     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerEffectEmissive.json
+          8820      1 b2cabe90283b7b8a7c264acb71bf7e3bfd97f634     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerEffectEmissiveOnly.json
+          9171      1 a579d0140439ccc391c2eedfd7e63acc4188554f     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerEffectEmissiveOnlyRemap.json
+          6685      1 cfaad3bb673b8b239e34931efde9552b1bfa194e     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerEffectEmissiveRemap.json
+          5021      1 e32dbd15ed79c8e6ea040624a00cd00e0431d47f     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerEffectRemap.json
+          5192      1 152b78a2ef03376cd59a4292b8b9777948377bcb     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerPlanetDecal.json
+          4122      1 c84d92c792790effef810b66a47f201daf2849cb     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerStandard.json
+          3722      1 392aa3acf7a365e446f548938119d988838de095     0 Data\EditorFiles\RuleTemplates\ShaderModels\2LayerStandardEmissive.json
+          5953      1 8b97475569c2cbd97671234609568bb92da8391a     0 Data\EditorFiles\RuleTemplates\ShaderModels\3LayerEffect.json
+          6104      1 f1613ee5a1bbee561d14dce72a7d5ce4318a2cae     0 Data\EditorFiles\RuleTemplates\ShaderModels\3LayerEffectEmissive.json
+          9671      1 5117d0897fe0a06851c78539fa8eb5133754f32c     0 Data\EditorFiles\RuleTemplates\ShaderModels\3LayerEffectEmissiveOnly.json
+          6932      1 de0c3a8bc067e49f5fc212488b18589932cc55fb     0 Data\EditorFiles\RuleTemplates\ShaderModels\3LayerPlanetDecal.json
+          5548      1 3aab31985c534e06b9501329f9eccdefa5c3e7a5     0 Data\EditorFiles\RuleTemplates\ShaderModels\3LayerStandard.json
+          5154      1 9e7792547c1b9757ce5c48ad0c527989fc498ff5     0 Data\EditorFiles\RuleTemplates\ShaderModels\3LayerStandardEmissive.json
+          8672      1 ef51ef6a0d7d40d171846c716b15f34298cbce04     0 Data\EditorFiles\RuleTemplates\ShaderModels\4LayerPlanetDecal.json
+          7131      1 4e35119705b746db39e10220e49810426811f312     0 Data\EditorFiles\RuleTemplates\ShaderModels\4LayerStandard.json
+          1366      1 b2c4e48420d4d5b496bdfb2bae585f5f3d9dee84     0 Data\EditorFiles\RuleTemplates\ShaderModels\BaseMaterial.json
+          3274      1 66b0aa500f07f5e703680e1563203368b19c02ba     0 Data\EditorFiles\RuleTemplates\ShaderModels\BodySkin1Layer.json
+          4276      1 8e27dacd3f6e9314fa1be0668db4064e2cc86169     0 Data\EditorFiles\RuleTemplates\ShaderModels\Character2Layer.json
+          6034      1 e2da10d76186dabf456cc0ba9070c07ce0aacd49     0 Data\EditorFiles\RuleTemplates\ShaderModels\Character3Layer.json
+          7831      1 b6e70d2f4bdbce90063d281a5aa7e868a395e548     0 Data\EditorFiles\RuleTemplates\ShaderModels\Character4Layer.json
+          2561      1 b4e80a55ce9146ed1df6654c8b76b0cbc2810b02     0 Data\EditorFiles\RuleTemplates\ShaderModels\CloudCard.json
+          3396      1 a0e09a15eb54646ab6c7547e973abcf3a807d967     0 Data\EditorFiles\RuleTemplates\ShaderModels\ColorEmissive.json
+          3132      1 873fd388d620053dca64d5764de6af1e060a5876     0 Data\EditorFiles\RuleTemplates\ShaderModels\Debug.json
+          3743      1 6ad39a0fd1992d8fc5485cfd38ec6e021c3323df     0 Data\EditorFiles\RuleTemplates\ShaderModels\Experimental.json
+          6473      1 94a7094f101cba539cc85b2a859b0f2d0a263805     0 Data\EditorFiles\RuleTemplates\ShaderModels\Eye1Layer.json
+          3321      1 d34f6531bfc099db13fd4c39a69f2c1b6d8cb551     0 Data\EditorFiles\RuleTemplates\ShaderModels\EyeWetness1Layer.json
+          3095      1 fefc648958f95198222d66566ac7aa3797a92a10     0 Data\EditorFiles\RuleTemplates\ShaderModels\GlobalLayer.json
+          2296      1 0d92d9a09de777e964c1531121c0d6f9b242c53c     0 Data\EditorFiles\RuleTemplates\ShaderModels\Hair1Layer.json
+           429      1 4c9ec48c9840be62c48ba37a31dffb13f55945fe     0 Data\EditorFiles\RuleTemplates\ShaderModels\Invisible.json
+           932      1 07903997e198b6feb23be5fd89994dc83d3d1211     0 Data\EditorFiles\RuleTemplates\ShaderModels\Occlusion.json
+          5950      1 ab6233860836528bc6212f508bfbfba2fe5985e9     0 Data\EditorFiles\RuleTemplates\ShaderModels\PlanetaryRing.json
+         18064      1 5a1f8c613b11c0a0b068e00461907ce7f380f28a     0 Data\EditorFiles\RuleTemplates\ShaderModels\Skin5Layer.json
+           492      1 f1cc804f4e4bfc7f4fa867fc5ffcb3179937d80c     0 Data\EditorFiles\RuleTemplates\ShaderModels\StarmapBodyEffect.json
+           792      1 cf5968ad19bcabea5c37b906961eb783fb8158d7     0 Data\EditorFiles\RuleTemplates\ShaderModels\Terrain1Layer.json
+           869      1 400854d9c65a15c7e6c73c77eb26761fa5e4cb33     0 Data\EditorFiles\RuleTemplates\ShaderModels\TerrainEmissive1Layer.json
+          2706      1 237721aa4cab190a2afa161f93487042a91300b6     0 Data\EditorFiles\RuleTemplates\ShaderModels\TranslucentThin1Layer.json
+          2726      1 6efaf1254c9ff7eb60a96074ed985db2df081664     0 Data\EditorFiles\RuleTemplates\ShaderModels\TranslucentTwoSided1Layer.json
+          2292      1 fb86b76ff3aaf2222476fa945cbca49e26e364ec     0 Data\EditorFiles\RuleTemplates\ShaderModels\TwoSided1Layer.json
+          1932      1 46d835c43fc3584bfbcc02e15cffb1b0371d46c0     0 Data\EditorFiles\RuleTemplates\ShaderModels\VegetationEmissive1Layer.json
+          3623      1 20c03ca309c42f63e805de5acb1af3e12127b932     0 Data\EditorFiles\RuleTemplates\ShaderModels\VegetationEmissive2Layer.json
+          2205      1 08af2fa6cff8943c87162feea9a0e440cdd6274e     0 Data\EditorFiles\RuleTemplates\ShaderModels\VegetationStandard1Layer.json
+          4302      1 822dc641afdd0c70823c25420c76d84ac2d67f5c     0 Data\EditorFiles\RuleTemplates\ShaderModels\VegetationStandard2Layer.json
+          3108      1 28e67102e6b1ff655377342d0e2aa2ccc06db782     0 Data\EditorFiles\RuleTemplates\ShaderModels\VegetationTranslucent1Layer.json
+          4521      1 cf706499e0dd83d98c7b6cf02a52c75adb302b38     0 Data\EditorFiles\RuleTemplates\ShaderModels\VegetationTranslucent2Layer.json
+          9992      1 94f3bbd148d0a2102ba05c0fb16458e8ffb0eb0e     0 Data\EditorFiles\RuleTemplates\ShaderModels\Water.json
+          1995      1 728cd8fd3c099d1fd844b976d11d621ade28366c     0 Data\EditorFiles\RuleTemplates\ShaderModels\Water1Layer.json
+             0      0 0000000000000000000000000000000000000000    40 Data\Source
+             0      0 0000000000000000000000000000000000000000    40 Data\Source\TGATextures
+             0      0 0000000000000000000000000000000000000000    40 Data\Source\TGATextures\Terrain
+             0      0 0000000000000000000000000000000000000000    40 Data\Source\TGATextures\Terrain\OverlayMasks
+         21690      1 725da3b756f6f28b75a3147799de6bbab7eb038c     0 Data\Source\TGATextures\Terrain\OverlayMasks\AkilaCity.tif
+         21212      1 059ddeec62a11c10c5de9c2d3e8ff7d9958fe043     0 Data\Source\TGATextures\Terrain\OverlayMasks\CydoniaCity.tif
+          2998      1 8834f45ce40d5ee62f62a9fb202cc583c6a723f2     0 Data\Source\TGATextures\Terrain\OverlayMasks\DefaultSpaceshipLandingOverlay.tif
+          5720      1 b080d57306690734abceeeb76747f7c7f583fe4d     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR001World.tif
+          8320      1 86343c94d02dd93bc76909517d59558dedd20d08     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR002World.tif
+          5854      1 b3105035f86676188d9d2d0423fa6ef8f5b02373     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR003CaveWorld.tif
+          9872      1 0271573ac66eed29f903cbe4acbe9c18ba7687e7     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR003CaveWorldC.tif
+          6640      1 b73c00518496e97fe7e5b687db03e653b5d132a8     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR003CaveWorldD.tif
+          4820      1 8edbc3738038038f8239bd77a91ca2c10451baa6     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR006World03.tif
+          3136      1 21f15ea805b08f5b6cdf46028c719eb804535603     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR007World.tif
+          3028      1 f69c79115467bf22515c3e4015b75f358e315feb     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR008World.tif
+          4920      1 72333c736bfdc56f1c0590ab42c6f09e9fabb11c     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR009World.tif
+          9138      1 45809c3933972da455c090d30c2d2356763aea02     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR010World.tif
+          5672      1 a51c7f99032e75602f6382fa4080d4b2dc9658f3     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR011World.tif
+          4816      1 7f7ef310b58f8e153b77b197e6ff33c3c8d1ea88     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR012World.tif
+          7066      1 95d8b61678078d5187ba396f96cb7f03f0fc7f55     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR014GarageWorldB.tif
+          5570      1 3363828b67876b72d4dfbe5f67d6395b5900105a     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR015World.tif
+          9014      1 601f90ed659db152fe8418a2bc40f0a83a28d0c1     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR016World.tif
+          6874      1 b0ad681534a1067ea9c1c080d9c49b14873d5d51     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR017World.tif
+         17400      1 07d459bb4b082aadde7111378686ff67037ce35b     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR018World01.tif
+          4716      1 4d37f30202313c83754eaf429cebbbd3558efdb5     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR020WorldNew.tif
+          4638      1 44c4657b473993fc0a2c6cdd0d02af1bce8d0f3e     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR021World.tif
+         17510      1 8224d3adf03d4025c575f0d67a06d0913412a56a     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR022World.tif
+          6724      1 d9a7d9b02badc6688fd858741f950c4493b9766d     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR023World.tif
+          4682      1 f67aff1fe35965c0921e72e3902cee0548640744     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR024BountyHunters.tif
+          4744      1 5274e02a090f2a5d86c30290473c5d78c6620ce1     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR024World.tif
+          8048      1 62c3348f33b73d2dea06e1553beedf38940a4257     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR025World.tif
+          4582      1 64bfcdccd5c2e6c22cd28956e33e56acefe3ab56     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR026World.tif
+          4576      1 0b453c6f7968a79ed6cf9a8f04f2705eec4709d7     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR027World.tif
+          7264      1 97fe15dfa81e54cb45dbae25e08665f120c63e29     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR029World.tif
+          5116      1 93fb1ae7af881876b3e833ccb0947c1f6f866b06     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR034World.tif
+          2900      1 f0827d1e54996c916e02e2be49c002acbf9cb866     0 Data\Source\TGATextures\Terrain\OverlayMasks\DR035World.tif
+         25268      1 ef47f237a16d854322bdd30206caf17ede9f38fa     0 Data\Source\TGATextures\Terrain\OverlayMasks\LandingOverlay01.tif
+         25920      1 0d66881349a3421d2787cd57107eeb361c4c7bc1     0 Data\Source\TGATextures\Terrain\OverlayMasks\LandingOverlay02.tif
+         26028      1 bc53a57c15f14cc3853670f8cf79bbd9bb02d39f     0 Data\Source\TGATextures\Terrain\OverlayMasks\LandingOverlay03.tif
+         26012      1 55f2aff0885b8d5b2966cfb16b22111df4965dc2     0 Data\Source\TGATextures\Terrain\OverlayMasks\LandingOverlay04.tif
+         25348      1 28682267dbe25d4e2fbdab0baa631535684d9ce1     0 Data\Source\TGATextures\Terrain\OverlayMasks\LandingOverlay05.tif
+          8308      1 4f417634bfcd351687a30bdced399248c9f409f2     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC001World.tif
+         14556      1 c6786c291a5bf8a0af0f768b2999c78ba1eb512e     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC003KreetBase.tif
+         11786      1 672a8c81609e04c1cc7184f93a88d0dfd1d9fc8d     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC006World.tif
+         18964      1 f44d2978fb7add60f10daf1c10bb31bc759e166a     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC017World.tif
+         37604      1 3004df5f0ee44bf879fd90e369633d972bf1e6fc     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC024World.tif
+          8670      1 66f4424e55f43261158fd83708e9d71cf9585678     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC028AbandonedMines.tif
+          3872      1 ea86dc230957ae4b4ba7c69e57d7993afc057c7e     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC028DrillExit.tif
+          2918      1 70f38f07395697109a5f0a0a77cd1f4b2e9c7f49     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC028FreightElevatorExit.tif
+         14440      1 1b385b3943fe0cfcf7608dcb37a0eeb7aa29065e     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC030World.tif
+         40026      1 dd68d123fe800d61249eda5b2b31a51435d15215     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC032LondinionBWorld.tif
+          8418      1 ddec8a67d41e5168bab1abbdb68f5ca578e0973c     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC042BattleofNiira.tif
+         23178      1 5f8de65faaa41022f31332450a02724489e9f7c7     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC062TauGourmetWorld.tif
+         18470      1 88d0d4b4455f57c1efbf47e4918072a3b2057ccd     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC070World01.tif
+         14220      1 468e24ada39fe6eeb4d6fde987792bd60c93c341     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC071World.tif
+          5182      1 253bf50bbefad82639bf09c4978e03adf0e6ec32     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC074World.tif
+         12926      1 a70a9a3d12303d3bbba549863134a8855ffc9a2b     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC092World.tif
+          8062      1 040b1b366e2a4b445d1ead3191131936eda6146a     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC093KazaalSulfurMineWorldB.tif
+         10906      1 75a510f01c57bdc846c9540c42621e29a4407cd8     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC116World.tif
+          7248      1 44a6e6f1960eacb1c60de10293e1a47794337c46     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC119TheMantisLairWorld.tif
+         15698      1 2092702e46711309f5be47e46d0f58e8f534a3af     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC123World.tif
+          6814      1 c652f10647fe105d0d010af755705f3d1412572b     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC124World.tif
+         27790      1 cffbdad3a203f46a768de6c58203b7569d9bba3f     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC125World.tif
+          4512      1 757ebc557f0eaf14556fa88fa337fce0934c229f     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC126World.tif
+          4828      1 4cf760cb8ad0ec86b4f83aed953cd8e126346e1c     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC127World.tif
+         12318      1 66d14fcbed0a73c79339a0795b0766c2857697ac     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC131World.tif
+          9944      1 d2d4c462dbf4b08d06f1c9e0a55ccdd306dc1d68     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC132World.tif
+          7200      1 f9173184b58e678811ee1cded3810d2684bbea88     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC133World.tif
+          4722      1 e89b1f6f45869116c720123a20d883a9b0aa2cbc     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC134World.tif
+          6688      1 324aa29c7fcff4adf4699ab5d1be5ef4a3a69d13     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC135World.tif
+         32486      1 4c57d914852eac43895249fa874d42d78981ddd3     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC136World.tif
+          2970      1 c2a96a8dac8d2d6f29e72ced62ad82c302989c61     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC139World.tif
+          7160      1 15c9adb016f1e4050d99418ba0f9aa7009a07e04     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC142World.tif
+          5902      1 524763bba2497f04c8272ceaa05d35904a9ebd09     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC143World.tif
+          6590      1 f3dcf2337adbaeebfad3399c531470373e0a2c6c     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC144World.tif
+          7148      1 10c0cf709ef500ca33a27afc5c2fda3210d51ebd     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC146World.tif
+          7154      1 44722f13c4c2b047bbebb1eab1f06385e630aeee     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC148World.tif
+         11250      1 0f040dc27072bcfa1fd2ac991bece736ae4f5d0a     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC151World.tif
+          6674      1 1a04a8806f2048fcfff75c25bcd009c7370cd090     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC152World.tif
+          7134      1 5418143cac9c537de7ee5ed9734f062219816b57     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC153World.tif
+         20808      1 46da2013734d3d9b2f13c9f0f881de8058113287     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC154World.tif
+          7126      1 036c3418b3e22345e6c518ddc430f36737462beb     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC155World.tif
+          3046      1 99575c5f7715f121d2f16e7cfc2257a5590bd116     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC159World.tif
+          4620      1 95b867313c42a1598d84eb2717efa4b85985afab     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC160World.tif
+          9792      1 e7a29edfeebeeb035ce4f8a00e3326c42715bdc6     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC161World.tif
+          6714      1 6f62a73aecf4a4006e458c2cd25c2d71f60a9ddf     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC164World.tif
+         70200      1 94d1b3fc2d1225ae4a15e475a8588af72a2277ed     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC165World.tif
+          7928      1 ce5abbba0e900f7117ce440fe1ef7709075d9a45     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC166World.tif
+          6774      1 6c7f0b34673a5d46d38ddca14286d863d6c61dae     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC167World.tif
+          4722      1 bd8461abd97b6eb8c004ac596e1289204e858ecc     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC171World.tif
+          3138      1 352e180ccfa63502eb11388632c4320f2f225a7d     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC172World.tif
+          6408      1 ec1b80e0a62667c63ce07fff5f5412ef4039352a     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC173World.tif
+          6652      1 3264f8db206f4507c0d8312c64b04a38cd3c343d     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC174World.tif
+         24284      1 72f4243861ff138c7a6e20925e8f0fc05b0fa239     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC176World.tif
+          2966      1 896c3c631137af29985ef6158e1a4f85cc9aeb6d     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC178World.tif
+          7366      1 60ee43649343454ac43cf141548003fa09699876     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC179World.tif
+          7746      1 e85ae5d6c067dce2daccf0365d028634968d9e86     0 Data\Source\TGATextures\Terrain\OverlayMasks\LC180World.tif
+         28426      1 a985f3562ee12c0f668bcf427ab704ea1786294b     0 Data\Source\TGATextures\Terrain\OverlayMasks\NeonCity.tif
+         87264      1 faf824ca6cc299b3dafd8524c4f8db400bf7f7d8     0 Data\Source\TGATextures\Terrain\OverlayMasks\NewAtlantis.tif
+          4018      1 750e637cec31f0b1890f7f50421496723d5150e8     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF001CaveWorld.tif
+          3914      1 68b9fa4f0e209336cc45971463d8fdcf77e2d387     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF002CaveWorld.tif
+          3504      1 6867c883109caa7deba78989ceb5b200e0557626     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF003CaveWorld.tif
+          3530      1 b45ce5f9ba158c30a9dfbc6d8015c5d94ac1ad16     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF004CaveWorld.tif
+          3890      1 4d8f9d2ff9752b1797b1af15fa14c6e430946869     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF005CaveWorld.tif
+          3646      1 b80f28d3817274cfa828dcebc9d00759039bded8     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF006CaveWorld.tif
+          3620      1 a4693e219334f9339f7a2f0372d41ce5ddb7c9fc     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF007CaveWorld.tif
+          3876      1 5582bb9bde9f8cae66e5e49c21336a44ad3adb72     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF008CaveWorld.tif
+          3808      1 62707288d2a66029939625ff6f4a1b9a0daaeb6a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF009CaveWorld.tif
+          3288      1 c8f59a5e91e7a01e8d1806818a79a4ff6fba22e8     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF010CaveWorld.tif
+          3642      1 084d20738f90c2ed0e4737ebc2f55cfe6c22a358     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF011CaveWorld.tif
+          3112      1 7be42fa673839514ea7f171043eb7586d00ea180     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF014CaveWorld.tif
+          3000      1 57f4d04b1f6453e51fabdcb836795274c0c6ae70     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF015World.tif
+          2940      1 029a75218650a6ff21579b20aeeff4d27bd48b44     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF016World.tif
+          2900      1 c9be992412d086eae62ef0f7dd6937229372eeba     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF017World.tif
+          3036      1 ce68ea0bfd23627a0bf5f3c13391096594be43a4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF018World.tif
+          6558      1 dc6777d7fa00dcdd987749a3fcf5bd23859db397     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF019World.tif
+          3092      1 fce898fc00e60c33c244401b9339f965e93b0124     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF020World.tif
+          3092      1 edc1e8245755066bd38aeac7645c841113d4d8fc     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF021World.tif
+          4778      1 27c3a8bd8c6d6ba95ccf0c1d78ed8703820c44a6     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF022World.tif
+          3138      1 5570c976549da0fd5ea2ec2c5734b4d0dc08cea5     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF023World.tif
+          2998      1 229098ad85c5d3c6d396ad6ebcffe59672fb24a6     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF024World.tif
+          2982      1 93726f6210e74f7ecc132d4d339f9403e4011ec8     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF025World.tif
+          5260      1 a0767e4df81fa2a5b56f8579426a006da8c7d468     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAF026World.tif
+          3798      1 93cef5d70cde30dcf004548043cd33664ca3aabf     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAH001World.tif
+          4342      1 6c07e3b4961670b1f31fd109e8f5236d730b8df8     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEAH002World.tif
+          4580      1 6807e3d3fbcb34f181f555fd103dd24502936b29     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB001World.tif
+          3142      1 4bb4819d847ee905c3996d4d72dd9fb58e4b6e00     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB002World.tif
+          4720      1 c69aeff452491955a6d940f743540ac682daa996     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB003World.tif
+          3158      1 10dd4db822664796682b4acb086ef703e35aefd6     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB004World.tif
+          2838      1 22d7214f4688a6cfabc8c868e799733de5c7ad7f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB005World.tif
+          2982      1 bc7016f9f3789972e3026b2d6b5830932cdd0d6a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB007World.tif
+          2892      1 85f732208096271047a49bb8910339b97969a6bd     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB008World.tif
+          2954      1 1d5830833910294c4b914c1f5235f85987fef380     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB009World.tif
+          2828      1 681eb9b6884a0c58b81f95fb3bcb2c6ee931a781     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB010World.tif
+          2842      1 f7e46976b59b4ed535dae8de2fd34a9d6cf7de90     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB011World.tif
+          4682      1 7021362b97904174bde11aebfa3dc553469d6a19     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB012World.tif
+          4756      1 896e72877024c938a8876ccc62af28a12854e176     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB013World.tif
+          3022      1 d07bfea2c0cb68a9c866a00e4a58e5e86b1b9367     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB014World.tif
+          2832      1 5257cac5afd146add23e034acb67b2c97c3a65e9     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB015World.tif
+          3050      1 f53b29e3a08ec77b036a790ddd634a5850feb749     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB016World.tif
+          3074      1 af2b86d32d1d1746c311f29955f89685f6cc2899     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB017World.tif
+          3188      1 26136f00717bb462796ef38a1ce07a47de735c28     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB018World.tif
+          2918      1 b7d2a7f046ac9b3217322e8689733ac81d749b84     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB019World.tif
+          3178      1 20abe18034e31dc5a80c51a5e011c91ccc481e09     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB020World.tif
+          4452      1 6a3f7b33dd80520e035feee68294f0ec0777d9e6     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB021World.tif
+          4610      1 e79492088ea1c9b4fe063530ccc2335341b0a8a7     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB022World.tif
+          5128      1 fc4d16b4a848c20415608d33ba49e7b9f592bacf     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB023World.tif
+          4458      1 29ce4dee70ad83d5d67bace8078353cd58bcfc74     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB024World.tif
+          7330      1 0d50374e9636c526d9863a01d06aae00eea7b510     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB026World.tif
+          5500      1 37de4928c629047776298a23ceedefbe1ec03900     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB027World.tif
+          4786      1 8137afcfc68a48e48a194b2ac2399f3effe0acf7     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB028World.tif
+          4070      1 236353c492f49e0c06f289d478543ec2471a2c53     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB029World.tif
+          4622      1 4b90f62aa9b679ea53a11950ed27069e114472a4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB030World.tif
+          3010      1 48cc2f4f9d8fe106c0ec07344bf48bd63d71bcc3     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB031World.tif
+          4660      1 2d8f260b284db9ad05ec7c0545a5ab902e8fb50e     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB032World.tif
+          5766      1 c97b0e82548174b817a2faf3a0f2fb1a78046681     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEBB034World.tif
+          3000      1 0ce86b14f63b3262c18ff46ee42309baa02591f4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB001World.tif
+          7072      1 cea84bd50dd93d2cab668c9ede3ec0e07d7a29d7     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB002World.tif
+          3164      1 7ba6e28e3cc33551f318bcfcc72317188b15d251     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB502World.tif
+          3260      1 bec72e5e4155ac2064795282e6d822dd57027fa1     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB503World.tif
+          7388      1 cea7206af43a85998a03d4c8ff98a0b3f67b45bf     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB505World.tif
+          6402      1 8907a2e668b4e3f43417af8e38191a9d22acbf8a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB506World.tif
+          2996      1 c11e8efbb0f7f0b4130572d4c563539b0b9bac53     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB507World.tif
+          7506      1 de2b1f48fa095138315aaa581bdc4745b42f7a3b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB508World.tif
+          8872      1 ad4666d136a909e2b475ea37301d7630b10c5712     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB509World.tif
+          2990      1 872e301a2127400d431277d72d6a003cc075c1e2     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB510World.tif
+          4944      1 ee5346f74e065738b16f846a7f71ddbf847038c3     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDB511World.tif
+          3738      1 001f89b30d84a617898634f20c84f07c48a8cffc     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDebugNaturalOverlay.tif
+         17526      1 d26898b8734d069355c79d081345fb536e636f3f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDebugOverlay.tif
+          7078      1 bec097d1247e14197135db3083aa9ae12de4b768     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEDebugShipwreckOverlay.tif
+          4328      1 7998b2261c688ec7dff7c96e0289898d5e477655     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM001World.tif
+          3582      1 eb78400fcc74c49c723427287681e5291880029d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM002World.tif
+          3000      1 51f71fcb882478b90f5baa69a4a38eefaab312f4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM003World.tif
+          2982      1 91177028d2fb8fa904f9a8fd741289977ac4a1cf     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM004World.tif
+          2954      1 cee2a7c48d48cc3e5b8a7e49585eb7cb665e8766     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM005World.tif
+          5712      1 9359fc0ba46162bacd8ab3ed5c40219deeeacb3d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM006World.tif
+          2904      1 a880a6da6463062a9e5b4ca2dfb1ccd871e66071     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM007World.tif
+          4892      1 4003ec9328d12daa017c0acf70e2eeecbfe97883     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM008World.tif
+          2908      1 cfb90e17ea9720a1772556d23593ed8bc740eab1     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM009World.tif
+          2936      1 b03aa0b9e13b2e4575100c79320c7a5057a7d8f8     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM010World.tif
+          2976      1 150f178b8256603851d0152e922cac07b39006bb     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM011World.tif
+          4028      1 c2b348a2590da75cf8777a9f3f154ac6a1d417de     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM012World.tif
+          2972      1 c247f41fadff6f6c14805614b3b3ff7aeecb9f7d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM013World.tif
+          2992      1 ea6ba82e69a55a2b817032378d9623386fc90259     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM014World.tif
+          3002      1 a27e4604075dc2785571806f2155ba41e3576c76     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJM015World.tif
+          3686      1 c0038f9689d79fda00e31ae803f3037f2a502fab     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP001CaveWorld.tif
+          2990      1 fc8b0dc49749b4f505d41c7c94e9900df2a13120     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP002World.tif
+          3850      1 b78455878b3e0968143f4a025a77c5440c21975d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP004CaveWorld.tif
+          3060      1 46755fae36ced036f66e391344b752bba6819062     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP005CaveWorld.tif
+          2908      1 ce02f0400f08e148dd0056dfda8cc20cb01573f5     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP006CaveWorld.tif
+          3294      1 0b1132ff5f14d62b7046b4a78f58501dfd345b67     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP008CaveWorld.tif
+          3046      1 74f9b559f7b117d628358cb72c38254b08100c7a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP017World.tif
+          2956      1 e0c04709e17f6f8f8226e458f36d6d76d0ba757d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP018World.tif
+          2980      1 4b7fd685bfb0fb105b17e6a5bda282cfe6cc4d36     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP019World.tif
+          2932      1 8c7e450aa4aef811504410065962523d56b3ec7a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP020World.tif
+          2916      1 f8baf7c070ca54c33dd522fd6013d9dc273963b6     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP021World.tif
+          2962      1 9c0853daf8276d0d6b8b893653f4a86962710f2b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP022World.tif
+          2960      1 c6396034216c64d3c3b6f8ee6f2fd3193e6a46e8     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP023World.tif
+          2950      1 1f7b72e2850df6f9aaa12348d1a9a3189c462a3a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP024World.tif
+          2970      1 06691540195b85c7cc09b1d02bf04de34e0c93cb     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP025World.tif
+          3258      1 4a7ac8030980dd511784d65b78085e94628a2226     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP026World.tif
+          2982      1 fb4505c747dccf364d717e2334f0a03f07d10b49     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP027World.tif
+          4898      1 368d3ce1184d80701fb74bbe540974f21c599c56     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP029World.tif
+          4808      1 965e63a3c03b645ae3f68675ee597214e39418af     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP030World.tif
+          4856      1 a07d29a56baf4df0201e595bb35a919c88dd43fb     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP031World.tif
+          4764      1 4721f32675a0dd5d8840ea112aacf5be5e6fc0ea     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP032World.tif
+          4758      1 bbb564ccd8aa77576480bb42d4a1a6e2dc7763b1     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEJP033World.tif
+          4616      1 b8ff5eac5fdb216eead6feb80780ee30f83a2f56     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEKMK002SupplyMissionWorld.tif
+          9006      1 e0d039fc9931b0adc80d7d440b6863b60957926b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEOB001World.tif
+          3004      1 b76101e97c014e4f79fe476f7960eaa342389499     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEOB002CaveWorld.tif
+          2818      1 507de21afaedff68188b3d8818540a36914f1f36     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEOB003CaveWorld.tif
+          2810      1 0865f84946b5c62c91d04e3764fa3677d764314b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEOB004CaveWorld.tif
+          3570      1 f656ffb9fa25279ad5a3298e16f64b8427c32da1     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEOB005CaveWorld.tif
+         13750      1 eceb44c800e4da6dcfe38e03e19bfe35915289b5     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEOB006World.tif
+         17644      1 03a055540928cef3886f9fbf7e31f63afdc34063     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEOB007World.tif
+          7868      1 ca9131cf1af80a05c5935774d9f4aaf2550472d4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEOB008World.tif
+          6894      1 2a87aaaba91a9d4b6d7805a946824d18cdb9a8e9     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESC001World.tif
+          9254      1 eb73783049bea718108b233ef99db1106c2e6c9b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESC002World.tif
+          2952      1 fdf1164cac61553f7eddb0d21568f044c14cd3e3     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESC003World.tif
+          3610      1 39cbcc2f2b0b16ba4a8cf8255c90f09496b4ab99     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD001CaveWorld.tif
+          3614      1 59ff1c3673ae4149404f586eac10ae161aec073f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD003CaveWorld.tif
+          3668      1 a0b4ca674770975249cf354bfb3d9085eb21a9c2     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD007CaveWorld.tif
+          5650      1 9b88e2c81ad0f4061114c3b46ccd7246e129df6c     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD008World.tif
+          4348      1 a12dbefb07bca940d41bcc6f1a35516e6414c327     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD009World.tif
+          4902      1 e3201d525d5fbd84666b41a86ad47fd882a198ac     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD010World.tif
+          3496      1 7ab6a652bc79028a042984f78b2ea8b933b88775     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD011World.tif
+          3114      1 6ed0908d99388931ca72b25efecfdc71bf56f84f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD012World.tif
+          3032      1 c1f314f1e00eff81a285c0495af3c0d19442609f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD013World.tif
+          3048      1 8cdb2f203cbe9e66f69227bb7577ec8dccdfabb7     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD014World.tif
+         12270      1 02d41a6c84c73bb47758977598ee88b3944279b4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD015World.tif
+          4398      1 5875bfb53919073ed3e6c52f07b7b1d1b593983b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD016World.tif
+         10930      1 990a354ca682a5c0a5a18e03c4f61c7813a84365     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD017World.tif
+          4610      1 6a171806ed4b3b271798e092f1a15f23e14790dc     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESD018World.tif
+          2994      1 09b88035a3fb7e3b42da6b0e7d69079a1a58ef04     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF001World.tif
+          3020      1 d7956d155888a3809e32951677ac2065e962b536     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF002World.tif
+          3136      1 ce158ecc52164550403e0205072464d05470dd25     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF003World.tif
+          3250      1 6534a7a3db8f148cd12f2ad735b88fa68eff1074     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF004World.tif
+          2984      1 b5c248be81dd543c6b8256c754c8066368df7084     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF005World.tif
+          3060      1 ed7254ed8ea8018d85b3bd7ed503572fffbb6c3d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF006World.tif
+          3388      1 324c8120558a6340de57ec903405dda8d6d2fb3c     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF007World.tif
+          3672      1 8e5cf62278544afafea99a25c06382e444200925     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF008World.tif
+          3792      1 6f1170673056798b57163e84e92a4bc071691b7f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF009World.tif
+          4750      1 b52e3784d3b36c9d546ddaf99f5d628ca379667e     0 Data\Source\TGATextures\Terrain\OverlayMasks\OESF010World.tif
+          3076      1 b0d2e376c71152968d8b2cca6b895a439b62af33     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEZW001CaveWorld.tif
+          4106      1 d34e61abf3943d4b5257afee15cdc094588cbb7d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEZW002CaveWorld.tif
+          4028      1 49f5377d1f68a1b079e855ba1a75cc6daeb0e569     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEZW003CaveWorld.tif
+          3304      1 4469efcd8bde61a8c4323fe8046e2b135e295abb     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEZW004CaveWorld.tif
+          3324      1 883a92ba15c8f739aab8da6e5379993791f04be5     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEZW006CaveWorld.tif
+          2866      1 9fcc44e6bec9b23cb63763b57091482cc64a9216     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEZW007CaveWorld.tif
+          3670      1 e26349aee6f0414f8531ace26e2e01756db37375     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEZW008CaveWorld.tif
+          4572      1 1b35291734d4652f186b481ea5998d26999503bc     0 Data\Source\TGATextures\Terrain\OverlayMasks\OEZW009World.tif
+          3694      1 b660a70e703e555589b981137cd4121a1d3f1897     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayBlockOverlayPOIBiomeDenRough03.tif
+          4626      1 9c3f4169cd17f37609c15f3f7dde8197b844fd6b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayBlockPOIBiomeOasis01.tif
+          3236      1 54753743b528f406f575f7d03bedc65694c5cc9b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayCraterCaveEntrance01.tif
+          4094      1 c2d2dd8a66572eccd4f3c4446da660632642820a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayCratersSharpCaveEntrance01.tif
+          3232      1 b6593f49198cd04b406ad58e6a261bb2a5f45c1f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayFieldsFractureCaveEntrance01.tif
+          3612      1 f94514f98137a5f0d13c19d01b08996d0ab4a1d3     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayFieldsHillsCaveEntrance01.tif
+          3416      1 b31b9de2372ab94991cc84026a2b2cdecc4ac7b5     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayFieldsHillsCaveEntrance03.tif
+          3256      1 e42b21ec1997e5e367b032e091ca1eccf53b7740     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayHillsRockyCaveEntrance01.tif
+          3566      1 fb452b0a449ae63fb9b848d7be78d61451c6b5cf     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayHillsRoundedCaveEntrance01.tif
+          3950      1 96ed2adf5dade5d8a857827a12eafede457cb562     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayHillsRoundedCaveEntrance02.tif
+          4012      1 5c1b4d2cb2ec9f9660176a3d4a5474f10a1f0231     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayHillsSharpCaveEntrance01.tif
+          3004      1 c6be69f1a268b70c7a113d7d9a6a70900174d9c4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeArch01.tif
+          7396      1 ef14bf588a2d57ddfba8e6f0a938fab7d4a4cc85     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeCraterGrove01.tif
+          5322      1 e41bde6c8730ce504c1dbdfc0344f4eafe978d3c     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeCrystalCave1.tif
+          5422      1 804b2e9f6c05c0c828feb426237c1ed220b8fda6     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeCrystalTrees01.tif
+          2968      1 fe9479049279890e50627942506d80533b2c9b2b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenLayered01.tif
+          4860      1 5c8957aad62f8b538e97b70239d89e2a8fe5fe23     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenLayered02.tif
+          2862      1 70251f33921bab7cff80d4b2d60523f2456a33df     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenPocked01.tif
+          2824      1 71c095fdb4db768feb540a93cfb9e6922616c6cc     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenPocked02.tif
+          4284      1 fca06c198782dac04ace8f31dff9c8b19058ca16     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenRough01.tif
+          3596      1 6c2ff0a986a5535709bb70ffa1e34bd5d5033be2     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenRough02.tif
+          2834      1 49ac79b1066b7c5eecd53cb3769b902a69965a77     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenSharp01.tif
+          3324      1 8c03a88a10f1edc55377ed0328a8bb35d903d6fc     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenSharp02.tif
+          3290      1 047ef0a0c229c68293c887aeb6eb2457eb0df9cb     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenSharp03.tif
+          2826      1 4626253d1eafbb726f70b1353d7686f9e6dbe23f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenVeiny01.tif
+          4160      1 1d7d300faeeb62aceb82290f1c33bffd50358795     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenVeiny02.tif
+          3122      1 8aadbdc3d9c4e852216df18766f652223ad23584     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenVolcanicRough01.tif
+          3000      1 37cea7d3fa88b416742c95d3de2625b71f226021     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenVolcanicRough02.tif
+          3446      1 6293ad4a9b88cdc7bae6ebb22ec2874eac545628     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenVolcanicWorn01.tif
+          2984      1 0ca727c2b0ceb72f533261eb3ba2bb0b78cbca9c     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeDenVolcanicWorn02.tif
+          2958      1 8ebcd912ea873d850e1232b902f9a485462cfc08     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeFairyRing01.tif
+          5044      1 b34813fe022c61a7f8d0ebc9f7d27e3754c2b789     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeFloraGrove01.tif
+          2924      1 8acc0acbfe5c13711039f6e66c35ef59f8ebc346     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisLayered01.tif
+          2972      1 f8e126ed3175f928221ed1ee679df5647e1bb5ad     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisLayered02.tif
+          2954      1 baa3ab84b2d155a02934e08e5301703d0d3d92e4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisPocked01.tif
+          2986      1 a37d6bbc16c5249b602a706aaeec8261572f4d31     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisPocked02.tif
+          2960      1 ebb362769742ce1b0d4c37b7a2a858c0c4ea3453     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisRough01.tif
+          2978      1 ca1fce7fb8def6c6f46f47ccff37976ce1f2e619     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisRough02.tif
+          2990      1 0473b2dd9237fafa37fb545853b039c68e8c5005     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisSharp01.tif
+          2948      1 758e0fb4bf158ba1df87bffe0acffa8351b271eb     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisSharp02.tif
+          2940      1 3e7e14fbbf1158fe799b214d42b2e2103ac59d0f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisVeiny01.tif
+          3012      1 152a124390a663735a43f5c2ca6f8e6c74683fee     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisVeiny02.tif
+          2974      1 9fd5b15e24ff697a5542846d29a5b2d84c114951     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisVolcanicRough01.tif
+          2950      1 c1542e49353862ab72c808ca0833f5720253d28f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisVolcanicRough02.tif
+          3286      1 f1c4f11abe44fce2c8019f22a78127799e52608c     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisVolcanicWorn01.tif
+          2936      1 6a4495586945fbf3c74d105bab2910ad00f94a90     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeOasisVolcanicWorn02.tif
+          2940      1 e298bdabe0fea39608b0683760d9c77b684732a1     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeStrangeValley01.tif
+          4314      1 895b3b90da14a606e5c11d4a7e1838882bdfa9a1     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayPOIBiomeValleyofTrees01.tif
+          4716      1 ff3dbc6a2a392dd1d5a73e37bacf4077942e184d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitAeriformLifeMed01.tif
+          2920      1 0bd46e5ff9619cb6f0cbcaf60e05dc4dffd58b48     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitAeriformLifeSm01.tif
+          3378      1 82a78729fe16909e83f7bbea5601119e980e4976     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitAeriformLifeSm02.tif
+          7246      1 d9a592844c482c1de485ae9ab793d2f4e9bdf802     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitAmphibiousFootholdMed01.tif
+          6820      1 eb02e1bf9df7fbe43c606ee02357a80dffa02a9d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitAmphibiousFootholdMed02.tif
+          4230      1 3318627a8c101a91be4123b2285aec9fe607db03     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitAmphibiousFootholdSm01.tif
+          5934      1 7f339f4636e458e3312857bbb6595d5f59b2cedd     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBoiledSeasMed01.tif
+          8758      1 257020ce45cc335d1d6538014ebd819aa93599b3     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBoiledSeasMed02.tif
+          3004      1 68afeb3c295b7e7e4ee270ef9c9a75ae62253b3f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBoiledSeasSm01new.tif
+          5658      1 ee7b2c7f885d999d7130e512f6393d613a8037bf     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBolideBombardmentMed01.tif
+          4820      1 921f13c1b4df50377c060c5d1877e4568199dbd6     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBolideBombardmentMed01Life.tif
+          5200      1 2ed883549618b6b9acbf164cd368313cd0a1a922     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBolideBombardmentMed02.tif
+          4738      1 c89e812d08bdc943634a1904549bad825e05ade2     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBolideBombardmentMed02Life.tif
+          5072      1 5f5ffce6d09c5ea682d0b7428d8869f39dd8c1a4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBolideBombardmentMed03.tif
+          4706      1 05c5cefa40f2656eb877990fa6921473d7eab530     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitBolideBombardmentMed03Life.tif
+          6650      1 a0dd316d6daecaad66cb4a86c929a6a030b00ff4     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCharredEcosystemMd01.tif
+          5626      1 4754bfc3809c9a256f996ca4945884b5cd3687d3     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCharredEcosystemMd01Water.tif
+          6154      1 910301589426dcd21e1adb5f3c45e8232145c32d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCharredEcosystemMd02.tif
+          5728      1 de96f4d8974e9a9cfdf40d50ee07764b0017b6d9     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCharredEcosystemMd02Water.tif
+          2978      1 0aeb5bb38eedc76c82cd656a32d01fb53ec7f740     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCharredEcosystemSm01.tif
+          3046      1 17bb1fb296dfb5f236d733aff2cadb32caf03f74     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCharredEcosystemSm01Water.tif
+          6660      1 52f5a445525604bf0067a79df4bc9834f8acae7b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitContinualConducterMd01.tif
+          3412      1 03a0de63728813a33de701f2fdc9e200c26e5e46     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitContinualConductorSm01.tif
+          2888      1 44d4403b3a606df3eba180727b71c4d061b42855     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitContinualConductorSm02.tif
+          2844      1 65918e8a9d160d3f4c7555b27733bad44538bef3     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitContualConductorSm01.tif
+          4914      1 f0599129f435207f98612a2e52f5fc17b1e815a3     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCorallineLandmassMed01.tif
+          4940      1 ccd07e625dc78bcc11dadc8fd205d37ac6531dee     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCorallineLandmassMed02.tif
+          4274      1 150194aa39dc3dd908f7a43409e76163689f3222     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCorallineLandmassMed03.tif
+          6064      1 dffe1bed6681776559d55f068f46a14a214c8f86     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCrystallineCrustLg01.tif
+          6258      1 af26cc2002add58b832401d4a4c76d2c4c8d5203     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCrystallineCrustLg02.tif
+          2840      1 5f1fe4b5cc3904cbe05d814ec25b21a7d22ee3bc     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitCrystallineCrustSm01.tif
+          5192      1 7ed0aef3922a27a5d95eb7ba587d96538e919046     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitDiseasedBiosphereMed01.tif
+          4794      1 b570288f1d3bdb328b25fe2ea3ffc2a26914c438     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitDiseasedBiosphereMed02.tif
+          2956      1 0e1b3d66af351acc9682829de681c2dd966f075f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitDiseasedBiosphereSm01.tif
+          4922      1 f653a0430f1456f3eaf279fbd1d0a91cd42d131d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEcologicalConsortiumMd01.tif
+          3014      1 753d61b3147df7adc2a1663a9181be783513c136     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEcologicalConsortiumSm01.tif
+          3032      1 f073766a12af6b75bc2394ba9879403890ddb7ce     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEcologicalConsortiumSm02.tif
+          4608      1 4c57a963a6cbddc3ead584af84f59f00b81fd588     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEmergingTectonicsMed01.tif
+          4490      1 1f7615720e0d5aff6d023a36663e6a6405735c78     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEmergingTectonicsMed02.tif
+          3336      1 2889c798e51335e45a7be4d5e4a9a868fdb3a26e     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEmergingTectonicsSm01.tif
+          7108      1 71d6e6d0319fe4bba338fb18dcb8f8aaa0d9d9fe     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEnergeticRiftingMd01.tif
+          4900      1 337ad12b7515ea080500d843b3ddc08ba9c86faf     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEnergeticRiftingMd02.tif
+          2930      1 33616b51da922d78a14daafc2a248ddc1015a94f     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEnergeticRiftingMed01.tif
+          3158      1 e1ec454de3475090b70624711ef7c8894dc17f75     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEnergeticRiftingSm01.tif
+          4506      1 c711d4ff10517273a50a623b598c537d78170f31     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitEnergeticRiftingSm02.tif
+          5018      1 dd699f31a00c2d19716e49d7553cc7b92b52709c     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitExtinctionEventMed01.tif
+          4932      1 670165fa400aee7bb32fd3890c45e320a8e60983     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitExtinctionEventMed02.tif
+          3034      1 681565079e39e98b00b7e90a2321ae352db600f8     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitExtinctionEventSm01.tif
+          5220      1 0bd6b278d73f2a5104cc2b19ab4e38ac5861bba0     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitFrozenEcosystemMed01.tif
+          3306      1 be7fceb61ac8e00ed21c42ff381b368b4ad0dd6a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitFrozenEcosystemSm01.tif
+          2954      1 e15e4a986c59ec67536b9461caa1366e5562a015     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitFrozenEcosystemSm02.tif
+          5198      1 043bfa52094197a5f7107f00b6058df37cf2c497     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGaseousFontMed01.tif
+          6934      1 172af9098ded310784e07b89a182524b8271c31d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGaseousFontMed02.tif
+          6802      1 4cdd57b4e3f04dfe13b27d649dfb7e2bfe028189     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGaseousFontMed03new.tif
+          5626      1 c9a66f7491d4ec52ef78775de0295e9a969af742     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGlobalGlacialRecessionMed01.tif
+          3000      1 c67ece5b79ad47fd71a1fea4db4fed65820b95f5     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGlobalGlacialRecessionSm01.tif
+          3068      1 435cfbc602f04ad99e87558e8a5a4175c326b421     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGlobalGlacialRecessionSm02.tif
+          3014      1 6b67c5e42776817a6457844f2b28de6ba00004c2     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGravitationalAnomalySm01.tif
+          3100      1 4fd1bfacac2538c538136a11facd53545d44beb0     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGravitationalAnomalySm02.tif
+          3014      1 0272d3ba3e7c70bde9d0cc4087f71160c0599c5a     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitGravitationalAnomalySm03.tif
+          5740      1 f679f0e886854dc0de783c739166c71e1561965b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPeltedFieldMed01.tif
+          5740      1 f679f0e886854dc0de783c739166c71e1561965b     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPeltedFieldMed01Water.tif
+          3222      1 b5d844e9a83a77b5c0d7abb7eb98a0ba5511943c     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPeltedFieldSm01.tif
+          3222      1 b5d844e9a83a77b5c0d7abb7eb98a0ba5511943c     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPeltedFieldSm01Water.tif
+          2984      1 ab7bb2338191ab161894b0f7ec59a4841a7f7b51     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPeltedFieldSm02.tif
+          2984      1 ab7bb2338191ab161894b0f7ec59a4841a7f7b51     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPeltedFieldSm02Water.tif
+         17366      1 4288601702e2e23913ec5d0ecb0c5d697fdc9a15     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrimedforLifeMd01.tif
+          5216      1 096e7adb4a539908abcc8ec0bc72cf5ab1ec6160     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrimedLifeMd01.tif
+          9922      1 2ed67ae19cd5fef060b502295ca26b8f6a349331     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrimedLifeMd02.tif
+          5074      1 25e6ae34d50d19975c7f14164270861cca9bd606     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrimedLifeSm01.tif
+          6102      1 d595de9397596c9f8b6bd21a841cf41d8e0ccc04     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrimordialNetworkMed01.tif
+          4684      1 dfe3cf703e2b7a394e561482163a4aa0a87ab323     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrimordialNetworkMed02new.tif
+          2940      1 634e5cf1c1d17f86ec8c0294346a7641b40abf98     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrimordialNetworkSm01.tif
+          5420      1 bdec7f403540ecf8234d8c742d07241b16aa25f5     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrismaticPlumesMd01.tif
+          2908      1 48f3e1416b49a5b378e6b5a2af928f7dea39f16e     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrismaticPlumesSm01.tif
+          2928      1 1fc68904d67b7cf5f9b866e09c51be3cd47b80d1     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPrismaticPlumesSm02.tif
+          6190      1 5dc83996b953be95030db43bb3364b986f56a261     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPsychotropicBiotaMed01new.tif
+          3210      1 e19d932ad3bd4f18c3e8131b2cb434be965a6dff     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPsychotropicBiotaSm01.tif
+          3100      1 9489604092caa92f70532450b834081d8e73162d     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitPsychotropicBiotaSm02.tif
+          6872      1 7f851e156c560a86b6f671cd01cb88d0b628ea8e     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSentientMicrobialColoniesLg01new.tif
+          4660      1 b2db8e02f9c24ea0808eae607e8f3377d04c66de     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSentientMicrobialColoniesMed01.tif
+          4982      1 309b6dbc6ed4626b871b621f9be4b25094439d57     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSentientMicrobialColoniesMed02.tif
+          4826      1 6bae9790521649078e59335e5b01ae1792cc8db9     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSlushySubsurfaceSeasMed01.tif
+          2956      1 e0bec09e91d8607c26479ecf916ddadc3372c892     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSlushySubsurfaceSeasSm01.tif
+          3514      1 e11bf0cfaa46a8b1a17f9953b2491ca756767416     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSlushySubsurfaceSeasSm02.tif
+          9920      1 8f5a420894281bfc0e1a8163ae4591da3f267696     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSolarStormsSeasonsLg01Life.tif
+         27252      1 c56b607b1a18fd9bb0ac6a85a7f5809c2be99cc9     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSolarStormsSeasonsLg01new.tif
+          8430      1 bab6deb961eeb3b8802a2b649388dcc57becce67     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSolarStormsSeasonsMed01.tif
+         22636      1 1e83b3bf1d29e64ade947137b55e7d395a16e7f7     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSolarStormsSeasonsMed01Life.tif
+          6456      1 196d2cf95988c53f5a9633ea91e24294e16bdca0     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSolarStormsSeasonsMed02.tif
+          5230      1 1cc939c41a2f86ca0794e20218373e6bcdad5dc0     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSolarStormsSeasonsMed02Life.tif
+          6318      1 6296246dc77ebc3d7059578a0f132665b648e7e9     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSonorousLilthosphereMed02.tif
+          4484      1 11ffb2b31ba5c79d0e9ca0222ca2d83622a3fb35     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSonorousLithosphereMed01.tif
+          3004      1 c636ccbcbfdba80a493b017fdb75c16eb8c8a8e6     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitSonorousLithosphereSm01.tif
+          4498      1 7c0f84c0be4399905d758377a86f96ce5a90c367     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitTurbulentLithosphereMed01.tif
+          3064      1 1f64b849bba3229c34c1d3e960a2e384be725ae5     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitTurbulentLithosphereSm01.tif
+          3066      1 e440c47a0d4542568ece7ae513264785e8e0cd33     0 Data\Source\TGATextures\Terrain\OverlayMasks\OverlayTraitTurbulentLithosphereSm02.tif
+          2894      1 05dd71a84fd6256bfb8538362a8f80e298c84374     0 Data\Source\TGATextures\Terrain\OverlayMasks\PCMGenericLandingOverlay.tif
+          2894      1 05dd71a84fd6256bfb8538362a8f80e298c84374     0 Data\Source\TGATextures\Terrain\OverlayMasks\PCMGenericLandingUndiscoveredOverlay.tif
+          3792      1 6f1170673056798b57163e84e92a4bc071691b7f     0 Data\Source\TGATextures\Terrain\OverlayMasks\PCMHazardTestOverlay.tif
+          2944      1 9affff1f46916420766d43225bf543eae7493486     0 Data\Source\TGATextures\Terrain\OverlayMasks\PCMShipLanding01.tif
+          2994      1 611fd8b18163acbacbec224c5b94d721ca32bc3f     0 Data\Source\TGATextures\Terrain\OverlayMasks\PCMShipLanding02.tif
+          2966      1 d5f827c9da3fe23e2a6625fc8b9a0a3f8f8a639a     0 Data\Source\TGATextures\Terrain\OverlayMasks\PCMShipLanding03.tif
+          3016      1 bd7f7be85a91d2dfbf6a4d8eb537f1d5829815f6     0 Data\Source\TGATextures\Terrain\OverlayMasks\PCMShipLanding04.tif
+          2922      1 5c184a1c70512f3b1bb20a872f7cb32f473816be     0 Data\Source\TGATextures\Terrain\OverlayMasks\POI001World.tif
+          2966      1 ab892575d066723aa9c3ff352e93d0eb81aec1c5     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP003World.tif
+          2854      1 9392163655ecc3f7cd608d232c03d6f8b282c3c4     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP007World.tif
+          3020      1 47003a60fcd8911a1c0239adb73cfe8f153d5047     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP009World.tif
+          3176      1 a3bcec72f08e15d9cf578c1807afce5e4f3d6b5f     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP010World.tif
+          4628      1 de0ea366731f35f18f4f7e9860b6a42e3302c507     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP011World.tif
+          8128      1 a1805e13f97dd07bfe8ba16bfa6881a0fc83b003     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP012World.tif
+          4950      1 faeb0f09d124021cd38df302a3c243d417d562e7     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP013World.tif
+          4626      1 36575139a717438f94b1536bd7a8fa1fec541d23     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP014World.tif
+          4364      1 f7e8e8e787743ef4db3444c0f964f5339cfd9cb8     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP015World.tif
+          5650      1 c5074d08a42bcf76277976efe96ab9fb1c6dec03     0 Data\Source\TGATextures\Terrain\OverlayMasks\POIJP016World.tif
+          6646      1 0e23451d3feaedc6dc44b29d4ae04b5bb9e87097     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL003World.tif
+          8298      1 fd96a22d723971813a06d33d0cd22e41753df19a     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL005MuybridgeWorld.tif
+          7100      1 9e80a45ff148435b910ce4ad15b951e6e220ac68     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL010World.tif
+          7552      1 799159186fefab29d2ed789fd0b767a71b712a13     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL012World.tif
+          4630      1 717174e1a9af23364616e3d4a10fc05cdf8a3634     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL018Worlda.tif
+          7590      1 f7eb1757c268a1c2f9c4429835c466332262c014     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL032World.tif
+          6708      1 5c1484b6a411418f89fa9e9b305c1063451ce8f6     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL036World.tif
+          7656      1 dbc88ff6ae6a5b547b3e101fbdeae945f31fe234     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL037World.tif
+          6622      1 a3bb83d81a7d4867dcb0f06f5e3009747f1af0b7     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL039World.tif
+          4568      1 f3fc1737c4e89b27aa570bd4d555ec41e1084f29     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL040World.tif
+          3726      1 08c683c81fb478d42ce4b75053cd24f72b1d6df7     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL064World.tif
+          4578      1 af3f8fcdcb9abee1fe0a7421daaf289b25c97ca8     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL067World.tif
+          4568      1 5f233705a29b92db96620346ed9166e5acf107a8     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL089WorldNEW.tif
+          3580      1 93ec25442c87581bdad21e37a5ccf6ccd80722bb     0 Data\Source\TGATextures\Terrain\OverlayMasks\RL090World.tif
+         12274      1 79cd8cd05232091373d7e7bd980ebf7f4aed123e     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB001TempleWorld.tif
+          7190      1 fb08753e87f5a3145c12f76571e6b479b064371a     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB002TempleWorld.tif
+          7972      1 78dcb63b3f56334d5ae2cb9966e5207781e00786     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB003TempleWorld02.tif
+          8580      1 0086dc4fb8fc0defc8144729fa9e7413d3cc1e15     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB004TempleWorld.tif
+          7430      1 2f8d457db890d6a3bc7f5890c4097ff0168bbc18     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB005TempleWorld.tif
+          6978      1 2d79beb6bf830cbbbfdc27d474a54c16b4543f45     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB006TempleWorld.tif
+         10666      1 fb4a3438fdee3cd4829f688513c62063486e1896     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB007TempleWorld.tif
+         13480      1 7c5cbb78f53c7ddecc519bbe1715304b9c2c64a8     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB008TempleWorld.tif
+          8652      1 677839be2bb0ccb69b20cf32b7511e686083453a     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB009TempleWorld.tif
+          8542      1 3f5b2af8a13e652d96e3977a811c1ed5e74b6afb     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB010TempleWorld.tif
+         10322      1 899a0f96265a241f9d92a05ab4b89691c91e1be1     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB011TempleWorld.tif
+          9918      1 4be025d49bc8281719ec5c1e4d056c117cd19dcb     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB012TempleWorld.tif
+         11186      1 d712a7d4902d424ca427fdd50d2378e2d5e4334c     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB013TempleWorld.tif
+         13226      1 8ec4b59fd9f3c2032c3f19560e804e6ff00145f6     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB014TempleWorld.tif
+          8718      1 db6818d5ba7e8779142e4e0a0827b7ad93f9f0f6     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB015TempleWorld.tif
+         14818      1 7c0cebfc665f1f6adc2230999db6988b82efbecc     0 Data\Source\TGATextures\Terrain\OverlayMasks\SB016TempleWorld.tif
+          6882      1 4d25fa937cbb742c120a761cae3f5c43edb148f7     0 Data\Source\TGATextures\Terrain\OverlayMasks\SettleCrucibleWorld.tif
+          7352      1 43da05c0276c2ec1d879065572d241749a5c85c5     0 Data\Source\TGATextures\Terrain\OverlayMasks\SettleGagarinWorld.tif
+         30876      1 34afb7e34981a791e707d0a1037c1a4c6479cd51     0 Data\Source\TGATextures\Terrain\OverlayMasks\settlehopetownworld.tif
+         24494      1 da4b4847452a4c4a3473cfb2266bba8c7f03b45f     0 Data\Source\TGATextures\Terrain\OverlayMasks\SettleNewHomesteadWorld.tif
+         24938      1 a4894c12f8f1e513a9c57782a2fefbfc06123d7c     0 Data\Source\TGATextures\Terrain\OverlayMasks\SettleParadisoWorld.tif
+         46720      1 b3eeaeaad0ab26f8da8768edbf87366f16453116     0 Data\Source\TGATextures\Terrain\OverlayMasks\SettleRedMile.tif
+          7904      1 749e819227fccfd6d40353e38ba9007a339f9101     0 Data\Source\TGATextures\Terrain\OverlayMasks\SettleTheEleosRetreatWorld.tif
+         55990      1 0bc8fb440484563768d181678aa9b24a43e7251d     0 Data\Source\TGATextures\Terrain\OverlayMasks\SettleWaggonerFarm.tif
+          3134      1 51416867ed2d3fae77a049e89780f77a3eb1d54e     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestAirlockAIPathing.tif
+          6224      1 5da913b858e64f4aa5c721ffbd494b4076601a0e     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestJustin3x3World.tif
+          2944      1 7d841c5eee7f67325a04e1767357e4e0c8e543e6     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestJustinWorld.tif
+         34402      1 5f0e8321974d3aa63064ff5da75bef1709283b89     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestLandscape.tif
+         34402      1 5f0e8321974d3aa63064ff5da75bef1709283b89     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestLandscapeDUPE.tif
+         26642      1 54205f9bd78b0135c499c11ad203ff3bff0c644d     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestLightingGIWorld02.tif
+          3790      1 2c4d0ae7f18ed0cec2a065ee689bd3a2b01fd3de     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestMikeLandingOverlay.tif
+          3790      1 2c4d0ae7f18ed0cec2a065ee689bd3a2b01fd3de     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestMikeLandingOverlayDUPE.tif
+          7054      1 39d074c793718f365fade835208a6c7c9bbab7a9     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestMikeOverlayRenamed.tif
+          8770      1 db3507a7a2cc656a5178f2eb618b478d1d0b0444     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestOverlaySmallCave.tif
+       2170994      3 32b331eae0626c7a4161af872ca32fd08867c6c8     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestRocksRoughWorld01.tif
+         30174      1 c0d6a417da6072587b1e41ee4689879163aca766     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestSalvatore.tif
+         25468      1 4e9b30bf53ba5c6dee64015b20f029f2843e8e44     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestStarshipLandedWorld.tif
+          5352      1 5b34f0dd5a30fb9170e64e8453b48cd8027cb451     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestVecteraVista01.tif
+          5352      1 5b34f0dd5a30fb9170e64e8453b48cd8027cb451     0 Data\Source\TGATextures\Terrain\OverlayMasks\TestWaterWorld.tif
+             0      0 0000000000000000000000000000000000000000    40 Data\Textures
+             0      0 0000000000000000000000000000000000000000    40 Data\Textures\BrushAlphas
+        262292      1 1fee7d865cc9262d5c478e1a827c484848f5dcfc     0 Data\Textures\BrushAlphas\BillowyNoise.dds
+        262292      1 9b09282dd58c7f009f52d7d19e233ae4c7979999     0 Data\Textures\BrushAlphas\Circle.dds
+        262292      1 3ac63650c322fde334e78127301d9d0a17d1ac2e     0 Data\Textures\BrushAlphas\Circle02.DDS
+        262292      1 41a1a9822efff00ae3c8425230a73295fcc44b25     0 Data\Textures\BrushAlphas\CircleHard.dds
+        262292      1 b02ac30aa91ec3c22bcd20e01b015a05b748e8b0     0 Data\Textures\BrushAlphas\CircleHemisphere.dds
+        262292      1 234ee2ace8198b4a4ea9fb314e4621e8dfd08c8f     0 Data\Textures\BrushAlphas\CloudSpray.dds
+        262272      1 2daf8e6b7b94be1b6ba60ee88a28bfe21dbb7dde     0 Data\Textures\BrushAlphas\Clumpiness.dds
+        262292      1 773655177698204674b2e81774732999bbce5a10     0 Data\Textures\BrushAlphas\CropRow01.dds
+        262292      1 330ab7c2ab9064eba4ba86ce297ba9f6e8bc027d     0 Data\Textures\BrushAlphas\GrassyMound.dds
+        262292      1 585fc70a6758012f552a2f8fa7e2029f41dd1c37     0 Data\Textures\BrushAlphas\MeadowNoise.dds
+        349680      1 7c73cf0d2a5ec2f27c34129ef67470d2b31e195d     0 Data\Textures\BrushAlphas\Oval01_d.dds
+        262292      1 ffe06807e03d4c91ec02f891fd5ada0d87067318     0 Data\Textures\BrushAlphas\Pyramid.dds
+        262292      1 9f256c08bf028f733c471a6b4cfc293a1f6ff7bf     0 Data\Textures\BrushAlphas\Road.dds
+        262292      1 3f2eef0d9ae1ddb0435b45e45a96ec40130d5f11     0 Data\Textures\BrushAlphas\RoadDirt.dds
+       1048704      2 234550f64fca08d3d5be060eab11cb65977f3d53     0 Data\Textures\BrushAlphas\RoadTireTracks02.dds
+        262292      1 69dac49d01f30bea8d40825a2c43066b882a2b11     0 Data\Textures\BrushAlphas\Splatter.dds
+        262292      1 38a31a30c534d1c6991a54d4085fcf0bce58bb74     0 Data\Textures\BrushAlphas\Splatter2.dds
+        262292      1 d663ea5185966b8cd085bd1fda6cded8ff17d8cd     0 Data\Textures\BrushAlphas\Square.dds
+        262292      1 471902a10f5149b1963f1ed622a00f6d05cb6113     0 Data\Textures\BrushAlphas\SquareHard.dds
+         10571      1 710a8c2ab2c24cdfc5c764a59f844f85e277e883     0 EditorColors.xml
+       2972608      3 03498d4128aea26cba8021d22179b67728bbad33     0 flowchartx64.dll
+       1875808      2 f85aa9eba723dd62b3a7b8cb3961587dbbc68c1d     0 GFSDK_Aftermath_Lib.x64.dll
+             0      0 0000000000000000000000000000000000000000    40 LandscapeBrushes
+           836      1 bb642004b96c4aff5adc94839e8cbf8f57c8258a     0 LandscapeBrushes\CropRows.lbr
+           872      1 8b96579bc732b03f7e159fc0c9126f493f17264e     0 LandscapeBrushes\DefaultBrush.lbr
+          1111      1 3d2a648d910d4fcddbb3213486fdf86dcf776e10     0 LandscapeBrushes\GrassSpray.lbr
+           929      1 9ef13b4f8ed17d2c5100820a31e5b89fe9e428bf     0 LandscapeBrushes\MeadowNoise.lbr
+           895      1 ffc39004bfab4f9c477ce186c2b03f584e564632     0 LandscapeBrushes\OrganicFlatten.lbr
+           855      1 f99387142d115e4dd02bd03f3060402c0c14a6ab     0 LandscapeBrushes\Oval01.lbr
+           981      1 ac825bb59d155dc90262547ce35f58c92a400f1b     0 LandscapeBrushes\ProcGenMask.lbr
+           880      1 fc4f23fd3522a9f6256e083741cbfcb1b8ea6977     0 LandscapeBrushes\RiverBrush.lbr
+           919      1 0fb4bc2bacfcb8f4139cbf26b9228e96a6393479     0 LandscapeBrushes\Square.lbr
+             0      0 0000000000000000000000000000000000000000    40 lex
+          2338      1 3c7b8bfb0340a138974dc96dd2a42488e908b3db     0 lex\accent.tlx
+          7796      1 c9528fee7d5adb5a7514f6d10d9626df708e44ae     0 lex\ssceam.tlx
+        328061      1 388f4df46eae7e1e5530ed169654d264e6d4ad85     0 lex\ssceam2.clx
+          7798      1 968a06ce6362b2611bea5d104148fefc70f64e6a     0 lex\sscebr.tlx
+        330192      1 de8841e0137e89cd2238939433fac6e340caabbc     0 lex\sscebr2.clx
+          7798      1 968a06ce6362b2611bea5d104148fefc70f64e6a     0 lex\ssceca.tlx
+        328670      1 4e1cccfd476901bbce27a68e257f78c86c91e1cb     0 lex\ssceca2.clx
+          3632      1 f5f0d8a8d62e3ad529ded25b94a53dde0b25873a     0 lex\tech.tlx
+             0      0 0000000000000000000000000000000000000000    40 lex\User
+         21529      1 f7576390e8205d3a1f2a3a73e4635132988df811     0 lex\User\correct.tlx
+          4464      1 ebfbdc934b25c27196dfff6b56581a3092b2bc08     0 lex\User\userdic.tlx
+       3433312      4 f398251e3c92ae89318bc22e93629ddc74dafc4a     0 libcrypto-1_1-x64.dll
+       2292576      3 0ed521ed35f402e6788d011dd48f21673145704a     0 libeay32.dll
+       6828384      7 94752c0c2cecede39195812e9f2d956b04b91ad7     0 libmysql.dll
+        697184      1 5a849b60f9d0f48286924792a9dec5e25b70dccc     0 libssl-1_1-x64.dll
+        193690      1 d20d40059f0a7481d6c529601624191134577d3b     0 NOTICEFILE_StarfieldCK.txt
+             0      0 0000000000000000000000000000000000000000    40 OPAL
+         16498      1 5f529cc4ac124a4615eb007719500dbdc46c0648     0 OPAL\Clutter_Bar_General.opl
+          2303      1 d62b7f87b94af51841e8659a3b80cfe0dbf090b6     0 OPAL\Clutter_Bar_Loot.opl
+         12355      1 fb2c16c4c914dd7008805f684aef4a753ca82771     0 OPAL\Clutter_Greenhouse_General.opl
+         45272      1 705365f08708729504952d4178082f111df73ef3     0 OPAL\Clutter_Industrial_General.opl
+          7932      1 eafd386e603ed522c8234dfe3c038ea136a1c346     0 OPAL\Clutter_Industrial_Loot.opl
+         17920      1 6f40a87e2849cb7eee4dae5429f6bde88fbba77c     0 OPAL\Clutter_Kitchen_General.opl
+         10733      1 7a51ac12168430897db72077b3c10ac1ae44a57f     0 OPAL\Clutter_Kitchen_Loot.opl
+         28690      1 86819d7dd047cb6088c44be92bfe53055b88c927     0 OPAL\Clutter_Military_General.opl
+         60544      1 9784047ff5a4dd275103d6e42e24f526ff53860b     0 OPAL\Clutter_Science_General.opl
+          1742      1 d348d055e8ebac83a4e8b03ef0aca82c80fae9b0     0 OPAL\Clutter_Science_Loot.opl
+             0      0 0000000000000000000000000000000000000000    40 platforms
+        850552      1 cc2fc8db9e8acbd25455f22ae1bca83a20cdd670     0 platforms\qminimal.dll
+        758392      1 42f1562345c598b1dd1a5e326619197925124ba3     0 platforms\qoffscreen.dll
+        503416      1 8ae1b067ec3b236a1ea7f61a42d74e2a3d8b1cee     0 platforms\qwebgl.dll
+       1465464      2 4ebbbe56f7fd5a18a6916b9efd7f073a5d5658e0     0 platforms\qwindows.dll
+       6138720      6 9a6876076d6f76b9244c82a588875baa0a01c8c1     0 Qt5Core.dll
+       6494840      7 37161412df2c1313a54749fe6f33e4dbf41d128a     0 Qt5Gui.dll
+       1314424      2 e23e839ec0602662788f761ebe7dd4b39c018a7f     0 Qt5Network.dll
+        328824      1 c080a04a1e4e185fb93dc82d2ad542de74363bde     0 Qt5OpenGL.dll
+        212600      1 5d6e34f4b8a973745f8dd9f3e428004775070687     0 Qt5Sql.dll
+        338552      1 24bff3990a730b33ab67234b250eb8812ed62155     0 Qt5Svg.dll
+       5539448      6 ff44fddeec2d335ec0eaa861714b561f899675fd     0 Qt5Widgets.dll
+        641376      1 713ae084340cee22ed72d7a45fec7912f2eb90f5     0 QtAdvancedDocking.dll
+             0      0 0000000000000000000000000000000000000000    40 Snippets
+           213      1 c3d521bd6456200ce66699f5035337be20d4256a     0 Snippets\export_location.txt
+            53      1 f4fde11c0a63daf7bb3aaab608c0a6287a600407     0 Snippets\export_planet_creature_data.txt
+           317      1 14f7d302ff798cc2d647e1956a1d93c35a2ea878     0 Snippets\export_planet_data.txt
+            16      1 cb931cb94bb10da43a69ef7900d5e89e666b4ae1     0 Snippets\import_creature_name_only.txt
+            16      1 d05f0f97efd73fbaaf8f0bb06004af8609c5e323     0 Snippets\import_location_interiors.txt
+           150      1 cb497b186daacfe4074a133916fea137b686af88     0 Snippets\import_location_references.txt
+            16      1 25b25861a0d1b602ec785aed019204e3ebe055fb     0 Snippets\import_location_worldspaces.txt
+          1044      1 a18e6e2e00694cb15bfed2d32d18adb31e43654e     0 Snippets\import_planet_creatures.txt
+            42      1 ab7d7a73d7b78574f6fd6485455640598b7a2c83     0 Snippets\import_planet_flora.txt
+           415      1 f1c02cfeecd7237f4e5100d08c10cbf2c68a9abe     0 Snippets\SnippetHeaders.txt
+             0      0 0000000000000000000000000000000000000000    40 sqldrivers
+       1205880      2 ea6449f6c4e17ed44bd706246b0ae18a6b636e32     0 sqldrivers\qsqlite.dll
+       1817208      2 5ef43dfd3ed1d254f65ec35b00dbd277c1a92e62     0 sqldrivers\qsqlited.dll
+         73056      1 b837d860200e1c78a722df667db8ee136ca83263     0 sqldrivers\qsqlmysql.dll
+        193376      1 b4d92318c545896512f992ba738f029a386fd586     0 sqldrivers\qsqlmysqld.dll
+         94840      1 1ee396013000bc44f3b2671801412e5649bfcdb7     0 sqldrivers\qsqlodbc.dll
+        211064      1 adce96558085f48bf3c327751f6762184e74534c     0 sqldrivers\qsqlodbcd.dll
+         75896      1 f599dc313e20c76fee75d89b918628a2a827e569     0 sqldrivers\qsqlpsql.dll
+        175224      1 1066ef27b66c81f56b1299b8a32c1267b9d331c0     0 sqldrivers\qsqlpsqld.dll
+        397152      1 9f6623456c186a60b37cd5299c22111f2942e692     0 ssleay32.dll
+             0      0 0000000000000000000000000000000000000000    40 styles
+        183648      1 4fcc86cef94dd1c35ff5d2bb93d626034a9c356a     0 styles\qplastique.dll
+        141944      1 9a8e0565f9b00cf95991a0d63f2f3b1b7ada52a2     0 styles\qwindowsvistastyle.dll
+             0      0 0000000000000000000000000000000000000000    40 Tools
+             0      0 0000000000000000000000000000000000000000    40 Tools\Archive2
+         76128      1 0248139bbd463aaf8ec247dfbca8c5f73f0c71f9     0 Tools\Archive2\Archive2.exe
+           161      1 3fa322fe6ed724b1bc4fd52795428a36b7b8c131     0 Tools\Archive2\Archive2.exe.config
+       1543520      2 4cf31a3055b9ffb1a161a94dfc7d04af331123f1     0 Tools\Archive2\Archive2Interop.dll
+        116576      1 2a432e5014fc364216ef6c3d79158b24591fa358     0 Tools\Archive2\Microsoft.WindowsAPICodePack.dll
+        553312      1 00639705a67ddf80602b4151481fd690cdd97d51     0 Tools\Archive2\Microsoft.WindowsAPICodePack.Shell.dll
+             0      0 0000000000000000000000000000000000000000    40 Tools\ArtTools
+     149733112    143 91a54f8123cc2d1e1db2f98bda7c57e93932db4f     0 Tools\ArtTools\BGS_Starfield_ArtTools_1.0.0.5.exe
+    1419621636   1354 ba4411c6625287d24a858cd151276d15d6ffaaa9     0 Tools\ArtTools\Reference_Files.zip
+             0      0 0000000000000000000000000000000000000000    40 Tools\AssetWatcher
+       2329440      3 d2f4170c2c0e3c99c1075c845173a7111b5022b1     0 Tools\AssetWatcher\AssetWatcher.exe
+             0      0 0000000000000000000000000000000000000000    40 Tools\AssetWatcher\platforms
+        850552      1 cc2fc8db9e8acbd25455f22ae1bca83a20cdd670     0 Tools\AssetWatcher\platforms\qminimal.dll
+        758392      1 42f1562345c598b1dd1a5e326619197925124ba3     0 Tools\AssetWatcher\platforms\qoffscreen.dll
+       1465464      2 4ebbbe56f7fd5a18a6916b9efd7f073a5d5658e0     0 Tools\AssetWatcher\platforms\qwindows.dll
+             0      0 0000000000000000000000000000000000000000    40 Tools\AssetWatcher\Plugins
+             0      0 0000000000000000000000000000000000000000    40 Tools\AssetWatcher\Plugins\Starfield
+      35277152     34 317af31022ba6ae839af4279fd8af02193252207     0 Tools\AssetWatcher\Plugins\Starfield\BSFBXDLL.dll
+        806240      1 38e13301f94b56b46a82a2faaec6ea52048620bc     0 Tools\AssetWatcher\Plugins\Starfield\BSTextureConverterDLL.dll
+          5225      1 87cabe83b917bac4487ce594828482efec6a14de     0 Tools\AssetWatcher\Plugins\Starfield\Meshes_Settings.json
+          5756      1 073e2a8360a0c3cc5c6ddcf3d308de46f58fc1ea     0 Tools\AssetWatcher\Plugins\Starfield\Meshes_Settings_TeamCity.json
+         25189      1 dde009040093c1c1bd1f604d745403715d77336d     0 Tools\AssetWatcher\Plugins\Starfield\Textures_Settings.json
+         18598      1 c25ba833dba18fe0c2f790f2ee2cc1070f1554e0     0 Tools\AssetWatcher\Plugins\Starfield\Textures_Settings_HD.json
+         16504      1 c2cdee90a8bdbda1ed3ec46578ad6e288261bd2e     0 Tools\AssetWatcher\Plugins\Starfield\Textures_Settings_Outsource.json
+        546344      1 56d95251e5af782e28875dd1c51a34dbb9af4b6e     0 Tools\AssetWatcher\Plugins\Starfield\xg_xs.dll
+        718176      1 f466633f7908021283501d96c6489c6e77755597     0 Tools\AssetWatcher\Plugins\Starfield\xtexconv.exe
+       6138720      6 141bed12f9f701327f7a763cdc4046d9acdad5fd     0 Tools\AssetWatcher\Qt5Core.dll
+       6494840      7 37161412df2c1313a54749fe6f33e4dbf41d128a     0 Tools\AssetWatcher\Qt5Gui.dll
+       1314424      2 e23e839ec0602662788f761ebe7dd4b39c018a7f     0 Tools\AssetWatcher\Qt5Network.dll
+        338552      1 24bff3990a730b33ab67234b250eb8812ed62155     0 Tools\AssetWatcher\Qt5Svg.dll
+       5539448      6 ff44fddeec2d335ec0eaa861714b561f899675fd     0 Tools\AssetWatcher\Qt5Widgets.dll
+         26063      1 a2985db1f8738fcd6e8f8bd65004df7e83fd9d98     0 Tools\AssetWatcher\SettingsGeneration.py
+             0      0 0000000000000000000000000000000000000000    40 Tools\AssetWatcher\styles
+          8467      1 cbd3ca9db79f5a3babe116ff438fe34572db123c     0 Tools\AssetWatcher\styles\Default.css
+        141944      1 9a8e0565f9b00cf95991a0d63f2f3b1b7ada52a2     0 Tools\AssetWatcher\styles\qwindowsvistastyle.dll
+     162919898    157 2b5ed4ea119510cae94462b540f953ce9f6e6bfb     0 Tools\ContentResources.zip
+             0      0 0000000000000000000000000000000000000000    40 Tools\FaceFX
+        947040      1 9ca1219ad1d54a69c617bf316d9666fd7c590bb0     0 Tools\FaceFX\ffxc.exe
+         57064      1 46d09dd74283a586b3664d7ba62eb30730373b7b     0 Tools\FaceFX\GenesisDeadHead.facefx
+         57446      1 da72ab50b20cfc4928a81464ba49722a2def1418     0 Tools\FaceFX\GenesisDefault.facefx
+         81123      1 f014f75f18c59533d0829a9434d95293a45cfd9f     0 Tools\FaceFX\StarfieldHumanFemale.facefx
+         81113      1 1e601c4af58270cdfaacd9ebd8b1f343f7a2aba3     0 Tools\FaceFX\StarfieldHumanMale.facefx
+             0      0 0000000000000000000000000000000000000000    40 Tools\IconGenerator
+           899      1 07403cc716f1588a319ee3e2a3beb42fdabede91     0 Tools\IconGenerator\CreationKitCustom_InventoryIcons.ini
+           952      1 dd7b8ef9d43bbfceb27fa5cb749b6e34a0d6e289     0 Tools\IconGenerator\CreationKitCustom_ShipbuilderIcons.ini
+           952      1 dd7b8ef9d43bbfceb27fa5cb749b6e34a0d6e289     0 Tools\IconGenerator\CreationKitCustom_WorkshopIcons.ini
+           441      1 f4ea79ca26405c4df9111077fed0c44e8dda9b31     0 Tools\IconGenerator\CreationKitPrefs_InventoryIcons.ini
+           418      1 cc728176ef8045be91dd1a221b2d84c6d8b33903     0 Tools\IconGenerator\CreationKitPrefs_ShipbuilderIcons.ini
+           440      1 1dcde789b6bb072917215b6576d34e53ae07d414     0 Tools\IconGenerator\CreationKitPrefs_WorkshopIcons.ini
+             0      0 0000000000000000000000000000000000000000    40 Tools\LipGenerator
+       5996339      6 e1adcc21aedd2c0d3506b5fcd99645851cdecdf6     0 Tools\LipGenerator\FonixData.cdf
+      26226528     26 8432d168a70e86aebfb9064b667c99850b06e046     0 Tools\LipGenerator\icudt58.dll
+       1828192      2 4f04ace92e45968adcb0733ead966c281974c454     0 Tools\LipGenerator\icuin58.dll
+         52576      1 5829a12459abe2b79a23c4a03b0daf6fa994b06b     0 Tools\LipGenerator\icuio58.dll
+       1262432      2 bf9f4af3cd6fdcf2fa9134849de44d4a64ca481b     0 Tools\LipGenerator\icuuc58.dll
+        119136      1 4ba415c28f23fc2e784b28d325838cc4db86991b     0 Tools\LipGenerator\libresample.dll
+       2315104      3 bba5085e11346bc4afa1ab332a667a9f9255d0c6     0 Tools\LipGenerator\libsndfile-1.dll
+       1314144      2 1254d570ddb724b730e35b6a7c8e9c392b68bdba     0 Tools\LipGenerator\LipGenerator.exe
+             0      0 0000000000000000000000000000000000000000    40 Tools\Papyrus Compiler
+        113504      1 2ec11f1efa98f2ee80031730f40602522741e99d     0 Tools\Papyrus Compiler\Antlr3.Runtime.dll
+        253280      1 dbd3ba370dc19609fa981ccc9891a51dbdada39a     0 Tools\Papyrus Compiler\Antlr3.StringTemplate.dll
+       3536224      4 c1f1a841acc43bcd048554e13e32611c0c029ae7     0 Tools\Papyrus Compiler\PapyrusAssembler.exe
+         34144      1 ad62ce29091e004ece5b3d3428670d5d5fceae43     0 Tools\Papyrus Compiler\PapyrusCompiler.exe
+           144      1 4270640fbebc626f594f41ba09e0c99d33b64a60     0 Tools\Papyrus Compiler\PapyrusCompiler.exe.config
+          1993      1 1ef7ba10ae2a39795a1cb26641fa2f48d3334c01     0 Tools\Papyrus Compiler\PapyrusProject.xsd
+        747360      1 9d460ba091673f2e98dff9119f3604a1a6fa990c     0 Tools\Papyrus Compiler\PCompiler.dll
+         29024      1 aea87d28d702024a21b97684eb810431cd04596f     0 Tools\RoboVoicer.exe
+             0      0 0000000000000000000000000000000000000000    40 Tools\SetupUtilities
+             0      0 0000000000000000000000000000000000000000    40 Tools\SetupUtilities\Dependencies
+      67777552     66 fe291f3291db2f111d781562fef11990224ae16d     0 Tools\SetupUtilities\Dependencies\libxess.dll
+        298384      1 39cac2889d8ca497ee0d8434fc9f6966f18fa336     0 Tools\SetupUtilities\Dependencies\steam_api64.dll
+          1796      1 75e5560bb64fc9b25a6e45b8557a056184d6337e     0 Tools\SetupUtilities\ExportEditorDirToTarget.bat
+          1440      1 cd9387969bd4b5f041f7157d565861b88efca0cc     0 Tools\SetupUtilities\README.txt
+             0      0 0000000000000000000000000000000000000000    40 Tools\SQlite3
+        589664      1 b6c99f3c2b6b649d5c2511b8eec4eab74176a012     0 Tools\SQlite3\sqldiff.exe
+          7786      1 f94774de073307132323b6e830ad3c0c2beb439d     0 Tools\SQlite3\sqlite3.def
+       2170208      3 7ab10e17ce36e8b3e1a1cd7972f83527c39cd3d6     0 Tools\SQlite3\sqlite3.dll
+       1194336      2 c646589613200769c0a52a2a7de303ed7defb421     0 Tools\SQlite3\sqlite3.exe
+       2105696      3 d9e8687796aae88cfb1a0ff61671949db265855a     0 Tools\SQlite3\sqlite3_analyzer.exe
+             0      0 0000000000000000000000000000000000000000    40 Tools\VSCodePapyrusAddon
+       1177955      2 9ece6c4764c0940079825bbe43a00e38d82cb17e     0 Tools\VSCodePapyrusAddon\vscodepapyrus-1.7.0.vsix
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Actor-Mixer Hierarchy
+         24336      1 18aa8479ec8b7d18ef3bdcad999ece4ccf2b9b26     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\1919.wwu
+         64016      1 18fe2f10b6122ca2677e7f0446cb5215fcd93799     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AA99.wwu
+         10261      1 48ed69b1a8668daeb9e9641cf3e18f7ac21b9c94     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Airlock.wwu
+         26081      1 2a1165b8138c0ed693a1eea1156c9248133c7e34     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Allied.wwu
+         85125      1 d3396770a8f3a0428caa4137c84cda377c98668f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AlliedEnvoy.wwu
+          5925      1 b668912d9c55d2a459e44262a2676cde0fce5df6     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AlliedLaserSniper.wwu
+        255756      1 55daad84129c7d148fee3479b03e0ebb8d1ee182     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Archipelago.wwu
+        341194      1 b4ff886fc22ff5bd08e370c99b432a6da40f6ccf     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Artifact.wwu
+        604623      1 006c6286be7f4e19e440ea961812bb056d58284c     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_ArtifactPuzzleRings.wwu
+          9067      1 b1d50fd62e6fbf4f1bb3aa4d5ec6ddae881c1f01     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_BiomeDucking.wwu
+          3727      1 4dcce37758a1855544444d1348602ccbc1984748     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Biome_Extras.wwu
+        286361      1 360724a9bfd8df49fa25787a0d76d6ae1bd269ea     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Canyon.wwu
+        669308      1 10484886f9d91bc72f7d81940f9ca29dbff1d70b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_City_Akila.wwu
+       2308669      3 dd75037e66473d97840d74b1e7df829e7083206f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_City_Cydonia.wwu
+       1255450      2 e69201fdb9b5a135f6e49a359228f0ea677bcb62     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_City_Neon.wwu
+       1047316      1 c6d2bd6487a19d8043f539632157fccd24f8af97     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_City_New_Atlantis.wwu
+        120573      1 ddc2a57cb269e4174631b34180afba7a5d1a8d50     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Cratered.wwu
+        642993      1 4db3e560dc016553a5eb3b6b53ec56f83d4530a8     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Crowd_Walla.wwu
+        141790      1 a73945c48fba136867a2d7d605a1d865bd0bad56     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_DesertRocky.wwu
+        166794      1 cd6c3201a3a0ed9b09e0bdc484cca5b590886e78     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_DesertSandy.wwu
+         43842      1 01d05d701db4e2a4af12830b75c33ab62fa314ae     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_EchoMarkers.wwu
+       8938641      9 93b5584b158e7f600412da75c5d39440798f6225     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_ForestConiferous.wwu
+        507696      1 61e229236a312f4b8739d11bbebcfecf7b78955c     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_ForestDeciduous.wwu
+        142925      1 8a3f10bd3a10c25a94c42c9527ee96e0892fb1d4     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_ForestTropical.wwu
+        807294      1 b6a8405aa4adeaaea01098705f6ce386b137d8ae     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Frozen.wwu
+       2020700      2 64ed58c2af5d6c8a9aa3bb23218ad6a1bd3a242a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Global_Weather.wwu
+        144026      1 b0decaaf20fc6e37044b600daea30078f7b75cd4     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Hill.wwu
+         98187      1 34aa876c8e612a449a526c452a5e60bbc7cf3edd     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Mountain.wwu
+        192176      1 2abeae13598ac7d3ed96e8c92fdd7dec51e507a2     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_NewAtlantis.wwu
+        132518      1 5107b23d151b3ad4aae806d5d30560bf25d4d5e1     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_OceanCoast.wwu
+         50976      1 cfe1c7da9e8f4839cde08d9c4dd0ae7ed336723e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Savanna.wwu
+         37188      1 079644546e592447afc8693626a3a19298546c8a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Space.wwu
+         90626      1 6e6a00d3c00b11259ecd4cc1233451d4152707cb     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_VolcanicRough.wwu
+        101113      1 d03ccc9bc485d317c108ac8cd77630ec456cd272     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_VolcanicWorn.wwu
+         49862      1 981f035b5db38cee89e55d921e0ccaabe6d37a40     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_WaterSystem.wwu
+           616      1 c10f7c5b2bb6f6f4ed189ab45541f431bf04c8f1     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Weather.wwu
+        168028      1 3f5705a663521286ab2800d3656b1ea99f889631     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_Wetlands.wwu
+      12838060     13 9fab9398e4d0f227038c7762863336e73227438c     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AMB_WindSystem.wwu
+        130258      1 d81d64b6fef0b23bdeb0b5851baee64117b01893     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AmmoBallA.wwu
+        127820      1 e3c4632f0b9b2a99da5c5595d7706c15923d5ea1     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AmmoBallB.wwu
+         85982      1 31a4a50b170835142a0b87d57dbb70d8a61885f7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AmmoBallSuppressed_Pistols.wwu
+         87844      1 0e7737554180e718261d221129315c86b03996fd     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AmmoBallSuppressed_Rifles.wwu
+         96434      1 976b330bbb7166d5a25518359a23f94aa3ee0416     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AmmoLaserA.wwu
+        121984      1 2ec8fdbe996b68d39eda16695f848a165036a3b2     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AmmoShellSuppressed_Shotguns.wwu
+         36404      1 106b1d6aaab00dce84572c8b67185d5dd388144f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Arc_Welder.wwu
+        293162      1 473b23f7dab40f0e813181570270418e5cb4fa56     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AssortedMarkers.wwu
+         51343      1 36d6fad63555fc57ec0f435a1a620b13f8bb6cec     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AutoRivet.wwu
+         13335      1 076bcf97126ace267ee548ead3552a9d50b92fd3     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\AxeRescue.wwu
+         20320      1 005f4508cf202173de64d4d96279a220b44373c2     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\BarrowKnife.wwu
+        175984      1 1a3692c56344b860ffbc3f7e606eba30162b5e24     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Beowulf.wwu
+         16706      1 15af0da4bba021e86c209d2a3511ccb02bd05de9     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Bigbang.wwu
+         11956      1 67b547712914134543fa001053c427993de54ae7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Blastar.wwu
+         63723      1 071fb46a9e13d2fe2f268e62c4c4264dcf7a5966     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Breach.wwu
+         10054      1 f6d529b198c193d89b79c6be9c501502f252f50a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Bridger.wwu
+         61664      1 db1e64319d79e227aebc59eff161f962885fba79     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\BuriedTempleA.wwu
+         24666      1 a713bb5a9c967f6a15d049a72e90284a11b2817f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Coachman.wwu
+        126173      1 dc79a09c53c6bc6991bcee8c35b5ff4a3101d8b5     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\CombaTech.wwu
+         91228      1 1219b710906e7bd70271db02983f136d0682cc2a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Commercial.wwu
+       1647385      2 4faa3b43cffd7bc1197417712e4188b472f9d6e9     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Crafting_WorkBenches.wwu
+         19934      1 42969fd808aeb6a228369f8d657a31cd6c3555e4     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Cutlass.wwu
+        117804      1 b03e8a52ec54353e4a76198bf8ef0a184d71ab44     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Cutter.wwu
+          1970      1 b2cc7a4ba10eaf281a1d6204251eede255d98c90     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Default Work Unit.wwu
+         42404      1 e7bda4b09b17d22d09e10a423e41ced5f7294dd7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Deimos.wwu
+        180648      1 f9d8f50726c8920511b03967aea10304dc61b72b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Drumbeat.wwu
+        195605      1 c6f42e90dcb57e9e869ee618484baf25b77d7518     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\DungeonCave.wwu
+         86219      1 c48718846e4abcbb4f45ae9f367b5bf5d2cc009f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\DungeonCaveCrystal.wwu
+        395747      1 e8c81b01af566a22009b4e1e9599959f6ab44d71     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\DungeonIndustrial.wwu
+        348895      1 fa9db6f2f378cee07560dd86ee2fbc52fa6fd8cf     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\DungeonScience.wwu
+         10597      1 2f934a070f4525dca9af31ed3bd00f78f44bdb6b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Ecliptic.wwu
+        185671      1 189f373f62580c00b17aaea3bc86088eb31707cc     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Eon.wwu
+        174308      1 e8c8b42f91cefaafad61a88f3b7bba62b333b8b5     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Equinox.wwu
+        349564      1 c39067d6d3e7409e02220b9ab3364574eb70e4fd     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Exterior_Generic.wwu
+         76428      1 74e21fef437c669e085c1306ed088acd73d781d5     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Exterior_Industrial.wwu
+        454417      1 36cb6da1e6e0d2a43405de301d33a545477f6eea     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Exterior_Settlement.wwu
+        559724      1 f73f83d72191318d540e4c8c237d0b7eb43eec20     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Factory Synth One.wwu
+       1902918      2 1330d99aed33cbc1adf04816d726589fdc724b87     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_Artifact_Power.wwu
+         25493      1 36e529a5a3488a3311c99d0aeb7410c330396ad0     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_Chameleon.wwu
+        112797      1 039c6fcd988c1a790ed808d89c13b339cf82f942     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_CriticalDeaths.wwu
+       1880333      2 27803e7ac4ac0b1ca351c6636a7fdaa15ee505e8     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_Explosions.wwu
+        431808      1 cff65b6975310ed9a04e38c308c79cb4a900bd5f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_Hazards.wwu
+         52198      1 2c2722341aa1bacafd1cef9ca1b03c274a5fea81     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_ITM_IMODS.wwu
+         89871      1 bced6f69c32e567eee9b346a7c6570e156a1c827     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_Ore_Harvest.wwu
+       1338883      2 8c97825bd0b8f239ce7dcdf846149fc1142519f7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_Projectiles.wwu
+           624      1 5bc36d0ac5f2bed8a2f3051411002aa35e802eca     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_Space.wwu
+        509032      1 616c67215e9a1672bea2ba410e483ccd4f11550d     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\FX_Space_ChargedParticleCloud.wwu
+        175173      1 aed9ed900457961a84ddb484b66155f2c23f363b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Cavern Roomtones.wwu
+        235903      1 81ace2ec3235fe748b6aedd7f10a70b1cae3b251     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Clean Roomtones.wwu
+        435651      1 38f1d84dd70cdd0d1093f14eb9853021e0047cdb     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Control Room Roomtones.wwu
+         26651      1 3bfeed4af83cdb1d73a1d47e1927d60e3234e1b3     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Effects.wwu
+        246829      1 d775549e8a48ec3b5ad2179459f05d4422a94124     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Fusion Roomtones.wwu
+         55619      1 ecb034aa5871b92ca2f551603e2a7ed0451d6f6d     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Rooms.wwu
+        174712      1 5f8cca4ba2fb3700dad531081aa1250ebc60dedf     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Rusty Roomtones.wwu
+        212568      1 0922889b08c4c8503ede4d6b8aed883d8bd51890     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Warehouse Roomtones.wwu
+        200227      1 88951f5caaf167b3ed44662806f85da4e8452421     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic Warm Roomtones.wwu
+          1756      1 251d46be0161ea692f2d46a581ed298abb7a7290     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic.wwu
+        147487      1 0209f8f4cfdfe15b6eeaf3d8ca7ab422ca94a632     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic_IndustrialLab.wwu
+         69533      1 843041d682be8df701ca7b051640e65b06be1365     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Generic_Markers.wwu
+        144539      1 adab91ad763662b7fce0d3a39e7dff06ed22e525     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Grendel.wwu
+         20211      1 e3b09b9c67a1913910797f518c79aea2e7ed3f08     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Gutter.wwu
+         29579      1 a5caa7ce3618703e7fbf84f54893507aff362cf8     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\HardTarget.wwu
+         10202      1 73f65bc9b57b3eb082666e8e51b1186062236bd4     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Heater.wwu
+         68615      1 8dfad3825301dd5a02f1e859013bb0d93b8d41ca     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Hope.wwu
+         33658      1 65331525a0ea9cf1eff06eb50da46754cc70a572     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Hunting.wwu
+         37805      1 8c996701de10ff3850dc8ae6b8e5e1afdd3649bd     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\HuntingRussian.wwu
+        676605      1 c57cc73ee717f50acab74a776c86855eaacf750d     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Industrial.wwu
+         88651      1 0043fcc9c7a93fcfd4c74663d7a3735d1d5df9aa     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Inflictor.wwu
+         79088      1 ac21da8511490ca9348242fbe8f6427f306eae08     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\InflictorPistol.wwu
+         20337      1 e57e4fff50455cd706339071d77328dbf90bde26     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\KnifeCombat.wwu
+         71803      1 1cbe1c6e38747e0ca76a9a2bcefc93d595e30dcc     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Kodama.wwu
+         49311      1 a58917e2b5bbfdd6919bb65d4573b9c863ffb79d     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Kraken.wwu
+         58476      1 4219990b33a9e2142a3aa487e7531b5102ff9b9f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Lawgiver.wwu
+       1295681      2 ea4a61049439918026855af13868b65db43ce0e2     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\LC.wwu
+        184214      1 1c85bb41e906e9f2cb68ed7e84c01381439f9f92     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Maelstrom.wwu
+         17849      1 c899e21819985b27db0a7b5f9c57ad8f5af3aea8     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\MagPulse.wwu
+        132398      1 cee01fc5ebfd6c5fef275c251173dcd5c8aa9431     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\MagShear.wwu
+         62775      1 5c131fa3cd9f439525fb2c2c8fd3e69baa468a51     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\MagShot.wwu
+         39811      1 b6a2ca3328b43f7ea7311c29ae4c1634b272eb71     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\MagSniper.wwu
+         90729      1 d1032fe8c97176250baae6dce63862ec4ce27d6b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\MagStorm.wwu
+         91623      1 292f226cbb5193d03180689122e7072938f9a7aa     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Medicinal Terrarium.wwu
+        106171      1 a0131fa187e7710d1bee1b5b7d1fce51aca1557a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Microgun.wwu
+        124916      1 a8581499b5798f5713dabf0b0427b5931b464153     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Microgun_NPC.wwu
+         28791      1 4f9b0276b9b870c6aaf706db0cb2d4666e9673dc     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\MiningHab.wwu
+        570389      1 d3a0b790ee6bd29a4959d5169b90e1b2ec18190a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\MUS_Diegetic.wwu
+       3613121      4 604f975713bdcd492974370dd03a9386b9adcfd3     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\MUS_Score.wwu
+        530924      1 0c20336795dbf602ee49c65f71bc21161a679ac8     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NasaUnderground.wwu
+        153694      1 f3d531b189c1baadf39c1a67494d4d9d31983f2c     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Nishina_I.wwu
+        323011      1 d25fb537ffa9c978f6b2cd4d163350d11c6cc01c     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Nishina_II.wwu
+         90579      1 0b3125fb048c0e5fcd77fd128af955e10bcc21db     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Nova.wwu
+         51850      1 4397dcd5a1dbe982654f738fc5e97e91a376d2f4     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Novablast.wwu
+        124597      1 2a30122965dce99328702786ca63fda129927467     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Novalight.wwu
+       3211931      4 80963d02d3187efec7aaf0ab3a6ac995fd6fe986     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_BipedA.wwu
+       5625194      6 eb1dcf1ccddee3110508c4123fab09d7a1dfb65b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_Creature_Common.wwu
+        665468      1 650f3cc5d5897d0da4457a44b14eef3530c497a2     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_CritterA.wwu
+       1034210      1 1c9db6c05da6a0a1174031ead68676627207ae24     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_FloaterA.wwu
+        667666      1 3826af1eb683627f0f21100945aa9036b443dc42     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_FlyerA.wwu
+       4125583      4 be539852f1b264c17e4bb145fe7c7be316b3e98f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_HexapodA.wwu
+       5008358      5 cd1da0f29f2ed6d95a15146db3aaf084865e3192     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_HopperA.wwu
+         14325      1 f76ea36c84a088e98f5ebdea0713ab972d33f2bb     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_Human_Scenes.wwu
+        541252      1 7d0e0b84f383f4f89960554ef93afafdbe655ec0     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_LarvaA.wwu
+       2352922      3 af60eacbd10f321984d47b879b1fd45bfffe1a6a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_MantaA.wwu
+       4793385      5 6e255e6876949333805e1bff9c0715807a438536     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_MantidA.wwu
+        474359      1 9980e6d30090c304f1227b7e9ecb8941aebffe87     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_MiniBotA.wwu
+        169980      1 dad23288f48a41e99de85233be8006decad956de     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_Model_S.wwu
+       4013785      4 6e3eba4a81c4d2db82fd64d09695e34f05c493a1     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_OctopedeA.wwu
+        135469      1 dab5a77031abe0d40e129df96331573c9d1b4958     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_ParasiteA.wwu
+       3800776      4 6f55458df66d08cfa01dd9c8156191ea29dce241     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_QuadrupedA.wwu
+       3481798      4 597fbca21248f890820a93c3235172e1c11236ae     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_QuadrupedB.wwu
+       3404736      4 220afde8d08d0a30776bc022cba15f6ea77adafe     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_QuadrupedC.wwu
+       1873808      2 42905e9a4cfd8bbf2b5c5ff62ea8e275d34e104b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_RobotModelA.wwu
+        236648      1 d7201750f5b671fc68cee0b3b65fcc33c5469b57     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_Robot_Turrets.wwu
+       1126603      2 13b937a5a80a87259d5e9b4edd0cd9b118fd402e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_SwimmerA.wwu
+        989432      1 f22ab5a71949b17eda6e9d1c10849637183522aa     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\NPC_Terrormorph.wwu
+        124158      1 dd9aa9b5e4ceac94ca5ec0cb38f210dd906dcfcf     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_Alarms.wwu
+         55924      1 d989809463d1a3f597cb3e75116dedbf4dab2543     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_DoorsAndElevators.wwu
+        308591      1 652f2a52711fd8cbef4153d2bcebc955e8787661     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_Electrical.wwu
+         41871      1 0ad07445b9a6e2cc2f9cdcea3ce6f4cc4124b800     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_Fan.wwu
+         38853      1 4b151497f85c46e304afa2393bcdc18b9c158898     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_MovingPlatforms.wwu
+       1216214      2 53f2397b6da4e55c6b0197a37a960d4bf333d9e1     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_OutpostItems.wwu
+          9241      1 85b6d86073b4ef9ac40a9a18594e34bc58d32b30     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_Pipes.wwu
+         52151      1 d3d1c746359c04c469784ffb1f00b45649a98833     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_Quest.wwu
+        314594      1 6dcf736ad0063b311309dae87e578e9c8362dd8a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_Switches.wwu
+        474177      1 ad9adecfc76a84a8791300bb8827d3959e56af95     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_Traps.wwu
+        520709      1 3b9541748b464751162f0ca121cb995a931c6a6b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OBJ_Workbenches.wwu
+         46984      1 412287145f1c28a958aec764cc7f568bf840b532     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Orion.wwu
+         20323      1 193dcb496beb1bbf8aaebf6eb5d7173e41b027c5     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OsmiumDagger.wwu
+         47116      1 558f3ee5f417c6ef5d6b6ed124374ce10748447b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\OutpostScience.wwu
+         22549      1 880b5020ca20af7b895f49c2e940ba8b5dd914fe     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Pacifier.wwu
+         23271      1 a424a77a18b5528f8998841e1e4ce14ad01ae6ed     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\PainBlade.wwu
+         15142      1 548343b295e93135c9c22e761a4068574f57ca68     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\ParticleLance.wwu
+       1109187      2 73fc5be4320ddc2997aeac68cb6416c0b7acab10     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Pistol.wwu
+         53092      1 c38c6e006e0d54106f191b21867b92e021db0a26     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Pump.wwu
+        119179      1 973f1b3735b4e2b868b4f1b3f365280e0cd7c75c     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\QST_CF03.wwu
+         10750      1 f909fa3570ca53b996cfaede16d51d6ab7f4d0ce     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\QST_MQ201b.wwu
+         89940      1 4b1027cc7bfecc450158cd543a402a0bea4a377f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\QST_MQ206b.wwu
+         23962      1 494f879653fe5a0ea30d9bb616af145486e3412c     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\QST_RL088.wwu
+        127999      1 e6fa54ac7bf8e90f11197ecccff16a6929ef2a04     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Rattler.wwu
+         38717      1 c34f06b4fb6eb96794938fe8a25b9fde53172276     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Razorback.wwu
+         73228      1 771ae5b4d8520058628834239acebfc4989a3b9e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Regulator.wwu
+       1597262      2 fa972390582139e8c1efc042c7d56f6d679efc53     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Rifle.wwu
+         51293      1 da3268eab12115a86fa70dfc4c41675a3b093373     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\RussianAssaultRifle.wwu
+         33402      1 61c82631d9faea83e1e3d5ce70d00af117d2da97     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Server_Room.wwu
+         46050      1 fa24ba81bf985f272e896bbe5088471fa9be87fc     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\ShipDiscovery.wwu
+        210048      1 7f8a76c09a6bec3f3fd9d997693a16622fad170e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\ShipLarge.wwu
+        882530      1 84a4c374b4579fa5c40223b2b12a26b2db03f3ba     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\ShipLegacy.wwu
+          1103      1 ef4859583059b0c90c29bdee123c7f6cd3b14c64     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\ShipModules.wwu
+        314645      1 a61f3663c4e6a6dee283baf160526693974d1643     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Shotgun.wwu
+         57566      1 8b45be24f8e8fd5a63e8feb186d03b8c05c5c723     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Shotty.wwu
+        158998      1 d26573cc9f6e2431ae2960f9ae28d33d5b774222     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Sidestar.wwu
+         63759      1 72590a860096af8f4f6eed84aa775a652a622f8b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\SirenOfTheStarsBallroom.wwu
+        172520      1 3e1382c25180ebae877d8b90050db85ed859185a     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Solstice.wwu
+         53279      1 47ceab397c5681141b627ab79c7e074ec60f6bba     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\SpaceStation_TheKey.wwu
+         60985      1 0ecaaa25a28335d1b71488043dedeaab74bf262b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starborn.wwu
+         44882      1 4a016f8c241381663fdd8b4705fc844c04ecaa1b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\StarbornTempleA.wwu
+         20311      1 6ee412057923a9226d8266455d661d5214202379     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_AMB.wwu
+       3065633      3 a1e39b3bf2cce9d419503f27357d21c6e4d96a02     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_DRS.wwu
+        509261      1 4467736e0ddcddd0adff62376bb98404b2fb9543     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_DRSc.wwu
+      17378640     17 1bf310a8b8e049c4229e1b19893c34d869d88275     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_FST.wwu
+        682934      1 b1d8b5556a2dd0fbca902ae62ce7de21221a4742     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_FX.wwu
+       2613842      3 bb9d064702bb36526d9b80e05f564028c225e6cf     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_ITM.wwu
+           555      1 80e0bcef7db19e983a5e0c70a6009a6f8359fc27     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_MUS.wwu
+       1725965      2 4e76fd2abeca90974ceeedabcd668ba0d70f996d     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_NPC.wwu
+       1124983      2 408cc6337ade489643e7e2a42619d6c47246c909     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_OBJ.wwu
+       6572445      7 ea1871818cc77229bf008998dab3d77b193683d8     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_PHY.wwu
+       1602704      2 3689abc6fd3e62d79b8058739e23308a0d0193c6     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_QST.wwu
+         46877      1 ec361212dc5dcb26bae65857a3a0e46068328949     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_UI.wwu
+       5528680      6 8bfad40c5eeeba388ef325035a717266799acbf9     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_VEH.wwu
+         52433      1 b552bf3807b5ab00bd5ad947bbd396fe93f66c29     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_VOC.wwu
+         34709      1 76c33c5cb9c275f1371fc08a9f2404cc789eccd0     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_WPN.wwu
+        795080      1 9d7671e06d5ae829b351c0bc7d45f86b86fc72e0     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Starfield_XXX.wwu
+        175198      1 0690e754518c046f83bd00f240cb94b199633e12     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\StarStation.wwu
+         80596      1 88fc280a37a49ab3bd10ed0bb749effcaf8d9612     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\StarStationTheEye.wwu
+         73013      1 95431476171d8771fd5b91a217dae15636512533     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Stroud.wwu
+       5666355      6 6585e341cb29702c35cbe76242a491a9ca734cf7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Tails.wwu
+        295155      1 c6bec264608df973c638bc97866a9de34c8f831f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Tails_NPC.wwu
+         69027      1 a78a1654d5d5c72aa4dd7148b0f112fd5b4d5acc     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Taiyo.wwu
+         20296      1 f758c28233168b833f5b2724349617a37fa8dfae     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Tanto.wwu
+        268483      1 1abc159cb501a281af560ead3a8b16eda3f4677f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Terminals.wwu
+        143599      1 9b3967b16091cdc785f4f2e0d5ebb99f4cd8ac2f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\TheLodge.wwu
+         59253      1 461f78dea4035172994ca343087bdc4d7c862dac     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\TheRedMile.wwu
+        231792      1 03317809f0a7728715c39697055b370cec341518     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\TheWell.wwu
+        203267      1 9be952fa3ec24957cd5b1b07f9c0d701fe4f2cb7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Tombstone.wwu
+         19974      1 84f0d5651f322db9f40969c3a915519aac2bf268     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Trencher.wwu
+        213579      1 e652abeba508bd29e0920b26b025154355d91be9     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Turrets.wwu
+         56742      1 6ef5c0d48103c4cc559b66798cca07f5e1993ab5     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_AfflictionsInjuries.wwu
+         13881      1 a0820e5fcddb907cde6a639028fa2dd5204189c6     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Barter.wwu
+         17469      1 3eddb92cd3046124bdc45549a69ff1ba2c4a32a7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_ChallengeComplete.wwu
+        127844      1 331b4fda0e5a7dc16341db2188f56507265d23fb     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Chargen.wwu
+        364902      1 e695dd93fef26dea979e79a5ab0d70a5ca9a276b     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Crafting.wwu
+         15684      1 e2ab22c45b054d1860116ed2d5f11eea80421378     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Dashboard.wwu
+         54554      1 f9507fdb6c7dfbbda5cbf7078dd94d65f94ea83d     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Dataslate.wwu
+          8052      1 0c190925b84683ae1d73a812a227fb5b7b6e0526     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_DiscoverLocation.wwu
+         51899      1 9c5e45b66e201c777eba6fd3d1708fee738661ac     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_General.wwu
+         48277      1 4ffdba4e7186041479e558a9fe5b4ad056bf4f9e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Hazards.wwu
+         79278      1 88693e6f37dee185ee4052e5417cf8163aee83ba     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Inventory.wwu
+        714229      1 c43fd0e44c8161b901f733e11b8cdd5631ad2f70     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_MainMenu.wwu
+         66179      1 9fb286a0397067663cd07793cad474a3dcd2406d     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Minigame.wwu
+          5258      1 9dd25b3bcf9587293311c8bee47d739a014bd8b6     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Missions.wwu
+        142977      1 3d3d4a1671a8b2571f089fc838184f069656fee7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Monocle.wwu
+        156379      1 57b9ad3fc34443324b9bfcb0b2e4cf89b836a541     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Outpost.wwu
+         32099      1 b8905888d73587ca1db8e5720f8f0834b14f7c40     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Photomode.wwu
+         28270      1 cc85b722226f424b137990ca0d631dc499b4503f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Pickpocket.wwu
+         33007      1 0e9e679dba988c66a1573e3da6c1b223fb61b831     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_PlayerHealth.wwu
+        179076      1 3db12167dc4bafcdae9e079b2c08a5df98744c77     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Powers.wwu
+         66278      1 127aae05eb5cee32d69b28f16a0c786b5c3b83a3     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Quest.wwu
+         15992      1 231a75cb1a34ceb8bfec1c5fc5056d07b220d068     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_QuickUse.wwu
+        234180      1 f2b545bb4e9cda6cbcd7995ad17a31b3205024b0     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_ShipBuilder.wwu
+        517803      1 b738d9d7ab34867649d08fc25967ec3b175be0a7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_ShipUI.wwu
+         53645      1 92dc5044a938fd775d2d091efb28d11e7f9cd50e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Skills.wwu
+         10134      1 52e32ed793c0eee362fdab29ca0478e278cbec44     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Sleep.wwu
+        200529      1 e0b127bd31b645fa026de138034a6ce3fd92e1b7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Starmap.wwu
+         10742      1 93e33d8063effffd42838c27102a3406f7356ee0     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_SurfaceMap.wwu
+         10132      1 29758f7e367e80d78c53af8afe7d9350fc9f2174     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Wait.wwu
+          4922      1 47a5d3390a121eaac44f9aa3e0e82dd1ac825fe4     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UI_Watch.wwu
+         68309      1 c5c8b4f164ed48442d075a6a92abe2e738b025cc     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Unarmed.wwu
+        157508      1 c913b103d10c1974f52c85646f1287cb95fc22b9     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Unique Roomtones.wwu
+         13798      1 fcd8a7e045b3421d80e85430df5a0e8e2b20213e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Unity.wwu
+         38832      1 2a39ef07f27ba78a7471a9d3fbf256f9948ed742     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\UrbanEagle.wwu
+         52977      1 991d9876de58fe4dcb777204e218f3e03f2a3c69     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Utility.wwu
+         22285      1 470c22c20c1eae3f7e1eed2b206b4719dff43251     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VecteraChargenHab.wwu
+         87468      1 cebc9c4c3cd2c88e2fac8e411084fdf111023a61     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VecteraMine.wwu
+        449243      1 317d3be6080aa401a03528d029f7538fc730bfd4     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_Engines_AmunDunn.wwu
+        645531      1 a29f57b12f08d40018be814c1c2cc86745ae1a55     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_Engines_Panoptes.wwu
+        596526      1 606966e59f3ddb1c483c31fd145912f2173bbf82     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_Engines_Reladyne.wwu
+        857572      1 2e31132e3d5d424aa91bbb4ccb732b22358750bf     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_Engines_SlaytonAerospace.wwu
+        168798      1 e357777b94d4c0c4cbd4735c4d98cd328678aaa8     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_Engines_Starborn.wwu
+        154206      1 f3122383dfcd48daf7691ba9864d4f522e0c513f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_GravDrives.wwu
+           474      1 1cd5a307607fd636328f25dd786d635f13da8fdc     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_GravDrive_DeepCore.wwu
+           470      1 ad97d9d84db461b532f7d64cf6e900a817bf06c9     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_GravDrive_Nova.wwu
+           473      1 5d7204d48cf45515b7968d5c5bafbca64b19475d     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_GravDrive_Reladyne.wwu
+           482      1 25144ed724818db7ae4e09e645f3319bd6e65387     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VEH_GravDrive_SlaytonAerospace.wwu
+         18840      1 e99990a5485dcc56f0e05e8e900a915025fb88bc     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VentilationShaft.wwu
+          2195      1 1ce099a58e83cc43ca8155b6df6e2e2d1ffaa3f0     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VOC_Audiologs_Unique.wwu
+        233425      1 0fad5faabc177c7cdcca3b951f8b87e0d2bc19d6     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VOC_Defaults.wwu
+        180007      1 43b2f7b50f8da773ef869a66302758b45171e0ec     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VOC_Intercom_SFX.wwu
+        683597      1 f91b2932807895ec98ce5b761a9abe81a9c2f5bb     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VOC_Overrides.wwu
+       8238247      8 4d91c5ccf702c40f474dbdc24781237918aa2be8     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VOC_Player_SFX.wwu
+        212868      1 47d7a47f7f588fb819f42420ddff13ebd223a350     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\VOC_SFX_Overrides.wwu
+         19187      1 434aab41638559b8147b4a978e4d05faee4d23b6     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\Wakizashi.wwu
+        222735      1 6eba8b9d8fe1e6be1704bed36e90197d8f500ae3     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WPN_Creatures.wwu
+       4523876      5 5e48c11906d919b8fae1cf713d90dc7ecbc94859     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WPN_Hand.wwu
+       3160237      4 78f6be36189c35b5089143d13d10c6e137392e57     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WPN_Ship.wwu
+        911834      1 e2d8a091100e00f017df27bdfdce627d3661008f     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion.wwu
+         12072      1 8a685f181d4071cb24da4006092f8c45ddaa2574     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion_FX_Explosions.wwu
+         33383      1 4c1052e1870dc0f0ebf0bf23da2cadc294ffed4c     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion_FX_Impacts.wwu
+         71857      1 f99fcb5400fcfdc0476d991eb2d469382993d189     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion_ScriptEvents.wwu
+         67976      1 a921ac345379a919858ba530a592c3915c22b13e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion_VEH.wwu
+        220076      1 7a4697dedfa854a607be406efe35e690c93da7db     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion_WPN_Fire.wwu
+         15241      1 0b5f9fb5eddf6603805c13f5ee9d9d69b06df674     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion_WPN_Impacts.wwu
+         60034      1 a4063530747c14c29818ad9f69a7c4bca57ac946     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion_WPN_Movement.wwu
+         93848      1 f3ab647580097da30aec5407e81a79e7a6f36d2e     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\WwiseMotion_WPN_Reloads.wwu
+          9258      1 df5341fd8f884a0e61fa1084263aa7f7d27b14e7     0 Tools\wwise\Starfield\Actor-Mixer Hierarchy\ZeroGravity.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Attenuations
+        982041      1 2ce136e9cb26b0e082d6a170399e0d39cc0e1468     0 Tools\wwise\Starfield\Attenuations\Default Work Unit.wwu
+         11870      1 45a7dfe1609650a4fe0485f136f463adc5bc74cd     0 Tools\wwise\Starfield\Attenuations\XXX_TestAttenuations.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Audio Devices
+          1121      1 9796ca9e186e9f8833dda2fb1450e02dbd60d1db     0 Tools\wwise\Starfield\Audio Devices\Default Work Unit.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Control Surface Sessions
+          1510      1 ab09ac66f3f7a9fad9b49a2992b6283c2bb04238     0 Tools\wwise\Starfield\Control Surface Sessions\Default Work Unit.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Conversion Settings
+         29515      1 4370a8c7e9f491e198187160d7e9f96a86460847     0 Tools\wwise\Starfield\Conversion Settings\Default Work Unit.wwu
+         27820      1 b7b615a88f922417472ddae541396e7302e1971c     0 Tools\wwise\Starfield\Conversion Settings\Factory Conversion Settings.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Dynamic Dialogue
+           305      1 f30397d6e9a961566ce00607bf83f533e82743ad     0 Tools\wwise\Starfield\Dynamic Dialogue\Default Work Unit.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Effects
+         27158      1 044d467c37d8585f66bf150a18b207a4f70f0868     0 Tools\wwise\Starfield\Effects\AMB.wwu
+           289      1 1c47663ce9e53f876f9c1e8fe062134fc22449fe     0 Tools\wwise\Starfield\Effects\Default Work Unit.wwu
+        146612      1 361118bccb80f8cbcf1c9545454d6f07ebb969cc     0 Tools\wwise\Starfield\Effects\Factory Altiverb - Outdoor and More.wwu
+        155531      1 740d6a73d96c8bb6384ba69a4caee48b81a942a6     0 Tools\wwise\Starfield\Effects\Factory Convolution Reverb Effects Ambisonics.wwu
+        153941      1 24cb7556e1a1cbf3905ff0cb23afa6dc8193271e     0 Tools\wwise\Starfield\Effects\Factory Convolution Reverb Effects Stereo.wwu
+        130609      1 e394a67cb83c84b6c9b974dcb90c69194ce2e81f     0 Tools\wwise\Starfield\Effects\Factory Effects.wwu
+         10330      1 50eee36bd8f92206149380e99bc1c149097c76e8     0 Tools\wwise\Starfield\Effects\Factory iZotope Box Modeler.wwu
+          7007      1 db8a09fea5cc2e60dd434386924907db9307c854     0 Tools\wwise\Starfield\Effects\Factory iZotope Delay.wwu
+          5724      1 7e69dc0404267bce28e416c81c30c3c981079930     0 Tools\wwise\Starfield\Effects\Factory iZotope Dynamics.wwu
+          8761      1 1322bb2b4a415fbaa9abca9a456abf3583db82fd     0 Tools\wwise\Starfield\Effects\Factory iZotope Filters.wwu
+         19190      1 9a0df1701e965b098a774dc06a34f98292bc3b6c     0 Tools\wwise\Starfield\Effects\Factory iZotope Hybrid Reverb Effects.wwu
+         18199      1 007fdb812073ae50d5fd7dd4257fc85d1cfdb71b     0 Tools\wwise\Starfield\Effects\Factory iZotope Multiband Distortion.wwu
+         12134      1 a8a7d1f0a673f65fae8c7a6f1a5f58e29111d92e     0 Tools\wwise\Starfield\Effects\Factory iZotope Singleband Distortion.wwu
+         23926      1 2ed80069b2e7d81dbb9cecd7856a6faf366f36a3     0 Tools\wwise\Starfield\Effects\Factory Mastering Suite.wwu
+        132071      1 df64d3001a6d2c6683cda35b21e5950c361f0a4e     0 Tools\wwise\Starfield\Effects\Factory McDSP Effects.wwu
+           287      1 64a03068ebe5f33434f37d096556f8fedd204e8e     0 Tools\wwise\Starfield\Effects\Factory Reflect.wwu
+         12921      1 925f3c6fedbbbc9f33f063b4dbb5e956a3129567     0 Tools\wwise\Starfield\Effects\FX.wwu
+          3948      1 fd868f6d3316b0c33238b75e144d9cbd747af685     0 Tools\wwise\Starfield\Effects\MUS.wwu
+          7708      1 d80ef19ec9737cb6bbbae5a0fbf9d1958ee4b374     0 Tools\wwise\Starfield\Effects\PHY.wwu
+          3828      1 f70c795293d32b308f92b50370c8964393840878     0 Tools\wwise\Starfield\Effects\Player.wwu
+          6916      1 e0c9b593dcb9ee705b0bc1036e649dc9f31bd823     0 Tools\wwise\Starfield\Effects\Starfield_Effects.wwu
+         15206      1 69942b8e472f498dddd9e0c4b21ad9af52b39337     0 Tools\wwise\Starfield\Effects\STATES.wwu
+          1693      1 ffa7c0b479109308611d75aa03ac42e60a1abdcf     0 Tools\wwise\Starfield\Effects\UI_Terminals.wwu
+          4936      1 e60ef347882b94b4f9f98cd61b09120df01d2684     0 Tools\wwise\Starfield\Effects\VEH.wwu
+        176526      1 606f19e70489f43db23b45f6753799c3bbb863ca     0 Tools\wwise\Starfield\Effects\VOCfx.wwu
+         67451      1 7d4938de895926cc3a1f628d9fd4cb3a7b3adfb5     0 Tools\wwise\Starfield\Effects\WPN.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Events
+         26697      1 08c4dd937e40db5e6a0181ba627f04fdb75265d1     0 Tools\wwise\Starfield\Events\1919.wwu
+         44451      1 bd3580b1bafd546f8e1839c659fc6ec58821d5f6     0 Tools\wwise\Starfield\Events\AA99.wwu
+          2013      1 74d241333357da53a9d9cf0860e8264339f76429     0 Tools\wwise\Starfield\Events\Airlock.wwu
+         17331      1 bd19892a1ebe00e7728df0905924af37c425267a     0 Tools\wwise\Starfield\Events\Allied.wwu
+         23702      1 c9df6ad3f949250c4020256f5fb1d003408f6f6d     0 Tools\wwise\Starfield\Events\AlliedEnvoy.wwu
+          5569      1 6343ccddf78768e21fd6325f498246e693aca9ab     0 Tools\wwise\Starfield\Events\AlliedLaserRifle.wwu
+        154351      1 484281749c8353901ac6f892ac7ab02adc8fd067     0 Tools\wwise\Starfield\Events\AMB_Artifact.wwu
+         67918      1 5326978e483ef149663778099398197047185570     0 Tools\wwise\Starfield\Events\AMB_ArtifactPuzzleRings.wwu
+         11028      1 66e81fa9fe13fa0c851e795affeecc2f94bd71dd     0 Tools\wwise\Starfield\Events\AMB_Biome.wwu
+          3421      1 f64e90f933346c317ddc51dd069df446d1aef916     0 Tools\wwise\Starfield\Events\AMB_Biome_Archipelago.wwu
+          3264      1 fa78b2dd5096f53a9a8ecce542c43c58e61e68f2     0 Tools\wwise\Starfield\Events\AMB_Biome_Canyon.wwu
+          3422      1 014af58fa2dd8ae539a73e0946975b8c0a42f451     0 Tools\wwise\Starfield\Events\AMB_Biome_Cratered.wwu
+          6281      1 38eed45f94a94e72696a50a44a500482c929489c     0 Tools\wwise\Starfield\Events\AMB_Biome_DesertRocky.wwu
+          4835      1 e6ed9bdabbb3f674fe57cef26308a134b681263a     0 Tools\wwise\Starfield\Events\AMB_Biome_DesertSandy.wwu
+          7434      1 28c32a217249449a92a6cfe953c82be304a7c24b     0 Tools\wwise\Starfield\Events\AMB_Biome_ForestConiferous.wwu
+          7492      1 60bccac12270d4c1cbab1ae649ed9777cea3ecf7     0 Tools\wwise\Starfield\Events\AMB_Biome_ForestDeciduous.wwu
+          4725      1 91fb546e41a1f2ecde0eed5c101d1b52486e2539     0 Tools\wwise\Starfield\Events\AMB_Biome_ForestTropical.wwu
+          4814      1 3ed2fc8985e118d9553ffe98afd51a1a4f3260a4     0 Tools\wwise\Starfield\Events\AMB_Biome_Frozen.wwu
+          3787      1 69155feb54b54c6ea899c617956933020a772404     0 Tools\wwise\Starfield\Events\AMB_Biome_Hills.wwu
+          3352      1 8ebcc787a4e66d4f0816c0fda933a093b1c6b3b4     0 Tools\wwise\Starfield\Events\AMB_Biome_Mountains.wwu
+          4026      1 23860f888322adff457bbfe0407b08f3fd5e31cd     0 Tools\wwise\Starfield\Events\AMB_Biome_NoAtmosphere.wwu
+          4595      1 d45d95063daf6d29f573f8fe8adc063f2e18180b     0 Tools\wwise\Starfield\Events\AMB_Biome_OceanCoast.wwu
+         14302      1 d204f0bfef84ca4b7e68f47f81a0c31899fda024     0 Tools\wwise\Starfield\Events\AMB_Biome_Planet_NewAtlantis.wwu
+          3443      1 25ac467f6007995a6eebb2dfa81497d041371ad2     0 Tools\wwise\Starfield\Events\AMB_Biome_Savannah.wwu
+          4901      1 b0331a52092db0475c374a31184308193a91ee7e     0 Tools\wwise\Starfield\Events\AMB_Biome_VolcanicRough.wwu
+          4942      1 5fbfda26b1c468f5beb1b88c447bb681ae980d0a     0 Tools\wwise\Starfield\Events\AMB_Biome_VolcanicWorn.wwu
+          2024      1 d042e967c0dab3b85c7acdbe338e5eba6c7b18eb     0 Tools\wwise\Starfield\Events\AMB_Biome_Wetlands.wwu
+         76892      1 b9f2c2d995780f68cb1c7fddf0b55f1a9bea36b3     0 Tools\wwise\Starfield\Events\AMB_City_Akila.wwu
+        210898      1 154d4adf0a00b25823c85ee2c8ca4f34961d0030     0 Tools\wwise\Starfield\Events\AMB_City_Cydonia.wwu
+         85688      1 3bff9b0ed1fb5579e020856e1b9337bb3338e4a9     0 Tools\wwise\Starfield\Events\AMB_City_Neon.wwu
+         86623      1 eb1f16d68af5da9d7933368046dd680d9769b378     0 Tools\wwise\Starfield\Events\AMB_City_New_Atlantis.wwu
+         38467      1 36f2bf2ecdbfd35e84f7f1ce1fcd74f3db33c9d3     0 Tools\wwise\Starfield\Events\AMB_Crowd_Walla.wwu
+          4585      1 03f6c986e551488ecb309f11460fc459da9c7a9b     0 Tools\wwise\Starfield\Events\AMB_EchoMarkers.wwu
+          1033      1 195d7425a6f3b8fb61368f050c63b958b977c0fa     0 Tools\wwise\Starfield\Events\AMB_Exteriors.wwu
+          4684      1 4334ebbd1f0bcbd0d83788ee08156fb85c5fb4ec     0 Tools\wwise\Starfield\Events\AMB_Interiors.wwu
+          2711      1 428bcc427e567b1f2ff44189b358aa79ccb928b7     0 Tools\wwise\Starfield\Events\AMB_Underwater.wwu
+          3154      1 5dbbc97f6fd4f84546a3130c27fa5032414e4ec9     0 Tools\wwise\Starfield\Events\AMB_WaterSystem.wwu
+          4259      1 a7b80130ff0a50c81ce7bf7c94d9d1813865409b     0 Tools\wwise\Starfield\Events\AMB_Water_General.wwu
+         43976      1 b92ca05ad8534415009be17f5dafd49f467665fd     0 Tools\wwise\Starfield\Events\AMB_Weather.wwu
+        352784      1 a8597dde7f20a0ec2c34f00eecd0662706575b79     0 Tools\wwise\Starfield\Events\AMB_WindSystem.wwu
+          8757      1 42f532a05373b5a20c4be67fa2bd94c003dbd756     0 Tools\wwise\Starfield\Events\AMB_WwiseMotion_ScriptEvents.wwu
+         23594      1 a0a6fb81b039e3ca2434833c6eb677cf83d0ffbe     0 Tools\wwise\Starfield\Events\Arc_Welder.wwu
+         43798      1 f9a5a826669c19712108a183e49ab1501387ae17     0 Tools\wwise\Starfield\Events\AssortedMarkers.wwu
+         19448      1 f510eeca3ce75fa77a3070a216ffb60e3eae9d9b     0 Tools\wwise\Starfield\Events\AutoRivet.wwu
+         20382      1 d4f54b63d99f89201ded61107a8a5cb904aa8302     0 Tools\wwise\Starfield\Events\Bars.wwu
+         62853      1 dd8b28a5b336de2681775311503643d16c850769     0 Tools\wwise\Starfield\Events\Beowulf.wwu
+         12019      1 0798cda16e154dcb29644993edefdf2dee406bc0     0 Tools\wwise\Starfield\Events\Bigbang.wwu
+         44248      1 5c96d2f5fdf134c5f8c0c7534fe9c3d4adce9975     0 Tools\wwise\Starfield\Events\Breach.wwu
+         13584      1 7f8b402651916a3da45af9341f11634e85f4aeff     0 Tools\wwise\Starfield\Events\Bridger.wwu
+          8300      1 67ae8bf949abeb8ed278debceb86069210cbf6c8     0 Tools\wwise\Starfield\Events\BuriedTempleA.wwu
+        100166      1 b458d41d8222750b54312593290ae8652d563665     0 Tools\wwise\Starfield\Events\Clubs.wwu
+         19973      1 02c2b43ae31695c2cb29d16db75dc5c4cc143a17     0 Tools\wwise\Starfield\Events\Coachman.wwu
+         20902      1 c8cda95a67fc505f30853c40c21624fd03a0942e     0 Tools\wwise\Starfield\Events\Commercial.wwu
+        110843      1 1bfb8847273b5cfa12ec59e8a4558927aba52a48     0 Tools\wwise\Starfield\Events\Crafting_Events.wwu
+         58905      1 b2419d23378e7c201d91f629b7cf328ef4272147     0 Tools\wwise\Starfield\Events\Cutter.wwu
+           287      1 ca1901009349b547fe80e467946b2276a561f476     0 Tools\wwise\Starfield\Events\Default Work Unit.wwu
+         31338      1 6c43bd99bfaef7e9966dd11d0112254ace3fd867     0 Tools\wwise\Starfield\Events\Deimos.wwu
+         50802      1 e7a1f5231e218ac454ed6a98fbda1df8629bd36b     0 Tools\wwise\Starfield\Events\Drumbeat.wwu
+         30112      1 4b75431322cfcc1a60071113b9fd9da8be34afcd     0 Tools\wwise\Starfield\Events\DungeonCave.wwu
+         22538      1 067a7bc7d503a75bfd00f4efa96f5197e37abf14     0 Tools\wwise\Starfield\Events\DungeonCaveCrystal.wwu
+         47531      1 cbb93418ad3a5978245b664e2245460aeea33506     0 Tools\wwise\Starfield\Events\DungeonIndustrial.wwu
+         43228      1 f093c6db9eecb2f301dd9c7df0eb66cbaeb352d6     0 Tools\wwise\Starfield\Events\DungeonScience.wwu
+          8651      1 5fda60d81f622ccd800255d4e047eb1003f9a867     0 Tools\wwise\Starfield\Events\Ecliptic.wwu
+         62246      1 7795f124cdd789893bdb2eaf0fe25425e4639509     0 Tools\wwise\Starfield\Events\Eon.wwu
+         46733      1 d9ec29fdf0c2d375d2f83f44842eab5960e86610     0 Tools\wwise\Starfield\Events\Equinox.wwu
+         22259      1 153e5c2ff62356fbfa8235ca90505fc84bdb6b53     0 Tools\wwise\Starfield\Events\Exterior_Generic.wwu
+         29873      1 1b85ddf28a97bb2f6706c91a263fba1c1742f713     0 Tools\wwise\Starfield\Events\Exterior_Industrial.wwu
+         53856      1 3d1784d9825fe948f47e1a4def28955255a80011     0 Tools\wwise\Starfield\Events\Exterior_Settlement.wwu
+         39730      1 f6cf63e5eef9e459fb7a107469346a0af25d0823     0 Tools\wwise\Starfield\Events\Flamethrower.wwu
+        212663      1 b0b79e3898743ae69f24248c4f7fe39edb27af9b     0 Tools\wwise\Starfield\Events\FX_Artifact_Power.wwu
+         40010      1 a113d8222b295b19ae5308b4c8f7e0ec55c6b3be     0 Tools\wwise\Starfield\Events\FX_Artifact_Power_MQ302.wwu
+          2649      1 7e327f9e7f8d0d61b2112dada3be647dc650b64a     0 Tools\wwise\Starfield\Events\FX_Chameleon.wwu
+          9597      1 78174432cd9e29bd3d44836d08263b5690faaee8     0 Tools\wwise\Starfield\Events\FX_CriticalDeaths.wwu
+        129474      1 ccc068bfbebb24b8d8e7a539520b79a0ec7fe069     0 Tools\wwise\Starfield\Events\FX_Explosions.wwu
+         99404      1 542ab8908be21a4cda809d1709a98a5f1de5f19e     0 Tools\wwise\Starfield\Events\FX_Hazards.wwu
+         12298      1 c2399f04c087b5f67e6f6f2c858fab7fcc81e79b     0 Tools\wwise\Starfield\Events\FX_ITM_IMODS.wwu
+          8738      1 01b0d104ebf93499fce654636af48752fc0aa0c9     0 Tools\wwise\Starfield\Events\FX_Ore_Harvest.wwu
+         89998      1 3b4c56347103e9671b61100378ea24ea7d82e673     0 Tools\wwise\Starfield\Events\FX_Projectiles.wwu
+           612      1 78028c8506423c8f174e57074bb9fcc49bb9fc0e     0 Tools\wwise\Starfield\Events\FX_Space.wwu
+         12193      1 c208ba75dc3fe852d8c86f5b1d0adbc63e0007dc     0 Tools\wwise\Starfield\Events\FX_Space_ChargedParticleCloud.wwu
+          4555      1 fe1968a7e7d0d5416b411fde9df5364713641233     0 Tools\wwise\Starfield\Events\FX_WwiseMotion.wwu
+        224148      1 61f568d418f1bf18b7a72ebe8cd6ed059cdea378     0 Tools\wwise\Starfield\Events\Generic.wwu
+         22248      1 81c89eb02834989785acb0ee565014e28d90ef77     0 Tools\wwise\Starfield\Events\Generic_IndustrialLab.wwu
+         55685      1 af4a8fc055acb55868b53f6279be63f36d1ec712     0 Tools\wwise\Starfield\Events\Grendel.wwu
+         23318      1 38a457969d72ecbceebc8a936aad0da151d3ea66     0 Tools\wwise\Starfield\Events\HardTarget.wwu
+          6385      1 e35d1e346092d0ecf42de5152e254f8cb3139609     0 Tools\wwise\Starfield\Events\Heater.wwu
+         55130      1 4d35592e9aadcb0e2951faee235a6dc8b97c5eed     0 Tools\wwise\Starfield\Events\Hope.wwu
+         24492      1 0412de109c12af8b3cbb664c7c993960fe1f3306     0 Tools\wwise\Starfield\Events\Hunting.wwu
+         22536      1 adb8efcf740d4c3cd78ac290232affd43fd42fea     0 Tools\wwise\Starfield\Events\HuntingRussian.wwu
+        104968      1 fe8f913e9f23b47a1b6cb93ddcf00e4935d3416c     0 Tools\wwise\Starfield\Events\Industrial.wwu
+         32617      1 8d79298fc59c6f279914a283f8d240e065017948     0 Tools\wwise\Starfield\Events\Inflictor.wwu
+         30855      1 494eaa77efcb8e78f2e9a983b98cc64fdac0bc2e     0 Tools\wwise\Starfield\Events\InflictorPistol.wwu
+         38038      1 82ce50d91544b96d8837594d2bdb26fb6bccb21f     0 Tools\wwise\Starfield\Events\Kodama.wwu
+         30809      1 cc98203c46cb48fa838941ff098c09af7ab47b18     0 Tools\wwise\Starfield\Events\Kraken.wwu
+         14283      1 d4f78ac0207c50b630cc5f4fc575b518e674765e     0 Tools\wwise\Starfield\Events\KreetBase.wwu
+         17877      1 753fbc30d81a49687f5221ea66314a394d2c4f60     0 Tools\wwise\Starfield\Events\Lawgiver.wwu
+        131740      1 8026f0496e9bb6791230967dba1af2d692db2adf     0 Tools\wwise\Starfield\Events\LC.wwu
+         50026      1 555b7e527e1974dcac77f8d501c9de9dd1505436     0 Tools\wwise\Starfield\Events\Maelstrom.wwu
+         19330      1 ef0074051587ad4fa7288966be29fd58b386fd0e     0 Tools\wwise\Starfield\Events\MagPulse.wwu
+         30822      1 00c5dae114e649f822f44b63279519b9f4c42135     0 Tools\wwise\Starfield\Events\MagShear.wwu
+         32407      1 066139b18e5a72c4043a5be8da575f85af73caa3     0 Tools\wwise\Starfield\Events\MagShot.wwu
+         22120      1 c7fc5b0a8bb7423c7457e9eaa967f01e7e868f84     0 Tools\wwise\Starfield\Events\MagSniper.wwu
+         28451      1 696aea1ef01e3131650b67d6ccfa8f8c1ba56fd5     0 Tools\wwise\Starfield\Events\MagStorm.wwu
+         36896      1 01b0f5d4cb12669011db1921a93ddd3c370409e4     0 Tools\wwise\Starfield\Events\Microgun.wwu
+           759      1 ef89cdd5f816edc2f6013d308dd08ad6ac26f07a     0 Tools\wwise\Starfield\Events\Minigames.wwu
+          3605      1 5f4b94f90a19f7a5eaeae3f9ba52aeba81692df4     0 Tools\wwise\Starfield\Events\MiningHab.wwu
+         86165      1 3dcce60599cf6f7da85861d3f25ed672a85967e9     0 Tools\wwise\Starfield\Events\MUS_Diegetic.wwu
+        315311      1 d478300af24a9a9d06d096ee0cd70c9830f60afb     0 Tools\wwise\Starfield\Events\MUS_Score.wwu
+         24638      1 3f501d91cad1cac4ab80db7f33a095bb07f9907b     0 Tools\wwise\Starfield\Events\NasaUnderground.wwu
+         46112      1 d11b3ad183e11618e3aadb2e8feb2c7a73b5197f     0 Tools\wwise\Starfield\Events\Nishina_I.wwu
+         39881      1 27c2978b2eeeae4c58e14ca0b90721f1b69448d9     0 Tools\wwise\Starfield\Events\Nishina_II.wwu
+         53946      1 b0ba7c0ba6ae2df2b639cf78c916aa7c4a208dbb     0 Tools\wwise\Starfield\Events\Nova.wwu
+         23567      1 2d669fb67a5c03a64a3393198b8df6334b79516f     0 Tools\wwise\Starfield\Events\Novablast.wwu
+         31841      1 c59222f043aa4e3862ce4202c081a6aaf03ead2c     0 Tools\wwise\Starfield\Events\Novalight.wwu
+         24098      1 18b99f5417155ccf46cdc35b550c7d3d796f4567     0 Tools\wwise\Starfield\Events\NPC_BipedA.wwu
+         54884      1 f41e8c2bdfe18f5004e147129fd01074118ed4dd     0 Tools\wwise\Starfield\Events\NPC_Common.wwu
+          7878      1 30b7fb8a15ef2fcd67ebf007e3364f285739bbdd     0 Tools\wwise\Starfield\Events\NPC_CritterA.wwu
+          9234      1 c59c5fc2930bb86ce3603074afa7de47eb7e0f68     0 Tools\wwise\Starfield\Events\NPC_FloaterA.wwu
+         17936      1 cc357a02339a6a13bed665bc67e136a0c3a334da     0 Tools\wwise\Starfield\Events\NPC_FlyerA.wwu
+         29538      1 ec372c6de855274efe54bb0e85db327a87457b81     0 Tools\wwise\Starfield\Events\NPC_HexapodA.wwu
+         27174      1 726c4a2f3511b5965e41125689aa37766c04624a     0 Tools\wwise\Starfield\Events\NPC_HopperA.wwu
+          6129      1 f6d76469e9558d9e27ae8944465b66b2e7e437d3     0 Tools\wwise\Starfield\Events\NPC_LarvaA.wwu
+         24313      1 d434fcb4e57585a586b474fa29dc5e563717e00c     0 Tools\wwise\Starfield\Events\NPC_MantaA.wwu
+         31091      1 33474c3425d06e10fdc09263ee0d0bba68e8a2a7     0 Tools\wwise\Starfield\Events\NPC_MantidA.wwu
+         40063      1 daf720a8328c2d32c2c554aec2ff1d45d3f07d33     0 Tools\wwise\Starfield\Events\NPC_MiniBotA.wwu
+         18309      1 fc161f64e804073bb98428d080f7919ac6ab8982     0 Tools\wwise\Starfield\Events\NPC_Model_S.wwu
+         26761      1 a4f60874360cc8cdb74f78a41995e248ea6cd6d7     0 Tools\wwise\Starfield\Events\NPC_OctopedeA.wwu
+         14449      1 528b9c379071f84fb661fc760b5b75164dcb7a05     0 Tools\wwise\Starfield\Events\NPC_ParasiteA.wwu
+         26092      1 3b979a1791e31cb3c154e473d919d8d2b6ff1b3f     0 Tools\wwise\Starfield\Events\NPC_QuadrupedA.wwu
+         18250      1 8328c1df27d5458b2000584fc8f431b79ac2503d     0 Tools\wwise\Starfield\Events\NPC_QuadrupedB.wwu
+         18711      1 acaefc7ed6af5b95c5f8e2104d2d9f279d6db46c     0 Tools\wwise\Starfield\Events\NPC_QuadrupedC.wwu
+        111017      1 807e27acbcc4fb3750412bc3cafb26d975bf462f     0 Tools\wwise\Starfield\Events\NPC_RobotModelA.wwu
+          5345      1 222db6a91de2cf52542697dbdfe86782c3d881df     0 Tools\wwise\Starfield\Events\NPC_SwimmerA.wwu
+         41674      1 fb5f5101908f4f1fb0c98e49ca59bba1a35f3c52     0 Tools\wwise\Starfield\Events\NPC_Terrormorph.wwu
+         36341      1 18cf1326ef3e09d8f0f8cad9b52babc05d837514     0 Tools\wwise\Starfield\Events\NPC_Turrets.wwu
+         34831      1 5a4203d87f31030136388ee84ff1494bc15f90b1     0 Tools\wwise\Starfield\Events\OBJ_Alarms.wwu
+         40485      1 1a1453fee4b899a15411885b18d52cb9bd81c47d     0 Tools\wwise\Starfield\Events\OBJ_Electrical.wwu
+         13920      1 aabe23dc089a04329665549ea88ef4bed45ca83b     0 Tools\wwise\Starfield\Events\OBJ_Fans.wwu
+         12135      1 3e4c3d6a2ef5ec7f0552fc156a50a237b94536ca     0 Tools\wwise\Starfield\Events\OBJ_MovingPlatforms.wwu
+        155539      1 3aedfc7dc2bc2a810fa440e01f58e05f3d31443f     0 Tools\wwise\Starfield\Events\OBJ_Outpost.wwu
+          4163      1 e17e311a05a5074a3fd6031ea6b327319a9c6e38     0 Tools\wwise\Starfield\Events\OBJ_Pipes.wwu
+         20895      1 88f6db92ef3903657d3a33bbeba599d093ce36ba     0 Tools\wwise\Starfield\Events\OBJ_Quest.wwu
+         32979      1 bbad53ae0f8d9af35dd04a2ddf3e7a85fd50533e     0 Tools\wwise\Starfield\Events\OBJ_Traps.wwu
+         16140      1 c03fadad1df0437410ca80864cdeb507a13eb951     0 Tools\wwise\Starfield\Events\Orion.wwu
+         22693      1 8fa48d683959eec6d2dd930ca8f8643ff19a1aca     0 Tools\wwise\Starfield\Events\OutpostScience.wwu
+         24199      1 dead1c0f3a99c4a9d324eddf3cd780e28cb3b71b     0 Tools\wwise\Starfield\Events\Pacifier.wwu
+          8143      1 41a1992f144a41ae394cbdfbae55ba91d5b890f1     0 Tools\wwise\Starfield\Events\ParticleLance.wwu
+         32390      1 396d0d219c16c121f73c39c01d5cfe35bfc7e13d     0 Tools\wwise\Starfield\Events\Pump.wwu
+          3934      1 6871999ff1c378f72535e14352fb609ba510efb0     0 Tools\wwise\Starfield\Events\QST_MQ201b.wwu
+          8351      1 b7c2dcff29f880cccb5b70b6092d03dd891e0a52     0 Tools\wwise\Starfield\Events\QST_MQ206b.wwu
+          2580      1 a996337e4676d7af4edbe0160f90a39fd7c91252     0 Tools\wwise\Starfield\Events\QST_RL088.wwu
+         23759      1 8da42b39590864e11c0eac47628e6b211a2bcd55     0 Tools\wwise\Starfield\Events\Rattler.wwu
+         21526      1 55950be191cff5117494d391980741c2ae47e8f5     0 Tools\wwise\Starfield\Events\Razorback.wwu
+         40034      1 5182b74ffc7e970ce94ef251fff5062fc4af9b41     0 Tools\wwise\Starfield\Events\Regulator.wwu
+          3009      1 fc8ba94ae40530032b3dd5c2ca3e42b31476e162     0 Tools\wwise\Starfield\Events\RL.wwu
+          5259      1 5889da36a6867ed9b129f56501ba0469c3161b5c     0 Tools\wwise\Starfield\Events\RL027 Medicinal Terrarium.wwu
+          2574      1 f6bc41c6b779a98872bbc1052ac9ce2ca8072fae     0 Tools\wwise\Starfield\Events\Robot_Minibot_Laser.wwu
+         30732      1 581133b34c679d04478c69b295df6b6e3b836114     0 Tools\wwise\Starfield\Events\RussianAssaultRifle.wwu
+          3298      1 f7462b73cf16f3015b334f6681c4a5d2b814ae7c     0 Tools\wwise\Starfield\Events\Scenes.wwu
+          7697      1 6a8dd7ee468ec1855885dfe0cf153d3f74ffb133     0 Tools\wwise\Starfield\Events\Server_Room.wwu
+          4023      1 64b0926aa033e7703e14c24ce3c034dcfffd5b07     0 Tools\wwise\Starfield\Events\ShipDiscovery.wwu
+         68888      1 aa0479d7cf633b5c65f92bbe8c549870d930c633     0 Tools\wwise\Starfield\Events\ShipLarge.wwu
+         26985      1 457c23c34a51a867f9de7093083ba7c3db383247     0 Tools\wwise\Starfield\Events\ShipLegacy.wwu
+          1091      1 25e1b038c8f8339c9cb6973fd07465d93fd2fc26     0 Tools\wwise\Starfield\Events\ShipModules.wwu
+         41773      1 4ea8c28f988510249978fda1c25c5b18e4e61138     0 Tools\wwise\Starfield\Events\Shotty.wwu
+         40446      1 5c6c7317d3b4437d0ac76e6d73a19198d0fee21f     0 Tools\wwise\Starfield\Events\Sidestar.wwu
+         11443      1 638f8d8b5dde9f8011a8c64cc03cd21d55557b10     0 Tools\wwise\Starfield\Events\SirenOfTheStarsBallroom.wwu
+         46279      1 ee510321c0592c1808daaab16cb8d9f9cf9cf9c1     0 Tools\wwise\Starfield\Events\Solstice.wwu
+         18173      1 66b15838de529fe14917a685c7272ed470ee40cb     0 Tools\wwise\Starfield\Events\SpaceStation_TheKey.wwu
+         22041      1 103f82bda70d1a8e6ce70d8c43e7332d05a68217     0 Tools\wwise\Starfield\Events\Starborn.wwu
+         15004      1 61426db88406d0614710946810c1eccd37e7d9d9     0 Tools\wwise\Starfield\Events\StarbornTempleA.wwu
+           279      1 443e2a57f96a1b76a5293eb1b79d34182a180611     0 Tools\wwise\Starfield\Events\Starfield.wwu
+          8188      1 df449587490934e3521ebdba38ad7ad988588626     0 Tools\wwise\Starfield\Events\Starfield_AMB.wwu
+        300689      1 8e1f670b25382261b7a8e5ac179889934273a760     0 Tools\wwise\Starfield\Events\Starfield_DRS.wwu
+         48159      1 b599dc98c672402cdc05f6df32dabe837c3d919e     0 Tools\wwise\Starfield\Events\Starfield_DRSc.wwu
+        742507      1 1de6bd87a5c5da5eb9b41ccaa5934654fd9ffc95     0 Tools\wwise\Starfield\Events\Starfield_FST.wwu
+         54834      1 b98e29fd903a8f8156213d98494de2dae40330ca     0 Tools\wwise\Starfield\Events\Starfield_FX.wwu
+        243924      1 c8012c4f3839365ea156e754cba008bc34dc3617     0 Tools\wwise\Starfield\Events\Starfield_ITM.wwu
+           698      1 6a1d8a28819c9418623ee4893cd6e89e472e0e79     0 Tools\wwise\Starfield\Events\Starfield_MUS.wwu
+        125261      1 0b3e5cdb011e94be6f707f90b0637ec55816d999     0 Tools\wwise\Starfield\Events\Starfield_NPC.wwu
+        154145      1 6dba6ea6930b480c8037dcc06b5b0406bb2e8989     0 Tools\wwise\Starfield\Events\Starfield_OBJ.wwu
+        152865      1 ec23dc6bd95abcb20924e99d42602e305f355781     0 Tools\wwise\Starfield\Events\Starfield_PHY.wwu
+        282268      1 61ad1cb1e02556520b742db6aec33cc7fae1135f     0 Tools\wwise\Starfield\Events\Starfield_QST.wwu
+          2252      1 33f1c3db768811e45c77bf532c5a2f49ef762fa4     0 Tools\wwise\Starfield\Events\Starfield_UI.wwu
+        275588      1 7a98bc150ec4282e89b5438b93a6556b1520d878     0 Tools\wwise\Starfield\Events\Starfield_VEH.wwu
+           873      1 11458c0a4c0bfb456183c05529a29527fca459eb     0 Tools\wwise\Starfield\Events\Starfield_VOC.wwu
+           644      1 b38de61e8ee184369cd61eb24376195fa1674b91     0 Tools\wwise\Starfield\Events\Starfield_WPN.wwu
+         10704      1 feee25af03bd63b662e027e6cd0528373b3df0f9     0 Tools\wwise\Starfield\Events\Starfield_XXX.wwu
+         40797      1 f73b070d9d74fef6873c1fbbb5eca009c5ce3806     0 Tools\wwise\Starfield\Events\StarStation.wwu
+         22629      1 1930730cf95ce1d887ea7edff57d5800879f5f26     0 Tools\wwise\Starfield\Events\StarStationTheEye.wwu
+         54753      1 9a6298e7e445e1710cd63f989d866fdcd44b00b4     0 Tools\wwise\Starfield\Events\Stroud.wwu
+        391828      1 c13a3778d4adbc12b3cca645f56e59a47999f480     0 Tools\wwise\Starfield\Events\Tails.wwu
+         54873      1 f1e680b6de9c07481df7123628f34cc5e3695149     0 Tools\wwise\Starfield\Events\Taiyo.wwu
+         27520      1 395944be2a2e37bf582494612b3d538f17db0f5a     0 Tools\wwise\Starfield\Events\TheLodge.wwu
+          3515      1 bfc6a7c1a6c0ddc4632f749da9abab10147afdd4     0 Tools\wwise\Starfield\Events\TheRedMile.wwu
+         22121      1 3965b6f3ff9d855b7ccbcbd49c65bf0e5f847c55     0 Tools\wwise\Starfield\Events\TheWell.wwu
+         59607      1 c79c1e2648a4b8ad248f66167a85ec77abe7e5fb     0 Tools\wwise\Starfield\Events\Tombstone.wwu
+          9927      1 c431d5af5db707eaec4221afee9044de8e3079b0     0 Tools\wwise\Starfield\Events\Turrets.wwu
+          3396      1 57d8524dfc85f722de9b5fb7af864551ec896fa0     0 Tools\wwise\Starfield\Events\UI_Book.wwu
+          1109      1 db619a42cf8e8895f2dce86714881d2aee0be546     0 Tools\wwise\Starfield\Events\UI_Boostpack.wwu
+          2701      1 7e123218c4f208ba50c1da8a0db2b8a9047398f2     0 Tools\wwise\Starfield\Events\UI_Camera.wwu
+          2688      1 aedb25971878693e54353dc36608c0980ae6d608     0 Tools\wwise\Starfield\Events\UI_CriticalHit.wwu
+          6793      1 bb3795d45f549b4b4679f435a0962db8b90ac64e     0 Tools\wwise\Starfield\Events\UI_Dataslate.wwu
+          1123      1 74f670e64266c605ee2efaa52096c6606ceeb248     0 Tools\wwise\Starfield\Events\UI_DiscoverLocation.wwu
+          8544      1 2148c93454107b1bc9a6596358705a2687b6c1ef     0 Tools\wwise\Starfield\Events\UI_Experience.wwu
+        547185      1 a81cc75705635644d7dcf6fdeafc081acecd2f81     0 Tools\wwise\Starfield\Events\UI_Menu.wwu
+         15554      1 21b06c84a34f6a849ded0a15299bdb576d542553     0 Tools\wwise\Starfield\Events\UI_Minigame_Security.wwu
+          4328      1 a64c371bbff90a4d388d96623b786c43773e8b38     0 Tools\wwise\Starfield\Events\UI_PlayerHealth.wwu
+          5350      1 1c6a07bb2d7cd30293add6f55e8e6d4c4939dc6b     0 Tools\wwise\Starfield\Events\UI_Quest.wwu
+        132640      1 158cea525050f4659dbb1253d6f2eebad3ddd329     0 Tools\wwise\Starfield\Events\UI_ShipUI.wwu
+        134515      1 82847c0af9dae40388ef243333691c77f806a1c6     0 Tools\wwise\Starfield\Events\UI_States.wwu
+          1733      1 1785a50b7f95a86196d7a3fafa66c81d697fb7a3     0 Tools\wwise\Starfield\Events\UI_Suit.wwu
+         49539      1 31be2c0aabe9083adbfcdecfe007a9980d540ee4     0 Tools\wwise\Starfield\Events\UI_Terminals.wwu
+          1872      1 6e217fe3aaf23c5a38b9c03cbabbf6096d1d6d13     0 Tools\wwise\Starfield\Events\UI_ToolTip.wwu
+          1638      1 41b9a7858150b20cf891ebe3c3f939114001e983     0 Tools\wwise\Starfield\Events\UI_Watch.wwu
+          1251      1 1706d62bd811f6e89bdd0a9a8777530a7257b5bf     0 Tools\wwise\Starfield\Events\UI_Weapon.wwu
+          7553      1 74a64ab85d665738737dc8b73ed59c428f60d744     0 Tools\wwise\Starfield\Events\Unity.wwu
+         16005      1 551697f8d3bbdea026c1a828212a5675fd42ce3b     0 Tools\wwise\Starfield\Events\UrbanEagle.wwu
+         14431      1 b30b3f8ae9e170c61aec6e89d0f190eaa6fe2dea     0 Tools\wwise\Starfield\Events\Utility.wwu
+          3529      1 731d063ef1cdab65015d77be06bbd07bcbed9cee     0 Tools\wwise\Starfield\Events\VecteraChargenHab.wwu
+         31443      1 d0cb0638dde25dbecede89b187b5f7c50f5f714b     0 Tools\wwise\Starfield\Events\VecteraMine.wwu
+         41479      1 082af22d00cdaa80c1a129fe2eefcc512667860e     0 Tools\wwise\Starfield\Events\VEH_Engines_AmunDunn.wwu
+         75013      1 b01c1484d6d676a6e4f52a65d21443450d65dc16     0 Tools\wwise\Starfield\Events\VEH_Engines_Panoptes.wwu
+         64908      1 0923a2399d8d2345861ea0f361213d2f1c6a02a6     0 Tools\wwise\Starfield\Events\VEH_Engines_Reladyne.wwu
+         71265      1 b2f1daccaca28e5f32cc722f755d9cf834aa2eb8     0 Tools\wwise\Starfield\Events\VEH_Engines_SlaytonAerospace.wwu
+         16645      1 52adc0aa0bf48fff3ac239d379b16db62fcf0889     0 Tools\wwise\Starfield\Events\VEH_Engines_Starborn.wwu
+         13854      1 7892638ae494cf9ed910bdf70d33dec90e7a8361     0 Tools\wwise\Starfield\Events\VentilationShaft.wwu
+          2018      1 612f9bd6c61f77443840a0f0293ead907dd84e72     0 Tools\wwise\Starfield\Events\VOC_Audiologs_Unique.wwu
+         10056      1 4e9446000c33c52e77b457311aa14cda2cfd92fe     0 Tools\wwise\Starfield\Events\VOC_Defaults.wwu
+         69842      1 02f858ed3b33155d863fe73bbcb5f8744ce3158b     0 Tools\wwise\Starfield\Events\VOC_Overrides.wwu
+         27221      1 3ee6d32536e99cce0041b3ecd2ba67a69ff8aec2     0 Tools\wwise\Starfield\Events\VOC_Player.wwu
+         21459      1 f241cebf85f3df45d015fcff04dff1509d0eeecd     0 Tools\wwise\Starfield\Events\VOC_SFX_Overrides.wwu
+         18371      1 77e80b83308da8f95ebc3fa91468a1c65231e981     0 Tools\wwise\Starfield\Events\WPN_Creatures.wwu
+        167293      1 610c6d16eb4fe67c04a02d98d566d5878dd7ccd0     0 Tools\wwise\Starfield\Events\WPN_Hand.wwu
+        319345      1 bd73cd08ade828c86e27a3a61d252a1601a98f63     0 Tools\wwise\Starfield\Events\WPN_Ship.wwu
+          4074      1 2e19a53373a5dbe41866d8984ab0bd8f2ff557cb     0 Tools\wwise\Starfield\Events\ZeroGravity.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Game Parameters
+          1867      1 6f373e885f3297bdd70f50da1a420c2e38c04585     0 Tools\wwise\Starfield\Game Parameters\CC_Test_RTPCs.wwu
+         59383      1 69bc214752a4935946737ae474f327d290ea1a10     0 Tools\wwise\Starfield\Game Parameters\Default Work Unit.wwu
+           881      1 6950276ae51c7bf1c6da3b86c4763360ed1a6549     0 Tools\wwise\Starfield\Game Parameters\Factory Motion.wwu
+           944      1 0efe137e0d183ac514ab8ecc35a88eb949eb86b4     0 Tools\wwise\Starfield\Game Parameters\Starfield_XXX_GameParameters.wwu
+           300      1 74661866ad6ed612e180d217c5edc551ba15833e     0 Tools\wwise\Starfield\Game Parameters\Z_ML_TestRTPCs.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Interactive Music Hierarchy
+           462      1 e9af57789e6bac81f5052bfb131dff14f9e8701b     0 Tools\wwise\Starfield\Interactive Music Hierarchy\Default Work Unit.wwu
+         64736      1 bc625886383c8d43de51c9bca78425f08d80eef8     0 Tools\wwise\Starfield\Interactive Music Hierarchy\Starfield.wwu
+       2428592      3 445d2c118556864a2e34d90c827919cac24cfaa3     0 Tools\wwise\Starfield\Interactive Music Hierarchy\Starfield_VOC.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Master-Mixer Hierarchy
+       1086790      2 26cd3ee40ddb1b93339e7c84b9b57592ce442dab     0 Tools\wwise\Starfield\Master-Mixer Hierarchy\Default Work Unit.wwu
+           444      1 e42f7f4fb9ece3e7bc4867d1ed59c481e06fe01d     0 Tools\wwise\Starfield\Master-Mixer Hierarchy\DTS_Test_Busses.wwu
+           443      1 57365d0c61549051954ccb216b4a89e30ab3cca1     0 Tools\wwise\Starfield\Master-Mixer Hierarchy\RE_Test_Busses.wwu
+           552      1 8ef6cfb74739e1c3414d359a8accc5fc9b56c8a7     0 Tools\wwise\Starfield\Master-Mixer Hierarchy\XXX_TestBusses.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Metadata
+           293      1 12f8408c9fc1f9900ab9bde005c4d6aa8b0643a2     0 Tools\wwise\Starfield\Metadata\Default Work Unit.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Mixing Sessions
+          1860      1 4830be4d327d648ca8aa087839efa24ca00d03cf     0 Tools\wwise\Starfield\Mixing Sessions\Default Work Unit.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Modulators
+          7511      1 e5aa80c05016df5ab8062a1b8db599c8509ae065     0 Tools\wwise\Starfield\Modulators\Default Work Unit.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Presets
+        154581      1 14e46d469ea1b186cf877224c7b807149e00cd04     0 Tools\wwise\Starfield\Presets\Default Work Unit.wwu
+           872      1 063a92d808cece8ceec887dfc17a81d0849dc6e0     0 Tools\wwise\Starfield\Presets\Factory Reflect.wwu
+          1086      1 573ff26cc7a58810c35641d76576abc1be35d48a     0 Tools\wwise\Starfield\Presets\Factory Spatial Audio.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Queries
+           446      1 f400261069083176fc292b5e90903110ab6cf54f     0 Tools\wwise\Starfield\Queries\Default Work Unit.wwu
+          4525      1 00d9202ae3891b1bebfd0847fedccf89119dcf5d     0 Tools\wwise\Starfield\Queries\DTS_Queries.wwu
+         30323      1 b55a2e4a49e189b1598e2951b92cf639159171de     0 Tools\wwise\Starfield\Queries\Factory Queries.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\SoundBanks
+         10258      1 af6fb28196139274f0d0ee0d5b6356752e2e99e2     0 Tools\wwise\Starfield\SoundBanks\Default Work Unit.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Soundcaster Sessions
+           313      1 e93fba9310ebac8d983ed2e1a59f964d36facd7f     0 Tools\wwise\Starfield\Soundcaster Sessions\Default Work Unit.wwu
+        391542      1 1d227030deb95ba48605067f6c8f4bf24b3c7336     0 Tools\wwise\Starfield\Starfield.wproj
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\States
+         55074      1 bfb90bf4f04af45ff43ef7e89918e652c8096269     0 Tools\wwise\Starfield\States\Default Work Unit.wwu
+           290      1 5fc04a6514c7e410fbfa63d7c3c5cfbf2aab28d1     0 Tools\wwise\Starfield\States\Starfield_XXX_States.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Switches
+         43354      1 75daa8483d12894b0b7b559327c06105ba420af3     0 Tools\wwise\Starfield\Switches\Default Work Unit.wwu
+         10243      1 07507cce1cdb62c4d545c8d9065eaf3f0b9abfe0     0 Tools\wwise\Starfield\Switches\Starfield_XXX_Switches.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Triggers
+           291      1 f791c9d357095117777d81fde90d429e1769dd78     0 Tools\wwise\Starfield\Triggers\Default Work Unit.wwu
+             0      0 0000000000000000000000000000000000000000    40 Tools\wwise\Starfield\Virtual Acoustics
+           307      1 2093bea7939f25276ddfce4d62aad624c3270005     0 Tools\wwise\Starfield\Virtual Acoustics\Default Work Unit.wwu
+          6111      1 a59b46dedb49c46f26159d03b4e088112b758c87     0 Tools\wwise\Starfield\Virtual Acoustics\Factory Reflect Acoustic Textures.wwu
+         58368      1 42eadcef8cd30200137f504d45e8876503598ae1     0 WinPixEventRuntime.dll

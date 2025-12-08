@@ -1,0 +1,124 @@
+Content Manifest for Depot 1716742 
+
+Manifest ID / date     : 2422293171576873112 / 07/18/2025 17:30:22 
+Total number of files  : 114 
+Total number of chunks : 123122 
+Total bytes on disk    : 134660420613 
+Total bytes compressed : 99153337264 
+
+
+          Size Chunks File SHA                                 Flags Name
+         61082      1 a5773170a101e6462225e82b022f4c112568e76d     0 Data\BlueprintShips-Starfield - Localization.ba2
+     302872282    290 ae9150c0063a239eff56a06518b32d136e7318dd     0 Data\BlueprintShips-Starfield.esm
+            16      1 7800ae303179dbe9a7e04b9da1f2b197de299862     0 Data\data.bin
+     630468097    661 d67842254cb607bbbb2fea0081d697f2ff7c478b     0 Data\SFBGS003 - Main.ba2
+     364574882    361 bee9bc6aad778492dfdd259cb3d75ef213235ba3     0 Data\SFBGS003 - Textures.ba2
+     133635105    144 9567cda813d153fc98c12fa79ab134800f5b7351     0 Data\SFBGS003 - Voices_de.ba2
+     136867865    137 ac24c403c133b4912b08efd758ac28adf2b8cb39     0 Data\SFBGS003 - Voices_en.ba2
+     135427255    145 41c50992d5821a1d537101636951c18c157ab146     0 Data\SFBGS003 - Voices_es.ba2
+     132804943    143 b0a616407b8039c1ac53126180a3756b82980c3e     0 Data\SFBGS003 - Voices_fr.ba2
+     138260726    148 5dc9ea0ba131e18e4cad578055f63a3949e04e6c     0 Data\SFBGS003 - Voices_ja.ba2
+      33277802     32 4c0e3234fb61f8099db25a6bab9dfd179baf7338     0 Data\SFBGS003.esm
+      25700898     26 c85bdd7aa1db32a229a54e6c0c95fa609662d073     0 Data\SFBGS004 - Main.ba2
+      46703558     46 27ffd343e2d3861f58b1ce4887bcb9a1a1aae5c9     0 Data\SFBGS004 - Textures.ba2
+       9994950     10 63183990999948290df54f0fa1ed2169824afaae     0 Data\SFBGS004 - Voices_de.ba2
+       9561014     10 d6ac0b8be66a02c5b9db51bd918ae9d7db580ea3     0 Data\SFBGS004 - Voices_en.ba2
+      10257005     10 3de9c619b4bd90137d4fa42fc0b7242b0c6971ad     0 Data\SFBGS004 - Voices_es.ba2
+       8529282      9 abe1a8245bbb11c89cf7229eb1f41c858495498b     0 Data\SFBGS004 - Voices_fr.ba2
+       9369732      9 71c981509e0b52cc8ef8a5691ee3086d660fdc53     0 Data\SFBGS004 - Voices_ja.ba2
+        249772      1 8134eeb12f68c41074be2b1acf334f7027bb4915     0 Data\SFBGS004.esm
+     582808565    557 24d290f3dbfe5c08077ac1d520990352b500e482     0 Data\SFBGS006 - Main.ba2
+        434484      1 1fc234e764e4dbb1c7bea4bdafc3f8a776111c56     0 Data\SFBGS006 - Textures.ba2
+       7315458      7 98626627ae58f024b3451f87aafd88123e20c325     0 Data\SFBGS006.esm
+     104971738    101 590e88edbd0182923364ab31000390118aee8ca5     0 Data\SFBGS007 - Main.ba2
+         27252      1 8a76ef7a725d1110c3a24b14a548b26ce3567f3a     0 Data\SFBGS007.esm
+      10403375     11 29a2d0d7082bd4cd084aaf4c7c110a5344ecaa17     0 Data\SFBGS008 - Main.ba2
+      11302160     11 0c7fa42ae967c517c81caae2414b6af9e8b9d09f     0 Data\SFBGS008.esm
+     217771250    231 3ab454661cb2785031d6ca062716b8759bfd3730     0 Data\Starfield - Animations.ba2
+    3289283813   3137 b9e3e2bcc7a218b02e6d2b91def81973654e49ca     0 Data\Starfield - DensityMaps.ba2
+    4294892678   4096 000ff438b76ace45f55567d788d9ec90a7e34ad6     0 Data\Starfield - FaceAnimation01.ba2
+    4294868358   4096 1a10b8421bd393c0df11c7c7b4ee23e6b197b8c9     0 Data\Starfield - FaceAnimation02.ba2
+    4294946755   4096 1dd21693947abfcf29992d7dda2cd624fd3ee530     0 Data\Starfield - FaceAnimation03.ba2
+    4025862230   3855 49a3f3d684fd9cdd4222f589e345e5ac4f127e7b     0 Data\Starfield - FaceAnimation04.ba2
+    1619371713   1626 bd3b94db6e600372d6c4705c02775d90554acf0e     0 Data\Starfield - FaceAnimationPatch.ba2
+    1303527123   1244 959777c7ddf680b614a75e1667ee76b847ffd345     0 Data\Starfield - FaceMeshes.ba2
+       7847660      8 ee503626a4d2944e8c6ee63787ef0be987ee8e2f     0 Data\Starfield - GeneratedTextures.ba2
+     129098938    136 e2edd176332ddc94b542f933560d33f75b980928     0 Data\Starfield - Interface.ba2
+     114239973    127 d1275f0b7dad4b8c16f5d75ceea2741348f7a555     0 Data\Starfield - Localization.ba2
+      13248517     13 b99581954813d6781f64dc5af06eeebd9389b29b     0 Data\Starfield - LODMeshes.ba2
+      13132427     13 563644a863ab7468b5f138f1227adbe2b5e9b52c     0 Data\Starfield - LODMeshesPatch.ba2
+    4294682929   4250 a5c0c9c791156bec70cffcffc9065073fbca0f2c     0 Data\Starfield - LODTextures01.ba2
+      52303402     52 d6c1a1b7d63827b2b720275d8f4f3d4d4dc1dafd     0 Data\Starfield - LODTextures02.ba2
+      17556974     17 5967bcb7effd6991f5c2f8ff7c25abf586473350     0 Data\Starfield - Materials.ba2
+    4294890544   4099 5c213295dfea827969c037b1e296cb937157e0e9     0 Data\Starfield - Meshes01.ba2
+     839607830    801 3530a4e21aa03f2d2072e4c94302f7eceb769b2a     0 Data\Starfield - Meshes02.ba2
+    3820475951   3996 030c09e6d78debb6b8baf99b927616dce8cc34b8     0 Data\Starfield - MeshesPatch.ba2
+      38051406     38 b73398b04c2fc0b0f3bb119c03d09a37a86ee153     0 Data\Starfield - Misc.ba2
+     134677412    129 59897c4e2034cc99bda216666a8a6b31c74c7a45     0 Data\Starfield - Particles.ba2
+      22468821     22 e119790ae9bb10dacbebef14d1ccdd3273fb2326     0 Data\Starfield - PlanetData.ba2
+      95450214     92 6e73e1d5553ec4fb16b53de88867cf4fb8514aef     0 Data\Starfield - Shaders.ba2
+    4291234512   4215 2a75037c0bd457450e3f67946cd0b874d8b84b51     0 Data\Starfield - Terrain01.ba2
+    4289749798   4092 7e3de9c66b761e8a18d6eff28c7862fdb2a4e09f     0 Data\Starfield - Terrain02.ba2
+    4269589746   4072 31787be0c3cee5b6d84e550afceeffbcc056e6e3     0 Data\Starfield - Terrain03.ba2
+    2602112668   2482 8bdd57b23b605dbebdda90abdb05c68d0d4dad67     0 Data\Starfield - Terrain04.ba2
+       3143875      3 93ff73ba97583d6cb58973f3c561e18c93bec82e     0 Data\Starfield - TerrainPatch.ba2
+    4293630648   4276 d8757683f514bb1878f6b62d028482bd553eff5b     0 Data\Starfield - Textures01.ba2
+    4294481065   4105 09323c2499615349e1ecf8fcf78beced7473adf6     0 Data\Starfield - Textures02.ba2
+    4293851283   4098 17c5621e1ddeb77673d352d6ba564fe8308c3bf3     0 Data\Starfield - Textures03.ba2
+    4289987983   4095 045fa73065bd5b851037d9e4897a5864ef0f99fb     0 Data\Starfield - Textures04.ba2
+    4294590816   4099 50744a987147a0c86f0390ae4191d4060b38d8df     0 Data\Starfield - Textures05.ba2
+    4294938802   4098 7cd5717d6e0e59052f7b15af9968ff125aa3740c     0 Data\Starfield - Textures06.ba2
+    4294061043   4096 a88578d0d82950f0523766891c81d1e375960810     0 Data\Starfield - Textures07.ba2
+    4290519058   4096 6f8a0870a810f1c77164ac0315aa1228db318332     0 Data\Starfield - Textures08.ba2
+    4294392371   4096 445323dea81524156dbb03a2ba1d94d2ca683ff6     0 Data\Starfield - Textures09.ba2
+    4294276207   4097 983bd566720fb996433f74f7b9b97705026bedf2     0 Data\Starfield - Textures10.ba2
+     866957696    827 7d861bc58e48e464a839be2fbb622ede4f314afe     0 Data\Starfield - Textures11.ba2
+    4286473311   4675 15bda1a723b4fb7d3daf7ccbf388f5c228f741e0     0 Data\Starfield - TexturesPatch01.ba2
+     265961431    255 e5d2d7b8da0154077f86421ed22c536ce416ba99     0 Data\Starfield - TexturesPatch02.ba2
+    4294919148   4097 2d8ebb248b00d09cc55249577d3b7c0ecff13e9c     0 Data\Starfield - Voices01.ba2
+    2499060585   2387 cbaaa4458b2dc7112021741c18fef494bf8d5b59     0 Data\Starfield - Voices02.ba2
+      20901416     22 3a1d65f332c4be7f102eed711be7f4bf9e18dfd8     0 Data\Starfield - VoicesPatch.ba2
+    4294156448   4126 f869952f1e36ce52cddbee66b8d7a048ae1b5531     0 Data\Starfield - WwiseSounds01.ba2
+    4294666354   4140 487d80b6cdf0a0dc72396ac2f5b36a2db1a17a83     0 Data\Starfield - WwiseSounds02.ba2
+    4294654956   4135 2b245ca7366954692dd8c3c83bf4f0f0231dbc1a     0 Data\Starfield - WwiseSounds03.ba2
+    4264195266   4124 9dd6ed02c8aedb4a54acf6a6849f189a85394f8b     0 Data\Starfield - WwiseSounds04.ba2
+    2975910486   2870 b114a252ef2335283d506c8117bbdd0b94ff8b08     0 Data\Starfield - WwiseSounds05.ba2
+     687891832    782 9c5e75e4303d97b606b0dda837c5de5112b3b583     0 Data\Starfield - WwiseSoundsPatch.ba2
+    1456881949   1393 eae37c7da23b547ba4d3a5e1a4da18eaa491b8e2     0 Data\Starfield.esm
+             0      0 0000000000000000000000000000000000000000    40 Data\video
+      28801684     28 7d96045b9832158fdfefbd86cb24c60a690ab2ae     0 Data\video\ArtifactVision01.bk2
+      28800936     28 ceb9a8d3b2aa9c95cf54030390da0eb2b5bc181a     0 Data\video\ArtifactVision02.bk2
+      28804244     28 aa23d541c7496309341bd3fe6d1ccdd752919d2d     0 Data\video\ArtifactVision03.bk2
+      28800400     28 06b47e82cf3ead1481e63ddb5231d11d3b19e428     0 Data\video\ArtifactVision04.bk2
+      28799412     28 14cb8f5eadeccb88f463803f093cc8669f980b2a     0 Data\video\ArtifactVision05.bk2
+      28804720     28 70c076546c35f95d6c209fea0dc24711d64d589a     0 Data\video\ArtifactVision06.bk2
+      28804668     28 47566127714b8e108f4b314184f6b796cc2f5f09     0 Data\video\ArtifactVision07.bk2
+      28804004     28 c2a9564fa9f021be3d0b29099556534e3c01fe9f     0 Data\video\ArtifactVision08.bk2
+      28800740     28 0349f8d80a4252067f28da4f04adf9a18b0ba28a     0 Data\video\ArtifactVision09.bk2
+      11416192     11 33d675f9fbeadc57e0b497b31306df6ed8a16cff     0 Data\video\BGS_LOGO_1080p_BinkVersion.bk2
+     287405528    275 b4dd8209bddf6bc0c79368241b8b0a280c230733     0 Data\video\EndingVision.bk2
+     476197580    455 d43f3c0dda83eb8d8ce2770539ebd76733f142e1     0 Data\video\MainMenuLoop.bk2
+      25395572     25 aec4e24781353a5e2b2df0735ffc882ba6d15751     0 Data\video\PowerVision_Alien.bk2
+      27658348     27 05a0ee51f29ec1042c8b41b8edb22e0bdcbed81b     0 Data\video\PowerVision_AntiGravField.bk2
+      27658480     27 1330369f5d66b5e6d801b3555986ac1bafc56ed4     0 Data\video\PowerVision_CreateVac.bk2
+      25314952     25 d573d2bfc8d9e87f177f564e8b788a212b74eb65     0 Data\video\PowerVision_CreatorsPeace.bk2
+      27658392     27 7641fd58b24f3909ce842ec6cafa3977d40b86ec     0 Data\video\PowerVision_Earthbound.bk2
+      27311676     27 c721800ce6c9c03fb0b64e8b01e937adb700f255     0 Data\video\PowerVision_Elemental.bk2
+      27658532     27 21d4a870f65a73b2bcb0a16195436edaf7fc63b9     0 Data\video\PowerVision_Eternal.bk2
+      27659352     27 a28f48d78b2e42530e127b35259a045d1f17b850     0 Data\video\PowerVision_GravDash.bk2
+      27658376     27 e173b9c1ca5e30454d4757b9c3dc6f3a9f4e69ef     0 Data\video\PowerVision_GravityWave.bk2
+      27658344     27 f9057a2728d8ce22d3d29335fa38ceb9f70a94b1     0 Data\video\PowerVision_GravityWell.bk2
+      27658504     27 3e9f2988da3459838099ac806ca9c7f737effa26     0 Data\video\PowerVision_InnerDemon.bk2
+      27658540     27 63b214b9bac4d661c076d886bbca0bc3fc134e87     0 Data\video\PowerVision_LifeForced.bk2
+      27658536     27 df6719d3727e8a1f9b55c5a3f1482c53c8ab13f5     0 Data\video\PowerVision_MoonForm.bk2
+      27658868     27 e475eaa4bc9f27b0f67e9c690a87481ddec22276     0 Data\video\PowerVision_ParallelSelf.bk2
+      27658520     27 46726281e2e55b4b10eafd3a6173b60cc1f154b8     0 Data\video\PowerVision_ParticleBeam.bk2
+      27658568     27 f3de1fe843d6d7fc70eeeda1cb19f65c12c07e4b     0 Data\video\PowerVision_PersonalAtmosphere.bk2
+      27659796     27 e9e313683b9dfa2796e9a000e0aa5a49244e7b72     0 Data\video\PowerVision_PhasedTime.bk2
+      27658796     27 47a0447b9c719ca43cbd86c5c7c70c7a4bca8022     0 Data\video\PowerVision_Precognition.bk2
+      27658680     27 ecfdf3c8585659aece7076e66e37cd23fdd42369     0 Data\video\PowerVision_ReactiveShield.bk2
+      27658492     27 9e4931ba949dca810e877ceecb7d97c084ca4651     0 Data\video\PowerVision_SenseStar.bk2
+      27658388     27 1b7798198bfd3a56f2d9c291e47885d2d931c7ee     0 Data\video\PowerVision_SolarFlare.bk2
+      27658872     27 aaf9294eb5c0f968c071019ec05d218c07ba7695     0 Data\video\PowerVision_SunlessSpace.bk2
+      27658592     27 9f9ba0324848ac429798f5bf46df6deaecef09fd     0 Data\video\PowerVision_Supernova.bk2
+      27658360     27 a30dd06b22a01291bfcdd7c445f30f745e4c19d3     0 Data\video\PowerVision_VoidForm.bk2

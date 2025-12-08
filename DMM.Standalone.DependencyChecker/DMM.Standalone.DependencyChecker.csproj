@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<!-- Expose custom configurations to Visual Studio -->
+		<Configurations>Debug;Release;PublishFrameworkDependent;PublishSelfContained;Publish</Configurations>
+	</PropertyGroup>
+
+	<!-- Framework-dependent (slim) defaults when that configuration is selected -->
+	<PropertyGroup Condition="'$(Configuration)' == 'PublishFrameworkDependent'">
+		<PublishSingleFile>true</PublishSingleFile>
+		<!-- Trimming is NOT supported for framework-dependent single-file bundles -->
+		<PublishTrimmed>false</PublishTrimmed>
+		<DebugType>None</DebugType>
+		<IncludeSymbols>false</IncludeSymbols>
+	</PropertyGroup>
+
+	<!-- Self-contained (fat) defaults when that configuration is selected -->
+	<PropertyGroup Condition="'$(Configuration)' == 'PublishSelfContained'">
+		<PublishSingleFile>true</PublishSingleFile>
+		<PublishTrimmed>true</PublishTrimmed>
+		<DebugType>None</DebugType>
+		<IncludeSymbols>false</IncludeSymbols>
+	</PropertyGroup>
+
+	<!-- Publish-on-build: handles three cases
+	     - PublishFrameworkDependent: produce slim dmmdeps.exe (no trimming/compression)
+	     - PublishSelfContained: produce fat dmmdeps_fat.exe (trimming + compression)
+	     - Publish: produce both artifacts -->
+	<Target Name="PublishOnBuild" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+		<!-- Framework-dependent (single exe, user must have .NET installed) -->
+		<Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent'"
+			  Command="dotnet publish -c Release -r win-x64 -p:SelfContained=false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:AssemblyName=dmmdeps -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
+
+		<!-- Self-contained (single exe with runtime included) -->
+		<Exec Condition="'$(Configuration)' == 'PublishSelfContained'"
+			  Command="dotnet publish -c Release -r win-x64 -p:SelfContained=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
+
+		<!-- Publish (both artifacts) -->
+		<Exec Condition="'$(Configuration)' == 'Publish'"
+			  Command="dotnet publish -c Release -r win-x64 -p:SelfContained=false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:AssemblyName=dmmdeps -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
+		<Exec Condition="'$(Configuration)' == 'Publish'"
+			  Command="dotnet publish -c Release -r win-x64 -p:SelfContained=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
+	</Target>
+
+</Project>
