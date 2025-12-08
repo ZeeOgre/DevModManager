@@ -40,10 +40,41 @@ namespace DmmDep
         public string? TifRootOverride { get; set; } = "..\\..\\Source\\TGATextures";
         public string? ScriptsRootOverride { get; set; } = "Scripts";
         public bool TestMode { get; set; } // --test switch
+
+        // New switches
+        public bool Quiet { get; set; }   // --quiet : suppress skipped-file messages
+        public bool Silent { get; set; }  // --silent: only show start and completion
     }
 
     internal static class Program
     {
+        // runtime flags populated from options
+        private static bool s_quiet = false;
+        private static bool s_silent = false;
+
+        // logger helpers honoring --quiet / --silent
+        private static class Log
+        {
+            public static void Info(string message, bool isSkipped = false)
+            {
+                if (s_silent) return;
+                if (isSkipped && s_quiet) return;
+                Console.WriteLine(message);
+            }
+
+            public static void Warn(string message)
+            {
+                if (s_silent) return;
+                Console.WriteLine(message);
+            }
+
+            // Always printed regardless of --silent
+            public static void Always(string message)
+            {
+                Console.WriteLine(message);
+            }
+        }
+
         static int Main(string[] args)
         {
             if (args.Length == 0)
@@ -63,11 +94,17 @@ namespace DmmDep
                     return 1;
                 }
 
+                s_quiet = options.Quiet;
+                s_silent = options.Silent;
+
                 // ---- Root detection ----
 
                 string pluginPath = Path.GetFullPath(options.PluginPath);
                 if (!File.Exists(pluginPath))
                     throw new FileNotFoundException("Plugin file not found", pluginPath);
+
+                // Print a concise starting message regardless of --silent
+                Log.Always($"Starting dependency check: {Path.GetFileName(pluginPath)}");
 
                 string dataRoot = Path.GetDirectoryName(pluginPath)
                                   ?? throw new InvalidOperationException("Unable to get Data root from plugin path");
@@ -75,9 +112,9 @@ namespace DmmDep
                                   Directory.GetParent(dataRoot)?.FullName ??
                                   throw new InvalidOperationException("Unable to infer game root (parent of Data)");
 
-                Console.WriteLine($"Plugin   : {pluginPath}");
-                Console.WriteLine($"DataRoot : {dataRoot}");
-                Console.WriteLine($"GameRoot : {gameRoot}");
+                Log.Info($"Plugin   : {pluginPath}");
+                Log.Info($"DataRoot : {dataRoot}");
+                Log.Info($"GameRoot : {gameRoot}");
 
                 // CreationKit.ini / CreationKitCustom.ini (for XB path detection)
                 string? iniPath = FindCreationKitIni(gameRoot);
@@ -85,17 +122,17 @@ namespace DmmDep
                     throw new InvalidOperationException("CreationKit.ini / CreationKitCustom.ini not found. Use --xboxdata to specify XBOX Data root.");
 
                 string xboxDataRoot = options.XboxDataOverride ?? InferXboxDataRoot(gameRoot, iniPath);
-                Console.WriteLine($"XboxData : {xboxDataRoot}");
+                Log.Info($"XboxData : {xboxDataRoot}");
 
                 // TIF root: ..\..\Source\TGATextures from game root, unless overridden
                 string tifRoot = options.TifRootOverride ??
                                  Path.GetFullPath(Path.Combine(gameRoot, "..", "..", "Source", "TGATextures"));
-                Console.WriteLine($"TifRoot  : {tifRoot}");
+                Log.Info($"TifRoot  : {tifRoot}");
 
                 // Scripts root
                 string scriptsRoot = options.ScriptsRootOverride ?? Path.Combine(dataRoot, "Scripts");
                 string scriptsSourceRoot = Path.Combine(scriptsRoot, "Source");
-                Console.WriteLine($"Scripts  : {scriptsRoot}");
+                Log.Info($"Scripts  : {scriptsRoot}");
 
                 string pluginName = Path.GetFileNameWithoutExtension(pluginPath);
                 string outputRoot = Path.GetDirectoryName(pluginPath)!;
@@ -115,10 +152,10 @@ namespace DmmDep
 
                 // ---- 1. Scan plugin for NIF / terrain / MAT / misc strings ----
 
-                Console.WriteLine("[1] Scanning plugin for NIF / terrain / MAT / misc strings...");
+                Log.Info("[1] Scanning plugin for NIF / terrain / MAT / misc strings...");
                 var pluginBytes = File.ReadAllBytes(pluginPath);
                 var pluginStrings = ExtractPrintableStrings(pluginBytes, 6).ToList();
-                Console.WriteLine($"[1] Extracted {pluginStrings.Count} printable strings (len >= 6)");
+                Log.Info($"[1] Extracted {pluginStrings.Count} printable strings (len >= 6)");
 
                 var nifRelPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var btdNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -239,7 +276,7 @@ namespace DmmDep
                                 string full = Path.Combine(gameRoot, rel);
                                 if (File.Exists(full))
                                 {
-                                    Console.WriteLine($"[WARN] Unclassified asset extension '{ext}' from plugin: {rel}");
+                                    Log.Warn($"[WARN] Unclassified asset extension '{ext}' from plugin: {rel}");
                                     AddFile(manifest, achlistPaths, rel, FileKind.Warn, "plugin-warn", gameRoot, xboxDataRoot);
                                 }
                             }
@@ -251,7 +288,7 @@ namespace DmmDep
                 string modTerrainFolder = Path.Combine(gameRoot, "Data", "terrain", pluginName);
                 if (Directory.Exists(modTerrainFolder))
                 {
-                    Console.WriteLine("[1b] Adding terrain backup folder...");
+                    Log.Info("[1b] Adding terrain backup folder...");
                     foreach (var f in Directory.EnumerateFiles(modTerrainFolder, "*.*", SearchOption.AllDirectories))
                     {
                         string rel = "Data\\" + GetRelativePath(Path.Combine(gameRoot, "Data"), f);
@@ -261,7 +298,7 @@ namespace DmmDep
                 }
 
                 // OverlayMasks from .btd -> Textures\Terrain\OverlayMasks\<name>.dds
-                Console.WriteLine("[1c] Checking terrain overlay dds from .btd...");
+                Log.Info("[1c] Checking terrain overlay dds from .btd...");
                 foreach (var n in btdNames)
                 {
                     string rel = NormalizeRel(Path.Combine("Data", "Textures", "Terrain", "OverlayMasks", n + ".dds"));
@@ -274,7 +311,7 @@ namespace DmmDep
                 }
 
                 // ---- 2. NIF -> MAT + MeshPath + RIG ----
-                Console.WriteLine("[2] Scanning NIFs for MAT, mesh stems, and RIG...");
+                Log.Info("[2] Scanning NIFs for MAT, mesh stems, and RIG...");
 
                 foreach (var nifRel in nifRelPaths)
                 {
@@ -309,7 +346,7 @@ namespace DmmDep
                             }
                             else
                             {
-                                Console.WriteLine($"[2] Presumed MAT path '{rel}' from NIF '{nifRel}' does not exist");
+                                Log.Warn($"[2] Presumed MAT path '{rel}' from NIF '{nifRel}' does not exist");
                             }
                         }
                         else if (token.EndsWith(".rig", StringComparison.OrdinalIgnoreCase))
@@ -347,7 +384,7 @@ namespace DmmDep
                 }
 
                 // ---- 3. MATs -> DDS ----
-                Console.WriteLine("[3] Scanning MATs for DDS tokens (via JSON File/FileName)...");
+                Log.Info("[3] Scanning MATs for DDS tokens (via JSON File/FileName)...");
                 int matsWithCustom = 0;
                 int totalDdsHits = 0;
 
@@ -409,13 +446,13 @@ namespace DmmDep
                         if (!pcExists && xbExists)
                         {
                             string relXb = "XBOX\\Data\\" + GetRelativePath(xboxDataRoot, xbCandidate!);
-                            Console.WriteLine($"[WARN] PC texture missing; regenerate and try again -> {relXb}");
+                            Log.Warn($"[WARN] PC texture missing; regenerate and try again -> {relXb}");
                             continue;
                         }
                         if (pcExists && !xbExists && xbCandidate != null)
                         {
                             string relXb = "XBOX\\Data\\" + GetRelativePath(xboxDataRoot, xbCandidate);
-                            Console.WriteLine($"[WARN] XBOX texture missing; regenerate and try again -> {relXb}");
+                            Log.Warn($"[WARN] XBOX texture missing; regenerate and try again -> {relXb}");
                             if (found.Add(ddsRel))
                             {
                                 hasCustomTextures = true;
@@ -433,20 +470,21 @@ namespace DmmDep
                     }
                     else
                     {
-                        Console.WriteLine($"[3] Skipping MAT (no existing custom textures): {matRel}");
+                        // Mark this as a "skipped files" informational message (suppressed by --quiet)
+                        Log.Info($"[3] Skipping MAT (no existing custom textures): {matRel}", isSkipped: true);
                     }
                 }
 
-                Console.WriteLine($"[3] MATs with custom DDS: {matsWithCustom}, total DDS hits: {totalDdsHits}");
+                Log.Info($"[3] MATs with custom DDS: {matsWithCustom}, total DDS hits: {totalDdsHits}");
 
                 // ---- 4. Interface icons + shipbuilder + workshop ----
 
-                Console.WriteLine("[4] Collecting interface icons / previews...");
+                Log.Info("[4] Collecting interface icons / previews...");
                 CollectIconsAndPreviews(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot, tifRoot);
 
                 // ---- 5. Voice assets (PC dev + runtime + XB) ----
 
-                Console.WriteLine("[5] Collecting voice assets...");
+                Log.Info("[5] Collecting voice assets...");
                 CollectVoiceAssets(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot);
 
                 // ---- 6. Scripts (Bethesda Script Name format with imports) ----
@@ -456,13 +494,13 @@ namespace DmmDep
                     NormalizeRel(Path.Combine("Data", "Scripts", name.Replace(':', '\\') + ".pex"));
                 // ---- 6. Scripts (Bethesda script names + PSC imports) ----
 
-                Console.WriteLine("[6] Script discovery from plugin text + PSC imports...");
+                Log.Info("[6] Script discovery from plugin text + PSC imports...");
 
                 var rootScriptNames = ExtractScriptNamesFromPlugin(pluginBytes, gameRoot);
-                Console.WriteLine($"[6] Root script names from plugin: {rootScriptNames.Count}");
+                Log.Info($"[6] Root script names from plugin: {rootScriptNames.Count}");
 
                 var allScriptNames = ExpandScriptImports(rootScriptNames, gameRoot);
-                Console.WriteLine($"[6] After PSC imports: {allScriptNames.Count} total script names");
+                Log.Info($"[6] After PSC imports: {allScriptNames.Count} total script names");
 
                 var pscSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var pexSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -481,7 +519,6 @@ namespace DmmDep
                     if (File.Exists(fullPex) && pexSet.Add(pexRel))
                         AddFile(manifest, achlistPaths, pexRel, FileKind.Pex, "script-pex-or-import", gameRoot, xboxDataRoot);
                 }
-;
 
                 // Second pass: imports from PSC
                 var pscSetSnapshot = new HashSet<string>(pscSet, StringComparer.OrdinalIgnoreCase);
@@ -508,7 +545,7 @@ namespace DmmDep
                     }
                 }
 
-                Console.WriteLine($"[6] After PSC imports: {pscSet.Count} PSC, {pexSet.Count} PEX");
+                Log.Info($"[6] After PSC imports: {pscSet.Count} PSC, {pexSet.Count} PEX");
 
 
                 // ---- Outputs ----
@@ -516,19 +553,20 @@ namespace DmmDep
                 string achlistFileName = pluginName + (options.TestMode ? ".achlist.test" : ".achlist");
                 string achlistPath = Path.Combine(outputRoot, achlistFileName);
                 WriteAchlistJsonAsciiCrLf(achlistPath, achlistPaths.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
-                Console.WriteLine($"Wrote achlist : {achlistPath} (total {achlistPaths.Count})");
+                Log.Info($"Wrote achlist : {achlistPath} (total {achlistPaths.Count})");
 
                 string csvPath = Path.Combine(outputRoot, pluginName + "_deps.csv");
                 WriteDepsCsv(csvPath, manifest.Files);
-                Console.WriteLine($"Wrote deps (csv) : {csvPath} (total {manifest.Files.Count})");
+                Log.Info($"Wrote deps (csv) : {csvPath} (total {manifest.Files.Count})");
 
                 string jsonPath = Path.Combine(outputRoot, pluginName + "_deps.json");
                 var jsonOpts = new JsonSerializerOptions { WriteIndented = true };
                 File.WriteAllText(jsonPath, JsonSerializer.Serialize(manifest, jsonOpts));
-                Console.WriteLine($"Wrote deps    : {jsonPath}");
+                Log.Info($"Wrote deps    : {jsonPath}");
 
                 swTotal.Stop();
-                Console.WriteLine($"Done in {swTotal.Elapsed} | achlist={achlistPaths.Count}, deps={manifest.Files.Count}");
+                // Completion message always shown regardless of --silent
+                Log.Always($"Done in {swTotal.Elapsed} | achlist={achlistPaths.Count}, deps={manifest.Files.Count}");
                 return 0;
             }
             catch (Exception ex)
@@ -548,6 +586,8 @@ namespace DmmDep
             Console.WriteLine("  --tifroot <path>      Override TIF root (default ..\\..\\Source\\TGATextures).");
             Console.WriteLine("  --scriptsroot <path>  Override Data\\Scripts root.");
             Console.WriteLine("  --test                Write .achlist.test instead of .achlist.");
+            Console.WriteLine("  --quiet               Suppress output about skipped files (e.g. 'Skipping MAT').");
+            Console.WriteLine("  --silent              Suppress all informational output except starting and completion.");
         }
 
         private static Options? ParseArgs(string[] args)
@@ -585,6 +625,12 @@ namespace DmmDep
                     case "--test":
                         opts.TestMode = true;
                         break;
+                    case "--quiet":
+                        opts.Quiet = true;
+                        break;
+                    case "--silent":
+                        opts.Silent = true;
+                        break;
                     default:
                         Console.Error.WriteLine($"Unknown option: {arg}");
                         return null;
@@ -593,6 +639,10 @@ namespace DmmDep
 
             if (string.IsNullOrWhiteSpace(opts.PluginPath))
                 return null;
+
+            // if --silent is set, it implies --quiet
+            if (opts.Silent)
+                opts.Quiet = true;
 
             return opts;
         }

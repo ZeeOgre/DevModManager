@@ -696,8 +696,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS Stages_Stages_sqlite_autoindex_Stages_1 ON Sta
     StageName ASC
 );
 
-INSERT INTO UrlRule (id, Name, URLRule) VALUES (1, 'Bethesda Creations', 'https://creations.bethesda.net/{lang}/{ModInfo.BethesdaKey}/details/{BethesdaID}');
-INSERT INTO UrlRule (id, Name, URLRule) VALUES (2, 'Nexus', 'https://nexusmods.com/{Game.NexusKey}/mods/{ModInfo.NexusID}');
+
 
 
 COMMIT TRANSACTION;
