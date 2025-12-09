@@ -6,7 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-	<ItemGroup>
+</Project>
+
       <PackageReference Include="SteamKit2" Version="3.3.1" />
   </ItemGroup>
 
