@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DMM.AssetManagers.Common
 {
-    internal class achlist
+    internal class Achlist
     {
     }
 }
