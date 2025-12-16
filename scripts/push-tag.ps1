@@ -14,7 +14,10 @@ if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true' -or -not [string]::IsN
 }
 
 function Run-Git {
-    param([object[]] $Args)
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]] $Args
+    )
 
     # Resolve git binary once
     try {
@@ -23,8 +26,14 @@ function Run-Git {
         return @{ ExitCode = -1; StdOut = ""; StdErr = "git not found: $($_.Exception.Message)" }
     }
 
-    # Flatten argument arrays (handles callers using @(...))
-    [object[]] $flat = if ($Args -and $Args.Length -eq 1 -and $Args[0] -is [System.Object[]]) { $Args[0] } else { $Args }
+    # Defensive: ensure $Args is always non-null
+    if (-not $Args) { $Args = @() }
+
+    # Debug: enumerate args so we can see exactly what was passed
+    Write-Host ("DEBUG: Run-Git args count={0}" -f $Args.Length)
+    for ($i = 0; $i -lt $Args.Length; $i++) {
+        Write-Host ("DEBUG: Arg[{0}] = '{1}'" -f $i, $Args[$i])
+     }
 
     # Ensure every element is a string and join properly (quote if contains spaces)
     $parts = $flat | ForEach-Object {
