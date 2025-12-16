@@ -21,6 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMM.Standalone.DatabaseSeed
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{52FD92C9-CA60-4F85-A64E-37626A29A7ED}"
 	ProjectSection(SolutionItems) = preProject
+		scripts\bump-and-tag.ps1 = scripts\bump-and-tag.ps1
 		scripts\push-tag.ps1 = scripts\push-tag.ps1
 	EndProjectSection
 EndProject

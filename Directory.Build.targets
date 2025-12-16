@@ -1,0 +1,19 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- treat common CI env variables as CI -->
+    <IsCI Condition="'$(IsCI)' == '' and '$(GITHUB_ACTIONS)' == 'true'">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == '' and '$(CI)' == 'true'">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == '' and '$(TF_BUILD)' != ''">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == ''">false</IsCI>
+
+    <!-- developer override: /p:EnableLocalReleaseTrigger=false -->
+    <EnableLocalReleaseTrigger Condition="'$(EnableLocalReleaseTrigger)' == ''">true</EnableLocalReleaseTrigger>
+  </PropertyGroup>
+
+  <Target Name="TriggerRelease"
+          AfterTargets="Build"
+          Condition="'$(EnableLocalReleaseTrigger)' == 'true' and '$(IsCI)' != 'true' and '$(Configuration)' == 'Release' and '$(MSBuildProjectName)' == 'DMM.Standalone.DependencyChecker'">
+    <Message Importance="High" Text="Local Release build — running release trigger..." />
+    <Exec Command="pwsh -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)scripts\push-tag.ps1&quot;" />
+  </Target>
+</Project>

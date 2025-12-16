@@ -7,6 +7,12 @@ param(
 # Exit on any error
 $ErrorActionPreference = 'Stop'
 
+# Skip entirely on CI environments (explicit checks)
+if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true' -or -not [string]::IsNullOrEmpty($env:TF_BUILD)) {
+    Write-Host "CI detected (GITHUB_ACTIONS/CI/TF_BUILD). Skipping push-tag.ps1."
+    exit 0
+}
+
 function Run-Git {
     param([string[]] $Args)
 
@@ -87,22 +93,16 @@ if (-not $Tag) {
 
 # Echo which source was used
 switch ($tagSource) {
-    "argument" {
-        Write-Host "Using tag '$Tag' (source: command-line argument)"
-    }
-    "version-file" {
+    "argument"       { Write-Host "Using tag '$Tag' (source: command-line argument)" }
+    "version-file"   {
         Write-Host "Using tag '$Tag' (source: version file)"
         if ($versionFilePath) {
             Write-Host "Version file used: $versionFilePath"
             Write-Host "Version file contents: '$((Get-Content $versionFilePath -Raw).Trim())'"
         }
     }
-    "generated" {
-        Write-Host "Using tag '$Tag' (source: generated)"
-    }
-    default {
-        Write-Host "Using tag '$Tag' (source: unknown)"
-    }
+    "generated"      { Write-Host "Using tag '$Tag' (source: generated)" }
+    default          { Write-Host "Using tag '$Tag' (source: unknown)" }
 }
 
 # Ensure working tree is clean unless forced
