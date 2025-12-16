@@ -33,37 +33,25 @@ function Run-Git {
         Write-Host ("DEBUG: Arg[{0}] = '{1}'" -f $i, $Args[$i])
     }
 
-    # Use ArgumentList to avoid string concatenation/quoting problems
+    # Use Start-Process with redirected files to avoid ArgumentList/quoting/platform issues
+    $outFile = [System.IO.Path]::GetTempFileName()
+    $errFile = [System.IO.Path]::GetTempFileName()
     try {
-        $psi = New-Object System.Diagnostics.ProcessStartInfo
-        $psi.FileName = $gitCmd
-        $psi.RedirectStandardOutput = $true
-        $psi.RedirectStandardError  = $true
-        $psi.UseShellExecute = $false
-        $psi.CreateNoWindow = $true
+        $proc = Start-Process -FilePath $gitCmd -ArgumentList $Args -RedirectStandardOutput $outFile -RedirectStandardError $errFile -NoNewWindow -PassThru -Wait
+        $stdOut = ""
+        $stdErr = ""
+        try { $stdOut = Get-Content -Raw -LiteralPath $outFile -ErrorAction Stop } catch {}
+        try { $stdErr = Get-Content -Raw -LiteralPath $errFile -ErrorAction Stop } catch {}
 
-        # Clear any existing and add each arg
-        $null = $psi.ArgumentList.Clear()
-        foreach ($a in $Args) {
-            $null = $psi.ArgumentList.Add([string]$a)
-        }
-
-        # Debug: show joined args for readability
         $argStr = [string]::Join(" ", $Args | ForEach-Object { if ($_ -eq $null) { "" } else { $_ } })
         Write-Host "DEBUG: Running git -> `"$gitCmd`" $argStr"
 
-        $proc = [System.Diagnostics.Process]::Start($psi)
-        if ($null -eq $proc) {
-            return @{ ExitCode = -1; StdOut = ""; StdErr = "Failed to start git process." }
-        }
-
-        $stdOut = $proc.StandardOutput.ReadToEnd()
-        $stdErr = $proc.StandardError.ReadToEnd()
-        $proc.WaitForExit()
         return @{ ExitCode = $proc.ExitCode; StdOut = $stdOut; StdErr = $stdErr }
     } catch {
-        $exMsg = $_.Exception.Message
-        return @{ ExitCode = -1; StdOut = ""; StdErr = $exMsg }
+        return @{ ExitCode = -1; StdOut = ""; StdErr = $_.Exception.Message }
+    } finally {
+        Remove-Item -LiteralPath $outFile -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $errFile -ErrorAction SilentlyContinue
     }
 }
 
