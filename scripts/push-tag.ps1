@@ -348,8 +348,23 @@ if ($pushRes -and $pushRes.ContainsKey('StdErr') -and $pushRes.StdErr) {
 
 if ($pushRes.ExitCode -ne 0 -and -not $alreadyUpToDate) {
     "Push failed for tag $Tag. ExitCode: $($pushRes.ExitCode). StdErr: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-    Write-Error (("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRes.ExitCode, $pushRes.StdErr.Trim()))
-    exit 6
+
+    # Defensive check: sometimes remote reports messages (redirects) but the tag still exists on the remote.
+    "Checking remote for tag refs/tags/$Tag to verify push result" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    $lsRes = Run-Git "ls-remote" "origin" "refs/tags/$Tag"
+    $remoteHasTag = $false
+    if ($lsRes -and $lsRes.ContainsKey('StdOut') -and -not [string]::IsNullOrWhiteSpace($lsRes.StdOut)) {
+        if ($lsRes.StdOut -match 'refs/tags/') { $remoteHasTag = $true }
+    }
+
+    if ($remoteHasTag) {
+        Write-Host "Push reported error but tag refs/tags/$Tag exists on remote — treating as success."
+        "Push reported error but tag exists on remote; treating as success" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    } else {
+        "Push did not succeed and tag not found on remote; failing." | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        Write-Error (("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRes.ExitCode, $pushRes.StdErr.Trim()))
+        exit 6
+    }
 }
 
 if ($alreadyUpToDate) {
