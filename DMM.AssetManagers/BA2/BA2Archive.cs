@@ -383,7 +383,7 @@ namespace DMM.AssetManagers
             s_getAssets = (object ba2) =>
             {
                 var obj = assetsProp.GetValue(ba2);
-                return (obj as IEnumerable<object>) ?? ((obj as System.Collections.IEnumerable)?.Cast<object>
+                return (obj as IEnumerable<object>) ?? ((obj as System.Collections.IEnumerable)?.Cast<object>()
                         ?? throw new InvalidOperationException("BA2 Assets enumeration not supported."));
             };
 
@@ -448,7 +448,7 @@ namespace DMM.AssetManagers
         {
             return (object asset, Stream output) =>
             {
-                var m = asset.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance, new[] { typeof(Stream) });
+                var m = asset.GetType().GetMethod(methodName, new[] { typeof(Stream) });
                 if (m == null) return;
                 m.Invoke(asset, new object[] { output });
             };
