@@ -46,11 +46,6 @@
 
 	<!-- Post-build release trigger removed; TriggerRelease.targets will handle push-tag invocation -->
 
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
-		<!-- Opt-in: enable tag push when building Release in the IDE -->
-		<TriggerGitHubRelease>true</TriggerGitHubRelease>
-	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)' == 'FullRelease'">
 		<!-- Opt-in: enable tag push when building FullRelease in the IDE -->
 		<TriggerGitHubRelease>true</TriggerGitHubRelease>
