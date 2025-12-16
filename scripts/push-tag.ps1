@@ -43,7 +43,8 @@ function Run-Git {
         try { $stdOut = Get-Content -Raw -LiteralPath $outFile -ErrorAction Stop } catch {}
         try { $stdErr = Get-Content -Raw -LiteralPath $errFile -ErrorAction Stop } catch {}
 
-        $argStr = [string]::Join(" ", $Args | ForEach-Object { if ($_ -eq $null) { "" } else { $_ } })
+        # Parenthesize the pipeline expression so Join receives the resulting collection
+        $argStr = [string]::Join(" ", ($Args | ForEach-Object { if ($_ -eq $null) { "" } else { $_ } } ))
         Write-Host "DEBUG: Running git -> `"$gitCmd`" $argStr"
 
         return @{ ExitCode = $proc.ExitCode; StdOut = $stdOut; StdErr = $stdErr }
