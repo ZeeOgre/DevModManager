@@ -25,11 +25,21 @@ function Run-Git {
         $psi.UseShellExecute = $false
         $psi.CreateNoWindow = $true
 
-    $proc = [System.Diagnostics.Process]::Start($psi)
-    $stdOut = $proc.StandardOutput.ReadToEnd()
-    $stdErr = $proc.StandardError.ReadToEnd()
-    $proc.WaitForExit()
-    return @{ ExitCode = $proc.ExitCode; StdOut = $stdOut; StdErr = $stdErr }
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        if ($null -eq $proc) {
+            return @{ ExitCode = -1; StdOut = ""; StdErr = "Failed to start git process." }
+        }
+
+        $stdOut = $proc.StandardOutput.ReadToEnd()
+        $stdErr = $proc.StandardError.ReadToEnd()
+        $proc.WaitForExit()
+        return @{ ExitCode = $proc.ExitCode; StdOut = $stdOut; StdErr = $stdErr }
+    }
+    catch {
+        # Return a structured error so callers can report both stdout/stderr and the exception message
+        $exMsg = $_.Exception.Message
+        return @{ ExitCode = -1; StdOut = ""; StdErr = $exMsg }
+    }
 }
 
 # Ensure git is available
