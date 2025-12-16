@@ -17,7 +17,6 @@
     </LoadFromTemplate>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'DefaultBuild' " />
-  <PropertyGroup Condition=" '$(Configuration)' == 'FullRelease' " />
   <ItemGroup>
     <Compile Include="DMM.Installer.aip">
       <SubType>Code</SubType>
