@@ -132,13 +132,29 @@ switch ($tagSource) {
 
 # Ensure working tree is clean unless forced
 $statusRes = Run-Git @("status", "--porcelain")
-if ($statusRes.ExitCode -ne 0) {
-    $out = ($statusRes.StdOut ?? "").Trim()
-    $err = ($statusRes.StdErr ?? "").Trim()
-    Write-Error "git status failed (exit $($statusRes.ExitCode)). StdOut:`n$out`nStdErr:`n$err"
+
+if ($null -eq $statusRes) {
+    Write-Error "Internal error: Run-Git returned no result for 'git status'."
     exit 4
 }
-$status = $statusRes.StdOut.Trim()
+
+# Normalize fields safely (handle unexpected shapes)
+$stdOut = if ($statusRes.ContainsKey('StdOut')) { $statusRes.StdOut } else { $statusRes.StdOut ?? "" }
+$stdErr = if ($statusRes.ContainsKey('StdErr')) { $statusRes.StdErr } else { $statusRes.StdErr ?? "" }
+$exitCode = if ($statusRes.ContainsKey('ExitCode')) { $statusRes.ExitCode } else { $statusRes.ExitCode ?? -1 }
+
+if ($exitCode -ne 0) {
+    $out = ($stdOut ?? "").Trim()
+    $err = ($stdErr ?? "").Trim()
+    Write-Error "git status failed (exit $exitCode). StdOut:`n$out`nStdErr:`n$err"
+    exit 4
+}
+
+$status = ($stdOut ?? "").Trim()
+if ($status -and -not $Force) {
+    Write-Error "Working tree not clean. Commit or stash changes, or rerun with -Force.`nChanges:`n$status"
+    exit 3
+}
 
 # Check if tag already exists (local)
 $revRes = Run-Git @("rev-parse", "--verify", "refs/tags/$Tag")
