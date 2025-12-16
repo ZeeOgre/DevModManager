@@ -14,22 +14,34 @@ if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true' -or -not [string]::IsN
 }
 
 function Run-Git {
-    param([string[]] $Args)
+    param([object[]] $Args)
 
-    # Debug: show resolved git and arguments
+    # Resolve git binary once
     try {
         $gitCmd = (Get-Command git -ErrorAction Stop).Source
     } catch {
         return @{ ExitCode = -1; StdOut = ""; StdErr = "git not found: $($_.Exception.Message)" }
     }
 
-    $argStr = [string]::Join(" ", $Args)
+    # Flatten argument arrays (handles callers using @(...))
+    object[] $flat =
+        if ($Args -and $Args.Length -eq 1 -and $Args[0] -is [System.Object[]]) { $Args[0] } else { $Args }
+
+    # Ensure every element is a string and join properly (quote if contains spaces)
+    $parts = $flat | ForEach-Object {
+        if ($_ -eq $null) { "" } else {
+            $s = [string]$_
+            if ($s.Contains(' ')) { '"' + $s.Replace('"','\"') + '"' } else { $s }
+        }
+    }
+
+    $argStr = [string]::Join(" ", $parts)
     Write-Host "DEBUG: Running git -> `"$gitCmd`" $argStr"
 
-        try {
+    try {
         $psi = New-Object System.Diagnostics.ProcessStartInfo
-        $psi.FileName = "git"
-        $psi.Arguments = [string]::Join(" ", $Args)
+        $psi.FileName = $gitCmd
+        $psi.Arguments = $argStr
         $psi.RedirectStandardOutput = $true
         $psi.RedirectStandardError = $true
         $psi.UseShellExecute = $false
@@ -44,9 +56,7 @@ function Run-Git {
         $stdErr = $proc.StandardError.ReadToEnd()
         $proc.WaitForExit()
         return @{ ExitCode = $proc.ExitCode; StdOut = $stdOut; StdErr = $stdErr }
-    }
-    catch {
-        # Return a structured error so callers can report both stdout/stderr and the exception message
+    } catch {
         $exMsg = $_.Exception.Message
         return @{ ExitCode = -1; StdOut = ""; StdErr = $exMsg }
     }
