@@ -212,7 +212,8 @@ if ($status -and -not $Force) {
             'DMM.Standalone.DependencyChecker/*',
             'DMM.Installer/*',
             'scripts/*',
-            'Properties/*'
+            'Properties/*',
+            'TriggerRelease.targets'  # allow committing the targets file when we auto-bump
         )
 
         $unsafe = @()
@@ -302,6 +303,12 @@ if ($revRes.ExitCode -eq 0) {
         }
         "Auto-bump: committed version bump to $newVer" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
+        # record commit id
+        $shaRes = Run-Git "rev-parse" "HEAD"
+        $commitSha = $null
+        if ($shaRes -and $shaRes.ContainsKey('StdOut')) { $commitSha = $shaRes.StdOut.Trim() }
+        "Auto-bump commit SHA: $commitSha" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
         # Update tag name and continue
         if ($newVer -match '^v') { $Tag = $newVer } else { $Tag = "v$newVer" }
         Write-Host "Bumped tag to $Tag and will create new tag"
@@ -316,6 +323,7 @@ if ($revRes.ExitCode -eq 0) {
 }
 
 # Create annotated tag
+"Attempting to create annotated tag: $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 $tagRes = Run-Git "tag" "-a" $Tag "-m" "Release $Tag"
 if ($tagRes.ExitCode -ne 0) {
     Write-Error (("Failed to create tag {0}: {1}" -f $Tag, $tagRes.StdErr.Trim()))
@@ -326,6 +334,7 @@ Write-Host "Created tag $Tag"
 "Created tag $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
 # Push tag to origin (robust handling)
+"Attempting to push tag $Tag to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 $pushRes = Run-Git "push" "origin" "refs/tags/$Tag"
 
 # Consider 'Everything up-to-date' a success (sometimes git prints it without zero exit code)
@@ -338,8 +347,8 @@ if ($pushRes -and $pushRes.ContainsKey('StdErr') -and $pushRes.StdErr) {
 }
 
 if ($pushRes.ExitCode -ne 0 -and -not $alreadyUpToDate) {
+    "Push failed for tag $Tag. ExitCode: $($pushRes.ExitCode). StdErr: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
     Write-Error (("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRes.ExitCode, $pushRes.StdErr.Trim()))
-    "Failed to push tag ${Tag} to origin: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
     exit 6
 }
 

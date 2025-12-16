@@ -64,15 +64,9 @@
 
     <Message Importance="High" Text="New version written: $(NewVersion)" />
 
-    <!-- Git operations (run from project dir). Make non-fatal to avoid CI failures when
-         this target is accidentally invoked on an agent. -->
-    <Exec Command="git add &quot;%(VersionFile.Identity)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
-    <Exec Command="git commit -m &quot;Bump dmmdeps to $(NewVersion)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
-    <Exec Command="git push origin HEAD" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
-
-    <!-- Tag and push tag -->
-    <Exec Command="git tag -a v$(NewVersion) -m &quot;Release v$(NewVersion)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
-    <Exec Command="git push origin refs/tags/v$(NewVersion)" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
+    <!-- Delegate git operations and tagging to the unified push-tag.ps1 script -->
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -AutoCommit -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
 
     <Message Importance="High" Text="TriggerFullRelease: completed. New version: v$(NewVersion)" />
   </Target>
