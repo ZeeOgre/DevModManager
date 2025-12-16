@@ -64,7 +64,42 @@ git push origin HEAD
 if (-not $NoTag) {
   $tagName = "v$newNormalized"
   Write-Host "Invoking push-tag.ps1 to create & push tag $tagName"
-  powershell -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\push-tag.ps1" -Tag $tagName
+
+  # Determine repo root for a robust working directory
+  $repoRoot = (git rev-parse --show-toplevel 2>$null).Trim()
+  if (-not $repoRoot) {
+    Write-Error "Unable to determine repo root for invoking push-tag.ps1."
+    exit 6
+  }
+
+  # Build PowerShell command and start a separate process with working directory set to repo root.
+  $psExe = (Get-Command pwsh -ErrorAction SilentlyContinue).Source
+  if (-not $psExe) { $psExe = (Get-Command powershell -ErrorAction SilentlyContinue).Source }
+  if (-not $psExe) { $psExe = "powershell" }
+
+  $pushScriptPath = Join-Path $PSScriptRoot "push-tag.ps1"
+  $args = "-NoProfile -ExecutionPolicy Bypass -File `"$pushScriptPath`" -Tag `"$tagName`""
+
+  $psi = New-Object System.Diagnostics.ProcessStartInfo
+  $psi.FileName = $psExe
+  $psi.Arguments = $args
+  $psi.WorkingDirectory = $repoRoot
+  $psi.RedirectStandardOutput = $true
+  $psi.RedirectStandardError = $true
+  $psi.UseShellExecute = $false
+  $proc = [System.Diagnostics.Process]::Start($psi)
+  $stdOut = $proc.StandardOutput.ReadToEnd()
+  $stdErr = $proc.StandardError.ReadToEnd()
+  $proc.WaitForExit()
+  $exitCode = $proc.ExitCode
+
+  if ($stdOut) { Write-Host $stdOut.Trim() }
+  if ($stdErr) { Write-Host $stdErr.Trim() }
+
+  if ($exitCode -ne 0) {
+    Write-Error ("push-tag.ps1 failed with exit code {0}." -f $exitCode)
+    exit 6
+  }
 }
 
 Write-Host "Done. New version: $newNormalized"
