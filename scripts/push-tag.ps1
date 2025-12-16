@@ -5,8 +5,15 @@ param(
     [string] $RepoRoot
 )
 
+# Determine repo root path in a way compatible with Windows PowerShell (no inline if-expression)
+if ($RepoRoot) {
+    $rootPath = $RepoRoot
+} else {
+    $rootPath = (Get-Location).ProviderPath
+}
+
 # Create a persistent debug log file in the repo root so MSBuild/IDE runs always produce diagnostics
-$dbgFile = Join-Path -Path (if ($RepoRoot) { $RepoRoot } else { (Get-Location).ProviderPath }) -ChildPath ("push-tag-debug-{0}-pid{1}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss'), $PID)
+$dbgFile = Join-Path -Path $rootPath -ChildPath ("push-tag-debug-{0}-pid{1}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss'), $PID)
 "---- push-tag debug start: $(Get-Date) ----" | Out-File -FilePath $dbgFile -Encoding utf8
 "Args: Force=$Force AutoCommit=$AutoCommit Tag=$Tag RepoRoot=$RepoRoot" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 "User: $(whoami)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
@@ -47,34 +54,26 @@ function Run-Git {
         Write-Host ("DEBUG: Arg[{0}] = '{1}'" -f $i, $Args[$i])
     }
 
-    # Use Start-Process with redirected files to avoid ArgumentList/quoting/platform issues
-    $outFile = [System.IO.Path]::GetTempFileName()
-    $errFile = [System.IO.Path]::GetTempFileName()
     try {
-        $proc = Start-Process -FilePath $gitCmd -ArgumentList $Args -RedirectStandardOutput $outFile -RedirectStandardError $errFile -NoNewWindow -PassThru -Wait
+        # Invoke git directly, capture combined stdout/stderr and exit code
+        $output = & $gitCmd @Args 2>&1
+        $exit = $LASTEXITCODE
         $stdOut = ""
         $stdErr = ""
-        try { $stdOut = Get-Content -Raw -LiteralPath $outFile -ErrorAction Stop } catch {}
-        try { $stdErr = Get-Content -Raw -LiteralPath $errFile -ErrorAction Stop } catch {}
-
-        # Parenthesize the pipeline expression so Join receives the resulting collection
-        $argStr = [string]::Join(" ", ($Args | ForEach-Object { if ($_ -eq $null) { "" } else { $_ } } ))
-        Write-Host "DEBUG: Running git -> `"$gitCmd`" $argStr"
+        if ($output) { $stdOut = ($output -join "`n") }
 
         # Persist diagnostics
+        $argStr = [string]::Join(" ", ($Args | ForEach-Object { if ($_ -eq $null) { "" } else { $_ } } ))
         "Run-Git: $gitCmd $argStr" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-        "ExitCode: $($proc.ExitCode)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        "ExitCode: $exit" | Out-File -FilePath $dbgFile -Append -Encoding utf8
         "StdOut:`n$stdOut" | Out-File -FilePath $dbgFile -Append -Encoding utf8
         "StdErr:`n$stdErr" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
-        return @{ ExitCode = $proc.ExitCode; StdOut = $stdOut; StdErr = $stdErr }
+        return @{ ExitCode = $exit; StdOut = $stdOut; StdErr = $stdErr }
     } catch {
         $errMsg = $_.Exception.Message
         "Run-Git error: $errMsg" | Out-File -FilePath $dbgFile -Append -Encoding utf8
         return @{ ExitCode = -1; StdOut = ""; StdErr = $errMsg }
-    } finally {
-        Remove-Item -LiteralPath $outFile -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath $errFile -ErrorAction SilentlyContinue
     }
 }
 
@@ -95,7 +94,7 @@ if ($RepoRoot) {
     Set-Location $RepoRoot
     $repoRoot = (Get-Location).ProviderPath
 } else {
-    $result = Run-Git @("rev-parse", "--show-toplevel")
+    $result = Run-Git "rev-parse" "--show-toplevel"
     if ($result.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($result.StdOut)) {
         Write-Error "Not a git repository (cannot find repo root). git error: $($result.StdErr.Trim())"
         "Not a git repo: $($result.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
@@ -159,7 +158,7 @@ switch ($tagSource) {
 }
 
 # Ensure working tree is clean unless forced
-$statusRes = Run-Git @("status", "--porcelain")
+$statusRes = Run-Git "status" "--porcelain"
 
 if ($null -eq $statusRes) {
     Write-Error "Internal error: Run-Git returned no result for 'git status'."
@@ -232,14 +231,14 @@ if ($status -and -not $Force) {
 
         # Stage and commit
         "AutoCommit: staging changed files: $($changed -join ', ')" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-        $addRes = Run-Git @('add','--all')
+        $addRes = Run-Git "add" "--all"
         if ($addRes.ExitCode -ne 0) {
             Write-Error "git add failed: $($addRes.StdErr)"
             "git add failed: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
             exit 3
         }
         $commitMsg = "Auto-commit changes for FullRelease by push-tag.ps1"
-        $commitRes = Run-Git @('commit','-m',$commitMsg)
+        $commitRes = Run-Git "commit" "-m" $commitMsg
         if ($commitRes.ExitCode -ne 0) {
             Write-Error "git commit failed: $($commitRes.StdErr)"
             "git commit failed: $($commitRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
@@ -255,16 +254,16 @@ if ($status -and -not $Force) {
 }
 
 # Check if tag already exists (local)
-$revRes = Run-Git @("rev-parse", "--verify", "refs/tags/$Tag")
+$revRes = Run-Git "rev-parse" "--verify" "refs/tags/$Tag"
 if ($revRes.ExitCode -eq 0) {
     Write-Host "Tag $Tag already exists locally."
     "Tag $Tag already exists locally" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 } else {
     # Create annotated tag
-    $tagRes = Run-Git @("tag", "-a", $Tag, "-m", "Release $Tag")
+    $tagRes = Run-Git "tag" "-a" $Tag "-m" "Release $Tag"
     if ($tagRes.ExitCode -ne 0) {
-        Write-Error ("Failed to create tag {0}: {1}" -f $Tag, $tagRes.StdErr.Trim())
-        "Failed to create tag $Tag: $($tagRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        Write-Error (("Failed to create tag {0}: {1}" -f $Tag, $tagRes.StdErr.Trim()))
+        "Failed to create tag ${Tag}: $($tagRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
         exit 5
     }
     Write-Host "Created tag $Tag"
@@ -272,10 +271,10 @@ if ($revRes.ExitCode -eq 0) {
 }
 
 # Push tag to origin (robust handling)
-$pushRes = Run-Git @("push", "origin", "refs/tags/$Tag")
+$pushRes = Run-Git "push" "origin" "refs/tags/$Tag"
 if ($pushRes.ExitCode -ne 0) {
-    Write-Error ("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRes.ExitCode, $pushRes.StdErr.Trim())
-    "Failed to push tag $Tag to origin: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    Write-Error (("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRes.ExitCode, $pushRes.StdErr.Trim()))
+    "Failed to push tag ${Tag} to origin: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
     exit 6
 }
 
