@@ -42,4 +42,6 @@
 		<Exec Condition="'$(Configuration)' == 'Publish'" Command="dotnet publish -c Release -r win-x64 -p:SelfContained=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
 	</Target>
 
+	<Import Project="TriggerRelease.targets" Condition="Exists('TriggerRelease.targets')" />
+
 </Project>
