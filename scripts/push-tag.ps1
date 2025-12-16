@@ -26,34 +26,31 @@ function Run-Git {
         return @{ ExitCode = -1; StdOut = ""; StdErr = "git not found: $($_.Exception.Message)" }
     }
 
-    # Defensive: ensure $Args is always non-null
     if (-not $Args) { $Args = @() }
 
-    # Debug: enumerate args so we can see exactly what was passed
     Write-Host ("DEBUG: Run-Git args count={0}" -f $Args.Length)
     for ($i = 0; $i -lt $Args.Length; $i++) {
         Write-Host ("DEBUG: Arg[{0}] = '{1}'" -f $i, $Args[$i])
-     }
-
-    # Ensure every element is a string and join properly (quote if contains spaces)
-    $parts = $flat | ForEach-Object {
-        if ($_ -eq $null) { "" } else {
-            $s = [string]$_
-            if ($s.Contains(' ')) { '"' + $s.Replace('"','\"') + '"' } else { $s }
-        }
     }
 
-    $argStr = [string]::Join(" ", $parts)
-    Write-Host "DEBUG: Running git -> `"$gitCmd`" $argStr"
-
+    # Use ArgumentList to avoid string concatenation/quoting problems
     try {
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = $gitCmd
-        $psi.Arguments = $argStr
         $psi.RedirectStandardOutput = $true
-        $psi.RedirectStandardError = $true
+        $psi.RedirectStandardError  = $true
         $psi.UseShellExecute = $false
         $psi.CreateNoWindow = $true
+
+        # Clear any existing and add each arg
+        $null = $psi.ArgumentList.Clear()
+        foreach ($a in $Args) {
+            $null = $psi.ArgumentList.Add([string]$a)
+        }
+
+        # Debug: show joined args for readability
+        $argStr = [string]::Join(" ", $Args | ForEach-Object { if ($_ -eq $null) { "" } else { $_ } })
+        Write-Host "DEBUG: Running git -> `"$gitCmd`" $argStr"
 
         $proc = [System.Diagnostics.Process]::Start($psi)
         if ($null -eq $proc) {
