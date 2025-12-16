@@ -1,5 +1,6 @@
 param(
     [switch] $Force,
+    [switch] $AutoCommit,
     [string] $Tag,
     [string] $RepoRoot
 )
@@ -7,7 +8,7 @@ param(
 # Create a persistent debug log file in the repo root so MSBuild/IDE runs always produce diagnostics
 $dbgFile = Join-Path -Path (if ($RepoRoot) { $RepoRoot } else { (Get-Location).ProviderPath }) -ChildPath ("push-tag-debug-{0}-pid{1}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss'), $PID)
 "---- push-tag debug start: $(Get-Date) ----" | Out-File -FilePath $dbgFile -Encoding utf8
-"Args: Force=$Force Tag=$Tag RepoRoot=$RepoRoot" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+"Args: Force=$Force AutoCommit=$AutoCommit Tag=$Tag RepoRoot=$RepoRoot" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 "User: $(whoami)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 "Pwd: $(Get-Location).ProviderPath" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 "PowerShell: $($PSVersionTable.PSVersion)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
@@ -195,9 +196,62 @@ if ($exitCode -ne 0) {
 $status = ""
 if ($stdOut) { $status = $stdOut.Trim() }
 if ($status -and -not $Force) {
-    Write-Error "Working tree not clean. Commit or stash changes, or rerun with -Force.`nChanges:`n$status"
-    "Working tree not clean. Changes:`n$status" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-    exit 3
+    # If AutoCommit is requested, only allow if changed files are within an approved whitelist
+    if ($AutoCommit) {
+        # Extract changed paths from porcelain output
+        $changed = @()
+        foreach ($line in ($stdOut -split "`n")) {
+            $l = $line.Trim()
+            if (-not $l) { continue }
+            if ($l -match '^[\s\S]{0,}\s{1,}(.+)$') { $p = $matches[1].Trim() } else { $p = $l }
+            $changed += $p
+        }
+
+        # allowed patterns (relative paths). Modify as needed.
+        $allowed = @(
+            'DMM.Standalone.DependencyChecker/*',
+            'DMM.Installer/*',
+            'scripts/*',
+            'Properties/*'
+        )
+
+        $unsafe = @()
+        foreach ($f in $changed) {
+            $ok = $false
+            foreach ($pat in $allowed) {
+                if ($f -like $pat) { $ok = $true; break }
+            }
+            if (-not $ok) { $unsafe += $f }
+        }
+
+        if ($unsafe.Count -gt 0) {
+            Write-Error "AutoCommit refused: changed files outside allowed paths:`n$($unsafe -join "`n")"
+            "AutoCommit refused: $($unsafe -join ', ')" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 3
+        }
+
+        # Stage and commit
+        "AutoCommit: staging changed files: $($changed -join ', ')" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        $addRes = Run-Git @('add','--all')
+        if ($addRes.ExitCode -ne 0) {
+            Write-Error "git add failed: $($addRes.StdErr)"
+            "git add failed: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 3
+        }
+        $commitMsg = "Auto-commit changes for FullRelease by push-tag.ps1"
+        $commitRes = Run-Git @('commit','-m',$commitMsg)
+        if ($commitRes.ExitCode -ne 0) {
+            Write-Error "git commit failed: $($commitRes.StdErr)"
+            "git commit failed: $($commitRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 3
+        }
+        "AutoCommit: commit created" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+    } else {
+        Write-Error "Working tree not clean. Commit or stash changes, or rerun with -Force.`nChanges:`n$status"
+        "Working tree not clean. Changes:`n$status" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        exit 3
+    }
 }
 
 # Check if tag already exists (local)
