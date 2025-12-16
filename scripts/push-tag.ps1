@@ -24,8 +24,7 @@ function Run-Git {
     }
 
     # Flatten argument arrays (handles callers using @(...))
-    object[] $flat =
-        if ($Args -and $Args.Length -eq 1 -and $Args[0] -is [System.Object[]]) { $Args[0] } else { $Args }
+    [object[]] $flat = if ($Args -and $Args.Length -eq 1 -and $Args[0] -is [System.Object[]]) { $Args[0] } else { $Args }
 
     # Ensure every element is a string and join properly (quote if contains spaces)
     $parts = $flat | ForEach-Object {
