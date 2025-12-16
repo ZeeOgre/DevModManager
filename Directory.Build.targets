@@ -12,8 +12,8 @@
 
   <Target Name="TriggerRelease"
           AfterTargets="Build"
-          Condition="'$(EnableLocalReleaseTrigger)' == 'true' and '$(IsCI)' != 'true' and '$(Configuration)' == 'Release' and '$(MSBuildProjectName)' == 'DMM.Standalone.DependencyChecker'">
-    <Message Importance="High" Text="Local Release build — running release trigger..." />
-    <Exec Command="pwsh -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)scripts\push-tag.ps1&quot;" />
+          Condition="'$(EnableLocalReleaseTrigger)' == 'true' and '$(IsCI)' != 'true' and '$(Configuration)' == 'FullRelease' and '$(MSBuildProjectName)' == 'DMM.Standalone.DependencyChecker'">
+    <Message Importance="High" Text="Local FullRelease build â€” running release trigger..." />
+    <Exec Command="pwsh -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildThisFileDirectory)scripts\push-tag.ps1' -AutoCommit&quot;" />
   </Target>
 </Project>

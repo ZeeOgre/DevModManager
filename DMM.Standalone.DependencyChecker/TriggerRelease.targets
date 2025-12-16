@@ -7,6 +7,6 @@
   <Target Name="TriggerGitHubRelease" AfterTargets="Build"
           Condition="'$(Configuration)' == 'FullRelease' and '$(TriggerGitHubRelease)' == 'true'">
     <Message Text="TriggerGitHubRelease=true — running: $(MSBuildProjectDirectory)\..\scripts\push-tag.ps1 -AutoCommit" Importance="high" />
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -AutoCommit" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1' -AutoCommit&quot;" />
   </Target>
 </Project>
