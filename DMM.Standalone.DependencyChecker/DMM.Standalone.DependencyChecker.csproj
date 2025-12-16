@@ -48,4 +48,9 @@
 	  <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(SolutionDir)scripts\push-tag.ps1&quot;" />
 	</Target>
 
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<!-- Opt-in: enable tag push when building Release in the IDE -->
+		<TriggerGitHubRelease>true</TriggerGitHubRelease>
+	</PropertyGroup>
+
 </Project>
