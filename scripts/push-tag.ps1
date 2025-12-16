@@ -272,13 +272,23 @@ if ($revRes.ExitCode -eq 0) {
 
 # Push tag to origin (robust handling)
 $pushRes = Run-Git "push" "origin" "refs/tags/$Tag"
-if ($pushRes.ExitCode -ne 0) {
+
+# Consider 'Everything up-to-date' a success (sometimes git prints it without zero exit code)
+$alreadyUpToDate = $false
+if ($pushRes -and $pushRes.ContainsKey('StdOut') -and $pushRes.StdOut) {
+    if ($pushRes.StdOut -match 'Everything up-to-date') { $alreadyUpToDate = $true }
+}
+if ($pushRes -and $pushRes.ContainsKey('StdErr') -and $pushRes.StdErr) {
+    if ($pushRes.StdErr -match 'Everything up-to-date') { $alreadyUpToDate = $true }
+}
+
+if ($pushRes.ExitCode -ne 0 -and -not $alreadyUpToDate) {
     Write-Error (("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRes.ExitCode, $pushRes.StdErr.Trim()))
     "Failed to push tag ${Tag} to origin: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
     exit 6
 }
 
-if ($pushRes.StdOut -match 'Everything up-to-date' -or $pushRes.StdErr -match 'Everything up-to-date') {
+if ($alreadyUpToDate) {
     Write-Host "Tag $Tag already on remote (no-op)."
     "Tag $Tag already on remote (no-op)." | Out-File -FilePath $dbgFile -Append -Encoding utf8
 } else {
