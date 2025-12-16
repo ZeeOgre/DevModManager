@@ -6,7 +6,7 @@
 
   <Target Name="TriggerGitHubRelease" AfterTargets="Build"
           Condition="'$(Configuration)' == 'Release' and '$(TriggerGitHubRelease)' == 'true'">
-    <Message Text="TriggerGitHubRelease=true — running: $(SolutionDir)scripts\push-tag.ps1" Importance="high" />
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(SolutionDir)scripts\push-tag.ps1&quot;" />
+    <Message Text="TriggerGitHubRelease=true — running: $(MSBuildProjectDirectory)\..\scripts\push-tag.ps1" Importance="high" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot;" />
   </Target>
 </Project>
