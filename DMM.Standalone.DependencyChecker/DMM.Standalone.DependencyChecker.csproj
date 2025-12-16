@@ -52,13 +52,13 @@
 
     <!-- FullRelease: run with AutoCommit enabled -->
     <Exec Condition="'$(Configuration)' == 'FullRelease'"
-          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1' -AutoCommit -RepoRoot '$(MSBuildProjectDirectory)\..' 2&gt;&amp;1 | Out-File -FilePath '$(MSBuildProjectDirectory)\push-tag.log' -Encoding utf8&quot;"
-      ContinueOnError="WarnAndContinue" />
+          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -AutoCommit:$true -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
+      WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
 
     <!-- Non-FullRelease: run without AutoCommit -->
     <Exec Condition="'$(Configuration)' != 'FullRelease'"
-          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1' -RepoRoot '$(MSBuildProjectDirectory)\..' 2&gt;&amp;1 | Out-File -FilePath '$(MSBuildProjectDirectory)\push-tag.log' -Encoding utf8&quot;"
-      ContinueOnError="WarnAndContinue" />
+          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
+      WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
   </Target>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
