@@ -73,12 +73,19 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "Created tag $Tag"
 }
 
-# Push tag to origin
+# Push tag to origin (robust handling)
 $pushOutput = & git push origin "refs/tags/$Tag" 2>&1
-if ($LASTEXITCODE -ne 0) {
-    Write-Error ("Failed to push tag {0} to origin: {1}" -f $Tag, $pushOutput)
+$pushRc = $LASTEXITCODE
+
+if ($pushRc -ne 0) {
+    Write-Error ("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRc, $pushOutput)
     exit 6
 }
-Write-Host "Pushed tag $Tag to origin"
+
+if ($pushOutput -match 'Everything up-to-date') {
+    Write-Host "Tag $Tag already on remote (no-op)."
+} else {
+    Write-Host "Pushed tag $Tag to origin"
+}
 
 exit 0
