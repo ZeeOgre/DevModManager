@@ -64,7 +64,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const sha = context.sha;
-            const core = require('@actions/core');
+            // use injected `core` (do not `require('@actions/core')` here)
             const maxAttempts = 3;
 
             async function createReleaseForTag(t) {

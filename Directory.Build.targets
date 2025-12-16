@@ -12,8 +12,16 @@
 
   <Target Name="TriggerRelease"
           AfterTargets="Build"
-          Condition="'$(EnableLocalReleaseTrigger)' == 'true' and '$(IsCI)' != 'true' and '$(Configuration)' == 'FullRelease' and '$(MSBuildProjectName)' == 'DMM.Standalone.DependencyChecker'">
-    <Message Importance="High" Text="Local FullRelease build — running release trigger..." />
-    <Exec Command="pwsh -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildThisFileDirectory)scripts\push-tag.ps1' -AutoCommit&quot;" />
+          Condition="'$(EnableLocalReleaseTrigger)' == 'true'
+                     and '$(IsCI)' != 'true'
+                     and '$(Configuration)' == 'FullRelease'
+                     and '$(TriggerGitHubRelease)' != 'true'">
+    <!-- Diagnostic: show who triggered and key properties -->
+    <Message Importance="High" Text="Local FullRelease build — running directory-level release trigger for project: $(MSBuildProjectName)" />
+    <Message Importance="Normal" Text="Properties: Configuration=$(Configuration); IsCI=$(IsCI); EnableLocalReleaseTrigger=$(EnableLocalReleaseTrigger); TriggerGitHubRelease=$(TriggerGitHubRelease)" />
+
+    <!-- Call script via PowerShell call operator to ensure script parameters are passed correctly.
+         Pass explicit RepoRoot so the script resolves repo root reliably. -->
+    <Exec Command="pwsh -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildThisFileDirectory)scripts\push-tag.ps1' -AutoCommit -RepoRoot '$(MSBuildThisFileDirectory)'&quot;" />
   </Target>
 </Project>

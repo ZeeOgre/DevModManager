@@ -106,6 +106,7 @@ namespace DmmDep
                 // Print a concise starting message regardless of --silent
                 Log.Always($"Starting dependency check: {Path.GetFileName(pluginPath)}");
 
+                //all of these should ALWAYS succeed.
                 string dataRoot = Path.GetDirectoryName(pluginPath)
                                   ?? throw new InvalidOperationException("Unable to get Data root from plugin path");
                 string gameRoot = options.GameRootOverride ??
@@ -152,7 +153,7 @@ namespace DmmDep
 
                 // ---- 1. Scan plugin for NIF / terrain / MAT / misc strings ----
 
-                Log.Info("[1] Scanning plugin for NIF / terrain / MAT / misc strings...");
+                Log.Info("[1] Scanning plugin for local NIF / terrain / MAT / misc strings...");
                 var pluginBytes = File.ReadAllBytes(pluginPath);
                 var pluginStrings = ExtractPrintableStrings(pluginBytes, 6).ToList();
                 Log.Info($"[1] Extracted {pluginStrings.Count} printable strings (len >= 6)");
