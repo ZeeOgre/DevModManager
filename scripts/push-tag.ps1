@@ -139,18 +139,32 @@ if ($null -eq $statusRes) {
 }
 
 # Normalize fields safely (handle unexpected shapes)
-$stdOut = if ($statusRes.ContainsKey('StdOut')) { $statusRes.StdOut } else { $statusRes.StdOut ?? "" }
-$stdErr = if ($statusRes.ContainsKey('StdErr')) { $statusRes.StdErr } else { $statusRes.StdErr ?? "" }
-$exitCode = if ($statusRes.ContainsKey('ExitCode')) { $statusRes.ExitCode } else { $statusRes.ExitCode ?? -1 }
+$stdOut = ""
+if ($statusRes -and $statusRes.ContainsKey('StdOut') -and $statusRes.StdOut) {
+    $stdOut = $statusRes.StdOut
+}
+
+$stdErr = ""
+if ($statusRes -and $statusRes.ContainsKey('StdErr') -and $statusRes.StdErr) {
+    $stdErr = $statusRes.StdErr
+}
+
+$exitCode = -1
+if ($statusRes -and $statusRes.ContainsKey('ExitCode') -and $statusRes.ExitCode -ne $null) {
+    $exitCode = $statusRes.ExitCode
+}
 
 if ($exitCode -ne 0) {
-    $out = ($stdOut ?? "").Trim()
-    $err = ($stdErr ?? "").Trim()
+    $out = ""
+    if ($stdOut) { $out = $stdOut.Trim() }
+    $err = ""
+    if ($stdErr) { $err = $stdErr.Trim() }
     Write-Error "git status failed (exit $exitCode). StdOut:`n$out`nStdErr:`n$err"
     exit 4
 }
 
-$status = ($stdOut ?? "").Trim()
+$status = ""
+if ($stdOut) { $status = $stdOut.Trim() }
 if ($status -and -not $Force) {
     Write-Error "Working tree not clean. Commit or stash changes, or rerun with -Force.`nChanges:`n$status"
     exit 3
@@ -183,4 +197,4 @@ if ($pushRes.StdOut -match 'Everything up-to-date' -or $pushRes.StdErr -match 'E
     Write-Host "Pushed tag $Tag to origin"
 }
 
-exit 0
+exit 0      
