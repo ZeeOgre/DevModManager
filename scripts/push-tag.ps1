@@ -1,6 +1,7 @@
 param(
     [switch] $Force,
-    [string] $Tag
+    [string] $Tag,
+    [string] $RepoRoot
 )
 
 # Exit on any error
@@ -30,30 +31,49 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     exit 2
 }
 
-# Resolve repo root
-$result = Run-Git @("rev-parse", "--show-toplevel")
-if ($result.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($result.StdOut)) {
-    Write-Error "Not a git repository (cannot find repo root). git error: $($result.StdErr.Trim())"
-    exit 2
+# If RepoRoot was passed in, use it; otherwise resolve repo root
+if ($RepoRoot) {
+    if (-not (Test-Path $RepoRoot)) {
+        Write-Error "Provided RepoRoot path does not exist: $RepoRoot"
+        exit 2
+    }
+    Set-Location $RepoRoot
+    $repoRoot = (Get-Location).ProviderPath
+} else {
+    $result = Run-Git @("rev-parse", "--show-toplevel")
+    if ($result.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($result.StdOut)) {
+        Write-Error "Not a git repository (cannot find repo root). git error: $($result.StdErr.Trim())"
+        exit 2
+    }
+    $repoRoot = $result.StdOut.Trim()
+    Set-Location $repoRoot
 }
-$repoRoot = $result.StdOut.Trim()
-Set-Location $repoRoot
+
+# Track tag source for diagnostics
+$tagSource = "none"
+$versionFilePath = $null
+
+# If tag supplied on the command line, prefer it
+if ($Tag) {
+    $tagSource = "argument"
+}
 
 # If tag not supplied, try to find a Properties\version.txt anywhere in the repo (prefer project-level)
 if (-not $Tag) {
-    $versionFile = $null
     try {
-        $versionFile = Get-ChildItem -Path $repoRoot -Filter version.txt -Recurse -ErrorAction SilentlyContinue |
-                       Where-Object { $_.FullName -imatch "\\Properties\\version\.txt$" } |
-                       Select-Object -First 1
+        $vf = Get-ChildItem -Path $repoRoot -Filter version.txt -Recurse -ErrorAction SilentlyContinue |
+              Where-Object { $_.FullName -imatch "\\Properties\\version\.txt$" } |
+              Select-Object -First 1
     } catch {
-        # ignore
+        $vf = $null
     }
 
-    if ($versionFile -and (Test-Path $versionFile.FullName)) {
-        $v = (Get-Content $versionFile.FullName -Raw).Trim()
+    if ($vf -and (Test-Path $vf.FullName)) {
+        $versionFilePath = $vf.FullName
+        $v = (Get-Content $versionFilePath -Raw).Trim()
         if ($v) {
             if ($v -match '^v') { $Tag = $v } else { $Tag = "v$v" }
+            $tagSource = "version-file"
         }
     }
 }
@@ -61,7 +81,28 @@ if (-not $Tag) {
 # Fallback tag if still empty
 if (-not $Tag) {
     $Tag = ("v" + (Get-Date -Format "yyyyMMdd-HHmmss"))
+    $tagSource = "generated"
     Write-Host "No version file found; using generated tag: $Tag"
+}
+
+# Echo which source was used
+switch ($tagSource) {
+    "argument" {
+        Write-Host "Using tag '$Tag' (source: command-line argument)"
+    }
+    "version-file" {
+        Write-Host "Using tag '$Tag' (source: version file)"
+        if ($versionFilePath) {
+            Write-Host "Version file used: $versionFilePath"
+            Write-Host "Version file contents: '$((Get-Content $versionFilePath -Raw).Trim())'"
+        }
+    }
+    "generated" {
+        Write-Host "Using tag '$Tag' (source: generated)"
+    }
+    default {
+        Write-Host "Using tag '$Tag' (source: unknown)"
+    }
 }
 
 # Ensure working tree is clean unless forced

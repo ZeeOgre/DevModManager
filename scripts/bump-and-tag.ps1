@@ -78,7 +78,7 @@ if (-not $NoTag) {
   if (-not $psExe) { $psExe = "powershell" }
 
   $pushScriptPath = Join-Path $PSScriptRoot "push-tag.ps1"
-  $args = "-NoProfile -ExecutionPolicy Bypass -File `"$pushScriptPath`" -Tag `"$tagName`""
+  $args = "-NoProfile -ExecutionPolicy Bypass -File `"$pushScriptPath`" -Tag `"$tagName`" -RepoRoot `"$repoRoot`""
 
   $psi = New-Object System.Diagnostics.ProcessStartInfo
   $psi.FileName = $psExe
