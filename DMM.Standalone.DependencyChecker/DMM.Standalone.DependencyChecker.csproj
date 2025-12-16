@@ -44,4 +44,8 @@
 
 	<Import Project="TriggerRelease.targets" Condition="Exists('TriggerRelease.targets')" />
 
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	  <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(SolutionDir)scripts\push-tag.ps1&quot;" />
+	</Target>
+
 </Project>
