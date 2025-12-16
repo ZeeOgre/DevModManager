@@ -495,6 +495,11 @@ namespace DmmDep
                 // ---- 6. Scripts (Bethesda script names + PSC imports) ----
 
                 Log.Info("[6] Script discovery from plugin text + PSC imports...");
+                // NOTE: Script files (PSC/PEX) may be overrepresented here because we only
+                // check for their presence on disk. We do not inspect parent archives that
+                // might contain scripts, so some scripts may appear present when they are
+                // actually provided by archives or other distribution mechanisms.
+                Log.Warn("[NOTE] Script files (PSC/PEX) may be overrepresented; only filesystem presence is checked.");
 
                 var rootScriptNames = ExtractScriptNamesFromPlugin(pluginBytes, gameRoot);
                 Log.Info($"[6] Root script names from plugin: {rootScriptNames.Count}");
@@ -560,9 +565,11 @@ namespace DmmDep
                 Log.Info($"Wrote deps (csv) : {csvPath} (total {manifest.Files.Count})");
 
                 string jsonPath = Path.Combine(outputRoot, pluginName + "_deps.json");
-                var jsonOpts = new JsonSerializerOptions { WriteIndented = true };
-                File.WriteAllText(jsonPath, JsonSerializer.Serialize(manifest, jsonOpts));
-                Log.Info($"Wrote deps    : {jsonPath}");
+                // JSON output is currently not used and can be very large. Skip writing it.
+                // If needed in future re-enable serialization below.
+                // var jsonOpts = new JsonSerializerOptions { WriteIndented = true };
+                // File.WriteAllText(jsonPath, JsonSerializer.Serialize(manifest, jsonOpts));
+                Log.Info($"Skipped writing JSON deps file: {jsonPath} (disabled to reduce output size)");
 
                 swTotal.Stop();
                 // Completion message always shown regardless of --silent
