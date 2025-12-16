@@ -256,6 +256,7 @@ if ($status -and -not $Force) {
 }
 
 # Check if tag already exists (local)
+$TagCreated = $false
 $revRes = Run-Git "rev-parse" "--verify" "refs/tags/$Tag"
 if ($revRes.ExitCode -eq 0) {
     Write-Host "Tag $Tag already exists locally."
@@ -269,50 +270,122 @@ if ($revRes.ExitCode -eq 0) {
             exit 5
         }
 
-        # Read and parse current version
-        $curText = (Get-Content $versionFilePath -Raw).Trim()
-        $m = [System.Text.RegularExpressions.Regex]::Match($curText, "^v?(\d+)\.(\d+)\.(\d+)$")
-        if (-not $m.Success) {
-            Write-Error "version.txt contains unexpected format: '$curText' (expected MAJOR.MINOR.PATCH)"
-            "Auto-bump refused: version file format unexpected: $curText" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-            exit 5
+        $maxAttempts = 3
+        for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+            "Auto-bump attempt $attempt/$maxAttempts" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+            # Read and parse current version
+            $curText = (Get-Content $versionFilePath -Raw).Trim()
+            $m = [System.Text.RegularExpressions.Regex]::Match($curText, "^v?(\d+)\.(\d+)\.(\d+)$")
+            if (-not $m.Success) {
+                Write-Error "version.txt contains unexpected format: '$curText' (expected MAJOR.MINOR.PATCH)"
+                "Auto-bump refused: version file format unexpected: $curText" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                exit 5
+            }
+            $major = [int]$m.Groups[1].Value
+            $minor = [int]$m.Groups[2].Value
+            $patch = [int]$m.Groups[3].Value
+
+            # bump
+            $patch++
+            $newVer = "{0}.{1}.{2}" -f $major, $minor, $patch
+
+            # Write new version (no leading v in file)
+            Set-Content -Path $versionFilePath -Value $newVer -Encoding UTF8
+            "Auto-bump: version.txt updated to $newVer" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+            # Stage and commit the updated version file
+            $addRes = Run-Git "add" "$versionFilePath"
+            if ($addRes.ExitCode -ne 0) {
+                Write-Error "git add failed for version file: $($addRes.StdErr)"
+                "git add failed for version file: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                exit 5
+            }
+            $commitMsg = "Auto-bump version to $newVer for release"
+            $commitRes = Run-Git "commit" "-m" $commitMsg
+            if ($commitRes.ExitCode -ne 0) {
+                Write-Error "git commit failed for version bump: $($commitRes.StdErr)"
+                "git commit failed for version bump: $($commitRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                exit 5
+            }
+            "Auto-bump: committed version bump to $newVer" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+            # record commit id
+            $shaRes = Run-Git "rev-parse" "HEAD"
+            $commitSha = $null
+            if ($shaRes -and $shaRes.ContainsKey('StdOut')) { $commitSha = $shaRes.StdOut.Trim() }
+            "Auto-bump commit SHA: $commitSha" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+            # Update tag name to new version
+            if ($newVer -match '^v') { $Tag = $newVer } else { $Tag = "v$newVer" }
+            Write-Host "Bumped tag to $Tag and will create new tag"
+            "Bumped tag to $Tag and will create new tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+            # Try to create annotated tag
+            $tagRes = Run-Git "tag" "-a" $Tag "-m" "Release $Tag"
+            if ($tagRes.ExitCode -ne 0) {
+                "Tag creation failed for $Tag (attempt $attempt): $($tagRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                # If tag creation failed due to existing tag, continue to next attempt
+            } else {
+                "Created tag $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+                # Push tag to origin (robust handling)
+                "Attempting to push tag $Tag to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                $pushRes = Run-Git "push" "origin" "refs/tags/$Tag"
+
+                # Consider 'Everything up-to-date' a success
+                $alreadyUpToDate = $false
+                if ($pushRes -and $pushRes.ContainsKey('StdOut') -and $pushRes.StdOut) {
+                    if ($pushRes.StdOut -match 'Everything up-to-date') { $alreadyUpToDate = $true }
+                }
+                if ($pushRes -and $pushRes.ContainsKey('StdErr') -and $pushRes.StdErr) {
+                    if ($pushRes.StdErr -match 'Everything up-to-date') { $alreadyUpToDate = $true }
+                }
+
+                if ($pushRes.ExitCode -ne 0 -and -not $alreadyUpToDate) {
+                    "Push failed for tag $Tag (attempt $attempt). ExitCode: $($pushRes.ExitCode). StdErr: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+                    # Defensive check: sometimes remote reports messages but the tag still exists on the remote.
+                    "Checking remote for tag refs/tags/$Tag to verify push result" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                    $lsRes = Run-Git "ls-remote" "origin" "refs/tags/$Tag"
+                    $remoteHasTag = $false
+                    if ($lsRes -and $lsRes.ContainsKey('StdOut') -and -not [string]::IsNullOrWhiteSpace($lsRes.StdOut)) {
+                        if ($lsRes.StdOut -match 'refs/tags/') { $remoteHasTag = $true }
+                    }
+
+                    if ($remoteHasTag) {
+                        Write-Host "Push reported error but tag refs/tags/$Tag exists on remote — treating as success."
+                        "Push reported error but tag exists on remote; treating as success" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                        $TagCreated = $true
+                        break
+                    } else {
+                        # try next attempt
+                        "Push failed and tag not on remote; will try next attempt if available" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                    }
+                } else {
+                    if ($alreadyUpToDate) {
+                        Write-Host "Tag $Tag already on remote (no-op)."
+                        "Tag $Tag already on remote (no-op)." | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                    } else {
+                        Write-Host "Pushed tag $Tag to origin"
+                        "Pushed tag $Tag to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                    }
+                    $TagCreated = $true
+                    break
+                }
+            }
+
+            if ($attempt -lt $maxAttempts) {
+                "Auto-bump attempt $attempt did not succeed; trying next patch..." | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            }
         }
-        $major = [int]$m.Groups[1].Value
-        $minor = [int]$m.Groups[2].Value
-        $patch = [int]$m.Groups[3].Value
-        $patch++
-        $newVer = "{0}.{1}.{2}" -f $major, $minor, $patch
 
-        # Write new version (no leading v in file)
-        Set-Content -Path $versionFilePath -Value $newVer -Encoding UTF8
-        "Auto-bump: version.txt updated to $newVer" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-
-        # Stage and commit the updated version file
-        $addRes = Run-Git "add" "$versionFilePath"
-        if ($addRes.ExitCode -ne 0) {
-            Write-Error "git add failed for version file: $($addRes.StdErr)"
-            "git add failed for version file: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-            exit 5
+        if (-not $TagCreated) {
+            Write-Error "Failed to create and push a new unique tag after $maxAttempts attempts. Aborting."
+            "Failed to create and push bumped tag after $maxAttempts attempts" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 6
         }
-        $commitMsg = "Auto-bump version to $newVer for release"
-        $commitRes = Run-Git "commit" "-m" $commitMsg
-        if ($commitRes.ExitCode -ne 0) {
-            Write-Error "git commit failed for version bump: $($commitRes.StdErr)"
-            "git commit failed for version bump: $($commitRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-            exit 5
-        }
-        "Auto-bump: committed version bump to $newVer" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
-        # record commit id
-        $shaRes = Run-Git "rev-parse" "HEAD"
-        $commitSha = $null
-        if ($shaRes -and $shaRes.ContainsKey('StdOut')) { $commitSha = $shaRes.StdOut.Trim() }
-        "Auto-bump commit SHA: $commitSha" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-
-        # Update tag name and continue
-        if ($newVer -match '^v') { $Tag = $newVer } else { $Tag = "v$newVer" }
-        Write-Host "Bumped tag to $Tag and will create new tag"
-        "Bumped tag to $Tag and will create new tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
     } else {
         Write-Host "Tag $Tag exists and AutoCommit is not enabled; skipping tag creation."
         "Tag exists and no AutoCommit: skipping" | Out-File -FilePath $dbgFile -Append -Encoding utf8
@@ -322,57 +395,62 @@ if ($revRes.ExitCode -eq 0) {
     # tag does not exist; proceed as before
 }
 
-# Create annotated tag
-"Attempting to create annotated tag: $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-$tagRes = Run-Git "tag" "-a" $Tag "-m" "Release $Tag"
-if ($tagRes.ExitCode -ne 0) {
-    Write-Error (("Failed to create tag {0}: {1}" -f $Tag, $tagRes.StdErr.Trim()))
-    "Failed to create tag ${Tag}: $($tagRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-    exit 5
-}
-Write-Host "Created tag $Tag"
-"Created tag $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+# Create annotated tag (if not already created by auto-bump loop)
+if (-not $TagCreated) {
+    "Attempting to create annotated tag: $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    $tagRes = Run-Git "tag" "-a" $Tag "-m" "Release $Tag"
+    if ($tagRes.ExitCode -ne 0) {
+        Write-Error (("Failed to create tag {0}: {1}" -f $Tag, $tagRes.StdErr.Trim()))
+        "Failed to create tag ${Tag}: $($tagRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        exit 5
+    }
+    Write-Host "Created tag $Tag"
+    "Created tag $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
-# Push tag to origin (robust handling)
-"Attempting to push tag $Tag to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-$pushRes = Run-Git "push" "origin" "refs/tags/$Tag"
+    # Push tag to origin (robust handling)
+    "Attempting to push tag $Tag to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    $pushRes = Run-Git "push" "origin" "refs/tags/$Tag"
 
-# Consider 'Everything up-to-date' a success (sometimes git prints it without zero exit code)
-$alreadyUpToDate = $false
-if ($pushRes -and $pushRes.ContainsKey('StdOut') -and $pushRes.StdOut) {
-    if ($pushRes.StdOut -match 'Everything up-to-date') { $alreadyUpToDate = $true }
-}
-if ($pushRes -and $pushRes.ContainsKey('StdErr') -and $pushRes.StdErr) {
-    if ($pushRes.StdErr -match 'Everything up-to-date') { $alreadyUpToDate = $true }
-}
-
-if ($pushRes.ExitCode -ne 0 -and -not $alreadyUpToDate) {
-    "Push failed for tag $Tag. ExitCode: $($pushRes.ExitCode). StdErr: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-
-    # Defensive check: sometimes remote reports messages (redirects) but the tag still exists on the remote.
-    "Checking remote for tag refs/tags/$Tag to verify push result" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-    $lsRes = Run-Git "ls-remote" "origin" "refs/tags/$Tag"
-    $remoteHasTag = $false
-    if ($lsRes -and $lsRes.ContainsKey('StdOut') -and -not [string]::IsNullOrWhiteSpace($lsRes.StdOut)) {
-        if ($lsRes.StdOut -match 'refs/tags/') { $remoteHasTag = $true }
+    # Consider 'Everything up-to-date' a success (sometimes git prints it without zero exit code)
+    $alreadyUpToDate = $false
+    if ($pushRes -and $pushRes.ContainsKey('StdOut') -and $pushRes.StdOut) {
+        if ($pushRes.StdOut -match 'Everything up-to-date') { $alreadyUpToDate = $true }
+    }
+    if ($pushRes -and $pushRes.ContainsKey('StdErr') -and $pushRes.StdErr) {
+        if ($pushRes.StdErr -match 'Everything up-to-date') { $alreadyUpToDate = $true }
     }
 
-    if ($remoteHasTag) {
-        Write-Host "Push reported error but tag refs/tags/$Tag exists on remote — treating as success."
-        "Push reported error but tag exists on remote; treating as success" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    if ($pushRes.ExitCode -ne 0 -and -not $alreadyUpToDate) {
+        "Push failed for tag $Tag. ExitCode: $($pushRes.ExitCode). StdErr: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+        # Defensive check: sometimes remote reports messages (redirects) but the tag still exists on the remote.
+        "Checking remote for tag refs/tags/$Tag to verify push result" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        $lsRes = Run-Git "ls-remote" "origin" "refs/tags/$Tag"
+        $remoteHasTag = $false
+        if ($lsRes -and $lsRes.ContainsKey('StdOut') -and -not [string]::IsNullOrWhiteSpace($lsRes.StdOut)) {
+            if ($lsRes.StdOut -match 'refs/tags/') { $remoteHasTag = $true }
+        }
+
+        if ($remoteHasTag) {
+            Write-Host "Push reported error but tag refs/tags/$Tag exists on remote — treating as success."
+            "Push reported error but tag exists on remote; treating as success" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        } else {
+            Write-Error (("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRes.ExitCode, $pushRes.StdErr.Trim()))
+            "Failed to push tag ${Tag} to origin: $($pushRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 6
+        }
+    }
+
+    if ($alreadyUpToDate) {
+        Write-Host "Tag $Tag already on remote (no-op)."
+        "Tag $Tag already on remote (no-op)." | Out-File -FilePath $dbgFile -Append -Encoding utf8
     } else {
-        "Push did not succeed and tag not found on remote; failing." | Out-File -FilePath $dbgFile -Append -Encoding utf8
-        Write-Error (("Failed to push tag {0} to origin (exit {1}): {2}" -f $Tag, $pushRes.ExitCode, $pushRes.StdErr.Trim()))
-        exit 6
+        Write-Host "Pushed tag $Tag to origin"
+        "Pushed tag $Tag to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
     }
-}
-
-if ($alreadyUpToDate) {
-    Write-Host "Tag $Tag already on remote (no-op)."
-    "Tag $Tag already on remote (no-op)." | Out-File -FilePath $dbgFile -Append -Encoding utf8
 } else {
-    Write-Host "Pushed tag $Tag to origin"
-    "Pushed tag $Tag to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    Write-Host "Tag $Tag was already created during auto-bump; skipping tag creation."
+    "Tag $Tag was created during auto-bump; skipping duplicate creation." | Out-File -FilePath $dbgFile -Append -Encoding utf8
 }
 
 "---- push-tag debug end: $(Get-Date) ----" | Out-File -FilePath $dbgFile -Append -Encoding utf8
