@@ -49,7 +49,7 @@
             and '$(IsCI)' != 'true'
             and '$(EnableLocalReleaseTrigger)' != 'false'
             and '$(MSBuildProjectName)' == 'DMM.Standalone.DependencyChecker'">
-    <Message Importance="High" Text="TriggerFullRelease: local Release build detected — performing bump, commit, push and tag (local only)." />
+    <Message Importance="High" Text="TriggerFullRelease: local Release build detected — delegating bump, commit, push and tag to scripts/push-tag.ps1 (local only)." />
 
     <ItemGroup>
       <VersionFile Include="$(MSBuildProjectDirectory)\Properties\version.txt" />
@@ -57,17 +57,11 @@
 
     <Error Condition="!Exists('%(VersionFile.Identity)')" Text="Version file not found at %(VersionFile.Identity). Aborting release target." />
 
-    <!-- Increment patch and write new version -->
-    <BumpVersionTask VersionFile="%(VersionFile.Identity)">
-      <Output TaskParameter="NewVersion" PropertyName="NewVersion" />
-    </BumpVersionTask>
-
-    <Message Importance="High" Text="New version written: $(NewVersion)" />
-
-    <!-- Delegate git operations and tagging to the unified push-tag.ps1 script -->
+    <!-- Delegate git operations and tagging to the unified push-tag.ps1 script. The script will
+         auto-bump the version file, commit, and create/push tags as needed. -->
     <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -AutoCommit -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
           WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
 
-    <Message Importance="High" Text="TriggerFullRelease: completed. New version: v$(NewVersion)" />
+    <Message Importance="High" Text="TriggerFullRelease: completed (push-tag handled bump/tag)." />
   </Target>
 </Project>
