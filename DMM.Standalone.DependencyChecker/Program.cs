@@ -499,7 +499,7 @@ namespace DmmDep
                 // check for their presence on disk. We do not inspect parent archives that
                 // might contain scripts, so some scripts may appear present when they are
                 // actually provided by archives or other distribution mechanisms.
-                Log.Warn("[NOTE] Script files (PSC/PEX) may be overrepresented; only filesystem presence is checked, not parent archives (potential future enhancement).");
+                Log.Warn("[NOTE] Script files (PSC/PEX) may be overrepresented; only filesystem presence is checked, not parent archives (probable future enhancement).");
 
                 var rootScriptNames = ExtractScriptNamesFromPlugin(pluginBytes, gameRoot);
                 Log.Info($"[6] Root script names from plugin: {rootScriptNames.Count}");

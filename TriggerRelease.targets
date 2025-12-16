@@ -59,7 +59,7 @@
 
     <!-- Delegate git operations and tagging to the unified push-tag.ps1 script. The script will
          auto-bump the version file, commit, and create/push tags as needed. -->
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -AutoCommit -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -AutoCommit:$true -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
           WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
 
     <Message Importance="High" Text="TriggerFullRelease: completed (push-tag handled bump/tag)." />
