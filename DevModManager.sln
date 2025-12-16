@@ -19,6 +19,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMM.AssetManagers", "DMM.As
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMM.Standalone.DatabaseSeeder", "DMM.Standalone.DatabaseSeeder\DMM.Standalone.DatabaseSeeder.csproj", "{F3296458-1988-4A7F-A416-9AC734C77FBF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{52FD92C9-CA60-4F85-A64E-37626A29A7ED}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\push-tag.ps1 = scripts\push-tag.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{7C72BFD1-6836-4D18-8CA2-C7B5499F0F4C}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
