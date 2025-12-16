@@ -16,7 +16,17 @@ if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true' -or -not [string]::IsN
 function Run-Git {
     param([string[]] $Args)
 
+    # Debug: show resolved git and arguments
     try {
+        $gitCmd = (Get-Command git -ErrorAction Stop).Source
+    } catch {
+        return @{ ExitCode = -1; StdOut = ""; StdErr = "git not found: $($_.Exception.Message)" }
+    }
+
+    $argStr = [string]::Join(" ", $Args)
+    Write-Host "DEBUG: Running git -> `"$gitCmd`" $argStr"
+
+        try {
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "git"
         $psi.Arguments = [string]::Join(" ", $Args)
