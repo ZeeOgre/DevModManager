@@ -30,6 +30,7 @@
 	     - PublishFrameworkDependent: produce slim dmmdeps.exe (no trimming/compression)
 	     - PublishSelfContained: produce fat dmmdeps_fat.exe (trimming + compression)
 	     - Publish: produce both artifacts -->
+  
 	<Target Name="PublishOnBuild" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
 		<!-- Framework-dependent (single exe, user must have .NET installed) -->
 		<Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent'" Command="dotnet publish -c Release -r win-x64 -p:SelfContained=false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:AssemblyName=dmmdeps -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
@@ -49,7 +50,7 @@
           Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(TriggerGitHubRelease)' == 'true' and '$(GITHUB_ACTIONS)' != 'true' and '$(CI)' != 'true'">
     <!-- Run but do not fail the build on non-zero exit; log warnings instead -->
     <Message Importance="High" Text="PostBuild: running push-tag.ps1 (TriggerGitHubRelease=true)." />
-    <Exec Command="pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot; 2>&1 | Out-File -FilePath &quot;$(MSBuildProjectDirectory)\push-tag.log&quot; -Encoding utf8"
+    <Exec Command="pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot; 2&gt;&amp;1 | Out-File -FilePath &quot;$(MSBuildProjectDirectory)\push-tag.log&quot; -Encoding utf8"
       ContinueOnError="WarnAndContinue" />
   </Target>
 
