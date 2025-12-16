@@ -235,7 +235,8 @@ Global
 		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.DefaultBuild|x64.Build.0 = Release|Any CPU
 		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.DefaultBuild|x86.ActiveCfg = Release|Any CPU
 		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.DefaultBuild|x86.Build.0 = Release|Any CPU
-		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.FullRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.FullRelease|Any CPU.ActiveCfg = FullRelease|Any CPU
+		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.FullRelease|Any CPU.Build.0 = FullRelease|Any CPU
 		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.FullRelease|x64.ActiveCfg = Release|Any CPU
 		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.FullRelease|x86.ActiveCfg = Release|Any CPU
 		{C75F4D25-3C13-4905-B9CD-0B2C5096D84F}.Publish|Any CPU.ActiveCfg = Publish|Any CPU
