@@ -47,6 +47,7 @@
             '$(BuildingInsideVisualStudio)' == 'true'
             and ('$(Configuration)' == 'FullRelease' or '$(Configuration)' == 'Release')
             and '$(IsCI)' != 'true'
+            and '$(EnableLocalReleaseTrigger)' != 'false'
             and '$(MSBuildProjectName)' == 'DMM.Standalone.DependencyChecker'">
     <Message Importance="High" Text="TriggerFullRelease: local Release build detected — performing bump, commit, push and tag (local only)." />
 
@@ -63,14 +64,15 @@
 
     <Message Importance="High" Text="New version written: $(NewVersion)" />
 
-    <!-- Git operations (run from project dir). Errors will fail the build so you see problems immediately. -->
-    <Exec Command="git add &quot;%(VersionFile.Identity)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
-    <Exec Command="git commit -m &quot;Bump dmmdeps to $(NewVersion)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
-    <Exec Command="git push origin HEAD" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <!-- Git operations (run from project dir). Make non-fatal to avoid CI failures when
+         this target is accidentally invoked on an agent. -->
+    <Exec Command="git add &quot;%(VersionFile.Identity)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
+    <Exec Command="git commit -m &quot;Bump dmmdeps to $(NewVersion)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
+    <Exec Command="git push origin HEAD" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
 
     <!-- Tag and push tag -->
-    <Exec Command="git tag -a v$(NewVersion) -m &quot;Release v$(NewVersion)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
-    <Exec Command="git push origin refs/tags/v$(NewVersion)" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Exec Command="git tag -a v$(NewVersion) -m &quot;Release v$(NewVersion)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
+    <Exec Command="git push origin refs/tags/v$(NewVersion)" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
 
     <Message Importance="High" Text="TriggerFullRelease: completed. New version: v$(NewVersion)" />
   </Target>

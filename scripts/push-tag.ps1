@@ -49,9 +49,10 @@ function Run-Git {
 
     if (-not $Args) { $Args = @() }
 
-    Write-Host ("DEBUG: Run-Git args count={0}" -f $Args.Length)
+    Write-Host "DEBUG: Run-Git args count=$($Args.Length)"
     for ($i = 0; $i -lt $Args.Length; $i++) {
-        Write-Host ("DEBUG: Arg[{0}] = '{1}'" -f $i, $Args[$i])
+        $argVal = if ($null -eq $Args[$i]) { '' } else { $Args[$i] }
+        Write-Host "DEBUG: Arg[$i] = '$argVal'"
     }
 
     try {
@@ -258,17 +259,71 @@ $revRes = Run-Git "rev-parse" "--verify" "refs/tags/$Tag"
 if ($revRes.ExitCode -eq 0) {
     Write-Host "Tag $Tag already exists locally."
     "Tag $Tag already exists locally" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-} else {
-    # Create annotated tag
-    $tagRes = Run-Git "tag" "-a" $Tag "-m" "Release $Tag"
-    if ($tagRes.ExitCode -ne 0) {
-        Write-Error (("Failed to create tag {0}: {1}" -f $Tag, $tagRes.StdErr.Trim()))
-        "Failed to create tag ${Tag}: $($tagRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-        exit 5
+
+    # If tag exists, try to bump patch and create a new tag if allowed
+    if ($AutoCommit -or $Force) {
+        if (-not $versionFilePath) {
+            Write-Error "Cannot auto-bump version: no version.txt found to update."
+            "Auto-bump refused: no version file found" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 5
+        }
+
+        # Read and parse current version
+        $curText = (Get-Content $versionFilePath -Raw).Trim()
+        $m = [System.Text.RegularExpressions.Regex]::Match($curText, "^v?(\d+)\.(\d+)\.(\d+)$")
+        if (-not $m.Success) {
+            Write-Error "version.txt contains unexpected format: '$curText' (expected MAJOR.MINOR.PATCH)"
+            "Auto-bump refused: version file format unexpected: $curText" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 5
+        }
+        $major = [int]$m.Groups[1].Value
+        $minor = [int]$m.Groups[2].Value
+        $patch = [int]$m.Groups[3].Value
+        $patch++
+        $newVer = "{0}.{1}.{2}" -f $major, $minor, $patch
+
+        # Write new version (no leading v in file)
+        Set-Content -Path $versionFilePath -Value $newVer -Encoding UTF8
+        "Auto-bump: version.txt updated to $newVer" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+        # Stage and commit the updated version file
+        $addRes = Run-Git "add" "$versionFilePath"
+        if ($addRes.ExitCode -ne 0) {
+            Write-Error "git add failed for version file: $($addRes.StdErr)"
+            "git add failed for version file: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 5
+        }
+        $commitMsg = "Auto-bump version to $newVer for release"
+        $commitRes = Run-Git "commit" "-m" $commitMsg
+        if ($commitRes.ExitCode -ne 0) {
+            Write-Error "git commit failed for version bump: $($commitRes.StdErr)"
+            "git commit failed for version bump: $($commitRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            exit 5
+        }
+        "Auto-bump: committed version bump to $newVer" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+
+        # Update tag name and continue
+        if ($newVer -match '^v') { $Tag = $newVer } else { $Tag = "v$newVer" }
+        Write-Host "Bumped tag to $Tag and will create new tag"
+        "Bumped tag to $Tag and will create new tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    } else {
+        Write-Host "Tag $Tag exists and AutoCommit is not enabled; skipping tag creation."
+        "Tag exists and no AutoCommit: skipping" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        exit 0
     }
-    Write-Host "Created tag $Tag"
-    "Created tag $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+} else {
+    # tag does not exist; proceed as before
 }
+
+# Create annotated tag
+$tagRes = Run-Git "tag" "-a" $Tag "-m" "Release $Tag"
+if ($tagRes.ExitCode -ne 0) {
+    Write-Error (("Failed to create tag {0}: {1}" -f $Tag, $tagRes.StdErr.Trim()))
+    "Failed to create tag ${Tag}: $($tagRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    exit 5
+}
+Write-Host "Created tag $Tag"
+"Created tag $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
 # Push tag to origin (robust handling)
 $pushRes = Run-Git "push" "origin" "refs/tags/$Tag"
