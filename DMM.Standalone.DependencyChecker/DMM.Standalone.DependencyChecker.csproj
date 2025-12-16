@@ -50,7 +50,7 @@
     <!-- Run but do not fail the build on non-zero exit; log warnings instead -->
     <Message Importance="High" Text="PostBuild: running push-tag.ps1 (TriggerGitHubRelease=true)." />
     <!-- Run script inside PowerShell so Out-File is available -->
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1' -RepoRoot '$(MSBuildProjectDirectory)\..' 2>&1 | Out-File -FilePath '$(MSBuildProjectDirectory)\push-tag.log' -Encoding utf8&quot;"
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1' -RepoRoot '$(MSBuildProjectDirectory)\..' 2&gt;&amp;1 | Out-File -FilePath '$(MSBuildProjectDirectory)\push-tag.log' -Encoding utf8&quot;"
       ContinueOnError="WarnAndContinue" />
   </Target>
 
