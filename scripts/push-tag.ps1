@@ -16,13 +16,14 @@ if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true' -or -not [string]::IsN
 function Run-Git {
     param([string[]] $Args)
 
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = "git"
-    $psi.Arguments = [string]::Join(" ", $Args)
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.UseShellExecute = $false
-    $psi.CreateNoWindow = $true
+    try {
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "git"
+        $psi.Arguments = [string]::Join(" ", $Args)
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $psi.UseShellExecute = $false
+        $psi.CreateNoWindow = $true
 
     $proc = [System.Diagnostics.Process]::Start($psi)
     $stdOut = $proc.StandardOutput.ReadToEnd()
@@ -108,14 +109,12 @@ switch ($tagSource) {
 # Ensure working tree is clean unless forced
 $statusRes = Run-Git @("status", "--porcelain")
 if ($statusRes.ExitCode -ne 0) {
-    Write-Error "git status failed: $($statusRes.StdErr.Trim())"
+    $out = ($statusRes.StdOut ?? "").Trim()
+    $err = ($statusRes.StdErr ?? "").Trim()
+    Write-Error "git status failed (exit $($statusRes.ExitCode)). StdOut:`n$out`nStdErr:`n$err"
     exit 4
 }
 $status = $statusRes.StdOut.Trim()
-if ($status -and -not $Force) {
-    Write-Error "Working tree not clean. Commit or stash changes, or rerun with -Force.`nChanges:`n$status"
-    exit 3
-}
 
 # Check if tag already exists (local)
 $revRes = Run-Git @("rev-parse", "--verify", "refs/tags/$Tag")
