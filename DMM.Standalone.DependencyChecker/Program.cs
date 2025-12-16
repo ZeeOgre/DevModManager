@@ -484,7 +484,7 @@ namespace DmmDep
 
                 // ---- 5. Voice assets (PC dev + runtime + XB) ----
 
-                Log.Info("[5] Collecting voice assets...");
+                Log.Info("[5] Collecting voice files...");
                 CollectVoiceAssets(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot);
 
                 // ---- 6. Scripts (Bethesda Script Name format with imports) ----

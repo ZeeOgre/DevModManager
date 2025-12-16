@@ -44,22 +44,7 @@
 
 	<Import Project="TriggerRelease.targets" Condition="Exists('TriggerRelease.targets')" />
 
-	<!-- Run tag script after build events; resolve script path relative to project directory -->
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent"
-          Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(TriggerGitHubRelease)' == 'true' and '$(GITHUB_ACTIONS)' != 'true' and '$(CI)' != 'true' and '$(EnableLocalReleaseTrigger)' != 'false'">
-    <!-- Run but do not fail the build on non-zero exit; log warnings instead -->
-    <Message Importance="High" Text="PostBuild: running push-tag.ps1 (TriggerGitHubRelease=true)." />
-
-    <!-- FullRelease: run with AutoCommit enabled -->
-    <Exec Condition="'$(Configuration)' == 'FullRelease'"
-          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -AutoCommit:$true -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
-      WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
-
-    <!-- Non-FullRelease: run without AutoCommit -->
-    <Exec Condition="'$(Configuration)' != 'FullRelease'"
-          Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
-      WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
-  </Target>
+	<!-- Post-build release trigger removed; TriggerRelease.targets will handle push-tag invocation -->
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<!-- Opt-in: enable tag push when building Release in the IDE -->
