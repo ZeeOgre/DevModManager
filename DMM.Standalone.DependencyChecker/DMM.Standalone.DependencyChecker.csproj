@@ -43,11 +43,11 @@
 		<!-- Create distribution directory if it doesn't exist -->
 		<MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
 		
-		<!-- Framework-dependent (single exe, user must have .NET installed) -->
+		<!-- Framework-dependent (single exe, user must have .NET installed) - SLIM VERSION -->
 		<Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" 
 		      Command="dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:AssemblyName=dmmdeps -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
 
-		<!-- Self-contained (single exe with runtime included) -->
+		<!-- Self-contained (single exe with runtime included) - FAT VERSION -->
 		<Exec Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" 
 		      Command="dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
 		
@@ -63,11 +63,11 @@
 		      SkipUnchangedFiles="true" />
 		
 		<Message Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" 
-		         Text="Published dmmdeps.exe to $(DistributionDir)" 
+		         Text="Published dmmdeps.exe (framework-dependent, ~10MB, requires .NET 8) to $(DistributionDir)" 
 		         Importance="high" />
 		         
 		<Message Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" 
-		         Text="Published dmmdeps_fat.exe to $(DistributionDir)" 
+		         Text="Published dmmdeps_fat.exe (self-contained, ~64MB, includes .NET 8) to $(DistributionDir)" 
 		         Importance="high" />
 	</Target>
 
