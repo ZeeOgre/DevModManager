@@ -114,7 +114,7 @@ jobs:
                 owner, 
                 repo, 
                 tag_name: t, 
-                name: `DMM Dependency Checker ${t}`, 
+                name: t, 
                 body: `## DevModManager Dependency Checker ${t}\n\n### Downloads\n- **dmmdeps.zip** - Framework-dependent (requires .NET 8 Runtime, ~2-5 MB)\n- **dmmdeps-fat.zip** - Self-contained (includes .NET 8 Runtime, ~70-90 MB)\n\n### Usage\n\`\`\`\ndmmdeps.exe <plugin-path> [options]\n\`\`\``, 
                 draft: false, 
                 prerelease: false 
