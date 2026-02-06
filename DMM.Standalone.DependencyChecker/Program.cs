@@ -75,6 +75,49 @@ namespace DmmDep
             }
         }
 
+        private static string BuildXboxRelativePath(string xboxDataRoot, string xboxFullPath)
+        {
+            // Build consistent XBOX relative path from xboxDataRoot
+            // xboxDataRoot typically points to: <GameRoot>\XBOX\Data
+            // We want to return: XBOX\Data\<relative-from-xboxDataRoot>
+            
+            string relFromXboxData = GetRelativePath(xboxDataRoot, xboxFullPath);
+            
+            // Get the parent of xboxDataRoot to find the XBOX folder name
+            string? xboxRootParent = Directory.GetParent(xboxDataRoot)?.FullName;
+            if (xboxRootParent == null)
+                return NormalizeRel(Path.Combine("XBOX", "Data", relFromXboxData));
+            
+            string xboxFolderName = Path.GetFileName(Directory.GetParent(xboxDataRoot)?.FullName ?? "XBOX");
+            string dataFolderName = Path.GetFileName(xboxDataRoot);
+            
+            return NormalizeRel(Path.Combine(xboxFolderName, dataFolderName, relFromXboxData));
+        }
+
+        private static bool IsMatExtension(string token)
+        {
+            // Check if token contains ".mat" (case-insensitive) but not ".mat2" or other variants
+            // Look for the 4-character sequence ".mat" followed by end-of-string or non-alphanumeric
+            if (token.Length < 4)
+                return false;
+            
+            int matIndex = token.IndexOf(".mat", StringComparison.OrdinalIgnoreCase);
+            if (matIndex < 0)
+                return false;
+            
+            // Check if it's exactly ".mat" at the end or followed by non-alphanumeric
+            int afterMatIndex = matIndex + 4;
+            if (afterMatIndex == token.Length)
+                return true; // ends with .mat
+            
+            char afterChar = token[afterMatIndex];
+            // If followed by digit or letter, it's something like .mat2 or .matx
+            if (char.IsLetterOrDigit(afterChar))
+                return false;
+            
+            return true; // .mat followed by non-alphanumeric (like space, slash, etc.)
+        }
+
         static int Main(string[] args)
         {
             if (args.Length == 0)
@@ -179,7 +222,7 @@ namespace DmmDep
                         }
                     }
                     // --- .mat from plugin (e.g. MTPT / material path records) ---
-                    else if (s.EndsWith(".mat", StringComparison.OrdinalIgnoreCase))
+                    else if (IsMatExtension(s))
                     {
                         string rel = s.Replace('/', '\\').TrimStart('\\');
                         if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
@@ -324,7 +367,7 @@ namespace DmmDep
                     {
                         string token = s.Replace('/', '\\').TrimStart('\\');
 
-                        if (token.EndsWith(".mat", StringComparison.OrdinalIgnoreCase))
+                        if (IsMatExtension(token))
                         {
                             string rel = token;
 
@@ -445,13 +488,13 @@ namespace DmmDep
 
                         if (!pcExists && xbExists)
                         {
-                            string relXb = "XBOX\\Data\\" + GetRelativePath(xboxDataRoot, xbCandidate!);
+                            string relXb = BuildXboxRelativePath(xboxDataRoot, xbCandidate!);
                             Log.Warn($"[WARN] PC texture missing; regenerate and try again -> {relXb}");
                             continue;
                         }
                         if (pcExists && !xbExists && xbCandidate != null)
                         {
-                            string relXb = "XBOX\\Data\\" + GetRelativePath(xboxDataRoot, xbCandidate);
+                            string relXb = BuildXboxRelativePath(xboxDataRoot, xbCandidate);
                             Log.Warn($"[WARN] XBOX texture missing; regenerate and try again -> {relXb}");
                             if (found.Add(ddsRel))
                             {
@@ -774,8 +817,7 @@ namespace DmmDep
 
                 if (File.Exists(candidate))
                 {
-                    string relXb = "XBOX\\Data\\" + GetRelativePath(xboxDataRoot, candidate);
-                    xboxRel = NormalizeRel(relXb);
+                    xboxRel = BuildXboxRelativePath(xboxDataRoot, candidate);
                 }
             }
 
@@ -889,8 +931,7 @@ namespace DmmDep
                         string ext = Path.GetExtension(f).ToLowerInvariant();
                         if (ext is ".wav" or ".lip" or ".txt" or ".dat")
                         {
-                            string relXb = "XBOX\\Data\\" + GetRelativePath(xboxDataRoot, f);
-                            relXb = NormalizeRel(relXb);
+                            string relXb = BuildXboxRelativePath(xboxDataRoot, f);
                             if (!manifest.Files.Any(fe => fe.XboxPath == relXb))
                             {
                                 manifest.Files.Add(new FileEntry
@@ -911,8 +952,7 @@ namespace DmmDep
                 {
                     foreach (var f in Directory.EnumerateFiles(xbVoiceRoot, "*.wem", SearchOption.AllDirectories))
                     {
-                        string relXb = "XBOX\\Data\\" + GetRelativePath(xboxDataRoot, f);
-                        relXb = NormalizeRel(relXb);
+                        string relXb = BuildXboxRelativePath(xboxDataRoot, f);
                         if (!manifest.Files.Any(fe => fe.XboxPath == relXb))
                         {
                             manifest.Files.Add(new FileEntry
@@ -1026,7 +1066,7 @@ namespace DmmDep
             return NormalizeRel(Path.Combine("Data", "Scripts", "Source", path + ".psc"));
         }
 
-        // Convert Bethesda Script Name to PEX relative path
+        // Convert Bethesda Script Name to PEX relative path   
         private static string ScriptNameToPexRel(string name)
         {
             string path = name.Replace(':', '\\');

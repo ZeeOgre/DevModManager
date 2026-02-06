@@ -45,8 +45,8 @@
 	<Import Project="TriggerRelease.targets" Condition="Exists('TriggerRelease.targets')" />
 
 	<!-- Run tag script after build events; resolve script path relative to project directory -->
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
-	  <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot;" />
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true' AND '$(Configuration)' == 'Release'">
+	  <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot;" WorkingDirectory="$(MSBuildProjectDirectory)\.." />
 	</Target>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
