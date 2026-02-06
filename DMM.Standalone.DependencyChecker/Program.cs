@@ -403,6 +403,14 @@ namespace DmmDep
                         else if (token.EndsWith(".rig", StringComparison.OrdinalIgnoreCase))
                         {
                             string rel = token;
+                            
+                            // Truncate at .rig extension to remove garbage
+                            int rigIndex = rel.IndexOf(".rig", StringComparison.OrdinalIgnoreCase);
+                            if (rigIndex >= 0)
+                            {
+                                rel = rel.Substring(0, rigIndex + 4); // Keep up to and including ".rig"
+                            }
+                            
                             if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
                             {
                                 rel = rel.StartsWith("meshes\\", StringComparison.OrdinalIgnoreCase)
@@ -422,7 +430,17 @@ namespace DmmDep
                         else if (!token.Contains('.') && token.Contains("\\"))
                         {
                             string stem = token.TrimStart('\\');
-                            string meshRel = stem.StartsWith("geometries\\", StringComparison.OrdinalIgnoreCase)
+                             
+                            // Clean up any potential garbage characters at the end of the stem
+                            // (though less common since we're looking for paths without extensions)
+                            int nullChar = stem.IndexOf('\0');
+                            if (nullChar >= 0)
+                            {
+                                stem = stem.Substring(0, nullChar);
+                            }
+                            stem = stem.TrimEnd();
+                            
+                           string meshRel = stem.StartsWith("geometries\\", StringComparison.OrdinalIgnoreCase)
                                 ? NormalizeRel(Path.Combine("Data", stem + ".mesh"))
                                 : NormalizeRel(Path.Combine("Data\\geometries", stem + ".mesh"));
 
