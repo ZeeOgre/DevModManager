@@ -32,7 +32,6 @@ jobs:
         run: |
           dotnet publish ${{ env.BUILD_PROJECT }} `
             -c Release `
-            -r ${{ env.RID }} `
             --self-contained false `
             -p:PublishSingleFile=true `
             -p:PublishTrimmed=false `
