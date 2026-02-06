@@ -9,6 +9,11 @@
 		<Configurations>Debug;Release;FullRelease;PublishFrameworkDependent;PublishSelfContained;Publish</Configurations>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<!-- Exclude ProgramModular.cs from build -->
+		<Compile Remove="ProgramModular.cs" />
+	</ItemGroup>
+
 	<!-- Framework-dependent (slim) defaults when that configuration is selected -->
 	<PropertyGroup Condition="'$(Configuration)' == 'PublishFrameworkDependent'">
 		<PublishSingleFile>true</PublishSingleFile>
