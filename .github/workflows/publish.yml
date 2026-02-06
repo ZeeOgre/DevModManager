@@ -1,4 +1,4 @@
-name: CI Publish and Release
+﻿name: CI Publish and Release
 
 on:
   push:
@@ -28,32 +28,76 @@ jobs:
       - name: Restore
         run: dotnet restore ${{ env.BUILD_PROJECT }}
 
-      - name: Publish framework-dependent build
+      - name: Publish framework-dependent build (slim)
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained false /p:PublishSingleFile=false /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
+          dotnet publish ${{ env.BUILD_PROJECT }} `
+            -c Release `
+            -r ${{ env.RID }} `
+            --self-contained false `
+            -p:PublishSingleFile=true `
+            -p:PublishTrimmed=false `
+            -p:DebugType=None `
+            -p:IncludeSymbols=false `
+            -p:OutputType=Exe `
+            -p:AssemblyName=dmmdeps `
+            -p:EnableLocalReleaseTrigger=false `
+            -o ./out/dmmdeps
 
       - name: Publish self-contained single-file (fat) build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
+          dotnet publish ${{ env.BUILD_PROJECT }} `
+            -c Release `
+            -r ${{ env.RID }} `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:PublishTrimmed=true `
+            -p:DebugType=None `
+            -p:IncludeSymbols=false `
+            -p:OutputType=Exe `
+            -p:EnableCompressionInSingleFile=true `
+            -p:AssemblyName=dmmdeps_fat `
+            -p:EnableLocalReleaseTrigger=false `
+            -o ./out/dmmdeps-fat
 
-      - name: Normalize names and prepare zips
+      - name: Verify and prepare zips
         shell: pwsh
         run: |
-          mkdir out\zips
-          $d1 = Get-ChildItem -Path out\dmmdeps -Filter *.exe -File | Select-Object -First 1
-          if ($null -eq $d1) { Write-Error "framework-dependent exe not found"; exit 1 }
-          Copy-Item $d1.FullName out\dmmdeps\dmmdeps.exe -Force
-          $d2 = Get-ChildItem -Path out\dmmdeps-fat -Filter *.exe -File | Select-Object -First 1
-          if ($null -eq $d2) { Write-Error "fat exe not found"; exit 1 }
-          Copy-Item $d2.FullName out\dmmdeps-fat\dmmdeps-fat.exe -Force
-          Compress-Archive -Path out\dmmdeps\dmmdeps.exe -DestinationPath out\zips\dmmdeps.zip -Force
-          Compress-Archive -Path out\dmmdeps-fat\dmmdeps-fat.exe -DestinationPath out\zips\dmmdeps-fat.zip -Force
+          New-Item -ItemType Directory -Path out\zips -Force | Out-Null
+          
+          # Verify framework-dependent exe
+          $slimExe = "out\dmmdeps\dmmdeps.exe"
+          if (-not (Test-Path $slimExe)) { 
+            Write-Error "Framework-dependent exe not found at $slimExe"
+            Get-ChildItem -Path out\dmmdeps -Recurse
+            exit 1 
+          }
+          Write-Host "✓ Found dmmdeps.exe ($(((Get-Item $slimExe).Length / 1MB).ToString('0.00')) MB)"
+          
+          # Verify self-contained exe
+          $fatExe = "out\dmmdeps-fat\dmmdeps_fat.exe"
+          if (-not (Test-Path $fatExe)) { 
+            Write-Error "Self-contained exe not found at $fatExe"
+            Get-ChildItem -Path out\dmmdeps-fat -Recurse
+            exit 1 
+          }
+          Write-Host "✓ Found dmmdeps_fat.exe ($(((Get-Item $fatExe).Length / 1MB).ToString('0.00')) MB)"
+          
+          # Create zips with correct names
+          Compress-Archive -Path $slimExe -DestinationPath out\zips\dmmdeps.zip -Force
+          Compress-Archive -Path $fatExe -DestinationPath out\zips\dmmdeps-fat.zip -Force
+          
+          Write-Host "✓ Created release packages:"
+          Get-ChildItem -Path out\zips | ForEach-Object {
+            Write-Host "  - $($_.Name) ($(($_.Length / 1MB).ToString('0.00')) MB)"
+          }
 
-      - name: Upload workflow artifacts (optional)
+      - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dmmdeps-zips
-          path: out/zips
+          name: dmmdeps-executables
+          path: |
+            out/zips/dmmdeps.zip
+            out/zips/dmmdeps-fat.zip
 
       - name: Ensure GitHub release exists (create if missing, bump tag with retries if already exists)
         id: ensure_release
@@ -64,11 +108,18 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const sha = context.sha;
-            // use injected `core` (do not `require('@actions/core')` here)
             const maxAttempts = 3;
 
             async function createReleaseForTag(t) {
-              const { data: newRel } = await github.rest.repos.createRelease({ owner, repo, tag_name: t, name: t, body: `Automated release for ${t}`, draft:false, prerelease:false });
+              const { data: newRel } = await github.rest.repos.createRelease({ 
+                owner, 
+                repo, 
+                tag_name: t, 
+                name: `DMM Dependency Checker ${t}`, 
+                body: `## DevModManager Dependency Checker ${t}\n\n### Downloads\n- **dmmdeps.zip** - Framework-dependent (requires .NET 8 Runtime, ~2-5 MB)\n- **dmmdeps-fat.zip** - Self-contained (includes .NET 8 Runtime, ~70-90 MB)\n\n### Usage\n\`\`\`\ndmmdeps.exe <plugin-path> [options]\n\`\`\``, 
+                draft: false, 
+                prerelease: false 
+              });
               core.info(`Created release id=${newRel.id} for ${t}`);
               return { upload_url: newRel.upload_url, id: newRel.id, tag: t };
             }
@@ -93,7 +144,6 @@ jobs:
                   core.warning(`Attempt ${attempt} failed: ${err.message}`);
                   if (err.status === 422 || (err.message && err.message.includes('already exists'))) {
                     core.info(`Tag ${newTag} already exists, will try next patch.`);
-                    // try next attempt
                   } else {
                     throw err;
                   }
