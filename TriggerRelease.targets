@@ -1,0 +1,67 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- CI detection (used to avoid running release actions on CI agents) -->
+  <PropertyGroup>
+    <IsCI Condition="'$(IsCI)' == '' and '$(GITHUB_ACTIONS)' == 'true'">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == '' and '$(CI)' == 'true'">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == '' and '$(TF_BUILD)' != ''">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == ''">false</IsCI>
+  </PropertyGroup>
+
+  <!-- Inline task: bump patch number in a version.txt (MAJOR.MINOR.PATCH) -->
+  <UsingTask
+    TaskName="BumpVersionTask"
+    TaskFactory="CodeTaskFactory"
+    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+    <ParameterGroup>
+      <VersionFile ParameterType="System.String" Required="true" />
+      <NewVersion ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System.Core" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        if (string.IsNullOrEmpty(VersionFile)) throw new System.ArgumentException("VersionFile is required");
+        if (!System.IO.File.Exists(VersionFile)) throw new System.IO.FileNotFoundException("version.txt not found", VersionFile);
+        var text = System.IO.File.ReadAllText(VersionFile).Trim();
+        var m = System.Text.RegularExpressions.Regex.Match(text, @"^\s*v?(\d+)\.(\d+)\.(\d+)\s*$");
+        if (!m.Success) throw new System.InvalidOperationException("version.txt contains unexpected format: '" + text + "' (expected MAJOR.MINOR.PATCH)");
+        int major = int.Parse(m.Groups[1].Value);
+        int minor = int.Parse(m.Groups[2].Value);
+        int patch = int.Parse(m.Groups[3].Value);
+        patch++;
+        var nv = string.Format("{0}.{1}.{2}", major, minor, patch);
+        System.IO.File.WriteAllText(VersionFile, nv, System.Text.Encoding.UTF8);
+        NewVersion = nv;
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <!--
+    TriggerFullRelease: runs automatically for local IDE Release builds of the
+    DMM.Standalone.DependencyChecker project (no extra opt-in).
+    It will NOT run on CI (IsCI=true).
+  -->
+  <Target Name="TriggerFullRelease"
+          AfterTargets="Build"
+          Condition="
+            '$(BuildingInsideVisualStudio)' == 'true'
+            and ('$(Configuration)' == 'FullRelease' or '$(Configuration)' == 'Release')
+            and '$(IsCI)' != 'true'
+            and '$(EnableLocalReleaseTrigger)' != 'false'
+            and '$(MSBuildProjectName)' == 'DMM.Standalone.DependencyChecker'">
+    <Message Importance="High" Text="TriggerFullRelease: local Release build detected — delegating bump, commit, push and tag to scripts/push-tag.ps1 (local only)." />
+
+    <ItemGroup>
+      <VersionFile Include="$(MSBuildProjectDirectory)\Properties\version.txt" />
+    </ItemGroup>
+
+    <Error Condition="!Exists('%(VersionFile.Identity)')" Text="Version file not found at %(VersionFile.Identity). Aborting release target." />
+
+    <!-- Delegate git operations and tagging to the unified push-tag.ps1 script. The script will
+         auto-bump the version file, commit, and create/push tags as needed. -->
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot; -AutoCommit:$true -RepoRoot &quot;$(MSBuildProjectDirectory)\..&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="WarnAndContinue" />
+
+    <Message Importance="High" Text="TriggerFullRelease: completed (push-tag handled bump/tag)." />
+  </Target>
+</Project>

@@ -149,6 +149,7 @@ namespace DmmDep
                 // Print a concise starting message regardless of --silent
                 Log.Always($"Starting dependency check: {Path.GetFileName(pluginPath)}");
 
+                //all of these should ALWAYS succeed.
                 string dataRoot = Path.GetDirectoryName(pluginPath)
                                   ?? throw new InvalidOperationException("Unable to get Data root from plugin path");
                 string gameRoot = options.GameRootOverride ??
@@ -195,7 +196,7 @@ namespace DmmDep
 
                 // ---- 1. Scan plugin for NIF / terrain / MAT / misc strings ----
 
-                Log.Info("[1] Scanning plugin for NIF / terrain / MAT / misc strings...");
+                Log.Info("[1] Scanning plugin for local NIF / terrain / MAT / misc strings...");
                 var pluginBytes = File.ReadAllBytes(pluginPath);
                 var pluginStrings = ExtractPrintableStrings(pluginBytes, 6).ToList();
                 Log.Info($"[1] Extracted {pluginStrings.Count} printable strings (len >= 6)");
@@ -354,7 +355,7 @@ namespace DmmDep
                 }
 
                 // ---- 2. NIF -> MAT + MeshPath + RIG ----
-                Log.Info("[2] Scanning NIFs for MAT, mesh stems, and RIG...");
+                Log.Info("[2] Scanning NIFs for MAT, mesh stems, and RIG... meshes come from nifs (which are in meshes) but are stored in geometries... confused yet?");
 
                 foreach (var nifRel in nifRelPaths)
                 {
@@ -527,7 +528,7 @@ namespace DmmDep
 
                 // ---- 5. Voice assets (PC dev + runtime + XB) ----
 
-                Log.Info("[5] Collecting voice assets...");
+                Log.Info("[5] Collecting voice files...");
                 CollectVoiceAssets(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot);
 
                 // ---- 6. Scripts (Bethesda Script Name format with imports) ----
@@ -538,6 +539,11 @@ namespace DmmDep
                 // ---- 6. Scripts (Bethesda script names + PSC imports) ----
 
                 Log.Info("[6] Script discovery from plugin text + PSC imports...");
+                // NOTE: Script files (PSC/PEX) may be overrepresented here because we only
+                // check for their presence on disk. We do not inspect parent archives that
+                // might contain scripts, so some scripts may appear present when they are
+                // actually provided by archives or other distribution mechanisms.
+                Log.Warn("[NOTE] Script files (PSC/PEX) may be overrepresented; only filesystem presence is checked, not parent archives (probable future enhancement).");
 
                 var rootScriptNames = ExtractScriptNamesFromPlugin(pluginBytes, gameRoot);
                 Log.Info($"[6] Root script names from plugin: {rootScriptNames.Count}");
@@ -603,9 +609,11 @@ namespace DmmDep
                 Log.Info($"Wrote deps (csv) : {csvPath} (total {manifest.Files.Count})");
 
                 string jsonPath = Path.Combine(outputRoot, pluginName + "_deps.json");
-                var jsonOpts = new JsonSerializerOptions { WriteIndented = true };
-                File.WriteAllText(jsonPath, JsonSerializer.Serialize(manifest, jsonOpts));
-                Log.Info($"Wrote deps    : {jsonPath}");
+                // JSON output is currently not used and can be very large. Skip writing it.
+                // If needed in future re-enable serialization below.
+                // var jsonOpts = new JsonSerializerOptions { WriteIndented = true };
+                // File.WriteAllText(jsonPath, JsonSerializer.Serialize(manifest, jsonOpts));
+                Log.Info($"Skipped writing JSON deps file: {jsonPath} (disabled to reduce output size)");
 
                 swTotal.Stop();
                 // Completion message always shown regardless of --silent

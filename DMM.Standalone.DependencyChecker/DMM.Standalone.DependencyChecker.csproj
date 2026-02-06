@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<!-- Expose custom configurations to Visual Studio -->
-		<Configurations>Debug;Release;PublishFrameworkDependent;PublishSelfContained;Publish</Configurations>
+		<Configurations>Debug;Release;FullRelease;PublishFrameworkDependent;PublishSelfContained;Publish</Configurations>
 	</PropertyGroup>
 
 	<!-- Framework-dependent (slim) defaults when that configuration is selected -->
@@ -44,13 +44,10 @@
 
 	<Import Project="TriggerRelease.targets" Condition="Exists('TriggerRelease.targets')" />
 
-	<!-- Run tag script after build events; resolve script path relative to project directory -->
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true' AND '$(Configuration)' == 'Release'">
-	  <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1&quot;" WorkingDirectory="$(MSBuildProjectDirectory)\.." />
-	</Target>
+	<!-- Post-build release trigger removed; TriggerRelease.targets will handle push-tag invocation -->
 
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
-		<!-- Opt-in: enable tag push when building Release in the IDE -->
+	<PropertyGroup Condition="'$(Configuration)' == 'FullRelease'">
+		<!-- Opt-in: enable tag push when building FullRelease in the IDE -->
 		<TriggerGitHubRelease>true</TriggerGitHubRelease>
 	</PropertyGroup>
 

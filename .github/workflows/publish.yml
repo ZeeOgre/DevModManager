@@ -30,11 +30,11 @@ jobs:
 
       - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained false /p:PublishSingleFile=false -o ./out/dmmdeps
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained false /p:PublishSingleFile=false /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
 
       - name: Publish self-contained single-file (fat) build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false -o ./out/dmmdeps-fat
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
 
       - name: Normalize names and prepare zips
         shell: pwsh
@@ -55,24 +55,65 @@ jobs:
           name: dmmdeps-zips
           path: out/zips
 
-      - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/')
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Ensure GitHub release exists (create if missing, bump tag with retries if already exists)
+        id: ensure_release
+        uses: actions/github-script@v6
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          body: 'Automated release for ${{ github.ref_name }}'
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const tag = context.ref.replace('refs/tags/','');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const sha = context.sha;
+            // use injected `core` (do not `require('@actions/core')` here)
+            const maxAttempts = 3;
+
+            async function createReleaseForTag(t) {
+              const { data: newRel } = await github.rest.repos.createRelease({ owner, repo, tag_name: t, name: t, body: `Automated release for ${t}`, draft:false, prerelease:false });
+              core.info(`Created release id=${newRel.id} for ${t}`);
+              return { upload_url: newRel.upload_url, id: newRel.id, tag: t };
+            }
+
+            try {
+              const { data: release } = await github.rest.repos.getReleaseByTag({ owner, repo, tag });
+              core.info(`Release for ${tag} already exists (id=${release.id}). Will attempt to bump tag and create a new release.`);
+
+              const m = tag.match(/^v?(\d+)\.(\d+)\.(\d+)$/);
+              if (!m) throw new Error(`Cannot parse tag '${tag}' as MAJOR.MINOR.PATCH`);
+              const major = parseInt(m[1],10), minor = parseInt(m[2],10), basePatch = parseInt(m[3],10);
+
+              for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                const newPatch = basePatch + attempt;
+                const newTag = `v${major}.${minor}.${newPatch}`;
+                core.info(`Attempt ${attempt}/${maxAttempts}: creating tag ref ${newTag} -> ${sha}`);
+                try {
+                  await github.rest.git.createRef({ owner, repo, ref: `refs/tags/${newTag}`, sha });
+                  core.info(`Created ref refs/tags/${newTag}`);
+                  return await createReleaseForTag(newTag);
+                } catch (err) {
+                  core.warning(`Attempt ${attempt} failed: ${err.message}`);
+                  if (err.status === 422 || (err.message && err.message.includes('already exists'))) {
+                    core.info(`Tag ${newTag} already exists, will try next patch.`);
+                    // try next attempt
+                  } else {
+                    throw err;
+                  }
+                }
+              }
+
+              throw new Error(`Failed to create bumped tag after ${maxAttempts} attempts.`);
+            } catch (err) {
+              if (err.status === 404) {
+                core.info(`No existing release for ${tag}. Creating new release.`);
+                return await createReleaseForTag(tag);
+              }
+              throw err;
+            }
 
       - name: Upload dmmdeps.zip to release
         if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ fromJson(steps.ensure_release.outputs.result).upload_url }}
           asset_path: out/zips/dmmdeps.zip
           asset_name: dmmdeps.zip
           asset_content_type: application/zip
@@ -83,7 +124,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ fromJson(steps.ensure_release.outputs.result).upload_url }}
           asset_path: out/zips/dmmdeps-fat.zip
           asset_name: dmmdeps-fat.zip
           asset_content_type: application/zip

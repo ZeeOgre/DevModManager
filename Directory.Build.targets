@@ -1,0 +1,27 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- treat common CI env variables as CI -->
+    <IsCI Condition="'$(IsCI)' == '' and '$(GITHUB_ACTIONS)' == 'true'">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == '' and '$(CI)' == 'true'">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == '' and '$(TF_BUILD)' != ''">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == ''">false</IsCI>
+
+    <!-- developer override: /p:EnableLocalReleaseTrigger=false -->
+    <EnableLocalReleaseTrigger Condition="'$(EnableLocalReleaseTrigger)' == ''">true</EnableLocalReleaseTrigger>
+  </PropertyGroup>
+
+  <Target Name="TriggerRelease"
+          AfterTargets="Build"
+          Condition="'$(EnableLocalReleaseTrigger)' == 'true'
+                     and '$(IsCI)' != 'true'
+                     and '$(Configuration)' == 'FullRelease'
+                     and '$(TriggerGitHubRelease)' != 'true'">
+    <!-- Diagnostic: show who triggered and key properties -->
+    <Message Importance="High" Text="Local FullRelease build — running directory-level release trigger for project: $(MSBuildProjectName)" />
+    <Message Importance="Normal" Text="Properties: Configuration=$(Configuration); IsCI=$(IsCI); EnableLocalReleaseTrigger=$(EnableLocalReleaseTrigger); TriggerGitHubRelease=$(TriggerGitHubRelease)" />
+
+    <!-- Call script via PowerShell call operator to ensure script parameters are passed correctly.
+         Pass explicit RepoRoot so the script resolves repo root reliably. -->
+    <Exec Command="pwsh -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildThisFileDirectory)scripts\push-tag.ps1' -AutoCommit -RepoRoot '$(MSBuildThisFileDirectory)'&quot;" />
+  </Target>
+</Project>

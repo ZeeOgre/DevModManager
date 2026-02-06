@@ -383,3 +383,8 @@ FodyWeavers.xsd
 [Ii]nstaller/*-cache/**
 [Ii]nstaller/*-cache/**/*
 
+# push-tag debug logs created by scripts/push-tag.ps1
+push-tag-debug-*.log
+# per-project push-tag log
+DMM.Standalone.DependencyChecker/push-tag.log
+
