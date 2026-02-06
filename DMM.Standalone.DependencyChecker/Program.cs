@@ -365,12 +365,19 @@ namespace DmmDep
                     var nifBytes = File.ReadAllBytes(full);
 
                     foreach (var s in ExtractPrintableStrings(nifBytes, 4))
-                    {
+                    {   
                         string token = s.Replace('/', '\\').TrimStart('\\');
 
                         if (IsMatExtension(token))
                         {
                             string rel = token;
+                            
+                            // Truncate at .mat extension to remove garbage like .mat+ or .mat1
+                            int matIndex = rel.IndexOf(".mat", StringComparison.OrdinalIgnoreCase);
+                            if (matIndex >= 0)
+                            {
+                                rel = rel.Substring(0, matIndex + 4); // Keep up to and including ".mat"
+                            }
 
                             if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
                             {
