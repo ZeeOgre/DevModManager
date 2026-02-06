@@ -38,11 +38,11 @@ jobs:
             -p:DebugType=None `
             -p:IncludeSymbols=false `
             -p:OutputType=Exe `
-            -p:AssemblyName=dmmdeps `
+            -p:AssemblyName=dmmdeps_fat `
             -p:EnableLocalReleaseTrigger=false `
-            -o ./out/dmmdeps
+            -o ./out/dmmdeps-slim
 
-      - name: Publish self-contained single-file (fat) build
+      - name: Publish self-contained single-file (fat) build  
         run: |
           dotnet publish ${{ env.BUILD_PROJECT }} `
             -c Release `
@@ -54,7 +54,7 @@ jobs:
             -p:IncludeSymbols=false `
             -p:OutputType=Exe `
             -p:EnableCompressionInSingleFile=true `
-            -p:AssemblyName=dmmdeps_fat `
+            -p:AssemblyName=dmmdeps `
             -p:EnableLocalReleaseTrigger=false `
             -o ./out/dmmdeps-fat
 
@@ -63,27 +63,25 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path out\zips -Force | Out-Null
           
-          # Verify framework-dependent exe
-          $slimExe = "out\dmmdeps\dmmdeps.exe"
-          if (-not (Test-Path $slimExe)) { 
-            Write-Error "Framework-dependent exe not found at $slimExe"
-            Get-ChildItem -Path out\dmmdeps -Recurse
-            exit 1 
-          }
-          Write-Host "✓ Found dmmdeps.exe ($(((Get-Item $slimExe).Length / 1MB).ToString('0.00')) MB)"
-          
-          # Verify self-contained exe
-          $fatExe = "out\dmmdeps-fat\dmmdeps_fat.exe"
+          # Framework-independent (fat) - includes .NET 8 runtime
+          $fatExe = "out\dmmdeps-fat\dmmdeps.exe"
           if (-not (Test-Path $fatExe)) { 
             Write-Error "Self-contained exe not found at $fatExe"
-            Get-ChildItem -Path out\dmmdeps-fat -Recurse
             exit 1 
           }
-          Write-Host "✓ Found dmmdeps_fat.exe ($(((Get-Item $fatExe).Length / 1MB).ToString('0.00')) MB)"
+          Write-Host "✓ Found dmmdeps.exe (self-contained: $(((Get-Item $fatExe).Length / 1MB).ToString('0.00')) MB)"
           
-          # Create zips with correct names
-          Compress-Archive -Path $slimExe -DestinationPath out\zips\dmmdeps.zip -Force
-          Compress-Archive -Path $fatExe -DestinationPath out\zips\dmmdeps-fat.zip -Force
+          # Framework-dependent (slim) - requires .NET 8 installed
+          $slimExe = "out\dmmdeps-slim\dmmdeps_fat.exe"
+          if (-not (Test-Path $slimExe)) { 
+            Write-Error "Framework-dependent exe not found at $slimExe"
+            exit 1 
+          }
+          Write-Host "✓ Found dmmdeps_fat.exe (framework-dependent: $(((Get-Item $slimExe).Length / 1MB).ToString('0.00')) MB)"
+          
+          # Package correctly named files into correctly named zips
+          Compress-Archive -Path $fatExe -DestinationPath out\zips\dmmdeps.zip -Force
+          Compress-Archive -Path $slimExe -DestinationPath out\zips\dmmdeps-fat.zip -Force
           
           Write-Host "✓ Created release packages:"
           Get-ChildItem -Path out\zips | ForEach-Object {
