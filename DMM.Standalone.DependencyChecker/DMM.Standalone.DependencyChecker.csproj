@@ -31,20 +31,20 @@
 		<IncludeSymbols>false</IncludeSymbols>
 	</PropertyGroup>
 
-	<!-- Publish-on-build: handles three cases
+	<!-- Publish-on-build: handles all cases including FullRelease
 	     - PublishFrameworkDependent: produce slim dmmdeps.exe (no trimming/compression)
 	     - PublishSelfContained: produce fat dmmdeps_fat.exe (trimming + compression)
-	     - Publish: produce both artifacts -->
-	<Target Name="PublishOnBuild" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+	     - Publish: produce both artifacts
+	     - FullRelease: produce both artifacts -->
+	<Target Name="PublishOnBuild" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' AND ('$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease')">
+		
 		<!-- Framework-dependent (single exe, user must have .NET installed) -->
-		<Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent'" Command="dotnet publish -c Release -r win-x64 -p:SelfContained=false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:AssemblyName=dmmdeps -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
+		<Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" 
+		      Command="dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:AssemblyName=dmmdeps -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
 
 		<!-- Self-contained (single exe with runtime included) -->
-		<Exec Condition="'$(Configuration)' == 'PublishSelfContained'" Command="dotnet publish -c Release -r win-x64 -p:SelfContained=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
-
-		<!-- Publish (both artifacts) -->
-		<Exec Condition="'$(Configuration)' == 'Publish'" Command="dotnet publish -c Release -r win-x64 -p:SelfContained=false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:AssemblyName=dmmdeps -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
-		<Exec Condition="'$(Configuration)' == 'Publish'" Command="dotnet publish -c Release -r win-x64 -p:SelfContained=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
+		<Exec Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" 
+		      Command="dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
 	</Target>
 
 	<Import Project="TriggerRelease.targets" Condition="Exists('TriggerRelease.targets')" />
