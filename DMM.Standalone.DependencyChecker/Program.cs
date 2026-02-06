@@ -354,8 +354,8 @@ namespace DmmDep
                     }
                 }
 
-                // ---- 2. NIF -> MAT + MeshPath + RIG ----
-                Log.Info("[2] Scanning NIFs for MAT, mesh stems, and RIG... meshes come from nifs (which are in meshes) but are stored in geometries... confused yet?");
+                // ---- 2. NIF -> MAT + MeshPath + RIG + HKX + BEHAVIOR ----
+                Log.Info("[2] Scanning NIFs for MAT, mesh stems, RIG, HKX, BEHAVIOR... meshes come from nifs (which are in meshes) but are stored in geometries... confused yet?");
 
                 foreach (var nifRel in nifRelPaths)
                 {
@@ -425,6 +425,166 @@ namespace DmmDep
                             if (File.Exists(Path.Combine(gameRoot, rel)))
                             {
                                 AddFile(manifest, achlistPaths, rel, FileKind.Rig, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                            }
+                        }
+                        else if (token.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string rel = token;
+                            
+                            // Truncate at .hkx extension to remove garbage
+                            int hkxIndex = rel.IndexOf(".hkx", StringComparison.OrdinalIgnoreCase);
+                            if (hkxIndex >= 0)
+                            {
+                                rel = rel.Substring(0, hkxIndex + 4); // Keep up to and including ".hkx"
+                            }
+                            
+                            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rel = rel.StartsWith("meshes\\", StringComparison.OrdinalIgnoreCase)
+                                    ? NormalizeRel(Path.Combine("Data", rel))
+                                    : NormalizeRel(Path.Combine("Data\\Meshes", rel));
+                            }
+                            else
+                            {
+                                rel = NormalizeRel(rel);
+                            }
+
+                            if (File.Exists(Path.Combine(gameRoot, rel)))
+                            {
+                                AddFile(manifest, achlistPaths, rel, FileKind.Anim, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                            }
+                        }
+                        else if (token.EndsWith(".behavior", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string rel = token;
+                            
+                            // Truncate at .behavior extension to remove garbage
+                            int behaviorIndex = rel.IndexOf(".behavior", StringComparison.OrdinalIgnoreCase);
+                            if (behaviorIndex >= 0)
+                            {
+                                rel = rel.Substring(0, behaviorIndex + 9); // Keep up to and including ".behavior"
+                            }
+                            
+                            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rel = rel.StartsWith("meshes\\", StringComparison.OrdinalIgnoreCase)
+                                    ? NormalizeRel(Path.Combine("Data", rel))
+                                    : NormalizeRel(Path.Combine("Data\\Meshes", rel));
+                            }
+                            else
+                            {
+                                rel = NormalizeRel(rel);
+                            }
+
+                            if (File.Exists(Path.Combine(gameRoot, rel)))
+                            {
+                                AddFile(manifest, achlistPaths, rel, FileKind.Anim, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                            }
+                        }
+                        else if (token.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Handle DDS references directly in NIFs (rare but possible)
+                            string rel = token;
+                            
+                            // Truncate at .dds extension to remove garbage
+                            int ddsIndex = rel.IndexOf(".dds", StringComparison.OrdinalIgnoreCase);
+                            if (ddsIndex >= 0)
+                            {
+                                rel = rel.Substring(0, ddsIndex + 4); // Keep up to and including ".dds"
+                            }
+                            
+                            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rel = rel.StartsWith("Textures\\", StringComparison.OrdinalIgnoreCase)
+                                    ? Path.Combine("Data", rel)
+                                    : Path.Combine("Data\\Textures", rel);
+                            }
+                            rel = NormalizeRel(rel);
+
+                            if (File.Exists(Path.Combine(gameRoot, rel)))
+                            {
+                                AddFile(manifest, achlistPaths, rel, FileKind.Texture, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                                TryAddInterfaceTifForTexture(manifest, rel, tifRoot);
+                            }
+                        }
+                        else if (token.EndsWith(".hkx", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string rel = token;
+                            
+                            // Truncate at .hkx extension to remove garbage
+                            int hkxIndex = rel.IndexOf(".hkx", StringComparison.OrdinalIgnoreCase);
+                            if (hkxIndex >= 0)
+                            {
+                                rel = rel.Substring(0, hkxIndex + 4); // Keep up to and including ".hkx"
+                            }
+                            
+                            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rel = rel.StartsWith("meshes\\", StringComparison.OrdinalIgnoreCase)
+                                    ? NormalizeRel(Path.Combine("Data", rel))
+                                    : NormalizeRel(Path.Combine("Data\\Meshes", rel));
+                            }
+                            else
+                            {
+                                rel = NormalizeRel(rel);
+                            }
+
+                            if (File.Exists(Path.Combine(gameRoot, rel)))
+                            {
+                                AddFile(manifest, achlistPaths, rel, FileKind.Anim, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                            }
+                        }
+                        else if (token.EndsWith(".behavior", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string rel = token;
+                            
+                            // Truncate at .behavior extension to remove garbage
+                            int behaviorIndex = rel.IndexOf(".behavior", StringComparison.OrdinalIgnoreCase);
+                            if (behaviorIndex >= 0)
+                            {
+                                rel = rel.Substring(0, behaviorIndex + 9); // Keep up to and including ".behavior"
+                            }
+                            
+                            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rel = rel.StartsWith("meshes\\", StringComparison.OrdinalIgnoreCase)
+                                    ? NormalizeRel(Path.Combine("Data", rel))
+                                    : NormalizeRel(Path.Combine("Data\\Meshes", rel));
+                            }
+                            else
+                            {
+                                rel = NormalizeRel(rel);
+                            }
+
+                            if (File.Exists(Path.Combine(gameRoot, rel)))
+                            {
+                                AddFile(manifest, achlistPaths, rel, FileKind.Anim, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                            }
+                        }
+                        else if (token.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Handle DDS references directly in NIFs (rare but possible)
+                            string rel = token;
+                            
+                            // Truncate at .dds extension to remove garbage
+                            int ddsIndex = rel.IndexOf(".dds", StringComparison.OrdinalIgnoreCase);
+                            if (ddsIndex >= 0)
+                            {
+                                rel = rel.Substring(0, ddsIndex + 4); // Keep up to and including ".dds"
+                            }
+                            
+                            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rel = rel.StartsWith("Textures\\", StringComparison.OrdinalIgnoreCase)
+                                    ? Path.Combine("Data", rel)
+                                    : Path.Combine("Data\\Textures", rel);
+                            }
+                            rel = NormalizeRel(rel);
+
+                            if (File.Exists(Path.Combine(gameRoot, rel)))
+                            {
+                                AddFile(manifest, achlistPaths, rel, FileKind.Texture, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                                TryAddInterfaceTifForTexture(manifest, rel, tifRoot);
                             }
                         }
                         else if (!token.Contains('.') && token.Contains("\\"))
