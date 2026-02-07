@@ -559,6 +559,9 @@ namespace DmmDep
                 Log.Info("[4] Collecting interface icons / previews...");
                 CollectIconsAndPreviews(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot, tifRoot);
 
+                // ---- 4b. Collect all TIF source files via directory walks ----
+                CollectAllTifFiles(manifest, pluginName, gameRoot, tifRoot);
+
                 // ---- 5. Voice assets (PC dev + runtime + XB) ----
 
                 Log.Info("[5] Collecting voice files...");
@@ -1075,7 +1078,7 @@ namespace DmmDep
             }
         }
 
-        // Terrain overlay TIF discovery - single file lookup inside game root
+        // Terrain overlay TIF discovery - walk the terrain TIF directory for matching names
         private static void TryAddTerrainOverlayTif(
             DependencyManifest manifest,
             string worldspaceName,
@@ -1095,6 +1098,53 @@ namespace DmmDep
             }
         }
 
+        // NEW: Comprehensive TIF collection via directory walks
+        private static void CollectAllTifFiles(
+            DependencyManifest manifest,
+            string pluginName,
+            string gameRoot,
+            string tifRoot)
+        {
+            Log.Info("[TIF] Collecting TIF source files...");
+
+            // 1. Terrain overlay TIFs from Data\Source\TGATextures\Terrain\OverlayMasks\
+            string terrainTifRoot = Path.Combine(gameRoot, "Data", "Source", "TGATextures", "Terrain", "OverlayMasks");
+            if (Directory.Exists(terrainTifRoot))
+            {
+                foreach (var tif in Directory.EnumerateFiles(terrainTifRoot, "*.tif", SearchOption.TopDirectoryOnly))
+                {
+                    string relTifPc = Path.Combine("Data", "Source", "TGATextures", "Terrain", "OverlayMasks", Path.GetFileName(tif));
+                    relTifPc = NormalizeRel(relTifPc);
+                    AddBackupOnlyFile(manifest, relTifPc, "terrain-overlay-tif-walk");
+                }
+            }
+
+            // 2. Interface TIFs from ..\..\Source\TGATextures\Interface\
+            string interfaceTifRoot = Path.Combine(tifRoot, "Interface");
+            if (Directory.Exists(interfaceTifRoot))
+            {
+                string[] iconTypes = { "InventoryIcons", "ShipBuilderIcons", "WorkshopIcons" };
+                
+                foreach (var type in iconTypes)
+                {
+                    string typeRoot = Path.Combine(interfaceTifRoot, type, pluginName + ".esm");
+                    if (!Directory.Exists(typeRoot))
+                        continue;
+
+                    foreach (var tif in Directory.EnumerateFiles(typeRoot, "*.tif", SearchOption.AllDirectories))
+                    {
+                        // Build relative path: ..\..\Source\TGATextures\Interface\{type}\{plugin}.esm\...
+                        string relFromTifRoot = GetRelativePath(tifRoot, tif);
+                        string relTifPc = Path.Combine("..\\..", "Source", "TGATextures", relFromTifRoot);
+                        relTifPc = NormalizeRel(relTifPc);
+                        AddBackupOnlyFile(manifest, relTifPc, $"interface-{type.ToLowerInvariant()}-tif-walk");
+                    }
+                }
+            }
+
+            Log.Info("[TIF] TIF collection complete");
+        }
+
         // =====================================================================
         // Script discovery
         // =====================================================================
@@ -1112,8 +1162,6 @@ namespace DmmDep
             string path = name.Replace(':', '\\');
             return NormalizeRel(Path.Combine("Data", "Scripts", path + ".pex"));
         }
-
-
 
         // Find colon-delimited tokens in plugin that correspond to valid scripts
         private static HashSet<string> ExtractScriptNamesFromPlugin(byte[] pluginBytes, string gameRoot)
@@ -1192,7 +1240,6 @@ namespace DmmDep
 
             return all;
         }
-
 
         private static void CollectMatDdsTokensFromJson(JsonElement element, List<string> tokens)
         {
