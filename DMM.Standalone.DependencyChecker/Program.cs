@@ -914,6 +914,9 @@ namespace DmmDep
                 "WorkshopIcons"
             };
 
+            int ddsCount = 0;
+            int tifFoundCount = 0;
+
             foreach (var type in iconTypes)
             {
                 string root = Path.Combine(dataRoot, "Textures", "Interface", type, pluginName + ".esm");
@@ -921,27 +924,37 @@ namespace DmmDep
 
                 foreach (string dds in Directory.EnumerateFiles(root, "*.dds", SearchOption.AllDirectories))
                 {
+                    ddsCount++;
                     string relUnderData = GetRelativePath(dataRoot, dds);
                     string relPc = NormalizeRel(Path.Combine("Data", relUnderData));
 
                     // Add DDS icon
                     AddFile(manifest, achlist, relPc, FileKind.Icon, $"icon-{type.ToLowerInvariant()}", gameRoot, xboxDataRoot);
 
-                    // Add corresponding TIF: Data\Textures\Interface\... → ..\..\Source\TGATextures\Interface\...
-                    // Example: Data\Textures\Interface\InventoryIcons\ZeeOgresEnhancedOutposts.esm\000000CCMC.dds
-                    //       → ..\..\Source\TGATextures\Interface\InventoryIcons\ZeeOgresEnhancedOutposts.esm\000000CCMC.tif
-                    string relUnderTextures = relPc.Substring("Data\\Textures\\".Length); // Interface\InventoryIcons\...
+                    // Add corresponding TIF: Data\Textures\Interface\... → tifRoot\Interface\...
+                    // Example DDS: Data\Textures\Interface\InventoryIcons\ZeeOgresEnhancedOutposts.esm\000000CCMC.dds
+                    // Calculate: Interface\InventoryIcons\ZeeOgresEnhancedOutposts.esm\000000CCMC.tif
+                    string relUnderTextures = relPc.Substring("Data\\Textures\\".Length);
                     string tifSubPath = Path.ChangeExtension(relUnderTextures, ".tif");
                     string tifFull = Path.Combine(tifRoot, tifSubPath);
 
+                    // Debug log (first 3 only)
+                    if (tifFoundCount < 3 && File.Exists(tifFull))
+                    {
+                        string relTifForLog = GetRelativePath(gameRoot, tifFull);
+                        Log.Info($"[4-DEBUG] TIF mapping: {relPc} → {relTifForLog}");
+                    }
+
                     if (File.Exists(tifFull))
                     {
-                        string relTifPc = GetRelativePath(gameRoot, tifFull);
-                        relTifPc = NormalizeRel(relTifPc);
-                        AddBackupOnlyFile(manifest, relTifPc, "interface-icon-tif");
+                        tifFoundCount++;
+                        // Use FULL absolute path - let AddBackupOnlyFile normalize it
+                        AddBackupOnlyFile(manifest, tifFull, "interface-icon-tif");
                     }
                 }
             }
+
+            Log.Info($"[4] Found {ddsCount} interface icons, {tifFoundCount} corresponding TIF files");
         }
 
         private static void CollectVoiceAssets(
