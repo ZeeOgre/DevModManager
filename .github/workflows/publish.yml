@@ -33,7 +33,7 @@ jobs:
           dotnet publish ${{ env.BUILD_PROJECT }} `
             -c Release `
             -r ${{ env.RID }} `                    # ADD THIS LINE
-            --self-contained false `
+            "--self-contained" false `
             -p:PublishSingleFile=true `
             -p:PublishTrimmed=false `
             -p:DebugType=None `
@@ -48,7 +48,7 @@ jobs:
           dotnet publish ${{ env.BUILD_PROJECT }} `
             -c Release `
             -r ${{ env.RID }} `
-            --self-contained true `
+            "--self-contained" true `
             -p:PublishSingleFile=true `
             -p:PublishTrimmed=true `
             -p:DebugType=None `
