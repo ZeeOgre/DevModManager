@@ -39,16 +39,32 @@ jobs:
       - name: Normalize names and prepare zips
         shell: pwsh
         run: |
-          mkdir out\zips
-          $d1 = Get-ChildItem -Path out\dmmdeps -Filter *.exe -File | Select-Object -First 1
-          if ($null -eq $d1) { Write-Error "framework-dependent exe not found"; exit 1 }
-          Copy-Item $d1.FullName out\dmmdeps\dmmdeps.exe -Force
-          $d2 = Get-ChildItem -Path out\dmmdeps-fat -Filter *.exe -File | Select-Object -First 1
-          if ($null -eq $d2) { Write-Error "fat exe not found"; exit 1 }
+          mkdir out\zips -ErrorAction SilentlyContinue
+          
+          # Framework-dependent build - already named dmmdeps.exe
+          $d1 = Get-ChildItem -Path out\dmmdeps -Filter dmmdeps.exe -File | Select-Object -First 1
+          if ($null -eq $d1) { 
+            Write-Error "Framework-dependent dmmdeps.exe not found in out\dmmdeps"
+            Get-ChildItem -Path out\dmmdeps
+            exit 1 
+          }
+          
+          # Self-contained build - needs renaming from dmmdeps_fat.exe to dmmdeps-fat.exe
+          $d2 = Get-ChildItem -Path out\dmmdeps-fat -Filter dmmdeps_fat.exe -File | Select-Object -First 1
+          if ($null -eq $d2) { 
+            Write-Error "Self-contained dmmdeps_fat.exe not found in out\dmmdeps-fat"
+            Get-ChildItem -Path out\dmmdeps-fat
+            exit 1 
+          }
           Copy-Item $d2.FullName out\dmmdeps-fat\dmmdeps-fat.exe -Force
-          Compress-Archive -Path out\dmmdeps\dmmdeps.exe -DestinationPath out\zips\dmmdeps.zip -Force
+          
+          # Create zips
+          Compress-Archive -Path $d1.FullName -DestinationPath out\zips\dmmdeps.zip -Force
           Compress-Archive -Path out\dmmdeps-fat\dmmdeps-fat.exe -DestinationPath out\zips\dmmdeps-fat.zip -Force
-
+          
+          # Verify zips
+          Write-Host "Created zips:"
+          Get-ChildItem out\zips
       - name: Upload workflow artifacts (optional)
         uses: actions/upload-artifact@v4
         with:
