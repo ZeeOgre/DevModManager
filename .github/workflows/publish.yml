@@ -145,7 +145,18 @@ jobs:
             Sub-second execution for ~5000 files. No directory walking - deterministic asset discovery based on plugin content.
 
             ### Full Documentation
-            See [README.md](https://github.com/ZeeOgre/DevModManager/blob/master/DMM.Standalone.DependencyChecker/README.md) for detailed documentation, troubleshooting, and integration guide.`;
+            See [README.md](https://github.com/ZeeOgre/DevModManager/blob/master/DMM.Standalone.DependencyChecker/README.md) for detailed documentation, troubleshooting, and integration guide.
+
+            ### Complementary PowerShell Script
+            While the rest of DMM is under development in C#, a complementary PowerShell script is available to automate mod backups and archive management for producing Windows and Xbox `.ba2` archives:
+
+            - [StarfieldArchiveManager.ps1](https://github.com/ZeeOgre/SharedResources/blob/master/scripts/StarfieldArchiveManager.ps1)
+`;
+
+
+            ### Complementary Powershell Script
+            While the rest of DMM is under development in C#, I've built a powershell script that will automate mod backups and the archive management process for producing windows and xbox ba2 archives
+            https://github.com/ZeeOgre/SharedResources/blob/master/scripts/StarfieldArchiveManager.ps1
 
               const { data: newRel } = await github.rest.repos.createRelease({ 
                 owner, 
