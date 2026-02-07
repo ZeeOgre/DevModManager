@@ -925,10 +925,6 @@ namespace DmmDep
                     string ext = Path.GetExtension(f).ToLowerInvariant();
                     if (ext is ".wem" or ".ffxanim")
                     {
-                        // Filter out wwise.dat files
-                        if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
-                            continue;
-                        
                         string relUnderData = GetRelativePath(dataRoot, f);
                         string relPc = NormalizeRel(Path.Combine("Data", relUnderData));
                         AddFile(manifest, achlist, relPc, FileKind.Voice, "pc-voice-runtime", gameRoot, xboxDataRoot);
@@ -972,10 +968,6 @@ namespace DmmDep
                 {
                     foreach (var f in Directory.EnumerateFiles(xbVoiceRoot, "*.wem", SearchOption.AllDirectories))
                     {
-                        // Filter out wwise.dat files
-                        if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
-                            continue;
-                        
                         string relXb = BuildXboxRelativePath(xboxDataRoot, f);
                         if (!manifest.Files.Any(fe => fe.XboxPath == relXb))
                         {
