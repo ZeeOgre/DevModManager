@@ -349,16 +349,25 @@ namespace DmmDep
                     }
                 }
 
-                // OverlayMasks from .btd -> Textures\Terrain\OverlayMasks\<name>.dds
+                // OverlayMasks from .btd -> Textures\Terrain\OverlayMasks\<name>.dds + TIF
                 Log.Info("[1c] Checking terrain overlay dds from .btd...");
                 foreach (var n in btdNames)
                 {
-                    string rel = NormalizeRel(Path.Combine("Data", "Textures", "Terrain", "OverlayMasks", n + ".dds"));
-                    string full = Path.Combine(gameRoot, rel);
-                    if (File.Exists(full))
+                    // Add DDS
+                    string ddsRel = NormalizeRel(Path.Combine("Data", "Textures", "Terrain", "OverlayMasks", n + ".dds"));
+                    string ddsFull = Path.Combine(gameRoot, ddsRel);
+                    if (File.Exists(ddsFull))
                     {
-                        AddFile(manifest, achlistPaths, rel, FileKind.Texture, "btd-overlay", gameRoot, xboxDataRoot);
-                        TryAddTerrainOverlayTif(manifest, n, gameRoot);
+                        AddFile(manifest, achlistPaths, ddsRel, FileKind.Texture, "btd-overlay", gameRoot, xboxDataRoot);
+                    }
+                    
+                    // Add corresponding TIF: Data\Source\TGATextures\Terrain\OverlayMasks\<name>.tif
+                    string tifRel = Path.Combine("Data", "Source", "TGATextures", "Terrain", "OverlayMasks", n + ".tif");
+                    string tifFull = Path.Combine(gameRoot, tifRel);
+                    if (File.Exists(tifFull))
+                    {
+                        tifRel = NormalizeRel(tifRel);
+                        AddBackupOnlyFile(manifest, tifRel, "terrain-overlay-tif");
                     }
                 }
 
@@ -515,7 +524,7 @@ namespace DmmDep
                                 hasCustomTextures = true;
                                 totalDdsHits++;
                                 AddFile(manifest, achlistPaths, ddsRel, FileKind.Texture, $"mat:{matRel}", gameRoot, xboxDataRoot);
-                                //TryAddInterfaceTifForTexture(manifest, ddsRel, tifRoot);
+                                TryAddInterfaceTifForTexture(manifest, ddsRel, tifRoot);
                             }
                             continue;
                         }
@@ -535,7 +544,7 @@ namespace DmmDep
                                 hasCustomTextures = true;
                                 totalDdsHits++;
                                 AddFile(manifest, achlistPaths, ddsRel, FileKind.Texture, $"mat:{matRel}", gameRoot, xboxDataRoot);
-                                //TryAddInterfaceTifForTexture(manifest, ddsRel, tifRoot);
+                                TryAddInterfaceTifForTexture(manifest, ddsRel, tifRoot);
                             }
                         }
                     }
@@ -558,9 +567,6 @@ namespace DmmDep
 
                 Log.Info("[4] Collecting interface icons / previews...");
                 CollectIconsAndPreviews(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot, tifRoot);
-
-                // ---- 4b. Collect all TIF source files via directory walks ----
-                CollectAllTifFiles(manifest, pluginName, gameRoot, tifRoot);
 
                 // ---- 5. Voice assets (PC dev + runtime + XB) ----
 
@@ -919,8 +925,21 @@ namespace DmmDep
                 {
                     string relUnderData = GetRelativePath(dataRoot, dds);
                     string relPc = NormalizeRel(Path.Combine("Data", relUnderData));
+                    
+                    // Add DDS icon
                     AddFile(manifest, achlist, relPc, FileKind.Icon, $"icon-{type.ToLowerInvariant()}", gameRoot, xboxDataRoot);
-                    TryAddInterfaceTif(manifest, relPc, tifRoot);
+                    
+                    // Add corresponding TIF: transform Data\Textures\Interface\... → ..\..\Source\TGATextures\Interface\...
+                    string relUnderTextures = relPc.Substring("Data\\Textures\\".Length);
+                    string tifSubPath = Path.ChangeExtension(relUnderTextures, ".tif");
+                    string tifFull = Path.Combine(tifRoot, tifSubPath);
+                    
+                    if (File.Exists(tifFull))
+                    {
+                        string relTifPc = GetRelativePath(gameRoot, tifFull);
+                        relTifPc = NormalizeRel(relTifPc);
+                        AddBackupOnlyFile(manifest, relTifPc, "interface-icon-tif");
+                    }
                 }
             }
         }
@@ -1053,96 +1072,41 @@ namespace DmmDep
             sw.Flush();
         }
 
-        // Interface TIF discovery - mirrors DDS structure under tifRoot (outside game root)
-        private static void TryAddInterfaceTif(
+        // Full-path-aware TIF mapping for interface + terrain textures (mirror includes "<plugin>.esm")
+        private static void TryAddInterfaceTifForTexture(
             DependencyManifest manifest,
             string relTexturePath,
             string tifRoot)
         {
-            if (!relTexturePath.StartsWith("Data\\Textures\\Interface\\", StringComparison.OrdinalIgnoreCase))
+            if (!relTexturePath.StartsWith("Data\\Textures", StringComparison.OrdinalIgnoreCase))
                 return;
 
             string relUnderTextures = relTexturePath.Substring("Data\\Textures\\".Length);
 
-            // Example:
-            // DDS: Data\Textures\Interface\InventoryIcons\<Plugin>.esm\...\foo.dds
-            // TIF: ..\..\Source\TGATextures\Interface\InventoryIcons\<Plugin>.esm\...\foo.tif
-            string tifSubPath = Path.ChangeExtension(relUnderTextures, ".tif");
-            string tifFull = Path.Combine(tifRoot, tifSubPath);
-
-            if (File.Exists(tifFull))
+            // Interface: mirror includes "<plugin>.esm" directory
+            if (relUnderTextures.StartsWith("Interface\\", StringComparison.OrdinalIgnoreCase))
             {
-                string relTifPc = Path.Combine("..\\..", "Source", "TGATextures", tifSubPath);
-                relTifPc = NormalizeRel(relTifPc);
-                AddBackupOnlyFile(manifest, relTifPc, "interface-icon-tif");
-            }
-        }
-
-        // Terrain overlay TIF discovery - walk the terrain TIF directory for matching names
-        private static void TryAddTerrainOverlayTif(
-            DependencyManifest manifest,
-            string worldspaceName,
-            string gameRoot)
-        {
-            // Example:
-            // DDS: Data\Textures\Terrain\OverlayMasks\<worldspace>.dds
-            // TIF: Data\Source\TGATextures\Terrain\OverlayMasks\<worldspace>.tif
-            string fileName = worldspaceName + ".tif";
-            string tifFull = Path.Combine(gameRoot, "Data", "Source", "TGATextures", "Terrain", "OverlayMasks", fileName);
-
-            if (File.Exists(tifFull))
-            {
-                string relTifPc = Path.Combine("Data", "Source", "TGATextures", "Terrain", "OverlayMasks", fileName);
-                relTifPc = NormalizeRel(relTifPc);
-                AddBackupOnlyFile(manifest, relTifPc, "terrain-overlay-tif");
-            }
-        }
-
-        // NEW: Comprehensive TIF collection via directory walks
-        private static void CollectAllTifFiles(
-            DependencyManifest manifest,
-            string pluginName,
-            string gameRoot,
-            string tifRoot)
-        {
-            Log.Info("[TIF] Collecting TIF source files...");
-
-            // 1. Terrain overlay TIFs from Data\Source\TGATextures\Terrain\OverlayMasks\
-            string terrainTifRoot = Path.Combine(gameRoot, "Data", "Source", "TGATextures", "Terrain", "OverlayMasks");
-            if (Directory.Exists(terrainTifRoot))
-            {
-                foreach (var tif in Directory.EnumerateFiles(terrainTifRoot, "*.tif", SearchOption.TopDirectoryOnly))
+                // Example:
+                // DDS: Data\Textures\Interface\InventoryIcons\<Plugin>.esm\...\foo.dds
+                // TIF: Source\TGATextures\Interface\InventoryIcons\<Plugin>.esm\...\foo.tif
+                string tifSubPath = Path.ChangeExtension(relUnderTextures, ".tif");
+                string tifFull = Path.Combine(tifRoot, tifSubPath);
+                if (File.Exists(tifFull))
                 {
-                    string relTifPc = Path.Combine("Data", "Source", "TGATextures", "Terrain", "OverlayMasks", Path.GetFileName(tif));
-                    relTifPc = NormalizeRel(relTifPc);
-                    AddBackupOnlyFile(manifest, relTifPc, "terrain-overlay-tif-walk");
+                    string relTifPc = Path.Combine("Source", "TGATextures", tifSubPath);
+                    AddBackupOnlyFile(manifest, relTifPc, "interface-tif-from-dds");
                 }
             }
-
-            // 2. Interface TIFs from ..\..\Source\TGATextures\Interface\
-            string interfaceTifRoot = Path.Combine(tifRoot, "Interface");
-            if (Directory.Exists(interfaceTifRoot))
+            else if (relUnderTextures.StartsWith("Terrain\\OverlayMasks\\", StringComparison.OrdinalIgnoreCase))
             {
-                string[] iconTypes = { "InventoryIcons", "ShipBuilderIcons", "WorkshopIcons" };
-                
-                foreach (var type in iconTypes)
+                string fileName = Path.GetFileNameWithoutExtension(relUnderTextures) + ".tif";
+                string tifFull = Path.Combine(tifRoot, "Terrain", "OverlayMasks", fileName);
+                if (File.Exists(tifFull))
                 {
-                    string typeRoot = Path.Combine(interfaceTifRoot, type, pluginName + ".esm");
-                    if (!Directory.Exists(typeRoot))
-                        continue;
-
-                    foreach (var tif in Directory.EnumerateFiles(typeRoot, "*.tif", SearchOption.AllDirectories))
-                    {
-                        // Build relative path: ..\..\Source\TGATextures\Interface\{type}\{plugin}.esm\...
-                        string relFromTifRoot = GetRelativePath(tifRoot, tif);
-                        string relTifPc = Path.Combine("..\\..", "Source", "TGATextures", relFromTifRoot);
-                        relTifPc = NormalizeRel(relTifPc);
-                        AddBackupOnlyFile(manifest, relTifPc, $"interface-{type.ToLowerInvariant()}-tif-walk");
-                    }
+                    string relTifPc = Path.Combine("Source", "TGATextures", "Terrain", "OverlayMasks", fileName);
+                    AddBackupOnlyFile(manifest, relTifPc, "terrain-tif-from-dds");
                 }
             }
-
-            Log.Info("[TIF] TIF collection complete");
         }
 
         // =====================================================================
@@ -1162,6 +1126,8 @@ namespace DmmDep
             string path = name.Replace(':', '\\');
             return NormalizeRel(Path.Combine("Data", "Scripts", path + ".pex"));
         }
+
+
 
         // Find colon-delimited tokens in plugin that correspond to valid scripts
         private static HashSet<string> ExtractScriptNamesFromPlugin(byte[] pluginBytes, string gameRoot)
@@ -1240,6 +1206,7 @@ namespace DmmDep
 
             return all;
         }
+
 
         private static void CollectMatDdsTokensFromJson(JsonElement element, List<string> tokens)
         {
