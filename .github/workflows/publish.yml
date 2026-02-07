@@ -28,74 +28,32 @@ jobs:
       - name: Restore
         run: dotnet restore ${{ env.BUILD_PROJECT }}
 
-      - name: Publish framework-dependent build (slim)
+      - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} `
-            -c Release `
-            -r ${{ env.RID }} `
-            --self-contained false `
-            -p:PublishSingleFile=true `
-            -p:PublishTrimmed=false `
-            -p:DebugType=None `
-            -p:IncludeSymbols=false `
-            -p:OutputType=Exe `
-            -p:AssemblyName=dmmdeps `
-            -p:EnableLocalReleaseTrigger=false `
-            -o ./out/dmmdeps-slim
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained false /p:PublishSingleFile=true /p:PublishTrimmed=false /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmdeps /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
 
-      - name: Publish self-contained single-file (fat) build  
+      - name: Publish self-contained single-file (fat) build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} `
-            -c Release `
-            -r ${{ env.RID }} `
-            --self-contained true `
-            -p:PublishSingleFile=true `
-            -p:PublishTrimmed=true `
-            -p:DebugType=None `
-            -p:IncludeSymbols=false `
-            -p:OutputType=Exe `
-            -p:EnableCompressionInSingleFile=true `
-            -p:AssemblyName=dmmdeps_fat `
-            -p:EnableLocalReleaseTrigger=false `
-            -o ./out/dmmdeps-fat
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:AssemblyName=dmmdeps_fat /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
 
-      - name: Verify and prepare zips
+      - name: Normalize names and prepare zips
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path out\zips -Force | Out-Null
-          
-          # Framework-dependent (slim) - requires .NET 8 installed
-          $slimExe = "out\dmmdeps-slim\dmmdeps.exe"
-          if (-not (Test-Path $slimExe)) { 
-            Write-Error "Framework-dependent exe not found at $slimExe"
-            exit 1 
-          }
-          Write-Host "✓ Found dmmdeps.exe (framework-dependent: $(((Get-Item $slimExe).Length / 1MB).ToString('0.00')) MB)"
-          
-          # Self-contained (fat) - includes .NET 8 runtime
-          $fatExe = "out\dmmdeps-fat\dmmdeps_fat.exe"
-          if (-not (Test-Path $fatExe)) { 
-            Write-Error "Self-contained exe not found at $fatExe"
-            exit 1 
-          }
-          Write-Host "✓ Found dmmdeps_fat.exe (self-contained: $(((Get-Item $fatExe).Length / 1MB).ToString('0.00')) MB)"
-          
-          # Package correctly named files into correctly named zips
-          Compress-Archive -Path $slimExe -DestinationPath out\zips\dmmdeps.zip -Force
-          Compress-Archive -Path $fatExe -DestinationPath out\zips\dmmdeps-fat.zip -Force
-          
-          Write-Host "✓ Created release packages:"
-          Get-ChildItem -Path out\zips | ForEach-Object {
-            Write-Host "  - $($_.Name) ($(($_.Length / 1MB).ToString('0.00')) MB)"
-          }
+          mkdir out\zips
+          $d1 = Get-ChildItem -Path out\dmmdeps -Filter *.exe -File | Select-Object -First 1
+          if ($null -eq $d1) { Write-Error "framework-dependent exe not found"; exit 1 }
+          Copy-Item $d1.FullName out\dmmdeps\dmmdeps.exe -Force
+          $d2 = Get-ChildItem -Path out\dmmdeps-fat -Filter *.exe -File | Select-Object -First 1
+          if ($null -eq $d2) { Write-Error "fat exe not found"; exit 1 }
+          Copy-Item $d2.FullName out\dmmdeps-fat\dmmdeps-fat.exe -Force
+          Compress-Archive -Path out\dmmdeps\dmmdeps.exe -DestinationPath out\zips\dmmdeps.zip -Force
+          Compress-Archive -Path out\dmmdeps-fat\dmmdeps-fat.exe -DestinationPath out\zips\dmmdeps-fat.zip -Force
 
-      - name: Upload workflow artifacts
+      - name: Upload workflow artifacts (optional)
         uses: actions/upload-artifact@v4
         with:
-          name: dmmdeps-executables
-          path: |
-            out/zips/dmmdeps.zip
-            out/zips/dmmdeps-fat.zip
+          name: dmmdeps-zips
+          path: out/zips
 
       - name: Ensure GitHub release exists (create if missing, bump tag with retries if already exists)
         id: ensure_release
@@ -109,15 +67,7 @@ jobs:
             const maxAttempts = 3;
 
             async function createReleaseForTag(t) {
-              const { data: newRel } = await github.rest.repos.createRelease({ 
-                owner, 
-                repo, 
-                tag_name: t, 
-                name: t, 
-                body: `## DevModManager Dependency Checker ${t}\n\n### Downloads\n- **dmmdeps.zip** - Framework-dependent (requires .NET 8 Runtime, ~2-5 MB)\n- **dmmdeps-fat.zip** - Self-contained (includes .NET 8 Runtime, ~70-90 MB)\n\n### Usage\n\`\`\`\ndmmdeps.exe <plugin-path> [options]\n\`\`\``, 
-                draft: false, 
-                prerelease: false 
-              });
+              const { data: newRel } = await github.rest.repos.createRelease({ owner, repo, tag_name: t, name: t, body: `## DevModManager Dependency Checker ${t}\n\n### Downloads\n- **dmmdeps.zip** - Framework-dependent (~186 KB, requires .NET 8)\n- **dmmdeps-fat.zip** - Self-contained (~10 MB, includes .NET 8)\n\n### Usage\n\`\`\`\ndmmdeps.exe <plugin-path> [options]\n\`\`\``, draft:false, prerelease:false });
               core.info(`Created release id=${newRel.id} for ${t}`);
               return { upload_url: newRel.upload_url, id: newRel.id, tag: t };
             }
