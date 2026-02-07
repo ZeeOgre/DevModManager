@@ -30,7 +30,7 @@ jobs:
 
       - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true /p:PublishReadyToRun=false /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmdeps /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true /p:UseAppHost=false /p:PublishReadyToRun=false /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmdeps /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
 
       - name: Publish self-contained single-file (fat) build
         run: |
@@ -213,3 +213,12 @@ jobs:
           asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Inspect slim exe size
+        shell: pwsh
+        run: |
+          $exe = "out\dmmdeps\dmmdeps.exe"
+          if (-not (Test-Path $exe)) { throw "Missing $exe" }
+          $len = (Get-Item $exe).Length
+          Write-Host "Slim dmmdeps.exe bytes: $len"
+          Write-Host "Slim dmmdeps.exe MB: $([Math]::Round($len / 1MB, 2))"
