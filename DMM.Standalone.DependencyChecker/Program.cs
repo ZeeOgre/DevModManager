@@ -939,6 +939,10 @@ namespace DmmDep
                     string ext = Path.GetExtension(f).ToLowerInvariant();
                     if (ext is ".wav" or ".lip" or ".txt" or ".dat")
                     {
+                        // Filter out wwise.dat files
+                        if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        
                         string relUnderData = GetRelativePath(dataRoot, f);
                         string relPc = NormalizeRel(Path.Combine("Data", relUnderData));
                         AddBackupOnlyFile(manifest, relPc, "pc-voice-dev");
@@ -972,6 +976,10 @@ namespace DmmDep
                         string ext = Path.GetExtension(f).ToLowerInvariant();
                         if (ext is ".wav" or ".lip" or ".txt" or ".dat")
                         {
+                            // Filter out wwise.dat files
+                            if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
+                                continue;
+                            
                             string relXb = BuildXboxRelativePath(xboxDataRoot, f);
                             if (!manifest.Files.Any(fe => fe.XboxPath == relXb))
                             {
@@ -1063,17 +1071,8 @@ namespace DmmDep
                 string tifFull = Path.Combine(tifRoot, tifSubPath);
                 if (File.Exists(tifFull))
                 {
-                    string relTifPc = NormalizeRel(Path.Combine("Source", "TGATextures", tifSubPath));
-                    if (!manifest.Files.Any(f => string.Equals(f.PcPath, relTifPc, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        manifest.Files.Add(new FileEntry
-                        {
-                            PcPath = relTifPc,
-                            XboxPath = null,
-                            Kind = FileKind.Tif.ToString().ToLowerInvariant(),
-                            Source = "interface-tif-from-dds"
-                        });
-                    }
+                    string relTifPc = Path.Combine("Source", "TGATextures", tifSubPath);
+                    AddBackupOnlyFile(manifest, relTifPc, "interface-tif-from-dds");
                 }
             }
             else if (relUnderTextures.StartsWith("Terrain\\OverlayMasks\\", StringComparison.OrdinalIgnoreCase))
@@ -1082,17 +1081,8 @@ namespace DmmDep
                 string tifFull = Path.Combine(tifRoot, "Terrain", "OverlayMasks", fileName);
                 if (File.Exists(tifFull))
                 {
-                    string relTifPc = NormalizeRel(Path.Combine("Source", "TGATextures", "Terrain", "OverlayMasks", fileName));
-                    if (!manifest.Files.Any(f => string.Equals(f.PcPath, relTifPc, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        manifest.Files.Add(new FileEntry
-                        {
-                            PcPath = relTifPc,
-                            XboxPath = null,
-                            Kind = FileKind.Tif.ToString().ToLowerInvariant(),
-                            Source = "terrain-tif-from-dds"
-                        });
-                    }
+                    string relTifPc = Path.Combine("Source", "TGATextures", "Terrain", "OverlayMasks", fileName);
+                    AddBackupOnlyFile(manifest, relTifPc, "terrain-tif-from-dds");
                 }
             }
         }
