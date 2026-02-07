@@ -71,6 +71,22 @@
 		         Importance="high" />
 	</Target>
 
+	<Target Name="DumpPublishProps" BeforeTargets="Publish">
+    <Message Importance="high" Text="=== DumpPublishProps ===" />
+    <Message Importance="high" Text="Configuration=$(Configuration)" />
+    <Message Importance="high" Text="TargetFramework=$(TargetFramework)" />
+    <Message Importance="high" Text="RuntimeIdentifier=$(RuntimeIdentifier)" />
+    <Message Importance="high" Text="SelfContained=$(SelfContained)" />
+    <Message Importance="high" Text="UseAppHost=$(UseAppHost)" />
+    <Message Importance="high" Text="PublishSingleFile=$(PublishSingleFile)" />
+    <Message Importance="high" Text="IncludeAllContentForSelfExtract=$(IncludeAllContentForSelfExtract)" />
+    <Message Importance="high" Text="PublishTrimmed=$(PublishTrimmed)" />
+    <Message Importance="high" Text="PublishReadyToRun=$(PublishReadyToRun)" />
+    <Message Importance="high" Text="PublishAot=$(PublishAot)" />
+    <Message Importance="high" Text="InvariantGlobalization=$(InvariantGlobalization)" />
+    <Message Importance="high" Text="=== /DumpPublishProps ===" />
+  </Target>
+
 	<Import Project="TriggerRelease.targets" Condition="Exists('TriggerRelease.targets')" />
 
 	<!-- Post-build release trigger removed; TriggerRelease.targets will handle push-tag invocation -->

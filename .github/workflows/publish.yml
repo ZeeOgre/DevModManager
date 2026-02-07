@@ -30,7 +30,7 @@ jobs:
 
       - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release --self-contained false /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmdeps /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release --no-self-contained /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmdeps /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
 
       - name: Publish self-contained single-file (fat) build
         run: |
