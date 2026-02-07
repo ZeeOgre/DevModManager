@@ -10,7 +10,8 @@ This project follows strict source code hygiene rules to maintain cross-platform
 ## Naming conventions
 - Avoid choosing type names that are identical to or easily confused with .NET BCL types (for example, avoid naming a type exactly `FileSystem` in a way that will commonly conflict with `System.*` APIs). This prevents accidental confusion and the need for frequent fully-qualified type names.
 - Prefer the interface-first pattern for file/IO abstractions:
-  - Interface: `IFileSystem` (define in `DMM.Core.IO`)  - Concrete implementations: prefer names that clarify intent or origin, such as `DefaultFileSystem`, `NativeFileSystem`, or `FileSystemImpl`. This reduces the chance of name collision with BCL types while keeping call sites clear: `IFieSystem` remains the injected contract.
+  - Interface: `IFileSystem` (define in `DMM.Core.IO`)
+  - Concrete implementations: prefer names that clarify intent or origin, such as `DefaultFileSystem`, `NativeFileSystem`, or `FileSystemImpl`. This reduces the chance of name collision with BCL types while keeping call sites clear: `IFieSystem` remains the injected contract.
 - If you must keep a short concrete name (for example `FileSystem`), prefer placing it in a clear project-specific namespace such as `DMM.Core.IO` and use dependency injection to avoid referencing the concrete type directly.
 - For call-site disambiguation prefer one of these approaches rather than renaming everywhere:
   - Use a namespace alias: `using SysIO = System.IO;` then call `SysIO.File` when you need the BCL type.
