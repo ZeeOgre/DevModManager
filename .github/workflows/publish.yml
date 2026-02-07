@@ -214,11 +214,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Inspect slim exe size
+      - name: Inspect slim output (files + sizes)
         shell: pwsh
         run: |
-          $exe = "out\dmmdeps\dmmdeps.exe"
-          if (-not (Test-Path $exe)) { throw "Missing $exe" }
-          $len = (Get-Item $exe).Length
-          Write-Host "Slim dmmdeps.exe bytes: $len"
-          Write-Host "Slim dmmdeps.exe MB: $([Math]::Round($len / 1MB, 2))"
+          Write-Host "Dotnet version:"
+          dotnet --version
+          Write-Host ""
+
+          Write-Host "Slim publish folder contents:"
+          Get-ChildItem -Path out\dmmdeps -Force | Select-Object Name, Length | Format-Table -AutoSize
+
+          $sum = (Get-ChildItem -Path out\dmmdeps -Force | Measure-Object -Property Length -Sum).Sum
+          Write-Host ""
+          Write-Host "Slim folder total bytes: $sum"
