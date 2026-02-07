@@ -177,8 +177,10 @@ namespace DmmDep
                 Log.Info($"XboxData : {xboxDataRoot}");
 
                 // TIF root: ..\..\Source\TGATextures from game root, unless overridden
-                string tifRoot = options.TifRootOverride ??
-                                 Path.GetFullPath(Path.Combine(gameRoot, "..", "..", "Source", "TGATextures"));
+                // TIF root: resolve to absolute path from game root
+                string tifRoot = options.TifRootOverride != null
+                    ? Path.GetFullPath(Path.Combine(gameRoot, options.TifRootOverride))
+                    : Path.GetFullPath(Path.Combine(gameRoot, "..", "..", "Source", "TGATextures"));
                 Log.Info($"TifRoot  : {tifRoot}");
 
                 // Scripts root
