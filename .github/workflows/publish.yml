@@ -32,14 +32,14 @@ jobs:
         run: |
           dotnet publish ${{ env.BUILD_PROJECT }} `
             -c Release `
-            -r ${{ env.RID }} `                    # ADD THIS LINE
-            "--self-contained" false `
+            -r ${{ env.RID }} `
+            --self-contained false `
             -p:PublishSingleFile=true `
             -p:PublishTrimmed=false `
             -p:DebugType=None `
             -p:IncludeSymbols=false `
             -p:OutputType=Exe `
-            -p:AssemblyName=dmmdeps `              # FIX: was dmmdeps_fat
+            -p:AssemblyName=dmmdeps `
             -p:EnableLocalReleaseTrigger=false `
             -o ./out/dmmdeps-slim
 
@@ -48,14 +48,14 @@ jobs:
           dotnet publish ${{ env.BUILD_PROJECT }} `
             -c Release `
             -r ${{ env.RID }} `
-            "--self-contained" true `
+            --self-contained true `
             -p:PublishSingleFile=true `
             -p:PublishTrimmed=true `
             -p:DebugType=None `
             -p:IncludeSymbols=false `
             -p:OutputType=Exe `
             -p:EnableCompressionInSingleFile=true `
-            -p:AssemblyName=dmmdeps_fat `          # FIX: was dmmdeps
+            -p:AssemblyName=dmmdeps_fat `
             -p:EnableLocalReleaseTrigger=false `
             -o ./out/dmmdeps-fat
 
@@ -65,7 +65,7 @@ jobs:
           New-Item -ItemType Directory -Path out\zips -Force | Out-Null
           
           # Framework-dependent (slim) - requires .NET 8 installed
-          $slimExe = "out\dmmdeps-slim\dmmdeps.exe"     # FIX: was dmmdeps_fat.exe
+          $slimExe = "out\dmmdeps-slim\dmmdeps.exe"
           if (-not (Test-Path $slimExe)) { 
             Write-Error "Framework-dependent exe not found at $slimExe"
             exit 1 
@@ -73,7 +73,7 @@ jobs:
           Write-Host "✓ Found dmmdeps.exe (framework-dependent: $(((Get-Item $slimExe).Length / 1MB).ToString('0.00')) MB)"
           
           # Self-contained (fat) - includes .NET 8 runtime
-          $fatExe = "out\dmmdeps-fat\dmmdeps_fat.exe"   # FIX: was dmmdeps.exe
+          $fatExe = "out\dmmdeps-fat\dmmdeps_fat.exe"
           if (-not (Test-Path $fatExe)) { 
             Write-Error "Self-contained exe not found at $fatExe"
             exit 1 
@@ -81,8 +81,8 @@ jobs:
           Write-Host "✓ Found dmmdeps_fat.exe (self-contained: $(((Get-Item $fatExe).Length / 1MB).ToString('0.00')) MB)"
           
           # Package correctly named files into correctly named zips
-          Compress-Archive -Path $slimExe -DestinationPath out\zips\dmmdeps.zip -Force        # FIX: was $fatExe
-          Compress-Archive -Path $fatExe -DestinationPath out\zips\dmmdeps-fat.zip -Force     # FIX: was $slimExe
+          Compress-Archive -Path $slimExe -DestinationPath out\zips\dmmdeps.zip -Force
+          Compress-Archive -Path $fatExe -DestinationPath out\zips\dmmdeps-fat.zip -Force
           
           Write-Host "✓ Created release packages:"
           Get-ChildItem -Path out\zips | ForEach-Object {
