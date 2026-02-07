@@ -67,7 +67,76 @@ jobs:
             const maxAttempts = 3;
 
             async function createReleaseForTag(t) {
-              const { data: newRel } = await github.rest.repos.createRelease({ owner, repo, tag_name: t, name: t, body: `## DevModManager Dependency Checker ${t}\n\n### Downloads\n- **dmmdeps.zip** - Framework-dependent (~186 KB, requires .NET 8)\n- **dmmdeps-fat.zip** - Self-contained (~10 MB, includes .NET 8)\n\n### Usage\n\`\`\`\ndmmdeps.exe <plugin-path> [options]\n\`\`\``, draft:false, prerelease:false });
+              const releaseBody = `## DevModManager Dependency Checker ${t}
+
+            ### What It Does
+            Scans Starfield plugins (.esm/.esp) and discovers all asset dependencies:
+            - Meshes, Materials, Textures (with PC & Xbox paths)
+            - Scripts (Papyrus .psc/.pex with automatic import resolution)
+            - Terrain (.btd files, overlay masks, and source TIF files)
+            - Interface Icons (Inventory/ShipBuilder/Workshop + source TIF files)
+            - Voice Assets (PC & Xbox, dev & runtime)
+            - Particles, Animations, Morphs, and more
+
+            **Outputs:**
+            - \`.achlist\` - JSON array of PC file paths (for Achievement-safe mod managers)
+            - \`_deps.csv\` - Detailed spreadsheet with file paths, asset types, and discovery sources
+
+            ### Downloads
+            - **dmmdeps.zip** (~186 KB) - Requires [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0/runtime)
+            - **dmmdeps-fat.zip** (~10 MB) - Includes .NET 8, no dependencies
+
+            ### Basic Usage
+            \`\`\`
+            dmmdeps.exe "C:\\Path\\To\\YourMod.esm"
+            \`\`\`
+            Creates \`YourMod.achlist\` and \`YourMod_deps.csv\` in the same folder.
+
+            ### Command-Line Options
+            \`\`\`
+            dmmdeps.exe <pluginPath> [options]
+
+            Options:
+              --gameroot <path>     Override game root (parent of Data folder)
+              --xboxdata <path>     Override Xbox Data root (default from CreationKit.ini)
+              --tifroot <path>      Override TIF source root (default ..\\..\\Source\\TGATextures)
+              --scriptsroot <path>  Override Scripts folder (default Data\\Scripts)
+              --test                Write .achlist.test instead of .achlist
+              --quiet               Suppress skipped-file messages
+              --silent              Suppress all output except start/completion
+            \`\`\`
+
+            ### Examples
+            **Auto-detect everything:**
+            \`\`\`
+            dmmdeps.exe "C:\\Games\\Starfield\\Data\\MyMod.esm"
+            \`\`\`
+
+            **Custom development setup:**
+            \`\`\`
+            dmmdeps.exe "G:\\ModDev\\MyMod.esm" --gameroot "C:\\Games\\Starfield" --tifroot "G:\\Source\\TGATextures"
+            \`\`\`
+
+            **CI/CD pipeline (silent mode):**
+            \`\`\`
+            dmmdeps.exe MyMod.esm --silent
+            \`\`\`
+
+            ### Performance
+            Sub-second execution for ~5000 files. No directory walking - deterministic asset discovery based on plugin content.
+
+            ### Full Documentation
+            See [README.md](https://github.com/ZeeOgre/DevModManager/blob/master/DMM.Standalone.DependencyChecker/README.md) for detailed documentation, troubleshooting, and integration guide.`;
+
+              const { data: newRel } = await github.rest.repos.createRelease({ 
+                owner, 
+                repo, 
+                tag_name: t, 
+                name: `dmmdeps ${t}`, 
+                body: releaseBody, 
+                draft: false, 
+                prerelease: false 
+              });
               core.info(`Created release id=${newRel.id} for ${t}`);
               return { upload_url: newRel.upload_url, id: newRel.id, tag: t };
             }

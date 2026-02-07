@@ -941,11 +941,11 @@ namespace DmmDep
                     string tifFull = Path.Combine(tifRoot, tifSubPath);
 
                     // Debug log (first 3 only)
-                    if (tifFoundCount < 3 && File.Exists(tifFull))
-                    {
-                        string relTifForLog = GetRelativePath(gameRoot, tifFull);
-                        Log.Info($"[4-DEBUG] TIF mapping: {relPc} → {relTifForLog}");
-                    }
+                    //if (tifFoundCount < 3 && File.Exists(tifFull))
+                    //{
+                    //    string relTifForLog = GetRelativePath(gameRoot, tifFull);
+                    //    Log.Info($"[4-DEBUG] TIF mapping: {relPc} → {relTifForLog}");
+                    //}
 
                     if (File.Exists(tifFull))
                     {
