@@ -566,7 +566,8 @@ namespace DmmDep
 
                 // ---- 4b. PlanetData BiomeMaps (PNDT FULL -> <FULL>.biom) ----
                 Log.Info("[4b] Collecting biome maps (.biom) from PNDT FULL names...");
-                CollectBiomeMapsFromPndtFull(manifest, achlistPaths, Path.GetFileName(pluginPath), pluginBytes, gameRoot, xboxDataRoot);
+                CollectBiomeMapsFromPndtFull(manifest, achlistPaths, nifRelPaths, Path.GetFileName(pluginPath), pluginBytes, gameRoot, xboxDataRoot);
+
 
 
                 // ---- 5. Voice assets (PC dev + runtime + XB) ----
@@ -1225,19 +1226,21 @@ namespace DmmDep
             }
 
         private static void CollectBiomeMapsFromPndtFull(
-                DependencyManifest manifest,
-                HashSet<string> achlist,
-                string pluginFileNameWithExt,   // e.g. "The Elder Star System - Magnus.esm"
-                byte[] pluginBytes,
-                string gameRoot,
-                string xboxDataRoot)
-            {
-                // We want: Data\PlanetData\BiomeMaps\<pluginBaseName>.esm\<PNDT FULL>.biom
-                // Even when parsing an ESP, runtime folder naming uses the ESM name.
-                //
-                // Optimization: Parse PNDT once and harvest all relevant subrecords (FULL + MODL) in a single pass.
+                        DependencyManifest manifest,
+                        HashSet<string> achlist,
+                        HashSet<string> nifRelPaths,   // <-- NEW
+                        string pluginFileNameWithExt,
+                        byte[] pluginBytes,
+                        string gameRoot,
+                        string xboxDataRoot)
 
-                var pndt = ExtractPndtStrings(pluginBytes);
+        {
+            // We want: Data\PlanetData\BiomeMaps\<pluginBaseName>.esm\<PNDT FULL>.biom
+            // Even when parsing an ESP, runtime folder naming uses the ESM name.
+            //
+            // Optimization: Parse PNDT once and harvest all relevant subrecords (FULL + MODL) in a single pass.
+
+            var pndt = ExtractPndtStrings(pluginBytes);
 
                 if (pndt.Full.Count == 0 && pndt.Modl.Count == 0)
                 {
@@ -1303,6 +1306,10 @@ namespace DmmDep
                 if (TryResolveModelPath(s, gameRoot, out string rel))
                 {
                     nifFound++;
+
+                    // add to seed set so phase [2] will walk it
+                    nifRelPaths.Add(rel);
+
                     AddFile(manifest, achlist, rel, FileKind.Nif, "pndt-modl", gameRoot, xboxDataRoot);
                     Log.Info($"[4b] PNDT MODL model resolved: {rel}");
                 }
