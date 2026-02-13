@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -1175,120 +1176,120 @@ namespace DmmDep
 
 
         private static void CollectMatDdsTokensFromJson(JsonElement element, List<string> tokens)
-        {
-            switch (element.ValueKind)
             {
-                case JsonValueKind.Object:
-                    foreach (var prop in element.EnumerateObject())
-                    {
-                        if ((prop.NameEquals("File") || prop.NameEquals("FileName")) &&
-                            prop.Value.ValueKind == JsonValueKind.String)
+                switch (element.ValueKind)
+                {
+                    case JsonValueKind.Object:
+                        foreach (var prop in element.EnumerateObject())
                         {
-                            string? val = prop.Value.GetString();
-                            if (!string.IsNullOrWhiteSpace(val) &&
-                                val.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
+                            if ((prop.NameEquals("File") || prop.NameEquals("FileName")) &&
+                                prop.Value.ValueKind == JsonValueKind.String)
                             {
-                                tokens.Add(val);
+                                string? val = prop.Value.GetString();
+                                if (!string.IsNullOrWhiteSpace(val) &&
+                                    val.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    tokens.Add(val);
+                                }
                             }
+
+                            CollectMatDdsTokensFromJson(prop.Value, tokens);
                         }
+                        break;
 
-                        CollectMatDdsTokensFromJson(prop.Value, tokens);
-                    }
-                    break;
-
-                case JsonValueKind.Array:
-                    foreach (var item in element.EnumerateArray())
-                        CollectMatDdsTokensFromJson(item, tokens);
-                    break;
+                    case JsonValueKind.Array:
+                        foreach (var item in element.EnumerateArray())
+                            CollectMatDdsTokensFromJson(item, tokens);
+                        break;
+                }
             }
-        }
 
         private static string? NormalizeDdsPathFromMat(string raw)
-        {
-            if (string.IsNullOrWhiteSpace(raw)) return null;
-            string s = raw.Replace('/', '\\').Replace("\\\\", "\\").Trim();
+            {
+                if (string.IsNullOrWhiteSpace(raw)) return null;
+                string s = raw.Replace('/', '\\').Replace("\\\\", "\\").Trim();
 
-            int idxDataTex = s.IndexOf("Data\\Textures\\", StringComparison.OrdinalIgnoreCase);
-            if (idxDataTex >= 0) return NormalizeRel(s.Substring(idxDataTex));
+                int idxDataTex = s.IndexOf("Data\\Textures\\", StringComparison.OrdinalIgnoreCase);
+                if (idxDataTex >= 0) return NormalizeRel(s.Substring(idxDataTex));
 
-            int idxTextures = s.IndexOf("Textures\\", StringComparison.OrdinalIgnoreCase);
-            if (idxTextures >= 0) return NormalizeRel(Path.Combine("Data", s.Substring(idxTextures)));
+                int idxTextures = s.IndexOf("Textures\\", StringComparison.OrdinalIgnoreCase);
+                if (idxTextures >= 0) return NormalizeRel(Path.Combine("Data", s.Substring(idxTextures)));
 
-            if (!s.EndsWith(".dds", StringComparison.OrdinalIgnoreCase)) return null;
-            return NormalizeRel(Path.Combine("Data", "Textures", s.TrimStart('\\')));
-        }
+                if (!s.EndsWith(".dds", StringComparison.OrdinalIgnoreCase)) return null;
+                return NormalizeRel(Path.Combine("Data", "Textures", s.TrimStart('\\')));
+            }
         private sealed class PndtExtract
-        {
-            public readonly HashSet<string> Full = new(StringComparer.OrdinalIgnoreCase);
-            public readonly HashSet<string> Modl = new(StringComparer.OrdinalIgnoreCase);
-        }
+            {
+                public readonly HashSet<string> Full = new(StringComparer.OrdinalIgnoreCase);
+                public readonly HashSet<string> Modl = new(StringComparer.OrdinalIgnoreCase);
+            }
 
         private static void CollectBiomeMapsFromPndtFull(
-            DependencyManifest manifest,
-            HashSet<string> achlist,
-            string pluginFileNameWithExt,   // e.g. "The Elder Star System - Magnus.esm"
-            byte[] pluginBytes,
-            string gameRoot,
-            string xboxDataRoot)
-        {
-            // We want: Data\PlanetData\BiomeMaps\<pluginBaseName>.esm\<PNDT FULL>.biom
-            // Even when parsing an ESP, runtime folder naming uses the ESM name.
-            //
-            // Optimization: Parse PNDT once and harvest all relevant subrecords (FULL + MODL) in a single pass.
-
-            var pndt = ExtractPndtStrings(pluginBytes);
-
-            if (pndt.Full.Count == 0 && pndt.Modl.Count == 0)
+                DependencyManifest manifest,
+                HashSet<string> achlist,
+                string pluginFileNameWithExt,   // e.g. "The Elder Star System - Magnus.esm"
+                byte[] pluginBytes,
+                string gameRoot,
+                string xboxDataRoot)
             {
-                Log.Warn("[4b] No PNDT FULL/MODL strings found while parsing plugin bytes. (No BIOM inference or PNDT model dependencies possible.)");
-                return;
-            }
+                // We want: Data\PlanetData\BiomeMaps\<pluginBaseName>.esm\<PNDT FULL>.biom
+                // Even when parsing an ESP, runtime folder naming uses the ESM name.
+                //
+                // Optimization: Parse PNDT once and harvest all relevant subrecords (FULL + MODL) in a single pass.
 
-            if (pndt.Full.Count > 0)
-                Log.Info($"[4b] PNDT FULL strings found: {pndt.Full.Count}");
-            if (pndt.Modl.Count > 0)
-                Log.Info($"[4b] PNDT MODL strings found: {pndt.Modl.Count}");
+                var pndt = ExtractPndtStrings(pluginBytes);
 
-            string pluginBaseName = Path.GetFileNameWithoutExtension(pluginFileNameWithExt);
-            string pluginFolderName = pluginBaseName + ".esm";
-
-            // ---- BIOM inference from FULL ----
-            int biomFound = 0;
-            int biomMissing = 0;
-
-            foreach (string full in pndt.Full.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
-            {
-                string safeFull = full.Trim();
-                if (safeFull.Length == 0)
-                    continue;
-
-                string biomRel = NormalizeRel(Path.Combine(
-                    "Data",
-                    "PlanetData",
-                    "BiomeMaps",
-                    pluginFolderName,
-                    safeFull + ".biom"));
-
-                string biomFull = Path.Combine(gameRoot, biomRel);
-
-                if (File.Exists(biomFull))
+                if (pndt.Full.Count == 0 && pndt.Modl.Count == 0)
                 {
-                    biomFound++;
-                    AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-full-inferred", gameRoot, xboxDataRoot);
+                    Log.Warn("[4b] No PNDT FULL/MODL strings found while parsing plugin bytes. (No BIOM inference or PNDT model dependencies possible.)");
+                    return;
                 }
-                else
+
+                if (pndt.Full.Count > 0)
+                    Log.Info($"[4b] PNDT FULL strings found: {pndt.Full.Count}");
+                if (pndt.Modl.Count > 0)
+                    Log.Info($"[4b] PNDT MODL strings found: {pndt.Modl.Count}");
+
+                string pluginBaseName = Path.GetFileNameWithoutExtension(pluginFileNameWithExt);
+                string pluginFolderName = pluginBaseName + ".esm";
+
+                // ---- BIOM inference from FULL ----
+                int biomFound = 0;
+                int biomMissing = 0;
+
+                foreach (string full in pndt.Full.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
                 {
-                    biomMissing++;
-                    Log.Warn($"[WARN] Missing inferred BIOM: {biomRel}");
+                    string safeFull = full.Trim();
+                    if (safeFull.Length == 0)
+                        continue;
+
+                    string biomRel = NormalizeRel(Path.Combine(
+                        "Data",
+                        "PlanetData",
+                        "BiomeMaps",
+                        pluginFolderName,
+                        safeFull + ".biom"));
+
+                    string biomFull = Path.Combine(gameRoot, biomRel);
+
+                    if (File.Exists(biomFull))
+                    {
+                        biomFound++;
+                        AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-full-inferred", gameRoot, xboxDataRoot);
+                    }
+                    else
+                    {
+                        biomMissing++;
+                        Log.Warn($"[WARN] Missing inferred BIOM: {biomRel}");
+                    }
                 }
-            }
 
-            if (pndt.Full.Count > 0)
-                Log.Info($"[4b] BIOM inference results: found {biomFound}, missing {biomMissing}");
+                if (pndt.Full.Count > 0)
+                    Log.Info($"[4b] BIOM inference results: found {biomFound}, missing {biomMissing}");
 
-            // ---- Model dependencies from MODL (planet_Nirn.nif etc.) ----
-            int nifFound = 0;
-            int nifMissing = 0;
+                // ---- Model dependencies from MODL (planet_Nirn.nif etc.) ----
+                int nifFound = 0;
+                int nifMissing = 0;
 
             foreach (string modl in pndt.Modl.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
             {
@@ -1296,221 +1297,275 @@ namespace DmmDep
                 if (s.Length == 0)
                     continue;
 
-                // Most records store paths relative to Data; normalize into a Data-rooted rel path for AddFile.
-                string rel = NormalizeRel(s.Replace('/', '\\'));
-
-                if (!rel.EndsWith(".nif", StringComparison.OrdinalIgnoreCase))
+                if (!s.EndsWith(".nif", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
-                    rel = NormalizeRel(Path.Combine("Data", rel.TrimStart('\\')));
-
-                string fullPc = Path.Combine(gameRoot, rel);
-
-                if (File.Exists(fullPc))
+                if (TryResolveModelPath(s, gameRoot, out string rel))
                 {
                     nifFound++;
                     AddFile(manifest, achlist, rel, FileKind.Nif, "pndt-modl", gameRoot, xboxDataRoot);
+                    Log.Info($"[4b] PNDT MODL model resolved: {rel}");
                 }
                 else
                 {
                     nifMissing++;
-                    Log.Warn($"[WARN] Missing PNDT MODL NIF: {rel}");
+
+                    // Log both expected candidates for clarity
+                    string raw = NormalizeRel(s.Replace('/', '\\')).TrimStart('\\');
+
+                    string c1 = raw.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                        ? raw
+                        : NormalizeRel(Path.Combine("Data", raw));
+
+                    string rawNoData = raw.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                        ? raw.Substring("Data\\".Length)
+                        : raw;
+
+                    string c2 = (!rawNoData.StartsWith("Meshes\\", StringComparison.OrdinalIgnoreCase))
+                        ? NormalizeRel(Path.Combine("Data", "Meshes", rawNoData))
+                        : "(n/a)";
+
+                    Log.Warn($"[WARN] Missing PNDT MODL NIF. Tried: {c1}" + (c2 != "(n/a)" ? $" OR {c2}" : ""));
                 }
             }
 
+
+
+
             if (pndt.Modl.Count > 0)
-                Log.Info($"[4b] PNDT MODL NIF results: found {nifFound}, missing {nifMissing}");
-        }
+                    Log.Info($"[4b] PNDT MODL NIF results: found {nifFound}, missing {nifMissing}");
+            }
 
-        /// <summary>
-        /// Extracts PNDT strings (FULL + MODL) from the binary plugin.
-        /// Handles GRUP containers and compressed record payloads.
-        /// </summary>
+            /// <summary>
+            /// Extracts PNDT strings (FULL + MODL) from the binary plugin.
+            /// Handles GRUP containers and compressed record payloads.
+            /// </summary>
         private static PndtExtract ExtractPndtStrings(byte[] pluginBytes)
-        {
-            var results = new PndtExtract();
-
-            const int HeaderSize = 24;
-            int len = pluginBytes.Length;
-            int offset = 0;
-
-            // Stack of GRUP end offsets. We "enter" a GRUP by pushing its end,
-            // then continue parsing records inside it linearly until we hit the end.
-            var grupEnds = new Stack<int>();
-
-            while (offset + HeaderSize <= len)
             {
-                // If we reached the end of the current GRUP, pop and continue.
-                while (grupEnds.Count > 0 && offset >= grupEnds.Peek())
-                    grupEnds.Pop();
+                var results = new PndtExtract();
 
-                // Record type (4cc)
-                string type = ReadFourCC(pluginBytes, offset);
-                uint sizeOrGroupSize = ReadU32(pluginBytes, offset + 4);
+                const int HeaderSize = 24;
+                int len = pluginBytes.Length;
+                int offset = 0;
 
-                if (type == "GRUP")
+                // Stack of GRUP end offsets. We "enter" a GRUP by pushing its end,
+                // then continue parsing records inside it linearly until we hit the end.
+                var grupEnds = new Stack<int>();
+
+                while (offset + HeaderSize <= len)
                 {
-                    // In Bethesda plugins, GRUP "size" is total group size INCLUDING header.
-                    int groupTotalSize = checked((int)sizeOrGroupSize);
-                    int groupEnd = offset + groupTotalSize;
+                    // If we reached the end of the current GRUP, pop and continue.
+                    while (grupEnds.Count > 0 && offset >= grupEnds.Peek())
+                        grupEnds.Pop();
 
-                    if (groupTotalSize < HeaderSize || groupEnd > len)
+                    // Record type (4cc)
+                    string type = ReadFourCC(pluginBytes, offset);
+                    uint sizeOrGroupSize = ReadU32(pluginBytes, offset + 4);
+
+                    if (type == "GRUP")
                     {
-                        // Corrupt or unexpected; bail safely to avoid infinite loops
+                        // In Bethesda plugins, GRUP "size" is total group size INCLUDING header.
+                        int groupTotalSize = checked((int)sizeOrGroupSize);
+                        int groupEnd = offset + groupTotalSize;
+
+                        if (groupTotalSize < HeaderSize || groupEnd > len)
+                        {
+                            // Corrupt or unexpected; bail safely to avoid infinite loops
+                            break;
+                        }
+
+                        // Enter GRUP: push end, then move to first child record (right after header)
+                        grupEnds.Push(groupEnd);
+                        offset += HeaderSize;
+                        continue;
+                    }
+
+                    // Normal record: header includes dataSize at +4
+                    int dataSize = checked((int)sizeOrGroupSize);
+                    int dataStart = offset + HeaderSize;
+                    int next = dataStart + dataSize;
+
+                    if (dataSize < 0 || next > len)
+                    {
+                        // Corrupt; stop
                         break;
                     }
 
-                    // Enter GRUP: push end, then move to first child record (right after header)
-                    grupEnds.Push(groupEnd);
-                    offset += HeaderSize;
-                    continue;
-                }
-
-                // Normal record: header includes dataSize at +4
-                int dataSize = checked((int)sizeOrGroupSize);
-                int dataStart = offset + HeaderSize;
-                int next = dataStart + dataSize;
-
-                if (dataSize < 0 || next > len)
-                {
-                    // Corrupt; stop
-                    break;
-                }
-
-                if (type == "PNDT")
-                {
-                    uint flags = ReadU32(pluginBytes, offset + 8);
-
-                    byte[] payload = Slice(pluginBytes, dataStart, dataSize);
-                    byte[] recordData = payload;
-
-                    // Compressed flag: 0x00040000 (same convention as TES5/FO4/Starfield)
-                    const uint CompressedFlag = 0x00040000;
-                    if ((flags & CompressedFlag) != 0 && payload.Length >= 5)
+                    if (type == "PNDT")
                     {
-                        recordData = TryDecompressRecordPayload(payload) ?? payload;
+                        uint flags = ReadU32(pluginBytes, offset + 8);
+
+                        byte[] payload = Slice(pluginBytes, dataStart, dataSize);
+                        byte[] recordData = payload;
+
+                        // Compressed flag: 0x00040000 (same convention as TES5/FO4/Starfield)
+                        const uint CompressedFlag = 0x00040000;
+                        if ((flags & CompressedFlag) != 0 && payload.Length >= 5)
+                        {
+                            recordData = TryDecompressRecordPayload(payload) ?? payload;
+                        }
+
+                        foreach (var full in ExtractStringSubrecords(recordData, "FULL"))
+                        {
+                            if (!string.IsNullOrWhiteSpace(full))
+                                results.Full.Add(full.Trim());
+                        }
+
+                        foreach (var modl in ExtractStringSubrecords(recordData, "MODL"))
+                        {
+                            if (!string.IsNullOrWhiteSpace(modl))
+                                results.Modl.Add(modl.Trim());
+                        }
                     }
 
-                    foreach (var full in ExtractStringSubrecords(recordData, "FULL"))
-                    {
-                        if (!string.IsNullOrWhiteSpace(full))
-                            results.Full.Add(full.Trim());
-                    }
-
-                    foreach (var modl in ExtractStringSubrecords(recordData, "MODL"))
-                    {
-                        if (!string.IsNullOrWhiteSpace(modl))
-                            results.Modl.Add(modl.Trim());
-                    }
+                    offset = next;
                 }
 
-                offset = next;
+                return results;
             }
 
-            return results;
-        }
-
-        /// <summary>
-        /// Extract string payloads from a specific subrecord type within a record payload.
-        /// Handles XXXX extended-size subrecords.
-        /// </summary>
+            /// <summary>
+            /// Extract string payloads from a specific subrecord type within a record payload.
+            /// Handles XXXX extended-size subrecords.
+            /// </summary>
         private static IEnumerable<string> ExtractStringSubrecords(byte[] recordData, string wantedFourCC)
-        {
-            const int SubHeader = 6;
-            int pos = 0;
-            int len = recordData.Length;
-
-            uint? extendedSize = null;
-
-            while (pos + SubHeader <= len)
             {
-                string sub = ReadFourCC(recordData, pos);
-                ushort sz16 = ReadU16(recordData, pos + 4);
-                pos += SubHeader;
+                const int SubHeader = 6;
+                int pos = 0;
+                int len = recordData.Length;
 
-                uint size = extendedSize ?? sz16;
-                extendedSize = null;
+                uint? extendedSize = null;
 
-                if (sub == "XXXX")
+                while (pos + SubHeader <= len)
                 {
-                    // XXXX: next subrecord uses 32-bit size stored in this data
-                    if (pos + sz16 <= len && sz16 == 4)
+                    string sub = ReadFourCC(recordData, pos);
+                    ushort sz16 = ReadU16(recordData, pos + 4);
+                    pos += SubHeader;
+
+                    uint size = extendedSize ?? sz16;
+                    extendedSize = null;
+
+                    if (sub == "XXXX")
                     {
-                        extendedSize = ReadU32(recordData, pos);
+                        // XXXX: next subrecord uses 32-bit size stored in this data
+                        if (pos + sz16 <= len && sz16 == 4)
+                        {
+                            extendedSize = ReadU32(recordData, pos);
+                        }
+                        pos += sz16;
+                        continue;
                     }
-                    pos += sz16;
-                    continue;
+
+                    if (pos + size > len)
+                        yield break; // corrupt / truncated
+
+                    if (sub == wantedFourCC)
+                    {
+                        var bytes = Slice(recordData, pos, checked((int)size));
+                        string str = Encoding.UTF8.GetString(bytes).TrimEnd('\0').Trim();
+                        if (str.Length > 0)
+                            yield return str;
+                    }
+
+                    pos += checked((int)size);
                 }
+            }
 
-                if (pos + size > len)
-                    yield break; // corrupt / truncated
+        private static byte[]? TryDecompressRecordPayload(byte[] payload)
+        {
+            try
+            {
+                if (payload.Length < 5)
+                    return null;
 
-                if (sub == wantedFourCC)
-                {
-                    var bytes = Slice(recordData, pos, checked((int)size));
-                    string str = Encoding.UTF8.GetString(bytes).TrimEnd('\0').Trim();
-                    if (str.Length > 0)
-                        yield return str;
-                }
+                int expected = checked((int)ReadU32(payload, 0));
+                if (expected <= 0 || expected > 256 * 1024 * 1024) // sanity cap
+                    return null;
 
-                pos += checked((int)size);
+                using var input = new MemoryStream(payload, 4, payload.Length - 4, writable: false);
+                using var z = new ZLibStream(input, CompressionMode.Decompress);
+                using var output = new MemoryStream(capacity: expected);
+
+                z.CopyTo(output);
+                var data = output.ToArray();
+
+                // Some plugins may not match expected exactly; accept what we got if non-empty
+                return data.Length > 0 ? data : null;
+            }
+            catch
+            {
+                return null;
             }
         }
-
-
-    private static byte[]? TryDecompressRecordPayload(byte[] payload)
-    {
-        try
+        private static bool TryResolveModelPath(
+                       string modlRaw,
+                       string gameRoot,
+                       out string resolvedRel)
         {
-            if (payload.Length < 5)
-                return null;
+            resolvedRel = "";
 
-            int expected = checked((int)ReadU32(payload, 0));
-            if (expected <= 0 || expected > 256 * 1024 * 1024) // sanity cap
-                return null;
+            string raw = NormalizeRel(modlRaw.Replace('/', '\\')).TrimStart('\\');
 
-            using var input = new MemoryStream(payload, 4, payload.Length - 4, writable: false);
-            using var z = new ZLibStream(input, CompressionMode.Decompress);
-            using var output = new MemoryStream(capacity: expected);
+            // Candidate #1: Data\<raw>
+            string c1Rel = raw.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                ? raw
+                : NormalizeRel(Path.Combine("Data", raw));
 
-            z.CopyTo(output);
-            var data = output.ToArray();
+            string c1Full = Path.Combine(gameRoot, c1Rel);
+            if (File.Exists(c1Full))
+            {
+                resolvedRel = c1Rel;
+                return true;
+            }
 
-            // Some plugins may not match expected exactly; accept what we got if non-empty
-            return data.Length > 0 ? data : null;
+            // Candidate #2: Data\Meshes\<raw> (if not already Meshes-rooted)
+            string rawNoData = raw.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                ? raw.Substring("Data\\".Length)
+                : raw;
+
+            if (!rawNoData.StartsWith("Meshes\\", StringComparison.OrdinalIgnoreCase))
+            {
+                string c2Rel = NormalizeRel(Path.Combine("Data", "Meshes", rawNoData));
+                string c2Full = Path.Combine(gameRoot, c2Rel);
+
+                if (File.Exists(c2Full))
+                {
+                    resolvedRel = c2Rel;
+                    return true;
+                }
+            }
+
+            return false;
         }
-        catch
+
+
+
+
+        private static string ReadFourCC(byte[] bytes, int offset)
         {
-            return null;
+            // bytes are ASCII for record/subrecord names
+            return Encoding.ASCII.GetString(bytes, offset, 4);
         }
-    }
 
-    private static string ReadFourCC(byte[] bytes, int offset)
-    {
-        // bytes are ASCII for record/subrecord names
-        return Encoding.ASCII.GetString(bytes, offset, 4);
-    }
+        private static ushort ReadU16(byte[] bytes, int offset)
+        {
+            return (ushort)(bytes[offset] | (bytes[offset + 1] << 8));
+        }
 
-    private static ushort ReadU16(byte[] bytes, int offset)
-    {
-        return (ushort)(bytes[offset] | (bytes[offset + 1] << 8));
-    }
+        private static uint ReadU32(byte[] bytes, int offset)
+        {
+            return (uint)(bytes[offset]
+                | (bytes[offset + 1] << 8)
+                | (bytes[offset + 2] << 16)
+                | (bytes[offset + 3] << 24));
+        }
 
-    private static uint ReadU32(byte[] bytes, int offset)
-    {
-        return (uint)(bytes[offset]
-            | (bytes[offset + 1] << 8)
-            | (bytes[offset + 2] << 16)
-            | (bytes[offset + 3] << 24));
-    }
+        private static byte[] Slice(byte[] bytes, int offset, int count)
+        {
+            var buf = new byte[count];
+            Buffer.BlockCopy(bytes, offset, buf, 0, count);
+            return buf;
+        }
 
-    private static byte[] Slice(byte[] bytes, int offset, int count)
-    {
-        var buf = new byte[count];
-        Buffer.BlockCopy(bytes, offset, buf, 0, count);
-        return buf;
     }
-
-}
 }
