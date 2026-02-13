@@ -375,6 +375,11 @@ namespace DmmDep
                     }
                 }
 
+                // ---- 1b. PlanetData BiomeMaps (PNDT FULL -> <FULL>.biom) ----
+                Log.Info("[1d] Collecting biome maps (.biom) from PNDT FULL names... (Targeted Scan element)");
+                CollectBiomeMapsFromPndtFull(manifest, achlistPaths, nifRelPaths, Path.GetFileName(pluginPath), pluginBytes, gameRoot, xboxDataRoot);
+
+
                 // ---- 2. NIF -> MAT + MeshPath + RIG ----
                 Log.Info("[2] Scanning NIFs for MAT, mesh stems, and RIG... meshes come from nifs (which are in meshes) but are stored in geometries... confused yet?");
 
@@ -384,6 +389,9 @@ namespace DmmDep
                     if (!File.Exists(full)) continue;
 
                     var nifBytes = File.ReadAllBytes(full);
+
+
+                    
 
                     foreach (var s in ExtractPrintableStrings(nifBytes, 4))
                     {
@@ -563,11 +571,6 @@ namespace DmmDep
                 // ---- 4. Interface icons + shipbuilder + workshop ----
                 Log.Info("[4] Collecting interface icons / previews...");
                 CollectIconsAndPreviews(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot, tifRoot);
-
-                // ---- 4b. PlanetData BiomeMaps (PNDT FULL -> <FULL>.biom) ----
-                Log.Info("[4b] Collecting biome maps (.biom) from PNDT FULL names...");
-                CollectBiomeMapsFromPndtFull(manifest, achlistPaths, nifRelPaths, Path.GetFileName(pluginPath), pluginBytes, gameRoot, xboxDataRoot);
-
 
 
                 // ---- 5. Voice assets (PC dev + runtime + XB) ----
@@ -1311,7 +1314,7 @@ namespace DmmDep
                     nifRelPaths.Add(rel);
 
                     AddFile(manifest, achlist, rel, FileKind.Nif, "pndt-modl", gameRoot, xboxDataRoot);
-                    Log.Info($"[4b] PNDT MODL model resolved: {rel}");
+                    Log.Info($"[1d] PNDT MODL model resolved: {rel}");
                 }
                 else
                 {
