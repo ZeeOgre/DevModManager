@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 
 namespace DmmDep
 {
 #nullable enable
 
-    internal enum FileKind { Pex, Psc, Nif, Mat, Texture, Mesh, Voice, Terrain, Icon, Tif, BackupOnly, Particle, Anim, Morph, Rig, Warn, Other }
+    internal enum FileKind { Pex, Psc, Nif, Mat, Texture, Mesh, Voice, Terrain, Icon, Tif, Biom, BackupOnly, Particle, Anim, Morph, Rig, Warn, Other }
 
     internal sealed class FileEntry
     {
@@ -88,17 +89,17 @@ namespace DmmDep
             // Build consistent XBOX relative path from xboxDataRoot
             // xboxDataRoot typically points to: <GameRoot>\XBOX\Data
             // We want to return: XBOX\Data\<relative-from-xboxDataRoot>
-            
+
             string relFromXboxData = GetRelativePath(xboxDataRoot, xboxFullPath);
-            
+
             // Get the parent of xboxDataRoot to find the XBOX folder name
             string? xboxRootParent = Directory.GetParent(xboxDataRoot)?.FullName;
             if (xboxRootParent == null)
                 return NormalizeRel(Path.Combine("XBOX", "Data", relFromXboxData));
-            
+
             string xboxFolderName = Path.GetFileName(Directory.GetParent(xboxDataRoot)?.FullName ?? "XBOX");
             string dataFolderName = Path.GetFileName(xboxDataRoot);
-            
+
             return NormalizeRel(Path.Combine(xboxFolderName, dataFolderName, relFromXboxData));
         }
 
@@ -108,21 +109,21 @@ namespace DmmDep
             // Look for the 4-character sequence ".mat" followed by end-of-string or non-alphanumeric
             if (token.Length < 4)
                 return false;
-            
+
             int matIndex = token.IndexOf(".mat", StringComparison.OrdinalIgnoreCase);
             if (matIndex < 0)
                 return false;
-            
+
             // Check if it's exactly ".mat" at the end or followed by non-alphanumeric
             int afterMatIndex = matIndex + 4;
             if (afterMatIndex == token.Length)
                 return true; // ends with .mat
-            
+
             char afterChar = token[afterMatIndex];
             // If followed by digit or letter, it's something like .mat2 or .matx
             if (char.IsLetterOrDigit(afterChar))
                 return false;
-            
+
             return true; // .mat followed by non-alphanumeric (like space, slash, etc.)
         }
 
@@ -362,7 +363,7 @@ namespace DmmDep
                     {
                         AddFile(manifest, achlistPaths, ddsRel, FileKind.Texture, "btd-overlay", gameRoot, xboxDataRoot);
                     }
-                    
+
                     // Add corresponding TIF: Data\Source\TGATextures\Terrain\OverlayMasks\<name>.tif
                     string tifRel = Path.Combine("Data", "Source", "TGATextures", "Terrain", "OverlayMasks", n + ".tif");
                     string tifFull = Path.Combine(gameRoot, tifRel);
@@ -384,13 +385,13 @@ namespace DmmDep
                     var nifBytes = File.ReadAllBytes(full);
 
                     foreach (var s in ExtractPrintableStrings(nifBytes, 4))
-                    {   
+                    {
                         string token = s.Replace('/', '\\').TrimStart('\\');
 
                         if (IsMatExtension(token))
                         {
                             string rel = token;
-                            
+
                             // Truncate at .mat extension to remove garbage like .mat+ or .mat1
                             int matIndex = rel.IndexOf(".mat", StringComparison.OrdinalIgnoreCase);
                             if (matIndex >= 0)
@@ -409,10 +410,7 @@ namespace DmmDep
 
                             if (File.Exists(fullMat))
                             {
-                                if (matRelPaths.Add(rel))
-                                {
-                                    //Console.WriteLine($"[2] Found MAT '{rel}' in NIF '{nifRel}'");
-                                }
+                                matRelPaths.Add(rel);
                             }
                             else
                             {
@@ -422,14 +420,14 @@ namespace DmmDep
                         else if (token.EndsWith(".rig", StringComparison.OrdinalIgnoreCase))
                         {
                             string rel = token;
-                            
+
                             // Truncate at .rig extension to remove garbage
                             int rigIndex = rel.IndexOf(".rig", StringComparison.OrdinalIgnoreCase);
                             if (rigIndex >= 0)
                             {
                                 rel = rel.Substring(0, rigIndex + 4); // Keep up to and including ".rig"
                             }
-                            
+
                             if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
                             {
                                 rel = rel.StartsWith("meshes\\", StringComparison.OrdinalIgnoreCase)
@@ -449,17 +447,15 @@ namespace DmmDep
                         else if (!token.Contains('.') && token.Contains("\\"))
                         {
                             string stem = token.TrimStart('\\');
-                             
-                            // Clean up any potential garbage characters at the end of the stem
-                            // (though less common since we're looking for paths without extensions)
+
                             int nullChar = stem.IndexOf('\0');
                             if (nullChar >= 0)
                             {
                                 stem = stem.Substring(0, nullChar);
                             }
                             stem = stem.TrimEnd();
-                            
-                           string meshRel = stem.StartsWith("geometries\\", StringComparison.OrdinalIgnoreCase)
+
+                            string meshRel = stem.StartsWith("geometries\\", StringComparison.OrdinalIgnoreCase)
                                 ? NormalizeRel(Path.Combine("Data", stem + ".mesh"))
                                 : NormalizeRel(Path.Combine("Data\\geometries", stem + ".mesh"));
 
@@ -473,6 +469,7 @@ namespace DmmDep
 
                 // ---- 3. MATs -> DDS ----
                 Log.Info("[3] Scanning MATs for DDS tokens (via JSON File/FileName)...");
+
                 int matsWithCustom = 0;
                 int totalDdsHits = 0;
 
@@ -556,7 +553,6 @@ namespace DmmDep
                     }
                     else
                     {
-                        // Mark this as a "skipped files" informational message (suppressed by --quiet)
                         Log.Info($"[3] Skipping MAT (no existing custom textures): {matRel}", isSkipped: true);
                     }
                 }
@@ -564,12 +560,15 @@ namespace DmmDep
                 Log.Info($"[3] MATs with custom DDS: {matsWithCustom}, total DDS hits: {totalDdsHits}");
 
                 // ---- 4. Interface icons + shipbuilder + workshop ----
-
                 Log.Info("[4] Collecting interface icons / previews...");
                 CollectIconsAndPreviews(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot, tifRoot);
 
-                // ---- 5. Voice assets (PC dev + runtime + XB) ----
+                // ---- 4b. PlanetData BiomeMaps (PNDT FULL -> <FULL>.biom) ----
+                Log.Info("[4b] Collecting biome maps (.biom) from PNDT FULL names...");
+                CollectBiomeMapsFromPndtFull(manifest, achlistPaths, Path.GetFileName(pluginPath), pluginBytes, gameRoot, xboxDataRoot);
 
+
+                // ---- 5. Voice assets (PC dev + runtime + XB) ----
                 Log.Info("[5] Collecting voice files...");
                 CollectVoiceAssets(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot);
 
@@ -578,13 +577,8 @@ namespace DmmDep
                     NormalizeRel(Path.Combine("Data", "Scripts", "Source", name.Replace(':', '\\') + ".psc"));
                 static string ToPexRel(string name) =>
                     NormalizeRel(Path.Combine("Data", "Scripts", name.Replace(':', '\\') + ".pex"));
-                // ---- 6. Scripts (Bethesda script names + PSC imports) ----
 
                 Log.Info("[6] Script discovery from plugin text + PSC imports...");
-                // NOTE: Script files (PSC/PEX) may be overrepresented here because we only
-                // check for their presence on disk. We do not inspect parent archives that
-                // might contain scripts, so some scripts may appear present when they are
-                // actually provided by archives or other distribution mechanisms.
                 Log.Warn("[NOTE] Script files (PSC/PEX) may be overrepresented; only filesystem presence is checked, not parent archives (probable future enhancement).");
 
                 var rootScriptNames = ExtractScriptNamesFromPlugin(pluginBytes, gameRoot);
@@ -611,7 +605,6 @@ namespace DmmDep
                         AddFile(manifest, achlistPaths, pexRel, FileKind.Pex, "script-pex-or-import", gameRoot, xboxDataRoot);
                 }
 
-                // Second pass: imports from PSC
                 var pscSetSnapshot = new HashSet<string>(pscSet, StringComparer.OrdinalIgnoreCase);
                 var importRegex = new Regex(@"^\s*import\s+([A-Za-z0-9_:.]+)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
@@ -638,9 +631,7 @@ namespace DmmDep
 
                 Log.Info($"[6] After PSC imports: {pscSet.Count} PSC, {pexSet.Count} PEX");
 
-
                 // ---- Outputs ----
-
                 string achlistFileName = pluginName + (options.TestMode ? ".achlist.test" : ".achlist");
                 string achlistPath = Path.Combine(outputRoot, achlistFileName);
                 WriteAchlistJsonAsciiCrLf(achlistPath, achlistPaths.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
@@ -651,14 +642,9 @@ namespace DmmDep
                 Log.Info($"Wrote deps (csv) : {csvPath} (total {manifest.Files.Count})");
 
                 string jsonPath = Path.Combine(outputRoot, pluginName + "_deps.json");
-                // JSON output is currently not used and can be very large. Skip writing it.
-                // If needed in future re-enable serialization below.
-                // var jsonOpts = new JsonSerializerOptions { WriteIndented = true };
-                // File.WriteAllText(jsonPath, JsonSerializer.Serialize(manifest, jsonOpts));
                 Log.Info($"Skipped writing JSON deps file: {jsonPath} (disabled to reduce output size)");
 
                 swTotal.Stop();
-                // Completion message always shown regardless of --silent
                 Log.Always($"Done in {swTotal.Elapsed} | achlist={achlistPaths.Count}, deps={manifest.Files.Count}");
                 return 0;
             }
@@ -979,7 +965,7 @@ namespace DmmDep
                         // Filter out wwise.dat files
                         if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
                             continue;
-                        
+
                         string relUnderData = GetRelativePath(dataRoot, f);
                         string relPc = NormalizeRel(Path.Combine("Data", relUnderData));
                         AddBackupOnlyFile(manifest, relPc, "pc-voice-dev");
@@ -1016,7 +1002,7 @@ namespace DmmDep
                             // Filter out wwise.dat files
                             if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
                                 continue;
-                            
+
                             string relXb = BuildXboxRelativePath(xboxDataRoot, f);
                             if (!manifest.Files.Any(fe => fe.XboxPath == relXb))
                             {
@@ -1087,7 +1073,7 @@ namespace DmmDep
             sw.Flush();
         }
 
-      
+
 
         // =====================================================================
         // Script discovery
@@ -1231,5 +1217,255 @@ namespace DmmDep
             if (!s.EndsWith(".dds", StringComparison.OrdinalIgnoreCase)) return null;
             return NormalizeRel(Path.Combine("Data", "Textures", s.TrimStart('\\')));
         }
+ 
+private static void CollectBiomeMapsFromPndtFull(
+    DependencyManifest manifest,
+    HashSet<string> achlist,
+    string pluginFileNameWithExt,   // e.g. "The Elder Star System - Magnus.esm"
+    byte[] pluginBytes,
+    string gameRoot,
+    string xboxDataRoot)
+    {
+        // We want: Data\PlanetData\BiomeMaps\<pluginFileNameWithExt>\<PNDT FULL>.biom
+        // Starfield CK/cook appears to infer biome map names by PNDT FULL + plugin filename folder.
+        // This method:
+        //  - Parses TES record stream
+        //  - Walks GRUP containers
+        //  - Extracts PNDT records
+        //  - Decompresses record payload if flagged compressed
+        //  - Parses subrecords and reads FULL strings
+        //  - Checks existence of correlated .biom files
+
+        var pndtFulls = ExtractPndtFullStrings(pluginBytes);
+
+        if (pndtFulls.Count == 0)
+        {
+            Log.Warn("[4b] No PNDT FULL strings found while parsing plugin bytes. (No .biom inference possible.)");
+            return;
+        }
+
+        Log.Info($"[4b] PNDT FULL strings found: {pndtFulls.Count}");
+
+        int found = 0;
+        int missing = 0;
+
+        foreach (string full in pndtFulls.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
+        {
+            string safeFull = full.Trim();
+            if (safeFull.Length == 0)
+                continue;
+
+            // Construct inferred biome map path
+            string biomRel = NormalizeRel(Path.Combine("Data", "PlanetData", "BiomeMaps", pluginFileNameWithExt, safeFull + ".biom"));
+            string biomFull = Path.Combine(gameRoot, biomRel);
+
+            if (File.Exists(biomFull))
+            {
+                found++;
+                AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-full-inferred", gameRoot, xboxDataRoot);
+            }
+            else
+            {
+                missing++;
+                Log.Warn($"[WARN] Missing inferred BIOM: {biomRel}");
+            }
+        }
+
+        Log.Info($"[4b] BIOM inference results: found {found}, missing {missing}");
     }
+
+    /// <summary>
+    /// Extracts PNDT FULL strings from the binary plugin.
+    /// Handles GRUP containers and compressed record payloads.
+    /// </summary>
+    private static HashSet<string> ExtractPndtFullStrings(byte[] pluginBytes)
+    {
+        var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        const int HeaderSize = 24;
+        int len = pluginBytes.Length;
+        int offset = 0;
+
+        // Stack of GRUP end offsets. We "enter" a GRUP by pushing its end,
+        // then continue parsing records inside it linearly until we hit the end.
+        var grupEnds = new Stack<int>();
+
+        while (offset + HeaderSize <= len)
+        {
+            // If we reached the end of the current GRUP, pop and continue.
+            while (grupEnds.Count > 0 && offset >= grupEnds.Peek())
+                grupEnds.Pop();
+
+            // Record type (4cc)
+            string type = ReadFourCC(pluginBytes, offset);
+            uint sizeOrGroupSize = ReadU32(pluginBytes, offset + 4);
+
+            if (type == "GRUP")
+            {
+                // In Bethesda plugins, GRUP "size" is total group size INCLUDING header.
+                int groupTotalSize = checked((int)sizeOrGroupSize);
+                int groupEnd = offset + groupTotalSize;
+
+                if (groupTotalSize < HeaderSize || groupEnd > len)
+                {
+                    // Corrupt or unexpected; bail safely to avoid infinite loops
+                    break;
+                }
+
+                // Enter GRUP: push end, then move to first child record (right after header)
+                grupEnds.Push(groupEnd);
+                offset += HeaderSize;
+                continue;
+            }
+
+            // Normal record: header includes dataSize at +4
+            int dataSize = checked((int)sizeOrGroupSize);
+            int dataStart = offset + HeaderSize;
+            int next = dataStart + dataSize;
+
+            if (dataSize < 0 || next > len)
+            {
+                // Corrupt; stop
+                break;
+            }
+
+            if (type == "PNDT")
+            {
+                uint flags = ReadU32(pluginBytes, offset + 8);
+
+                byte[] payload = Slice(pluginBytes, dataStart, dataSize);
+                byte[] recordData = payload;
+
+                // Compressed flag: 0x00040000 (same convention as TES5/FO4/Starfield)
+                const uint CompressedFlag = 0x00040000;
+                if ((flags & CompressedFlag) != 0 && payload.Length >= 5)
+                {
+                    recordData = TryDecompressRecordPayload(payload) ?? payload;
+                }
+
+                // Parse subrecords inside PNDT and collect FULL strings
+                foreach (var full in ExtractFullSubrecords(recordData))
+                {
+                    if (!string.IsNullOrWhiteSpace(full))
+                        results.Add(full.Trim());
+                }
+            }
+
+            offset = next;
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// FULL subrecords can appear multiple times; decode as UTF-8 and trim null terminators.
+    /// Handles XXXX extended-size subrecords.
+    /// </summary>
+    private static IEnumerable<string> ExtractFullSubrecords(byte[] recordData)
+    {
+        const int SubHeader = 6;
+        int pos = 0;
+        int len = recordData.Length;
+
+        uint? extendedSize = null;
+
+        while (pos + SubHeader <= len)
+        {
+            string sub = ReadFourCC(recordData, pos);
+            ushort sz16 = ReadU16(recordData, pos + 4);
+            pos += SubHeader;
+
+            uint size = extendedSize ?? sz16;
+            extendedSize = null;
+
+            if (sub == "XXXX")
+            {
+                // XXXX: next subrecord uses 32-bit size stored in this data
+                if (pos + sz16 <= len && sz16 == 4)
+                {
+                    extendedSize = ReadU32(recordData, pos);
+                }
+                pos += sz16;
+                continue;
+            }
+
+            if (pos + size > len)
+                yield break; // corrupt / truncated
+
+            if (sub == "FULL")
+            {
+                // FULL is typically a string, often null-terminated.
+                // Use UTF-8; it safely handles ASCII too.
+                var bytes = Slice(recordData, pos, checked((int)size));
+                string s = Encoding.UTF8.GetString(bytes);
+
+                // Trim nulls + whitespace
+                s = s.TrimEnd('\0').Trim();
+                if (s.Length > 0)
+                    yield return s;
+            }
+
+            pos += checked((int)size);
+        }
+    }
+
+    /// <summary>
+    /// Compressed record payload layout (Bethesda):
+    ///   [0..3] uint32 uncompressedSize
+    ///   [4..]  zlib stream
+    /// </summary>
+    private static byte[]? TryDecompressRecordPayload(byte[] payload)
+    {
+        try
+        {
+            if (payload.Length < 5)
+                return null;
+
+            int expected = checked((int)ReadU32(payload, 0));
+            if (expected <= 0 || expected > 256 * 1024 * 1024) // sanity cap
+                return null;
+
+            using var input = new MemoryStream(payload, 4, payload.Length - 4, writable: false);
+            using var z = new ZLibStream(input, CompressionMode.Decompress);
+            using var output = new MemoryStream(capacity: expected);
+
+            z.CopyTo(output);
+            var data = output.ToArray();
+
+            // Some plugins may not match expected exactly; accept what we got if non-empty
+            return data.Length > 0 ? data : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string ReadFourCC(byte[] bytes, int offset)
+    {
+        // bytes are ASCII for record/subrecord names
+        return Encoding.ASCII.GetString(bytes, offset, 4);
+    }
+
+    private static ushort ReadU16(byte[] bytes, int offset)
+    {
+        return (ushort)(bytes[offset] | (bytes[offset + 1] << 8));
+    }
+
+    private static uint ReadU32(byte[] bytes, int offset)
+    {
+        return (uint)(bytes[offset]
+            | (bytes[offset + 1] << 8)
+            | (bytes[offset + 2] << 16)
+            | (bytes[offset + 3] << 24));
+    }
+
+    private static byte[] Slice(byte[] bytes, int offset, int count)
+    {
+        var buf = new byte[count];
+        Buffer.BlockCopy(bytes, offset, buf, 0, count);
+        return buf;
+    }
+
+}
 }
