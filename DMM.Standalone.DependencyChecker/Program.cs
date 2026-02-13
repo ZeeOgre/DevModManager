@@ -1217,7 +1217,7 @@ namespace DmmDep
             if (!s.EndsWith(".dds", StringComparison.OrdinalIgnoreCase)) return null;
             return NormalizeRel(Path.Combine("Data", "Textures", s.TrimStart('\\')));
         }
- 
+     
 private static void CollectBiomeMapsFromPndtFull(
     DependencyManifest manifest,
     HashSet<string> achlist,
@@ -1225,54 +1225,55 @@ private static void CollectBiomeMapsFromPndtFull(
     byte[] pluginBytes,
     string gameRoot,
     string xboxDataRoot)
+{
+    // We want: Data\PlanetData\BiomeMaps\<pluginBaseName>.esm\<PNDT FULL>.biom
+    // Even when parsing an ESP, runtime folder naming uses the ESM name.
+
+    var pndtFulls = ExtractPndtFullStrings(pluginBytes);
+
+    if (pndtFulls.Count == 0)
     {
-        // We want: Data\PlanetData\BiomeMaps\<pluginFileNameWithExt>\<PNDT FULL>.biom
-        // Starfield CK/cook appears to infer biome map names by PNDT FULL + plugin filename folder.
-        // This method:
-        //  - Parses TES record stream
-        //  - Walks GRUP containers
-        //  - Extracts PNDT records
-        //  - Decompresses record payload if flagged compressed
-        //  - Parses subrecords and reads FULL strings
-        //  - Checks existence of correlated .biom files
-
-        var pndtFulls = ExtractPndtFullStrings(pluginBytes);
-
-        if (pndtFulls.Count == 0)
-        {
-            Log.Warn("[4b] No PNDT FULL strings found while parsing plugin bytes. (No .biom inference possible.)");
-            return;
-        }
-
-        Log.Info($"[4b] PNDT FULL strings found: {pndtFulls.Count}");
-
-        int found = 0;
-        int missing = 0;
-
-        foreach (string full in pndtFulls.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
-        {
-            string safeFull = full.Trim();
-            if (safeFull.Length == 0)
-                continue;
-
-            // Construct inferred biome map path
-            string biomRel = NormalizeRel(Path.Combine("Data", "PlanetData", "BiomeMaps", pluginFileNameWithExt, safeFull + ".biom"));
-            string biomFull = Path.Combine(gameRoot, biomRel);
-
-            if (File.Exists(biomFull))
-            {
-                found++;
-                AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-full-inferred", gameRoot, xboxDataRoot);
-            }
-            else
-            {
-                missing++;
-                Log.Warn($"[WARN] Missing inferred BIOM: {biomRel}");
-            }
-        }
-
-        Log.Info($"[4b] BIOM inference results: found {found}, missing {missing}");
+        Log.Warn("[4b] No PNDT FULL strings found while parsing plugin bytes. (No .biom inference possible.)");
+        return;
     }
+
+    Log.Info($"[4b] PNDT FULL strings found: {pndtFulls.Count}");
+
+    string pluginBaseName = Path.GetFileNameWithoutExtension(pluginFileNameWithExt);
+    string pluginFolderName = pluginBaseName + ".esm";
+
+    int found = 0;
+    int missing = 0;
+
+    foreach (string full in pndtFulls.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
+    {
+        string safeFull = full.Trim();
+        if (safeFull.Length == 0)
+            continue;
+
+        string biomRel = NormalizeRel(Path.Combine(
+            "Data",
+            "PlanetData",
+            "BiomeMaps",
+            pluginFolderName,
+            safeFull + ".biom"));
+
+        string biomFull = Path.Combine(gameRoot, biomRel);
+
+        if (File.Exists(biomFull))
+        {
+            found++;
+            AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-full-inferred", gameRoot, xboxDataRoot);
+        }
+        else
+        {
+            missing++;
+            Log.Warn($"[WARN] Missing inferred BIOM: {biomRel}");
+        }
+    }
+
+    Log.Info($"[4b] BIOM inference results: found {found}, missing {missing}");
+}
 
     /// <summary>
     /// Extracts PNDT FULL strings from the binary plugin.
