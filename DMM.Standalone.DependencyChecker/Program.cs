@@ -1243,49 +1243,47 @@ namespace DmmDep
         }
         private sealed class PndtExtract
         {
-            public readonly HashSet<string> Full = new(StringComparer.OrdinalIgnoreCase);
+            public readonly HashSet<string> Anam = new(StringComparer.OrdinalIgnoreCase);
             public readonly HashSet<string> Modl = new(StringComparer.OrdinalIgnoreCase);
         }
 
         private static void CollectBiomeMapsFromPndtFull(
                         DependencyManifest manifest,
                         HashSet<string> achlist,
-                        HashSet<string> nifRelPaths,   // <-- NEW
+                        HashSet<string> nifRelPaths,
                         string pluginFileNameWithExt,
                         byte[] pluginBytes,
                         string gameRoot,
                         string xboxDataRoot)
 
         {
-            // We want: Data\PlanetData\BiomeMaps\<pluginBaseName>.esm\<PNDT FULL>.biom
-            // Even when parsing an ESP, runtime folder naming uses the ESM name.
-            //
-            // Optimization: Parse PNDT once and harvest all relevant subrecords (FULL + MODL) in a single pass.
+            // NOTE: Despite the method name, BIOM inference is now keyed off PNDT:ANAM (not FULL).
+            // We want: Data\PlanetData\BiomeMaps\<pluginBaseName>.esm\<PNDT ANAM>.biom
 
             var pndt = ExtractPndtStrings(pluginBytes);
 
-                if (pndt.Full.Count == 0 && pndt.Modl.Count == 0)
+                if (pndt.Anam.Count == 0 && pndt.Modl.Count == 0)
                 {
-                    Log.Warn("[4b] No PNDT FULL/MODL strings found while parsing plugin bytes. (No BIOM inference or PNDT model dependencies possible.)");
+                    Log.Warn("[4b] No PNDT ANAM/MODL strings found while parsing plugin bytes. (No BIOM inference or PNDT model dependencies possible.)");
                     return;
                 }
 
-                if (pndt.Full.Count > 0)
-                    Log.Info($"[4b] PNDT FULL strings found: {pndt.Full.Count}");
+                if (pndt.Anam.Count > 0)
+                    Log.Info($"[4b] PNDT ANAM strings found: {pndt.Anam.Count}");
                 if (pndt.Modl.Count > 0)
                     Log.Info($"[4b] PNDT MODL strings found: {pndt.Modl.Count}");
 
                 string pluginBaseName = Path.GetFileNameWithoutExtension(pluginFileNameWithExt);
                 string pluginFolderName = pluginBaseName + ".esm";
 
-                // ---- BIOM inference from FULL ----
+                // ---- BIOM inference from ANAM ----
                 int biomFound = 0;
                 int biomMissing = 0;
 
-                foreach (string full in pndt.Full.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
+                foreach (string anam in pndt.Anam.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
                 {
-                    string safeFull = full.Trim();
-                    if (safeFull.Length == 0)
+                    string safeName = anam.Trim();
+                    if (safeName.Length == 0)
                         continue;
 
                     string biomRel = NormalizeRel(Path.Combine(
@@ -1293,14 +1291,14 @@ namespace DmmDep
                         "PlanetData",
                         "BiomeMaps",
                         pluginFolderName,
-                        safeFull + ".biom"));
+                        safeName + ".biom"));
 
                     string biomFull = Path.Combine(gameRoot, biomRel);
 
                     if (File.Exists(biomFull))
                     {
                         biomFound++;
-                        AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-full-inferred", gameRoot, xboxDataRoot);
+                        AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-anam-inferred", gameRoot, xboxDataRoot);
                     }
                     else
                     {
@@ -1309,7 +1307,7 @@ namespace DmmDep
                     }
                 }
 
-                if (pndt.Full.Count > 0)
+                if (pndt.Anam.Count > 0)
                     Log.Info($"[4b] BIOM inference results: found {biomFound}, missing {biomMissing}");
 
                 // ---- Model dependencies from MODL (planet_Nirn.nif etc.) ----
@@ -1434,10 +1432,11 @@ namespace DmmDep
                             recordData = TryDecompressRecordPayload(payload) ?? payload;
                         }
 
-                        foreach (var full in ExtractStringSubrecords(recordData, "FULL"))
+                        // BIOM name now comes from ANAM, not FULL
+                        foreach (var anam in ExtractStringSubrecords(recordData, "ANAM"))
                         {
-                            if (!string.IsNullOrWhiteSpace(full))
-                                results.Full.Add(full.Trim());
+                            if (!string.IsNullOrWhiteSpace(anam))
+                                results.Anam.Add(anam.Trim());
                         }
 
                         foreach (var modl in ExtractStringSubrecords(recordData, "MODL"))
