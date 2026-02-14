@@ -54,6 +54,8 @@ namespace DmmDep
         // New switches
         public bool Quiet { get; set; }   // --quiet : suppress skipped-file messages
         public bool Silent { get; set; }  // --silent: only show start and completion
+
+        public bool SmartClobber { get; set; } // --smartclobber : seed candidates from existing .achlist
     }
 
     internal static class Program
@@ -206,8 +208,21 @@ namespace DmmDep
 
                 var achlistPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                // ---- 1. Scan plugin for NIF / terrain / MAT / misc strings ----
+                if (options.SmartClobber)
+                {
+                    string oldAchlistPath = Path.Combine(outputRoot, pluginName + ".achlist");
+                    if (File.Exists(oldAchlistPath))
+                    {
+                        int seeded = SeedAchlistCandidatesFromExisting(oldAchlistPath, achlistPaths);
+                        Log.Info($"[0] --smartclobber seeded {seeded} items from existing achlist: {oldAchlistPath}");
+                    }
+                    else
+                    {
+                        Log.Info($"[0] --smartclobber: no existing achlist found at {oldAchlistPath}", isSkipped: true);
+                    }
+                }
 
+                // ---- 1. Scan plugin for NIF / terrain / MAT / misc strings ----
                 Log.Info("[1] Scanning plugin for local NIF / terrain / MAT / misc strings...");
                 var pluginBytes = File.ReadAllBytes(pluginPath);
                 var pluginStrings = ExtractPrintableStrings(pluginBytes, 6).ToList();
@@ -672,6 +687,7 @@ namespace DmmDep
             Console.WriteLine("  --test                Write .achlist.test instead of .achlist.");
             Console.WriteLine("  --quiet               Suppress output about skipped files (e.g. 'Skipping MAT').");
             Console.WriteLine("  --silent              Suppress all informational output except starting and completion.");
+            Console.WriteLine("  --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf).");
         }
 
         private static Options? ParseArgs(string[] args)
@@ -714,6 +730,9 @@ namespace DmmDep
                         break;
                     case "--silent":
                         opts.Silent = true;
+                        break;
+                    case "--smartclobber":
+                        opts.SmartClobber = true;
                         break;
                     default:
                         Console.Error.WriteLine($"Unknown option: {arg}");
@@ -1180,53 +1199,53 @@ namespace DmmDep
 
 
         private static void CollectMatDdsTokensFromJson(JsonElement element, List<string> tokens)
+        {
+            switch (element.ValueKind)
             {
-                switch (element.ValueKind)
-                {
-                    case JsonValueKind.Object:
-                        foreach (var prop in element.EnumerateObject())
+                case JsonValueKind.Object:
+                    foreach (var prop in element.EnumerateObject())
+                    {
+                        if ((prop.NameEquals("File") || prop.NameEquals("FileName")) &&
+                            prop.Value.ValueKind == JsonValueKind.String)
                         {
-                            if ((prop.NameEquals("File") || prop.NameEquals("FileName")) &&
-                                prop.Value.ValueKind == JsonValueKind.String)
+                            string? val = prop.Value.GetString();
+                            if (!string.IsNullOrWhiteSpace(val) &&
+                                val.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
                             {
-                                string? val = prop.Value.GetString();
-                                if (!string.IsNullOrWhiteSpace(val) &&
-                                    val.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    tokens.Add(val);
-                                }
+                                tokens.Add(val);
                             }
-
-                            CollectMatDdsTokensFromJson(prop.Value, tokens);
                         }
-                        break;
 
-                    case JsonValueKind.Array:
-                        foreach (var item in element.EnumerateArray())
-                            CollectMatDdsTokensFromJson(item, tokens);
-                        break;
-                }
+                        CollectMatDdsTokensFromJson(prop.Value, tokens);
+                    }
+                    break;
+
+                case JsonValueKind.Array:
+                    foreach (var item in element.EnumerateArray())
+                        CollectMatDdsTokensFromJson(item, tokens);
+                    break;
             }
+        }
 
         private static string? NormalizeDdsPathFromMat(string raw)
-            {
-                if (string.IsNullOrWhiteSpace(raw)) return null;
-                string s = raw.Replace('/', '\\').Replace("\\\\", "\\").Trim();
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return null;
+            string s = raw.Replace('/', '\\').Replace("\\\\", "\\").Trim();
 
-                int idxDataTex = s.IndexOf("Data\\Textures\\", StringComparison.OrdinalIgnoreCase);
-                if (idxDataTex >= 0) return NormalizeRel(s.Substring(idxDataTex));
+            int idxDataTex = s.IndexOf("Data\\Textures\\", StringComparison.OrdinalIgnoreCase);
+            if (idxDataTex >= 0) return NormalizeRel(s.Substring(idxDataTex));
 
-                int idxTextures = s.IndexOf("Textures\\", StringComparison.OrdinalIgnoreCase);
-                if (idxTextures >= 0) return NormalizeRel(Path.Combine("Data", s.Substring(idxTextures)));
+            int idxTextures = s.IndexOf("Textures\\", StringComparison.OrdinalIgnoreCase);
+            if (idxTextures >= 0) return NormalizeRel(Path.Combine("Data", s.Substring(idxTextures)));
 
-                if (!s.EndsWith(".dds", StringComparison.OrdinalIgnoreCase)) return null;
-                return NormalizeRel(Path.Combine("Data", "Textures", s.TrimStart('\\')));
-            }
+            if (!s.EndsWith(".dds", StringComparison.OrdinalIgnoreCase)) return null;
+            return NormalizeRel(Path.Combine("Data", "Textures", s.TrimStart('\\')));
+        }
         private sealed class PndtExtract
-            {
-                public readonly HashSet<string> Full = new(StringComparer.OrdinalIgnoreCase);
-                public readonly HashSet<string> Modl = new(StringComparer.OrdinalIgnoreCase);
-            }
+        {
+            public readonly HashSet<string> Full = new(StringComparer.OrdinalIgnoreCase);
+            public readonly HashSet<string> Modl = new(StringComparer.OrdinalIgnoreCase);
+        }
 
         private static void CollectBiomeMapsFromPndtFull(
                         DependencyManifest manifest,
@@ -1433,11 +1452,46 @@ namespace DmmDep
 
                 return results;
             }
+        private static int SeedAchlistCandidatesFromExisting(string achlistPath, HashSet<string> achlist)
+        {
+            try
+            {
+                // Your achlist is written as a JSON string array.
+                string json = File.ReadAllText(achlistPath, Encoding.ASCII);
 
-            /// <summary>
-            /// Extract string payloads from a specific subrecord type within a record payload.
-            /// Handles XXXX extended-size subrecords.
-            /// </summary>
+                string[]? items = JsonSerializer.Deserialize<string[]>(json);
+                if (items == null || items.Length == 0)
+                    return 0;
+
+                int added = 0;
+                foreach (string raw in items)
+                {
+                    if (string.IsNullOrWhiteSpace(raw))
+                        continue;
+
+                    string rel = NormalizeRel(raw.Trim());
+
+                    // Keep scope tight: only accept Data\... relative paths
+                    if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (achlist.Add(rel))
+                        added++;
+                }
+
+                return added;
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"[WARN] --smartclobber failed to read/parse existing achlist '{achlistPath}': {ex.GetType().Name}: {ex.Message}");
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Extract string payloads from a specific subrecord type within a record payload.
+        /// Handles XXXX extended-size subrecords.
+        /// </summary>
         private static IEnumerable<string> ExtractStringSubrecords(byte[] recordData, string wantedFourCC)
             {
                 const int SubHeader = 6;

@@ -123,6 +123,7 @@ jobs:
               --test                Write .achlist.test instead of .achlist
               --quiet               Suppress skipped-file messages
               --silent              Suppress all output except start/completion
+              --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf which would not otherwise be detectable.)
             \`\`\`
 
             ### Examples
