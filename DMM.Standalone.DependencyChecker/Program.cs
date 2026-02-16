@@ -215,6 +215,19 @@ namespace DmmDep
                     {
                         int seeded = SeedAchlistCandidatesFromExisting(oldAchlistPath, achlistPaths);
                         Log.Info($"[0] --smartclobber seeded {seeded} items from existing achlist: {oldAchlistPath}");
+
+                        int addedToManifest = 0;
+                        foreach (string rel in achlistPaths)
+                        {
+                            // Only add if the file is actually present.
+                            // This will also keep XBOX path logic for textures/sound, but for .bk2 there is no XB mapping anyway.
+                            int before = manifest.Files.Count;
+                            AddFile(manifest, achlistPaths, rel, FileKind.Other, "smartclobber-achlist", gameRoot, xboxDataRoot);
+                            if (manifest.Files.Count != before)
+                                addedToManifest++;
+                        }
+
+                        Log.Info($"[0] --smartclobber added {addedToManifest} seeded items to deps list");
                     }
                     else
                     {
