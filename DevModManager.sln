@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{
 		.github\workflows\publish.yml = .github\workflows\publish.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMM.Standalone.DependencyChecker.Modular", "DMM.Standalone.DependencyChecker.Modular\DMM.Standalone.DependencyChecker.Modular.csproj", "{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -347,6 +349,48 @@ Global
 		{F3296458-1988-4A7F-A416-9AC734C77FBF}.Release|x64.Build.0 = Release|Any CPU
 		{F3296458-1988-4A7F-A416-9AC734C77FBF}.Release|x86.ActiveCfg = Release|Any CPU
 		{F3296458-1988-4A7F-A416-9AC734C77FBF}.Release|x86.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Debug|x64.Build.0 = Debug|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Debug|x86.Build.0 = Debug|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.DefaultBuild|Any CPU.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.DefaultBuild|Any CPU.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.DefaultBuild|x64.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.DefaultBuild|x64.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.DefaultBuild|x86.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.DefaultBuild|x86.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.FullRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.FullRelease|Any CPU.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.FullRelease|x64.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.FullRelease|x64.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.FullRelease|x86.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.FullRelease|x86.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Publish|Any CPU.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Publish|Any CPU.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Publish|x64.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Publish|x64.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Publish|x86.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Publish|x86.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishFrameworkDependent|Any CPU.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishFrameworkDependent|Any CPU.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishFrameworkDependent|x64.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishFrameworkDependent|x64.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishFrameworkDependent|x86.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishFrameworkDependent|x86.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishSelfContained|Any CPU.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishSelfContained|Any CPU.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishSelfContained|x64.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishSelfContained|x64.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishSelfContained|x86.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.PublishSelfContained|x86.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Release|x64.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Release|x64.Build.0 = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Release|x86.ActiveCfg = Release|Any CPU
+		{AC528EC3-3A05-8EE6-2BBC-6C390259EA20}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
