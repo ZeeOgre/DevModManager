@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.21 on Tue Feb 17 20:00:57 2026
+-- File generated with SQLiteStudio v3.4.21 on Wed Feb 18 13:31:39 2026
 --
 -- Text encoding used: System
 --
@@ -440,7 +440,9 @@ CREATE TABLE IF NOT EXISTS GameSource (
     SourceGameId TEXT,
     URL          TEXT,
     URI          TEXT,
-    SourceRepoId TEXT
+    UNIQUE (
+        Name
+    )
 );
 
 
@@ -464,19 +466,50 @@ CREATE TABLE IF NOT EXISTS GameStoreInstall (
     ManifestFileId    INTEGER  NULL
                                REFERENCES FileInfo (id) ON DELETE SET NULL
                                                         ON UPDATE CASCADE,
-    StoreAppId        TEXT     NOT NULL,
-    IdentityName      TEXT     NULL,
+    StoreAppId        TEXT     NOT NULL,-- Steam AppId / Xbox ProductId / etc.
+    InstallInstanceId TEXT     NULL,-- EGS GUID / .item filename / etc.
+    DisplayName       TEXT     NULL,
+    ExecutableName    TEXT     NULL,
+    Version           TEXT     NULL,-- (optional later) Icon/Logo/Splash fields if you store locally or as URLs/URIs
+    /* IconFileId     INTEGER NULL REFERENCES FileInfo(id) ... */IdentityName      TEXT     NULL,
     TitleId           TEXT     NULL,
     ProductId         TEXT     NULL,
     ContentIdOverride TEXT     NULL,
-    DisplayName       TEXT     NULL,
-    ExecutableName    TEXT     NULL,
-    Version           TEXT     NULL,
     LastSeenDT        DATETIME NOT NULL,
     UNIQUE (
         GameStoreRootId,
         StoreAppId,
         InstallFolderId
+    ),
+    UNIQUE (
+        GameStoreRootId,
+        InstallInstanceId
+    )
+);
+-- LogoFileId     INTEGER NULL REFERENCES FileInfo(id) ...-- SplashFileId   INTEGER NULL REFERENCES FileInfo(id) ...-- lets EGS be stable per .item
+
+-- Table: GameStoreInstallDepot
+DROP TABLE IF EXISTS GameStoreInstallDepot;
+
+CREATE TABLE IF NOT EXISTS GameStoreInstallDepot (
+    id          INTEGER  PRIMARY KEY AUTOINCREMENT,
+    InstallId   INTEGER  NOT NULL
+                         REFERENCES GameStoreInstall (id) ON DELETE CASCADE
+                                                          ON UPDATE CASCADE,
+    DepotId     TEXT     NOT NULL,
+    ManifestId  TEXT     NULL,
+    BranchName  TEXT     NULL,-- Normalize NULLs for uniqueness (SQLite allows expressions here)
+    ManifestKey TEXT     GENERATED ALWAYS AS (IFNULL(ManifestId, '') ) STORED,
+    BranchKey   TEXT     GENERATED ALWAYS AS (IFNULL(BranchName, '') ) STORED,
+    IsDlcDepot  INTEGER  NOT NULL
+                         DEFAULT 0
+                         CHECK (IsDlcDepot IN (0, 1) ),
+    LastSeenDT  DATETIME NOT NULL,
+    UNIQUE (
+        InstallId,
+        DepotId,
+        ManifestKey,
+        BranchKey
     )
 );
 
@@ -485,14 +518,18 @@ CREATE TABLE IF NOT EXISTS GameStoreInstall (
 DROP TABLE IF EXISTS GameStoreProductLink;
 
 CREATE TABLE IF NOT EXISTS GameStoreProductLink (
-    id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    ChildInstallId   INTEGER NOT NULL
-                             REFERENCES GameStoreInstall (id) ON DELETE CASCADE
-                                                              ON UPDATE CASCADE,
-    ParentStoreAppId TEXT    NOT NULL,-- StoreId of base product (e.g. 9NCJSXWZTP88)
-    LinkType         TEXT    NOT NULL,-- e.g. 'AllowedProduct'
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    ChildInstallId     INTEGER NOT NULL
+                               REFERENCES GameStoreInstall (id) ON DELETE CASCADE
+                                                                ON UPDATE CASCADE,
+    ParentGameSourceId INTEGER NOT NULL
+                               REFERENCES GameSource (id) ON DELETE CASCADE
+                                                          ON UPDATE CASCADE,
+    ParentStoreAppId   TEXT    NOT NULL,-- store id of base product
+    LinkType           TEXT    NOT NULL,-- e.g. 'AllowedProduct', 'DLC', etc.
     UNIQUE (
         ChildInstallId,
+        ParentGameSourceId,
         ParentStoreAppId,
         LinkType
     )
@@ -503,20 +540,19 @@ CREATE TABLE IF NOT EXISTS GameStoreProductLink (
 DROP TABLE IF EXISTS GameStoreRoot;
 
 CREATE TABLE IF NOT EXISTS GameStoreRoot (
-    id              INTEGER  PRIMARY KEY AUTOINCREMENT,
-    GameSourceId    INTEGER  NOT NULL
-                             REFERENCES GameSource (id) ON DELETE CASCADE
-                                                        ON UPDATE CASCADE,
-    RootFolderId    INTEGER  NOT NULL
-                             REFERENCES Folders (id) ON DELETE CASCADE
+    id           INTEGER  PRIMARY KEY AUTOINCREMENT,
+    GameSourceId INTEGER  NOT NULL
+                          REFERENCES GameSource (id) ON DELETE CASCADE
                                                      ON UPDATE CASCADE,
-    DiscoverySource TEXT     NULL,
-    DiscoveryRef    TEXT     NULL,
-    DriveRoot       TEXT     NULL,
-    LastSeenDT      DATETIME NOT NULL,
+    RootFolderId INTEGER  NOT NULL
+                          REFERENCES Folders (id) ON DELETE CASCADE
+                                                  ON UPDATE CASCADE,
+    RootType     TEXT     NULL,
+    LastSeenDT   DATETIME NOT NULL,
     UNIQUE (
         GameSourceId,
-        RootFolderId
+        RootFolderId,
+        RootType
     )
 );
 
@@ -528,10 +564,10 @@ CREATE TABLE IF NOT EXISTS GameVersion (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     Version     TEXT,
     GameId      INTEGER REFERENCES Game (id) ON DELETE CASCADE
-                                             ON UPDATE CASCADE,
-    GameSource  INTEGER REFERENCES GameSource (id) ON DELETE CASCADE
+                                             ON UPDATE CASCADE,-- Keep for now (legacy / optional); but don’t rely on it for installs.
+    GameSource  INTEGER REFERENCES GameSource (id) ON DELETE SET NULL
                                                    ON UPDATE CASCADE,
-    VersionRepo TEXT
+    VersionRepo TEXT-- optional: repo/tag/commit reference for a pinned toolchain/version
 );
 
 
@@ -547,6 +583,24 @@ CREATE TABLE IF NOT EXISTS GameVersionFiles (
                                                       ON UPDATE CASCADE,
     ModId         INTEGER REFERENCES ModItems (id) ON DELETE RESTRICT
                                                    ON UPDATE CASCADE
+);
+
+
+-- Table: GameVersionSteamDepot
+DROP TABLE IF EXISTS GameVersionSteamDepot;
+
+CREATE TABLE IF NOT EXISTS GameVersionSteamDepot (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    GameVersionId INTEGER NOT NULL
+                          REFERENCES GameVersion (id) ON DELETE CASCADE
+                                                      ON UPDATE CASCADE,
+    AppId         TEXT    NOT NULL,
+    DepotId       TEXT    NOT NULL,
+    ManifestId    TEXT    NOT NULL,
+    UNIQUE (
+        GameVersionId,
+        DepotId
+    )
 );
 
 
