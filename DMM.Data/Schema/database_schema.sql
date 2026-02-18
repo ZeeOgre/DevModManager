@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.21 on Wed Feb 18 13:31:39 2026
+-- File generated with SQLiteStudio v3.4.21 on Wed Feb 18 13:59:12 2026
 --
 -- Text encoding used: System
 --
@@ -470,8 +470,17 @@ CREATE TABLE IF NOT EXISTS GameStoreInstall (
     InstallInstanceId TEXT     NULL,-- EGS GUID / .item filename / etc.
     DisplayName       TEXT     NULL,
     ExecutableName    TEXT     NULL,
-    Version           TEXT     NULL,-- (optional later) Icon/Logo/Splash fields if you store locally or as URLs/URIs
-    /* IconFileId     INTEGER NULL REFERENCES FileInfo(id) ... */IdentityName      TEXT     NULL,
+    Version           TEXT     NULL,
+    IconFileId        INTEGER  NULL
+                               REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                        ON UPDATE CASCADE,
+    LogoFileId        INTEGER  NULL
+                               REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                        ON UPDATE CASCADE,
+    SplashFileId      INTEGER  NULL
+                               REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                        ON UPDATE CASCADE,
+    IdentityName      TEXT     NULL,
     TitleId           TEXT     NULL,
     ProductId         TEXT     NULL,
     ContentIdOverride TEXT     NULL,
@@ -486,7 +495,7 @@ CREATE TABLE IF NOT EXISTS GameStoreInstall (
         InstallInstanceId
     )
 );
--- LogoFileId     INTEGER NULL REFERENCES FileInfo(id) ...-- SplashFileId   INTEGER NULL REFERENCES FileInfo(id) ...-- lets EGS be stable per .item
+
 
 -- Table: GameStoreInstallDepot
 DROP TABLE IF EXISTS GameStoreInstallDepot;
@@ -547,7 +556,7 @@ CREATE TABLE IF NOT EXISTS GameStoreRoot (
     RootFolderId INTEGER  NOT NULL
                           REFERENCES Folders (id) ON DELETE CASCADE
                                                   ON UPDATE CASCADE,
-    RootType     TEXT     NULL,
+    RootType     TEXT     NOT NULL,
     LastSeenDT   DATETIME NOT NULL,
     UNIQUE (
         GameSourceId,
@@ -599,7 +608,9 @@ CREATE TABLE IF NOT EXISTS GameVersionSteamDepot (
     ManifestId    TEXT    NOT NULL,
     UNIQUE (
         GameVersionId,
-        DepotId
+        AppId,
+        DepotId,
+        ManifestId
     )
 );
 
