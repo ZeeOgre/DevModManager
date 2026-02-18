@@ -1,0 +1,17 @@
+[35mDMM.AssetManagers/GameStores/Steam/Steam.cs[m[36m:[m[32m8[m[36m:[m[1;31musing SteamKit2[m;
+[35mDMM.AssetManagers/GameStores/Steam/Steam.cs[m[36m:[m[32m140[m[36m:[m        /// Very lightweight [1;31mSteamKit2[m wrapper: connect + logon.
+[35mDMM.AssetManagers/GameStores/Steam/Steam.cs[m[36m:[m[32m141[m[36m:[m        /// This intentionally avoids APIs that have been removed in [1;31mSteamKit2[m 3.x (RequestAppInfo, GetAppInfo, etc.).
+[35mDepotDownloader/CDNClientPool.cs[m[36m:[m[32m8[m[36m:[m[1;31musing SteamKit2[m.CDN;
+[35mDepotDownloader/ConsoleAuthenticator.cs[m[36m:[m[32m6[m[36m:[m[1;31musing SteamKit2[m.Authentication;
+[35mDepotDownloader/ConsoleAuthenticator.cs[m[36m:[m[32m10[m[36m:[m    // This is practically copied from https://github.com/SteamRE/SteamKit/blob/master/[1;31mSteamKit2[m/[1;31mSteamKit2[m/Steam/Authentication/UserConsoleAuthenticator.cs
+[35mDepotDownloader/ContentDownloader.cs[m[36m:[m[32m13[m[36m:[m[1;31musing SteamKit2[m;
+[35mDepotDownloader/ContentDownloader.cs[m[36m:[m[32m14[m[36m:[m[1;31musing SteamKit2[m.CDN;
+[35mDepotDownloader/Program.cs[m[36m:[m[32m13[m[36m:[m[1;31musing SteamKit2[m;
+[35mDepotDownloader/Program.cs[m[36m:[m[32m14[m[36m:[m[1;31musing SteamKit2[m.CDN;
+[35mDepotDownloader/ProtoManifest.cs[m[36m:[m[32m11[m[36m:[m[1;31musing SteamKit2[m;
+[35mDepotDownloader/Steam3Session.cs[m[36m:[m[32m12[m[36m:[m[1;31musing SteamKit2[m;
+[35mDepotDownloader/Steam3Session.cs[m[36m:[m[32m13[m[36m:[m[1;31musing SteamKit2[m.Authentication;
+[35mDepotDownloader/Steam3Session.cs[m[36m:[m[32m14[m[36m:[m[1;31musing SteamKit2[m.CDN;
+[35mDepotDownloader/Steam3Session.cs[m[36m:[m[32m15[m[36m:[m[1;31musing SteamKit2[m.Internal;
+[35mDepotDownloader/Util.cs[m[36m:[m[32m12[m[36m:[m[1;31musing SteamKit2[m;
+[35mDirectory.Packages.props[m[36m:[m[32m15[m[36m:[m    <PackageVersion Include="[1;31mSteamKit2[m" Version="3.4.0" />
