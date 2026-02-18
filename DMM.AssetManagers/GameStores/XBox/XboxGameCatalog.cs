@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using DMM.AssetManagers.GameStores.Common;
+using DMM.AssetManagers.GameStores.Common.Comparers;
 using System.Text;
 using System.Xml.Linq;
-using DMM.AssetManagers.GameStores.Common;
-using DMM.AssetManagers.GameStores.Common.Comparers;
 
 public static class XboxGameCatalog
 {
@@ -210,4 +206,4 @@ public static class XboxGameCatalog
         => PathUtils.NormalizeDir(dir);
 }
 
- 
+

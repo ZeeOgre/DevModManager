@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -419,7 +414,7 @@ namespace DmmDep
                     var nifBytes = File.ReadAllBytes(full);
 
 
-                    
+
 
                     foreach (var s in ExtractPrintableStrings(nifBytes, 4))
                     {
@@ -1275,57 +1270,57 @@ namespace DmmDep
 
             var pndt = ExtractPndtStrings(pluginBytes);
 
-                if (pndt.Anam.Count == 0 && pndt.Modl.Count == 0)
+            if (pndt.Anam.Count == 0 && pndt.Modl.Count == 0)
+            {
+                Log.Warn("[4b] No PNDT ANAM/MODL strings found while parsing plugin bytes. (No BIOM inference or PNDT model dependencies possible.)");
+                return;
+            }
+
+            if (pndt.Anam.Count > 0)
+                Log.Info($"[4b] PNDT ANAM strings found: {pndt.Anam.Count}");
+            if (pndt.Modl.Count > 0)
+                Log.Info($"[4b] PNDT MODL strings found: {pndt.Modl.Count}");
+
+            string pluginBaseName = Path.GetFileNameWithoutExtension(pluginFileNameWithExt);
+            string pluginFolderName = pluginBaseName + ".esm";
+
+            // ---- BIOM inference from ANAM ----
+            int biomFound = 0;
+            int biomMissing = 0;
+
+            foreach (string anam in pndt.Anam.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
+            {
+                string safeName = anam.Trim();
+                if (safeName.Length == 0)
+                    continue;
+
+                string biomRel = NormalizeRel(Path.Combine(
+                    "Data",
+                    "PlanetData",
+                    "BiomeMaps",
+                    pluginFolderName,
+                    safeName + ".biom"));
+
+                string biomFull = Path.Combine(gameRoot, biomRel);
+
+                if (File.Exists(biomFull))
                 {
-                    Log.Warn("[4b] No PNDT ANAM/MODL strings found while parsing plugin bytes. (No BIOM inference or PNDT model dependencies possible.)");
-                    return;
+                    biomFound++;
+                    AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-anam-inferred", gameRoot, xboxDataRoot);
                 }
-
-                if (pndt.Anam.Count > 0)
-                    Log.Info($"[4b] PNDT ANAM strings found: {pndt.Anam.Count}");
-                if (pndt.Modl.Count > 0)
-                    Log.Info($"[4b] PNDT MODL strings found: {pndt.Modl.Count}");
-
-                string pluginBaseName = Path.GetFileNameWithoutExtension(pluginFileNameWithExt);
-                string pluginFolderName = pluginBaseName + ".esm";
-
-                // ---- BIOM inference from ANAM ----
-                int biomFound = 0;
-                int biomMissing = 0;
-
-                foreach (string anam in pndt.Anam.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
+                else
                 {
-                    string safeName = anam.Trim();
-                    if (safeName.Length == 0)
-                        continue;
-
-                    string biomRel = NormalizeRel(Path.Combine(
-                        "Data",
-                        "PlanetData",
-                        "BiomeMaps",
-                        pluginFolderName,
-                        safeName + ".biom"));
-
-                    string biomFull = Path.Combine(gameRoot, biomRel);
-
-                    if (File.Exists(biomFull))
-                    {
-                        biomFound++;
-                        AddFile(manifest, achlist, biomRel, FileKind.Biom, "pndt-anam-inferred", gameRoot, xboxDataRoot);
-                    }
-                    else
-                    {
-                        biomMissing++;
-                        Log.Warn($"[WARN] Missing inferred BIOM: {biomRel}");
-                    }
+                    biomMissing++;
+                    Log.Warn($"[WARN] Missing inferred BIOM: {biomRel}");
                 }
+            }
 
-                if (pndt.Anam.Count > 0)
-                    Log.Info($"[4b] BIOM inference results: found {biomFound}, missing {biomMissing}");
+            if (pndt.Anam.Count > 0)
+                Log.Info($"[4b] BIOM inference results: found {biomFound}, missing {biomMissing}");
 
-                // ---- Model dependencies from MODL (planet_Nirn.nif etc.) ----
-                int nifFound = 0;
-                int nifMissing = 0;
+            // ---- Model dependencies from MODL (planet_Nirn.nif etc.) ----
+            int nifFound = 0;
+            int nifMissing = 0;
 
             foreach (string modl in pndt.Modl.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
             {
@@ -1373,97 +1368,97 @@ namespace DmmDep
 
 
             if (pndt.Modl.Count > 0)
-                    Log.Info($"[4b] PNDT MODL NIF results: found {nifFound}, missing {nifMissing}");
-            }
+                Log.Info($"[4b] PNDT MODL NIF results: found {nifFound}, missing {nifMissing}");
+        }
 
-            /// <summary>
-            /// Extracts PNDT strings (FULL + MODL) from the binary plugin.
-            /// Handles GRUP containers and compressed record payloads.
-            /// </summary>
+        /// <summary>
+        /// Extracts PNDT strings (FULL + MODL) from the binary plugin.
+        /// Handles GRUP containers and compressed record payloads.
+        /// </summary>
         private static PndtExtract ExtractPndtStrings(byte[] pluginBytes)
+        {
+            var results = new PndtExtract();
+
+            const int HeaderSize = 24;
+            int len = pluginBytes.Length;
+            int offset = 0;
+
+            // Stack of GRUP end offsets. We "enter" a GRUP by pushing its end,
+            // then continue parsing records inside it linearly until we hit the end.
+            var grupEnds = new Stack<int>();
+
+            while (offset + HeaderSize <= len)
             {
-                var results = new PndtExtract();
+                // If we reached the end of the current GRUP, pop and continue.
+                while (grupEnds.Count > 0 && offset >= grupEnds.Peek())
+                    grupEnds.Pop();
 
-                const int HeaderSize = 24;
-                int len = pluginBytes.Length;
-                int offset = 0;
+                // Record type (4cc)
+                string type = ReadFourCC(pluginBytes, offset);
+                uint sizeOrGroupSize = ReadU32(pluginBytes, offset + 4);
 
-                // Stack of GRUP end offsets. We "enter" a GRUP by pushing its end,
-                // then continue parsing records inside it linearly until we hit the end.
-                var grupEnds = new Stack<int>();
-
-                while (offset + HeaderSize <= len)
+                if (type == "GRUP")
                 {
-                    // If we reached the end of the current GRUP, pop and continue.
-                    while (grupEnds.Count > 0 && offset >= grupEnds.Peek())
-                        grupEnds.Pop();
+                    // In Bethesda plugins, GRUP "size" is total group size INCLUDING header.
+                    int groupTotalSize = checked((int)sizeOrGroupSize);
+                    int groupEnd = offset + groupTotalSize;
 
-                    // Record type (4cc)
-                    string type = ReadFourCC(pluginBytes, offset);
-                    uint sizeOrGroupSize = ReadU32(pluginBytes, offset + 4);
-
-                    if (type == "GRUP")
+                    if (groupTotalSize < HeaderSize || groupEnd > len)
                     {
-                        // In Bethesda plugins, GRUP "size" is total group size INCLUDING header.
-                        int groupTotalSize = checked((int)sizeOrGroupSize);
-                        int groupEnd = offset + groupTotalSize;
-
-                        if (groupTotalSize < HeaderSize || groupEnd > len)
-                        {
-                            // Corrupt or unexpected; bail safely to avoid infinite loops
-                            break;
-                        }
-
-                        // Enter GRUP: push end, then move to first child record (right after header)
-                        grupEnds.Push(groupEnd);
-                        offset += HeaderSize;
-                        continue;
-                    }
-
-                    // Normal record: header includes dataSize at +4
-                    int dataSize = checked((int)sizeOrGroupSize);
-                    int dataStart = offset + HeaderSize;
-                    int next = dataStart + dataSize;
-
-                    if (dataSize < 0 || next > len)
-                    {
-                        // Corrupt; stop
+                        // Corrupt or unexpected; bail safely to avoid infinite loops
                         break;
                     }
 
-                    if (type == "PNDT")
-                    {
-                        uint flags = ReadU32(pluginBytes, offset + 8);
-
-                        byte[] payload = Slice(pluginBytes, dataStart, dataSize);
-                        byte[] recordData = payload;
-
-                        // Compressed flag: 0x00040000 (same convention as TES5/FO4/Starfield)
-                        const uint CompressedFlag = 0x00040000;
-                        if ((flags & CompressedFlag) != 0 && payload.Length >= 5)
-                        {
-                            recordData = TryDecompressRecordPayload(payload) ?? payload;
-                        }
-
-                        // BIOM name now comes from ANAM, not FULL
-                        foreach (var anam in ExtractStringSubrecords(recordData, "ANAM"))
-                        {
-                            if (!string.IsNullOrWhiteSpace(anam))
-                                results.Anam.Add(anam.Trim());
-                        }
-
-                        foreach (var modl in ExtractStringSubrecords(recordData, "MODL"))
-                        {
-                            if (!string.IsNullOrWhiteSpace(modl))
-                                results.Modl.Add(modl.Trim());
-                        }
-                    }
-
-                    offset = next;
+                    // Enter GRUP: push end, then move to first child record (right after header)
+                    grupEnds.Push(groupEnd);
+                    offset += HeaderSize;
+                    continue;
                 }
 
-                return results;
+                // Normal record: header includes dataSize at +4
+                int dataSize = checked((int)sizeOrGroupSize);
+                int dataStart = offset + HeaderSize;
+                int next = dataStart + dataSize;
+
+                if (dataSize < 0 || next > len)
+                {
+                    // Corrupt; stop
+                    break;
+                }
+
+                if (type == "PNDT")
+                {
+                    uint flags = ReadU32(pluginBytes, offset + 8);
+
+                    byte[] payload = Slice(pluginBytes, dataStart, dataSize);
+                    byte[] recordData = payload;
+
+                    // Compressed flag: 0x00040000 (same convention as TES5/FO4/Starfield)
+                    const uint CompressedFlag = 0x00040000;
+                    if ((flags & CompressedFlag) != 0 && payload.Length >= 5)
+                    {
+                        recordData = TryDecompressRecordPayload(payload) ?? payload;
+                    }
+
+                    // BIOM name now comes from ANAM, not FULL
+                    foreach (var anam in ExtractStringSubrecords(recordData, "ANAM"))
+                    {
+                        if (!string.IsNullOrWhiteSpace(anam))
+                            results.Anam.Add(anam.Trim());
+                    }
+
+                    foreach (var modl in ExtractStringSubrecords(recordData, "MODL"))
+                    {
+                        if (!string.IsNullOrWhiteSpace(modl))
+                            results.Modl.Add(modl.Trim());
+                    }
+                }
+
+                offset = next;
             }
+
+            return results;
+        }
         private static int SeedAchlistCandidatesFromExisting(string achlistPath, HashSet<string> achlist)
         {
             try
@@ -1505,47 +1500,47 @@ namespace DmmDep
         /// Handles XXXX extended-size subrecords.
         /// </summary>
         private static IEnumerable<string> ExtractStringSubrecords(byte[] recordData, string wantedFourCC)
+        {
+            const int SubHeader = 6;
+            int pos = 0;
+            int len = recordData.Length;
+
+            uint? extendedSize = null;
+
+            while (pos + SubHeader <= len)
             {
-                const int SubHeader = 6;
-                int pos = 0;
-                int len = recordData.Length;
+                string sub = ReadFourCC(recordData, pos);
+                ushort sz16 = ReadU16(recordData, pos + 4);
+                pos += SubHeader;
 
-                uint? extendedSize = null;
+                uint size = extendedSize ?? sz16;
+                extendedSize = null;
 
-                while (pos + SubHeader <= len)
+                if (sub == "XXXX")
                 {
-                    string sub = ReadFourCC(recordData, pos);
-                    ushort sz16 = ReadU16(recordData, pos + 4);
-                    pos += SubHeader;
-
-                    uint size = extendedSize ?? sz16;
-                    extendedSize = null;
-
-                    if (sub == "XXXX")
+                    // XXXX: next subrecord uses 32-bit size stored in this data
+                    if (pos + sz16 <= len && sz16 == 4)
                     {
-                        // XXXX: next subrecord uses 32-bit size stored in this data
-                        if (pos + sz16 <= len && sz16 == 4)
-                        {
-                            extendedSize = ReadU32(recordData, pos);
-                        }
-                        pos += sz16;
-                        continue;
+                        extendedSize = ReadU32(recordData, pos);
                     }
-
-                    if (pos + size > len)
-                        yield break; // corrupt / truncated
-
-                    if (sub == wantedFourCC)
-                    {
-                        var bytes = Slice(recordData, pos, checked((int)size));
-                        string str = Encoding.UTF8.GetString(bytes).TrimEnd('\0').Trim();
-                        if (str.Length > 0)
-                            yield return str;
-                    }
-
-                    pos += checked((int)size);
+                    pos += sz16;
+                    continue;
                 }
+
+                if (pos + size > len)
+                    yield break; // corrupt / truncated
+
+                if (sub == wantedFourCC)
+                {
+                    var bytes = Slice(recordData, pos, checked((int)size));
+                    string str = Encoding.UTF8.GetString(bytes).TrimEnd('\0').Trim();
+                    if (str.Length > 0)
+                        yield return str;
+                }
+
+                pos += checked((int)size);
             }
+        }
 
         private static byte[]? TryDecompressRecordPayload(byte[] payload)
         {

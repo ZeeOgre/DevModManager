@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DMM.AssetManagers.TES
@@ -123,8 +119,8 @@ namespace DMM.AssetManagers.TES
                 // whether to treat them as "PC", "XB" or backup-only.
                 if (token.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
                     token.EndsWith(".wem", StringComparison.OrdinalIgnoreCase) ||
-                    token.EndsWith(".ffxanim", StringComparison.OrdinalIgnoreCase) )
-                    //token.EndsWith(".lip", StringComparison.OrdinalIgnoreCase))
+                    token.EndsWith(".ffxanim", StringComparison.OrdinalIgnoreCase))
+                //token.EndsWith(".lip", StringComparison.OrdinalIgnoreCase))
                 {
                     string rel = token;
                     if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))

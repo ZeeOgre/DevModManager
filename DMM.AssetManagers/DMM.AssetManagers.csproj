@@ -12,4 +12,8 @@
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
+  </ItemGroup>
+
 </Project>
