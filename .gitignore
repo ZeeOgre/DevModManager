@@ -388,3 +388,5 @@ push-tag-debug-*.log
 # per-project push-tag log
 DMM.Standalone.DependencyChecker/push-tag.log
 
+# Local-only test fixtures (mods/plugins not suitable for committing)
+tests/fixtures_local/

@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.18 on Sun Dec 7 16:07:12 2025
+-- File generated with SQLiteStudio v3.4.21 on Tue Feb 17 20:00:57 2026
 --
 -- Text encoding used: System
 --
@@ -38,9 +38,11 @@ CREATE TABLE IF NOT EXISTS AssetHandler (
 DROP TABLE IF EXISTS AssetKind;
 
 CREATE TABLE IF NOT EXISTS AssetKind (
-    id   INTEGER PRIMARY KEY AUTOINCREMENT,
-    Name TEXT    UNIQUE
-                 NOT NULL
+    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name               TEXT    UNIQUE
+                               NOT NULL,
+    DefaultArchiveName TEXT,
+    DefaultDataPath    TEXT
 );
 
 
@@ -247,7 +249,7 @@ CREATE TABLE IF NOT EXISTS FolderRole (
     IncludeInBackup   INTEGER NOT NULL
                               DEFAULT 1
                               CHECK (IncludeInBackup IN (0, 1) ),
-    PlatformId        INTEGER REFERENCES Platform (id) ON DELETE CASCADE
+    PlatformId        INTEGER REFERENCES Platform (id) ON DELETE RESTRICT
                                                        ON UPDATE CASCADE,
     IsRepoFolder      INTEGER NOT NULL
                               DEFAULT 0
@@ -255,7 +257,7 @@ CREATE TABLE IF NOT EXISTS FolderRole (
     IsToolFolder      INTEGER NOT NULL
                               DEFAULT 0
                               CHECK (IsToolFolder IN (0, 1) ),
-    isPlatformSpecifc         GENERATED ALWAYS AS (PlatformId } 0) 
+    isPlatformSpecifc INTEGER GENERATED ALWAYS AS (PlatformId > 0) 
 );
 
 
@@ -411,7 +413,7 @@ CREATE TABLE IF NOT EXISTS GameProfile (
     GameFolderId            INTEGER NOT NULL
                                     REFERENCES Folders (id) ON DELETE CASCADE
                                                             ON UPDATE CASCADE,
-    GameVersionId           INTEGER REFERENCES GameVersion (id) ON DELETE CASCADE
+    GameVersionId           INTEGER REFERENCES GameVersion (id) ON DELETE RESTRICT
                                                                 ON UPDATE CASCADE,
     GameDataFolderId        INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
@@ -419,7 +421,7 @@ CREATE TABLE IF NOT EXISTS GameProfile (
     GameXboxFolderId        INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
                                                             ON UPDATE CASCADE,
-    GamePlaystationFolderId INTEGER REFERENCES Folders (id) ON DELETE CASCADE
+    GamePlaystationFolderId INTEGER REFERENCES Folders (id) ON DELETE RESTRICT
                                                             ON UPDATE CASCADE,
     TifFolderId             INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
@@ -442,6 +444,83 @@ CREATE TABLE IF NOT EXISTS GameSource (
 );
 
 
+-- Table: GameStoreInstall
+DROP TABLE IF EXISTS GameStoreInstall;
+
+CREATE TABLE IF NOT EXISTS GameStoreInstall (
+    id                INTEGER  PRIMARY KEY AUTOINCREMENT,
+    GameStoreRootId   INTEGER  NOT NULL
+                               REFERENCES GameStoreRoot (id) ON DELETE CASCADE
+                                                             ON UPDATE CASCADE,
+    InstallFolderId   INTEGER  NOT NULL
+                               REFERENCES Folders (id) ON DELETE CASCADE
+                                                       ON UPDATE CASCADE,
+    ContentFolderId   INTEGER  NULL
+                               REFERENCES Folders (id) ON DELETE SET NULL
+                                                       ON UPDATE CASCADE,
+    DataFolderId      INTEGER  NULL
+                               REFERENCES Folders (id) ON DELETE SET NULL
+                                                       ON UPDATE CASCADE,
+    ManifestFileId    INTEGER  NULL
+                               REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                        ON UPDATE CASCADE,
+    StoreAppId        TEXT     NOT NULL,
+    IdentityName      TEXT     NULL,
+    TitleId           TEXT     NULL,
+    ProductId         TEXT     NULL,
+    ContentIdOverride TEXT     NULL,
+    DisplayName       TEXT     NULL,
+    ExecutableName    TEXT     NULL,
+    Version           TEXT     NULL,
+    LastSeenDT        DATETIME NOT NULL,
+    UNIQUE (
+        GameStoreRootId,
+        StoreAppId,
+        InstallFolderId
+    )
+);
+
+
+-- Table: GameStoreProductLink
+DROP TABLE IF EXISTS GameStoreProductLink;
+
+CREATE TABLE IF NOT EXISTS GameStoreProductLink (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    ChildInstallId   INTEGER NOT NULL
+                             REFERENCES GameStoreInstall (id) ON DELETE CASCADE
+                                                              ON UPDATE CASCADE,
+    ParentStoreAppId TEXT    NOT NULL,-- StoreId of base product (e.g. 9NCJSXWZTP88)
+    LinkType         TEXT    NOT NULL,-- e.g. 'AllowedProduct'
+    UNIQUE (
+        ChildInstallId,
+        ParentStoreAppId,
+        LinkType
+    )
+);
+
+
+-- Table: GameStoreRoot
+DROP TABLE IF EXISTS GameStoreRoot;
+
+CREATE TABLE IF NOT EXISTS GameStoreRoot (
+    id              INTEGER  PRIMARY KEY AUTOINCREMENT,
+    GameSourceId    INTEGER  NOT NULL
+                             REFERENCES GameSource (id) ON DELETE CASCADE
+                                                        ON UPDATE CASCADE,
+    RootFolderId    INTEGER  NOT NULL
+                             REFERENCES Folders (id) ON DELETE CASCADE
+                                                     ON UPDATE CASCADE,
+    DiscoverySource TEXT     NULL,
+    DiscoveryRef    TEXT     NULL,
+    DriveRoot       TEXT     NULL,
+    LastSeenDT      DATETIME NOT NULL,
+    UNIQUE (
+        GameSourceId,
+        RootFolderId
+    )
+);
+
+
 -- Table: GameVersion
 DROP TABLE IF EXISTS GameVersion;
 
@@ -461,12 +540,12 @@ DROP TABLE IF EXISTS GameVersionFiles;
 
 CREATE TABLE IF NOT EXISTS GameVersionFiles (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    FileId        INTEGER REFERENCES FileInfo (id) ON DELETE CASCADE
+    FileId        INTEGER REFERENCES FileInfo (id) ON DELETE RESTRICT
                                                    ON UPDATE CASCADE,
     ArchiveId     INTEGER REFERENCES FileInfo (id),
-    GameVersionId INTEGER REFERENCES GameVersion (id) ON DELETE CASCADE
+    GameVersionId INTEGER REFERENCES GameVersion (id) ON DELETE RESTRICT
                                                       ON UPDATE CASCADE,
-    ModId         INTEGER REFERENCES ModItems (id) ON DELETE CASCADE
+    ModId         INTEGER REFERENCES ModItems (id) ON DELETE RESTRICT
                                                    ON UPDATE CASCADE
 );
 
@@ -517,13 +596,13 @@ CREATE TABLE IF NOT EXISTS ModRepoFolder (
                                                         ON UPDATE CASCADE,
     SubModuleUrl        TEXT    NULL,
     LinkedFilesFolderId INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE CASCADE
+                                REFERENCES Folders (id) ON DELETE RESTRICT
                                                         ON UPDATE CASCADE,
     BackupFolderId      INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE CASCADE
+                                REFERENCES Folders (id) ON DELETE RESTRICT
                                                         ON UPDATE CASCADE,
     MetaFilesFolderId   INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE CASCADE
+                                REFERENCES Folders (id) ON DELETE RESTRICT
                                                         ON UPDATE CASCADE
 );
 
@@ -538,7 +617,7 @@ CREATE TABLE IF NOT EXISTS ModRepository (
                             REFERENCES ModItems (id) ON DELETE CASCADE
                                                      ON UPDATE CASCADE,
     RepoUrl         TEXT    NOT NULL,
-    ParentRepoId    INTEGER REFERENCES ModRepository (id) ON DELETE CASCADE
+    ParentRepoId    INTEGER REFERENCES ModRepository (id) ON DELETE RESTRICT
                                                           ON UPDATE CASCADE,
     isDLC           INTEGER NOT NULL
                             DEFAULT (0) 
@@ -655,48 +734,6 @@ CREATE TABLE IF NOT EXISTS UrlRule (
     Name    TEXT    UNIQUE,
     URLRule TEXT    NOT NULL
 );
-
-
--- Index: ModItems_ModItems_ModItems_ModItems_idx_ModItems_CurrentStageID
-DROP INDEX IF EXISTS ModItems_ModItems_ModItems_ModItems_idx_ModItems_CurrentStageID;
-
-CREATE INDEX IF NOT EXISTS ModItems_ModItems_ModItems_ModItems_idx_ModItems_CurrentStageID ON ModItems (
-    CurrentStageID ASC
-);
-
-
--- Index: ModItems_ModItems_sqlite_autoindex_ModItems_1
-DROP INDEX IF EXISTS ModItems_ModItems_sqlite_autoindex_ModItems_1;
-
-CREATE UNIQUE INDEX IF NOT EXISTS ModItems_ModItems_sqlite_autoindex_ModItems_1 ON ModItems (
-    ModName ASC
-);
-
-
--- Index: ModItems_sqlite_autoindex_ModItems_1
-DROP INDEX IF EXISTS ModItems_sqlite_autoindex_ModItems_1;
-
-CREATE UNIQUE INDEX IF NOT EXISTS ModItems_sqlite_autoindex_ModItems_1 ON ModItems (
-    ModName ASC
-);
-
-
--- Index: Stages_sqlite_autoindex_Stages_1
-DROP INDEX IF EXISTS Stages_sqlite_autoindex_Stages_1;
-
-CREATE UNIQUE INDEX IF NOT EXISTS Stages_sqlite_autoindex_Stages_1 ON Stages (
-    StageName ASC
-);
-
-
--- Index: Stages_Stages_sqlite_autoindex_Stages_1
-DROP INDEX IF EXISTS Stages_Stages_sqlite_autoindex_Stages_1;
-
-CREATE UNIQUE INDEX IF NOT EXISTS Stages_Stages_sqlite_autoindex_Stages_1 ON Stages (
-    StageName ASC
-);
-
-
 
 
 COMMIT TRANSACTION;

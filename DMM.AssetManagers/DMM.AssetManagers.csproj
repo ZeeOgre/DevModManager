@@ -9,10 +9,14 @@
 
   <ItemGroup>
     <PackageReference Include="GameFinder" />
-    <PackageReference Include="GameFinder.StoreHandlers.BethNet" />
     <PackageReference Include="niflysharp" />
     <PackageReference Include="Sharp.BSA.BA2" />
     <PackageReference Include="SteamKit2" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="GameStores\Common\" />
   </ItemGroup>
 
 </Project>

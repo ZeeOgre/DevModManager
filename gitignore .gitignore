@@ -1,0 +1,2 @@
+# Local-only test fixtures (mods/plugins not suitable for committing)
+tests/fixtures_local/

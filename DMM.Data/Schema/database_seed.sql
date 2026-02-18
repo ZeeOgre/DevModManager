@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.4.18 on Sun Dec 7 19:50:19 2025
+-- File generated with SQLiteStudio v3.4.21 on Tue Feb 17 19:43:09 2026
 --
 -- Text encoding used: System
 --
@@ -76,6 +76,12 @@ INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (28
 INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (29, 'WwiseSounds', 'Main', 'sound/soundbanks');
 INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (30, 'ArchiveMain', NULL, NULL);
 INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (31, 'ArchiveTextures', NULL, NULL);
+INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (32, 'TESFile', NULL, NULL);
+INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (33, 'TESFile-Core', NULL, NULL);
+INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (34, 'BA2Archive', NULL, NULL);
+INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (35, 'BA2Archive-Core', NULL, NULL);
+INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (36, 'PlanetDataBiomeMap', NULL, 'planetdata/biomemaps');
+INSERT INTO AssetKind (id, Name, DefaultArchiveName, DefaultDataPath) VALUES (37, 'Havok', NULL, NULL);
 
 -- Table: Config
 DROP TABLE IF EXISTS Config;
@@ -312,7 +318,7 @@ CREATE TABLE IF NOT EXISTS FolderRole (
     IncludeInBackup   INTEGER NOT NULL
                               DEFAULT 1
                               CHECK (IncludeInBackup IN (0, 1) ),
-    PlatformId        INTEGER REFERENCES Platform (id) ON DELETE CASCADE
+    PlatformId        INTEGER REFERENCES Platform (id) ON DELETE RESTRICT
                                                        ON UPDATE CASCADE,
     IsRepoFolder      INTEGER NOT NULL
                               DEFAULT 0
@@ -320,7 +326,7 @@ CREATE TABLE IF NOT EXISTS FolderRole (
     IsToolFolder      INTEGER NOT NULL
                               DEFAULT 0
                               CHECK (IsToolFolder IN (0, 1) ),
-    isPlatformSpecifc INTEGER GENERATED ALWAYS AS (PlatformId } 0) 
+    isPlatformSpecifc INTEGER GENERATED ALWAYS AS (PlatformId > 0) 
 );
 
 INSERT INTO FolderRole (id, Name, IncludeInBackup, PlatformId, IsRepoFolder, IsToolFolder) VALUES (0, 'GameRoot', 0, 0, 0, 0);
@@ -509,7 +515,7 @@ CREATE TABLE IF NOT EXISTS GameProfile (
     GameFolderId            INTEGER NOT NULL
                                     REFERENCES Folders (id) ON DELETE CASCADE
                                                             ON UPDATE CASCADE,
-    GameVersionId           INTEGER REFERENCES GameVersion (id) ON DELETE CASCADE
+    GameVersionId           INTEGER REFERENCES GameVersion (id) ON DELETE RESTRICT
                                                                 ON UPDATE CASCADE,
     GameDataFolderId        INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
@@ -517,7 +523,7 @@ CREATE TABLE IF NOT EXISTS GameProfile (
     GameXboxFolderId        INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
                                                             ON UPDATE CASCADE,
-    GamePlaystationFolderId INTEGER REFERENCES Folders (id) ON DELETE CASCADE
+    GamePlaystationFolderId INTEGER REFERENCES Folders (id) ON DELETE RESTRICT
                                                             ON UPDATE CASCADE,
     TifFolderId             INTEGER NULL
                                     REFERENCES Folders (id) ON DELETE SET NULL
@@ -541,6 +547,65 @@ CREATE TABLE IF NOT EXISTS GameSource (
 
 INSERT INTO GameSource (id, Name, SourceGameId, URL, URI, SourceRepoId) VALUES (1, 'Starfield - Steam', '1716740', 'https://store.steampowered.com/app/1716740/Starfield/', 'steam://rungameid/1716740', NULL);
 
+-- Table: GameStoreInstall
+DROP TABLE IF EXISTS GameStoreInstall;
+
+CREATE TABLE IF NOT EXISTS GameStoreInstall (
+    id                INTEGER  PRIMARY KEY AUTOINCREMENT,
+    GameStoreRootId   INTEGER  NOT NULL
+                               REFERENCES GameStoreRoot (id) ON DELETE CASCADE
+                                                             ON UPDATE CASCADE,
+    InstallFolderId   INTEGER  NOT NULL
+                               REFERENCES Folders (id) ON DELETE CASCADE
+                                                       ON UPDATE CASCADE,
+    ContentFolderId   INTEGER  NULL
+                               REFERENCES Folders (id) ON DELETE SET NULL
+                                                       ON UPDATE CASCADE,
+    DataFolderId      INTEGER  NULL
+                               REFERENCES Folders (id) ON DELETE SET NULL
+                                                       ON UPDATE CASCADE,
+    ManifestFileId    INTEGER  NULL
+                               REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                        ON UPDATE CASCADE,
+    StoreAppId        TEXT     NOT NULL,
+    IdentityName      TEXT     NULL,
+    TitleId           TEXT     NULL,
+    ProductId         TEXT     NULL,
+    ContentIdOverride TEXT     NULL,
+    DisplayName       TEXT     NULL,
+    ExecutableName    TEXT     NULL,
+    Version           TEXT     NULL,
+    LastSeenDT        DATETIME NOT NULL,
+    UNIQUE (
+        GameStoreRootId,
+        StoreAppId,
+        InstallFolderId
+    )
+);
+
+
+-- Table: GameStoreRoot
+DROP TABLE IF EXISTS GameStoreRoot;
+
+CREATE TABLE IF NOT EXISTS GameStoreRoot (
+    id              INTEGER  PRIMARY KEY AUTOINCREMENT,
+    GameSourceId    INTEGER  NOT NULL
+                             REFERENCES GameSource (id) ON DELETE CASCADE
+                                                        ON UPDATE CASCADE,
+    RootFolderId    INTEGER  NOT NULL
+                             REFERENCES Folders (id) ON DELETE CASCADE
+                                                     ON UPDATE CASCADE,
+    DiscoverySource TEXT     NULL,
+    DiscoveryRef    TEXT     NULL,
+    DriveRoot       TEXT     NULL,
+    LastSeenDT      DATETIME NOT NULL,
+    UNIQUE (
+        GameSourceId,
+        RootFolderId
+    )
+);
+
+
 -- Table: GameVersion
 DROP TABLE IF EXISTS GameVersion;
 
@@ -560,12 +625,12 @@ DROP TABLE IF EXISTS GameVersionFiles;
 
 CREATE TABLE IF NOT EXISTS GameVersionFiles (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    FileId        INTEGER REFERENCES FileInfo (id) ON DELETE CASCADE
+    FileId        INTEGER REFERENCES FileInfo (id) ON DELETE RESTRICT
                                                    ON UPDATE CASCADE,
     ArchiveId     INTEGER REFERENCES FileInfo (id),
-    GameVersionId INTEGER REFERENCES GameVersion (id) ON DELETE CASCADE
+    GameVersionId INTEGER REFERENCES GameVersion (id) ON DELETE RESTRICT
                                                       ON UPDATE CASCADE,
-    ModId         INTEGER REFERENCES ModItems (id) ON DELETE CASCADE
+    ModId         INTEGER REFERENCES ModItems (id) ON DELETE RESTRICT
                                                    ON UPDATE CASCADE
 );
 
@@ -616,13 +681,13 @@ CREATE TABLE IF NOT EXISTS ModRepoFolder (
                                                         ON UPDATE CASCADE,
     SubModuleUrl        TEXT    NULL,
     LinkedFilesFolderId INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE CASCADE
+                                REFERENCES Folders (id) ON DELETE RESTRICT
                                                         ON UPDATE CASCADE,
     BackupFolderId      INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE CASCADE
+                                REFERENCES Folders (id) ON DELETE RESTRICT
                                                         ON UPDATE CASCADE,
     MetaFilesFolderId   INTEGER NOT NULL
-                                REFERENCES Folders (id) ON DELETE CASCADE
+                                REFERENCES Folders (id) ON DELETE RESTRICT
                                                         ON UPDATE CASCADE
 );
 
@@ -637,7 +702,7 @@ CREATE TABLE IF NOT EXISTS ModRepository (
                             REFERENCES ModItems (id) ON DELETE CASCADE
                                                      ON UPDATE CASCADE,
     RepoUrl         TEXT    NOT NULL,
-    ParentRepoId    INTEGER REFERENCES ModRepository (id) ON DELETE CASCADE
+    ParentRepoId    INTEGER REFERENCES ModRepository (id) ON DELETE RESTRICT
                                                           ON UPDATE CASCADE,
     isDLC           INTEGER NOT NULL
                             DEFAULT (0) 
@@ -766,8 +831,56 @@ CREATE TABLE IF NOT EXISTS UrlRule (
     URLRule TEXT    NOT NULL
 );
 
-INSERT INTO UrlRule (id, Name, URLRule) VALUES (1, 'Bethesda Creations', 'https://creations.bethesda.net/{lang}/{ModInfo.BethesdaKey}/details/{BethesdaID}');
-INSERT INTO UrlRule (id, Name, URLRule) VALUES (2, 'Nexus', 'https://nexusmods.com/{Game.NexusKey}/mods/{ModInfo.NexusID}');
+INSERT INTO UrlRule (id, Name, URLRule) VALUES (1, 'Bethesda Creations', 'https://creations.bethesda.net/<lang>/<ModInfo.BethesdaKey>/details/<BethesdaID>');
+INSERT INTO UrlRule (id, Name, URLRule) VALUES (2, 'Nexus', 'https://nexusmods.com/<Game.NexusKey>/mods/<ModInfo.NexusID>');
+
+-- Index: IX_GameStoreInstall_GameStoreRootId
+DROP INDEX IF EXISTS IX_GameStoreInstall_GameStoreRootId;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreInstall_GameStoreRootId ON GameStoreInstall (
+    GameStoreRootId
+);
+
+
+-- Index: IX_GameStoreInstall_IdentityName
+DROP INDEX IF EXISTS IX_GameStoreInstall_IdentityName;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreInstall_IdentityName ON GameStoreInstall (
+    IdentityName
+);
+
+
+-- Index: IX_GameStoreInstall_InstallFolderId
+DROP INDEX IF EXISTS IX_GameStoreInstall_InstallFolderId;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreInstall_InstallFolderId ON GameStoreInstall (
+    InstallFolderId
+);
+
+
+-- Index: IX_GameStoreInstall_StoreAppId
+DROP INDEX IF EXISTS IX_GameStoreInstall_StoreAppId;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreInstall_StoreAppId ON GameStoreInstall (
+    StoreAppId
+);
+
+
+-- Index: IX_GameStoreRoot_GameSourceId
+DROP INDEX IF EXISTS IX_GameStoreRoot_GameSourceId;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreRoot_GameSourceId ON GameStoreRoot (
+    GameSourceId
+);
+
+
+-- Index: IX_GameStoreRoot_RootFolderId
+DROP INDEX IF EXISTS IX_GameStoreRoot_RootFolderId;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreRoot_RootFolderId ON GameStoreRoot (
+    RootFolderId
+);
+
 
 -- Index: ModItems_ModItems_ModItems_ModItems_idx_ModItems_CurrentStageID
 DROP INDEX IF EXISTS ModItems_ModItems_ModItems_ModItems_idx_ModItems_CurrentStageID;

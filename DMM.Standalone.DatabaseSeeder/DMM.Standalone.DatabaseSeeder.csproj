@@ -8,4 +8,9 @@
     <Configurations>Debug;Release;FullRelease</Configurations>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="GameFinder" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
 </Project>
