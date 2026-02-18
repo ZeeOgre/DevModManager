@@ -9,10 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Sharp.BSA.BA2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="GameStores\Common\" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
 </Project>

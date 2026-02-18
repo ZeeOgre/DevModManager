@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="xunit.v3" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
 </Project>

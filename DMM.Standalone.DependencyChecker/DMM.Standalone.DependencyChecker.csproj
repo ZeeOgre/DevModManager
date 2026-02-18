@@ -17,6 +17,7 @@
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
 	  <PackageReference Include="xunit.v3" />
+	  <PackageReference Include="YamlDotNet" />
 	</ItemGroup>
 
 	<!-- Framework-dependent (slim) defaults when that configuration is selected -->
