@@ -14,7 +14,7 @@ public sealed record AppInstallSnapshot
     public string? ExecutableName { get; init; }
 
     /// <summary>Common marketing/media assets, if discoverable.</summary>
-    public AppVisualAssetsSnapshot? VisualAssets { get; init; }
+    public AppVisualAssetsSnapshot? VisualAssets { get; set; }
 
     /// <summary>Normalized version string if store reports it.</summary>
     public string? Version { get; init; }
@@ -29,7 +29,7 @@ public sealed record AppInstallSnapshot
     public IReadOnlyList<DepotSnapshot> Depots { get; init; } = Array.Empty<DepotSnapshot>();
 
     /// <summary>Free-form store-specific metadata (ids, package family name, etc.).</summary>
-    public IReadOnlyDictionary<string, string> StoreMetadata { get; init; }
+    public IDictionary<string, string> StoreMetadata { get; init; }
         = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Scanner notes/issues tied to this app specifically.</summary>

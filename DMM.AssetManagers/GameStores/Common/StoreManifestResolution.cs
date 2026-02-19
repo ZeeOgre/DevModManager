@@ -1,4 +1,4 @@
-namespace DMM.AssetManagers.Stores
+namespace DMM.AssetManagers.GameStores.Common
 {
     public sealed class StoreManifestResolution
     {
