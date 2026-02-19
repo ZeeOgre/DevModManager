@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
-using DMM.AssetManagers.GameStores.XBox;
-
 
 using DMM.Tests.Harness.Infrastructure;
 
@@ -15,27 +14,30 @@ internal static class Program
 {
     private static int Main(string[] args)
     {
+        var totalSw = Stopwatch.StartNew();
+
+        TimeSpan scanElapsed = TimeSpan.Zero;
+        TimeSpan outputElapsed = TimeSpan.Zero;
+
         var parsed = CliArgs.Parse(args);
 
         if (parsed.ShowHelp || parsed.Positionals.Count == 0)
         {
             CliHelp.Print();
+            PrintTimings(totalSw, scanElapsed, outputElapsed);
             return parsed.Positionals.Count == 0 ? 1 : 0;
         }
 
         try
         {
-            // Register all available scanners here
             var scanners = ScannerRegistry.CreateAllScanners();
 
-            // Common context values
             var context = new StoreScanContext
             {
                 IncludeVisualAssets = !parsed.NoVisuals,
                 Roots = parsed.ResolveRoots()
             };
 
-            // Commands
             var cmd = parsed.Positionals[0].ToLowerInvariant();
 
             switch (cmd)
@@ -44,17 +46,27 @@ internal static class Program
                 case "--help":
                 case "-h":
                     CliHelp.Print();
+                    PrintTimings(totalSw, scanElapsed, outputElapsed);
                     return 0;
 
                 case "stores":
-                    return RunStores(scanners);
+                    {
+                        var rc = RunStores(scanners);
+                        PrintTimings(totalSw, scanElapsed, outputElapsed);
+                        return rc;
+                    }
 
                 case "scan":
-                    return RunScan(scanners, context, parsed);
+                    {
+                        var rc = RunScan(scanners, context, parsed, out scanElapsed, out outputElapsed);
+                        PrintTimings(totalSw, scanElapsed, outputElapsed);
+                        return rc;
+                    }
 
                 default:
                     Console.WriteLine($"Unknown command: {cmd}");
                     CliHelp.Print();
+                    PrintTimings(totalSw, scanElapsed, outputElapsed);
                     return 1;
             }
         }
@@ -62,8 +74,20 @@ internal static class Program
         {
             Console.WriteLine("Fatal error:");
             Console.WriteLine(ex);
+            PrintTimings(totalSw, scanElapsed, outputElapsed);
             return 1;
         }
+    }
+
+    private static void PrintTimings(Stopwatch totalSw, TimeSpan scan, TimeSpan output)
+    {
+        totalSw.Stop();
+
+        // Print only what we actually measured
+        if (scan != TimeSpan.Zero || output != TimeSpan.Zero)
+            Console.WriteLine($"[Timing] scan={scan} output={output} total={totalSw.Elapsed}");
+        else
+            Console.WriteLine($"[Elapsed: {totalSw.Elapsed}]");
     }
 
     private static int RunStores(IReadOnlyList<IStoreInstallScanner> scanners)
@@ -81,17 +105,22 @@ internal static class Program
         return 0;
     }
 
-    private static int RunScan(IReadOnlyList<IStoreInstallScanner> scanners, StoreScanContext context, CliArgs parsed)
+    private static int RunScan(
+        IReadOnlyList<IStoreInstallScanner> scanners,
+        StoreScanContext context,
+        CliArgs parsed,
+        out TimeSpan scanElapsed,
+        out TimeSpan outputElapsed)
     {
+        scanElapsed = TimeSpan.Zero;
+        outputElapsed = TimeSpan.Zero;
+
         if (scanners.Count == 0)
         {
             Console.WriteLine("No store scanners are registered.");
             return 1;
         }
 
-        // Syntax:
-        //   scan all
-        //   scan store <storeKey>
         if (parsed.Positionals.Count < 2)
         {
             Console.WriteLine("scan requires: all | store <storeKey>");
@@ -99,15 +128,16 @@ internal static class Program
         }
 
         var mode = parsed.Positionals[1].ToLowerInvariant();
-
-        // Build orchestrator
-        var orchestrator = new StoreScanner(scanners);
+        var orchestrator = new StoreScanOrchestrator(scanners);
 
         InstallSnapshot snapshot;
 
+        // Measure scan
+        var scanSw = Stopwatch.StartNew();
+
         if (mode == "all")
         {
-            snapshot = orchestrator.ScanAll(context);
+            snapshot = orchestrator.ScanStores(context);
         }
         else if (mode == "store")
         {
@@ -126,15 +156,20 @@ internal static class Program
             return 1;
         }
 
-        // Output
+        scanSw.Stop();
+        scanElapsed = scanSw.Elapsed;
+
+        // Measure output
+        var outSw = Stopwatch.StartNew();
         OutputWriter.Write(snapshot, parsed);
+        outSw.Stop();
+        outputElapsed = outSw.Elapsed;
 
         // Summary + exit codes
         Console.WriteLine();
         Console.WriteLine($"Apps: {snapshot.Apps.Count}");
         Console.WriteLine($"Issues: {snapshot.Issues.Count}");
 
-        // Helpful per-store summary
         var byStore = snapshot.Apps
             .GroupBy(a => a.Id.StoreKey, StringComparer.OrdinalIgnoreCase)
             .OrderBy(g => g.Key);

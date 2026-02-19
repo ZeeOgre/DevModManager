@@ -34,6 +34,11 @@ public sealed record AppInstallSnapshot
 
     /// <summary>Scanner notes/issues tied to this app specifically.</summary>
     public IReadOnlyList<ScanIssue> Issues { get; init; } = Array.Empty<ScanIssue>();
+
+    /// <summary>Store-agnostic tags used for filtering / classification.</summary>
+    public IReadOnlySet<string> Tags { get; init; }
+        = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
 }
 
 public sealed record StoreInstallId

@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+	<OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <AssemblyName>dmmtest</AssemblyName>
     <RootNamespace>DMM.Tests</RootNamespace>
+	<StartupObject>DMM.Tests.Harness.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,6 +42,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
+	  <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -31,7 +31,8 @@ public static class XboxGameCatalog
             if (!File.Exists(gamingRootFile))
                 continue;
 
-            var root = TryParseGamingRootFile(gamingRootFile, driveRoot);
+            var root = GamingRootParser.TryGetXboxGamesRootForDrive(driveRoot);
+
             if (root != null && Directory.Exists(root))
                 roots.Add(NormalizeDir(root));
         }
@@ -165,42 +166,7 @@ public static class XboxGameCatalog
         }
     }
 
-    private static string? TryParseGamingRootFile(string path, string driveRoot)
-    {
-        try
-        {
-            var bytes = File.ReadAllBytes(path);
-
-            // Decode as UTF-16LE; this will include lots of NULs / junk before the path,
-            // but the actual path string becomes readable.
-            var text = Encoding.Unicode.GetString(bytes);
-
-            // Find something that looks like a path.
-            var candidates = text
-                .Split('\0', StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .Where(s => s.Contains("\\") || s.Contains("/"))
-                .ToList();
-
-            if (candidates.Count == 0)
-                return null;
-
-            var relOrAbs = candidates.Last();
-
-            // If it’s relative (starts with "\Games"), combine with drive root.
-            if (Path.IsPathRooted(relOrAbs))
-                return relOrAbs;
-
-            if (relOrAbs.StartsWith("\\") || relOrAbs.StartsWith("/"))
-                return Path.Combine(driveRoot, relOrAbs.TrimStart('\\', '/'));
-
-            return Path.Combine(driveRoot, relOrAbs);
-        }
-        catch
-        {
-            return null;
-        }
-    }
+ 
 
     private static string NormalizeDir(string dir)
         => PathUtils.NormalizeDir(dir);

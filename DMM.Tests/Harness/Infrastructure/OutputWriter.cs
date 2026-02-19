@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 
 using DMM.AssetManagers.GameStores.Common.Models;
+using DMM.Core.IO.Converters;
 
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -41,9 +42,11 @@ public static class OutputWriter
     private static string ToYaml(InstallSnapshot snapshot)
     {
         var serializer = new SerializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
-            .Build();
+        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+        .WithTypeConverter(new DateTimeOffsetIsoConverter())
+        .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+        .Build();
+
 
         return serializer.Serialize(snapshot);
     }

@@ -4,6 +4,7 @@ using DMM.AssetManagers.GameStores.Common;
 
 // Add store scanner namespaces here
 using DMM.AssetManagers.GameStores.XBox;
+using DMM.AssetManagers.GameStores.Steam;
 
 namespace DMM.Tests.Harness.Infrastructure;
 
@@ -14,6 +15,7 @@ public static class ScannerRegistry
         var scanners = new List<IStoreInstallScanner>
         {
             new XboxInstallScanner(),
+            new SteamInstallScanner(),
         };
 
         // When ready:
