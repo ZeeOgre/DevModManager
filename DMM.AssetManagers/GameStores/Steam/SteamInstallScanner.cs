@@ -99,7 +99,6 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
             ContentFolder = null,
             DataFolder = null,
             AdditionalFolders = Array.Empty<NamedFolderRef>(), 
-            Tags = e.DerivedTags
         };
 
         AppVisualAssetsSnapshot? visuals = null;
