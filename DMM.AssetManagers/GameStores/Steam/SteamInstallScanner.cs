@@ -86,6 +86,8 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
             });
         }
 
+
+
         return new StoreScanResult { StoreKey = StoreKey, Apps = apps, Issues = issues };
     }
 
@@ -96,7 +98,8 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
             InstallFolder = new FolderRef { Path = e.InstallRoot },
             ContentFolder = null,
             DataFolder = null,
-            AdditionalFolders = Array.Empty<NamedFolderRef>()
+            AdditionalFolders = Array.Empty<NamedFolderRef>(), 
+            Tags = e.DerivedTags
         };
 
         AppVisualAssetsSnapshot? visuals = null;
@@ -127,25 +130,34 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
         if (!string.IsNullOrWhiteSpace(e.StateFlags)) meta["StateFlags"] = e.StateFlags!;
         if (e.LastUpdatedUtc is not null) meta["LastUpdatedUtc"] = e.LastUpdatedUtc.Value.ToString("O");
 
+        var depots = e.Depots.Select(d =>
+        {
+            var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var t in e.DerivedTags) tags.Add(t);
+            foreach (var t in d.Tags) tags.Add(t);
+            tags.Add("depot");
+            if (!string.IsNullOrWhiteSpace(d.ManifestId)) tags.Add("has-manifest");
+            return d with { Tags = tags };
+        }).ToList();
+
         return new AppInstallSnapshot
         {
-            Id = new StoreInstallId
-            {
-                StoreKey = StoreKey,
-                StoreAppId = e.AppId,
-                InstallInstanceId = null
-            },
+            Id = new StoreInstallId { StoreKey = StoreKey, StoreAppId = e.AppId, InstallInstanceId = null },
             DisplayName = e.DisplayName,
             InstallFolders = folders,
-            ExecutableName = null, // Steam manifests generally don't declare an exe; we can add later via appinfo.vdf if desired
+            ExecutableName = null,
             VisualAssets = visuals,
-            Version = e.BuildId, // best available store-provided "version-ish" value
+            Version = e.BuildId,
             InstallState = InstallState.Installed,
             LastUpdatedUtc = e.LastUpdatedUtc,
-            Depots = e.Depots,
+
+            Tags = e.DerivedTags,       // <-- ADD THIS
+            Depots = depots,            // <-- CHANGE THIS (was e.Depots)
+
             StoreMetadata = meta,
             Issues = Array.Empty<ScanIssue>()
         };
+
     }
 
     private static VisualAssetRef? MakeVisual(string? path)
