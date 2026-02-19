@@ -1,4 +1,4 @@
-namespace DMM.Tests.Infrastructure;
+namespace DMM.Tests.Harness.Infrastructure;
 
 internal static class RepoRoot
 {

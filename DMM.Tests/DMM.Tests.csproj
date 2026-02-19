@@ -4,9 +4,10 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <AssemblyName>dmmtest</AssemblyName>
+    <RootNamespace>DMM.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +32,14 @@
     <None Include="..\tests\README.md" Link="tests\README.md" />
     <None Include="..\tests\fixtures\README.md" Link="tests\fixtures\README.md" />
     <None Include="..\tests\fixtures_local\README.md" Link="tests\fixtures_local\README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Unit\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
   </ItemGroup>
 
 </Project>

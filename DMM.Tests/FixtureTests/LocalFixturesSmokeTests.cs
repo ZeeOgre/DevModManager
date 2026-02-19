@@ -1,4 +1,4 @@
-using DMM.Tests.Infrastructure;
+using DMM.Tests.Harness.Infrastructure;
 
 namespace DMM.Tests.FixtureTests;
 
