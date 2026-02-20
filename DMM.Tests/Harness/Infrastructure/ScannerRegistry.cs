@@ -18,10 +18,12 @@ public static class ScannerRegistry
     {
         var scanners = new List<IStoreInstallScanner>
         {
+            #if WINDOWS
             new XboxInstallScanner(),
             new SteamInstallScanner(),
             new EpicInstallScanner(),
             new GogInstallScanner(),
+            #endif
         };
 
         // When ready:
