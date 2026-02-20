@@ -27,19 +27,17 @@ public static class ScannerRegistry
 
         if (OperatingSystem.IsWindows())
         {
-            #if WINDOWS
-            new XboxInstallScanner(),
-            new SteamInstallScanner(),
-            new EpicInstallScanner(),
-            new GogInstallScanner(),
-            new PsnInstallScanner(),
-            new BattleNetInstallScanner(),
-            new MinecraftInstallScanner(),
-            new EaInstallScanner(),
-            new OriginInstallScanner(),
-            new RockstarInstallScanner(),
-            #endif
-        };
+            scanners.Add(new XboxInstallScanner());
+            scanners.Add(new SteamInstallScanner());
+            scanners.Add(new EpicInstallScanner());
+            scanners.Add(new GogInstallScanner());
+            scanners.Add(new PsnInstallScanner());
+            scanners.Add(new BattleNetInstallScanner());
+            scanners.Add(new MinecraftInstallScanner());
+            scanners.Add(new EaInstallScanner());
+            scanners.Add(new OriginInstallScanner());
+            scanners.Add(new RockstarInstallScanner());
+        }
 
         // When ready:
         // scanners.Add(new SteamInstallScanner());

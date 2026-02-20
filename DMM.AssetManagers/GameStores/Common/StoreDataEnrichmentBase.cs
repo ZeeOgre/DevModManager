@@ -7,11 +7,32 @@ namespace DMM.AssetManagers.GameStores.Common;
 
 public static class StoreDataEnrichmentBase
 {
-    public static void SetIfMissing(IDictionary<string, string> metadata, string key, string? value)
+    // Intention-revealing metadata helpers
+    public static void SetIfMissing(IDictionary<string, string> meta, string key, string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return;
-        if (!metadata.ContainsKey(key))
-            metadata[key] = value.Trim();
+        if (!meta.ContainsKey(key))
+            meta[key] = value.Trim();
+    }
+
+    public static void SetAlways(IDictionary<string, string> meta, string key, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return;
+        meta[key] = value.Trim();
+    }
+
+    // Standard enrichment timestamps (cross-store invariant)
+    public const string EnrichedFirstUtcKey = "EnrichedFirstUtc";
+    public const string EnrichedLastUtcKey = "EnrichedLastUtc";
+
+    public static void StampEnrichmentUtc(IDictionary<string, string> meta)
+    {
+        var now = DateTime.UtcNow.ToString("O");
+
+        if (!meta.ContainsKey(EnrichedFirstUtcKey))
+            meta[EnrichedFirstUtcKey] = now;
+
+        meta[EnrichedLastUtcKey] = now;
     }
 
     public static void TryWriteAllText(string path, string text)

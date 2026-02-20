@@ -27,6 +27,13 @@ internal static class Program
             parsed.Positionals.Add("scan");
             parsed.Positionals.Add("all");
         }
+        else if (parsed.Positionals.Count > 0
+                 && string.Equals(parsed.Positionals[0], "scanall", StringComparison.OrdinalIgnoreCase))
+        {
+            parsed.Positionals.Clear();
+            parsed.Positionals.Add("scan");
+            parsed.Positionals.Add("all");
+        }
 
         if (parsed.ShowHelp || parsed.Positionals.Count == 0)
         {

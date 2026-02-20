@@ -243,6 +243,7 @@ public static class SteamDataEnrichment
                 Exception = EnrichmentBase.ToExceptionInfo(ex)
             });
         }
+        StoreDataEnrichmentBase.StampEnrichmentUtc(snap.StoreMetadata);
     }
 
     private static readonly JsonSerializerOptions JsonOpts = new()

@@ -127,7 +127,7 @@ public static class GogDataEnrichment
             await AddVisualIfMissingAsync(http, snap, productId, "ProductImage", candidate, assetsRoot, issues, ct).ConfigureAwait(false);
         }
 
-        snap.StoreMetadata["GogEnrichedUtc"] = DateTime.UtcNow.ToString("O");
+        StoreDataEnrichmentBase.StampEnrichmentUtc(snap.StoreMetadata);
     }
 
     private static JsonElement ResolveAttributesNode(JsonElement root)
@@ -168,6 +168,7 @@ public static class GogDataEnrichment
                 }
             }
         }
+
     }
 
     private static Dictionary<string, string> ExtractImages(JsonElement root, JsonElement attrs)
