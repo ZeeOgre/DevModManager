@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
@@ -11,6 +13,11 @@ namespace DMM.AssetManagers.GameStores.XBox;
 public sealed class XboxInstallScanner : IStoreInstallScanner
 {
     public string StoreKey => StoreKeys.Xbox; // or "xbox" if you haven't added StoreKeys yet
+
+    public Task<StoreScanResult> ScanAsync(
+        StoreScanContext context,
+        CancellationToken ct = default)
+        => Task.FromResult(Scan(context));
 
     public StoreScanResult Scan(StoreScanContext context)
     {

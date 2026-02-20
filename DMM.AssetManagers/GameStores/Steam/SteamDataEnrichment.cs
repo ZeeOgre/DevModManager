@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
+using EnrichmentBase = global::DMM.AssetManagers.GameStores.Common.StoreDataEnrichmentBase;
 
 namespace DMM.AssetManagers.GameStores.Steam;
 
@@ -41,7 +42,7 @@ public static class SteamDataEnrichment
 
         if (targets.Count == 0) return;
 
-        var cacheRoot = ResolveSteamCacheRoot();
+        var cacheRoot = EnrichmentBase.ResolveCacheRoot(StoreKeys.Steam);
         var assetsRoot = Path.Combine(cacheRoot, "assets");
         var responsesRoot = Path.Combine(cacheRoot, "responses");
 
@@ -72,7 +73,7 @@ public static class SteamDataEnrichment
                         Message = $"Steam enrichment failed for appid {snap.Id.StoreAppId}.",
                         StoreKey = StoreKeys.Steam,
                         AppKey = snap.Id.StoreAppId,
-                        Exception = ToExceptionInfo(ex)
+                        Exception = EnrichmentBase.ToExceptionInfo(ex)
                     });
                 }
                 finally
@@ -100,8 +101,8 @@ public static class SteamDataEnrichment
         // StoreMetadata has a default dictionary initializer; assume it's present.
 
         // deterministic links (only set if missing)
-        SetIfMissing(snap.StoreMetadata, "SteamStoreUri", BuildSteamStoreUri(appId));
-        SetIfMissing(snap.StoreMetadata, "SteamCommunityUri", BuildSteamCommunityUri(appId));
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamStoreUri", BuildSteamStoreUri(appId));
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamCommunityUri", BuildSteamCommunityUri(appId));
         
 
 
@@ -110,14 +111,14 @@ public static class SteamDataEnrichment
         const string lang = "english";
 
         var apiUrl = $"https://store.steampowered.com/api/appdetails?appids={appId}&cc={cc}&l={lang}";
-        SetIfMissing(snap.StoreMetadata, "SteamAppDetailsUrl", apiUrl);
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamAppDetailsUrl", apiUrl);
 
         var json = await http.GetStringAsync(apiUrl, ct).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(json)) return;
 
         // Optional: store raw response on disk (not DB)
         var responsePath = Path.Combine(responsesRoot, $"{appId}_appdetails_cc-{cc}_l-{lang}.json");
-        TryWriteAllText(responsePath, json);
+        EnrichmentBase.TryWriteAllText(responsePath, json);
 
         Dictionary<string, Envelope>? dict;
         try
@@ -142,21 +143,21 @@ public static class SteamDataEnrichment
         var d = env.Data;
 
         // ---- Small metadata set (idempotent)
-        SetIfMissing(snap.StoreMetadata, "SteamType", d.Type);
-        SetIfMissing(snap.StoreMetadata, "SteamWebsite", d.Website);
-        SetIfMissing(snap.StoreMetadata, "SteamSupportedLanguages", d.SupportedLanguages);
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamType", d.Type);
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamWebsite", d.Website);
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamSupportedLanguages", d.SupportedLanguages);
 
         if (!string.IsNullOrWhiteSpace(d.ReleaseDate?.Date))
-            SetIfMissing(snap.StoreMetadata, "SteamReleaseDate", d.ReleaseDate!.Date);
+            EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamReleaseDate", d.ReleaseDate!.Date);
 
         if (d.Developers is { Length: > 0 })
-            SetIfMissing(snap.StoreMetadata, "SteamDevelopers", string.Join(" | ", d.Developers));
+            EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamDevelopers", string.Join(" | ", d.Developers));
 
         if (d.Publishers is { Length: > 0 })
-            SetIfMissing(snap.StoreMetadata, "SteamPublishers", string.Join(" | ", d.Publishers));
+            EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamPublishers", string.Join(" | ", d.Publishers));
 
         if (d.Dlc is { Length: > 0 })
-            SetIfMissing(snap.StoreMetadata, "SteamDlcAppIds", string.Join(",", d.Dlc));
+            EnrichmentBase.SetIfMissing(snap.StoreMetadata, "SteamDlcAppIds", string.Join(",", d.Dlc));
 
         // ---- Visual enrichment
         if (!context.IncludeVisualAssets) return;
@@ -196,10 +197,10 @@ public static class SteamDataEnrichment
         }
 
         // Also store the remote URL as audit/debug pointer (idempotent)
-        SetIfMissing(snap.StoreMetadata, $"SteamVisualUrl:{fileKind}", url);
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, $"SteamVisualUrl:{fileKind}", url);
 
         // Determine original filename (strip querystring), then prefix with {appid}_{FileKind}_
-        var originalName = ExtractFilenameFromUrl(url);
+        var originalName = EnrichmentBase.ExtractFilenameFromUrl(url);
         if (string.IsNullOrWhiteSpace(originalName))
         {
             // Very rare for Steam, but keep safe.
@@ -207,7 +208,7 @@ public static class SteamDataEnrichment
         }
 
         var localName = $"{appId}_{fileKind}_{originalName}";
-        localName = SanitizeFilename(localName);
+        localName = EnrichmentBase.SanitizeFilename(localName);
 
         var localPath = Path.Combine(assetsRoot, localName);
 
@@ -239,63 +240,10 @@ public static class SteamDataEnrichment
                 Message = $"Failed downloading Steam visual {fileKind} for appid {appId}.",
                 StoreKey = StoreKeys.Steam,
                 AppKey = appId,
-                Exception = ToExceptionInfo(ex)
+                Exception = EnrichmentBase.ToExceptionInfo(ex)
             });
         }
     }
-
-    private static string ResolveSteamCacheRoot()
-    {
-        // %LOCALAPPDATA%\ZeeOgre\DevModManager\Cache\GameStore\steam\
-        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        return Path.Combine(local, "ZeeOgre", "DevModManager", "Cache", "GameStore", "steam");
-    }
-
-    private static string ExtractFilenameFromUrl(string url)
-    {
-        try
-        {
-            // Works even if url has querystring
-            var u = new Uri(url);
-            var name = Path.GetFileName(u.AbsolutePath);
-            return name;
-        }
-        catch
-        {
-            // fallback: crude parse
-            var q = url.IndexOf('?', StringComparison.Ordinal);
-            var clean = q >= 0 ? url[..q] : url;
-            var slash = clean.LastIndexOf('/');     
-            return slash >= 0 ? clean[(slash + 1)..] : clean;
-        }
-    }
-
-    private static string SanitizeFilename(string name)
-    {
-        foreach (var c in Path.GetInvalidFileNameChars())
-            name = name.Replace(c, '_');
-        return name;
-    }
-
-    private static void SetIfMissing(IDictionary<string, string> meta, string key, string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return;
-        if (!meta.ContainsKey(key))
-            meta[key] = value.Trim();
-    }
-
-    private static void TryWriteAllText(string path, string text)
-    {
-        try { File.WriteAllText(path, text); }
-        catch { /* best-effort */ }
-    }
-
-    private static ExceptionInfo ToExceptionInfo(Exception ex) => new ExceptionInfo
-    {
-        Type = ex.GetType().FullName ?? ex.GetType().Name,
-        Message = ex.Message,
-        HResult = ex.HResult.ToString("X")
-    };
 
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
