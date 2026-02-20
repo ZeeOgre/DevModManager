@@ -337,6 +337,18 @@ namespace DmmDep
                             AddFile(manifest, achlistPaths, rel, FileKind.Morph, "plugin-morph", gameRoot, xboxDataRoot);
                         }
                     }
+                    // --- DDS textures ---
+                    else if (s.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string rel = s.Replace('/', '\\').TrimStart('\\');
+                        if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                            rel = Path.Combine("Data\\Textures", rel);
+                        rel = NormalizeRel(rel);
+                        if (File.Exists(Path.Combine(gameRoot, rel)))
+                        {
+                            AddFile(manifest, achlistPaths, rel, FileKind.Texture, "plugin-dds", gameRoot, xboxDataRoot);
+                        }
+                    }
                     // --- Fallback: other extensions that look like paths -> WARN ---
                     else
                     {
