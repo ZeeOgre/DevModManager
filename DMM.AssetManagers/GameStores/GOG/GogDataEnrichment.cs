@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
+using DMM.AssetManagers.GameStores.Common.StoreDataEnrichmentBase;
 
 namespace DMM.AssetManagers.GameStores.Gog;
 
@@ -30,7 +31,7 @@ public static class GogDataEnrichment
 
         if (targets.Count == 0) return;
 
-        var cacheRoot = StoreDataEnrichmentBase.ResolveCacheRoot(StoreKeys.Gog);
+        var cacheRoot = EnrichmentBase.ResolveCacheRoot(StoreKeys.Gog);
         var assetsRoot = Path.Combine(cacheRoot, "assets");
         var responsesRoot = Path.Combine(cacheRoot, "responses");
 
@@ -62,7 +63,7 @@ public static class GogDataEnrichment
                             Message = $"GOG enrichment failed for product {snap.Id.StoreAppId}.",
                             StoreKey = StoreKeys.Gog,
                             AppKey = snap.Id.StoreAppId,
-                            Exception = StoreDataEnrichmentBase.ToExceptionInfo(ex)
+                            Exception = EnrichmentBase.ToExceptionInfo(ex)
                         });
                     }
                 }
@@ -89,14 +90,14 @@ public static class GogDataEnrichment
         var productId = snap.Id.StoreAppId!.Trim();
         var apiUrl = $"https://api.gog.com/v2/games/{productId}";
 
-        StoreDataEnrichmentBase.SetIfMissing(snap.StoreMetadata, "GogApiUrl", apiUrl);
-        StoreDataEnrichmentBase.SetIfMissing(snap.StoreMetadata, "WebsiteGogDbUrl", $"https://www.gogdb.org/product/{productId}#details");
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, "GogApiUrl", apiUrl);
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, "WebsiteGogDbUrl", $"https://www.gogdb.org/product/{productId}#details");
 
         var json = await http.GetStringAsync(apiUrl, ct).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(json)) return;
 
         var responsePath = Path.Combine(responsesRoot, $"{productId}_game.json");
-        StoreDataEnrichmentBase.TryWriteAllText(responsePath, json);
+        EnrichmentBase.TryWriteAllText(responsePath, json);
 
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -147,11 +148,11 @@ public static class GogDataEnrichment
         if (attrs.ValueKind != JsonValueKind.Object) return;
 
         if (attrs.TryGetProperty("name", out var nameEl) && nameEl.ValueKind == JsonValueKind.String)
-            StoreDataEnrichmentBase.SetIfMissing(metadata, "GogApiName", nameEl.GetString());
+            EnrichmentBase.SetIfMissing(metadata, "GogApiName", nameEl.GetString());
 
         if (attrs.TryGetProperty("version", out var versionEl)
             && (versionEl.ValueKind == JsonValueKind.String || versionEl.ValueKind == JsonValueKind.Number))
-            StoreDataEnrichmentBase.SetIfMissing(metadata, "GogApiVersion", versionEl.ToString());
+            EnrichmentBase.SetIfMissing(metadata, "GogApiVersion", versionEl.ToString());
 
         if (attrs.TryGetProperty("playTasks", out var playTasks) && playTasks.ValueKind == JsonValueKind.Array)
         {
@@ -162,7 +163,7 @@ public static class GogDataEnrichment
                     && pt.TryGetProperty("path", out var pathEl)
                     && pathEl.ValueKind == JsonValueKind.String)
                 {
-                    StoreDataEnrichmentBase.SetIfMissing(metadata, "GogApiPlayTask:PrimaryPath", pathEl.GetString());
+                    EnrichmentBase.SetIfMissing(metadata, "GogApiPlayTask:PrimaryPath", pathEl.GetString());
                     break;
                 }
             }
@@ -250,13 +251,13 @@ public static class GogDataEnrichment
         if (snap.VisualAssets?.Additional != null && snap.VisualAssets.Additional.Any(a => string.Equals(a.Kind, fileKind, StringComparison.OrdinalIgnoreCase)))
             return;
 
-        StoreDataEnrichmentBase.SetIfMissing(snap.StoreMetadata, $"GogVisualUrl:{fileKind}", url);
+        EnrichmentBase.SetIfMissing(snap.StoreMetadata, $"GogVisualUrl:{fileKind}", url);
 
-        var originalName = StoreDataEnrichmentBase.ExtractFilenameFromUrl(url);
+        var originalName = EnrichmentBase.ExtractFilenameFromUrl(url);
         if (string.IsNullOrWhiteSpace(originalName))
             originalName = $"{fileKind}.jpg";
 
-        var localName = StoreDataEnrichmentBase.SanitizeFilename($"{productId}_{fileKind}_{originalName}");
+        var localName = EnrichmentBase.SanitizeFilename($"{productId}_{fileKind}_{originalName}");
         var localPath = Path.Combine(assetsRoot, localName);
 
         try
@@ -289,7 +290,7 @@ public static class GogDataEnrichment
                     Message = $"Failed downloading GOG visual {fileKind} for product {productId}.",
                     StoreKey = StoreKeys.Gog,
                     AppKey = productId,
-                    Exception = StoreDataEnrichmentBase.ToExceptionInfo(ex)
+                    Exception = EnrichmentBase.ToExceptionInfo(ex)
                 });
             }
         }
