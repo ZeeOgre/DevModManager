@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
 
@@ -12,6 +14,11 @@ namespace DMM.AssetManagers.GameStores.Epic;
 public sealed class EpicInstallScanner : IStoreInstallScanner
 {
     public string StoreKey => StoreKeys.Epic;
+
+    public Task<StoreScanResult> ScanAsync(
+        StoreScanContext context,
+        CancellationToken ct = default)
+        => Task.FromResult(Scan(context));
 
     public StoreScanResult Scan(StoreScanContext context)
     {
