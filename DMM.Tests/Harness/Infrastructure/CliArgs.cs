@@ -15,6 +15,7 @@ public sealed class CliArgs
     public string Format { get; private set; } = "yaml";
 
     public bool NoVisuals { get; private set; }
+    public bool ScanAll { get; private set; }
 
     // Roots can be provided via:
     // --roots "a;b;c"  (semicolon-separated)
@@ -52,6 +53,12 @@ public sealed class CliArgs
             if (token.Equals("--no-visuals", StringComparison.OrdinalIgnoreCase))
             {
                 a.NoVisuals = true;
+                continue;
+            }
+
+            if (token.Equals("--scanall", StringComparison.OrdinalIgnoreCase))
+            {
+                a.ScanAll = true;
                 continue;
             }
 

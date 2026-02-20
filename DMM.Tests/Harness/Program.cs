@@ -21,6 +21,13 @@ internal static class Program
 
         var parsed = CliArgs.Parse(args);
 
+        if (parsed.ScanAll)
+        {
+            parsed.Positionals.Clear();
+            parsed.Positionals.Add("scan");
+            parsed.Positionals.Add("all");
+        }
+
         if (parsed.ShowHelp || parsed.Positionals.Count == 0)
         {
             CliHelp.Print();

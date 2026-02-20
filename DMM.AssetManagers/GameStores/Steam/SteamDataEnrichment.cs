@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
-using :DMM.AssetManagers.GameStores.Common.StoreDataEnrichmentBase;
+using EnrichmentBase = DMM.AssetManagers.GameStores.Common.StoreDataEnrichmentBase;
 
 namespace DMM.AssetManagers.GameStores.Steam;
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using DMM.AssetManagers.GameStores.Common;
 using System.Runtime.Versioning;
@@ -16,15 +17,15 @@ public static class ScannerRegistry
 {
     public static IReadOnlyList<IStoreInstallScanner> CreateAllScanners()
     {
-        var scanners = new List<IStoreInstallScanner>
+        var scanners = new List<IStoreInstallScanner>();
+
+        if (OperatingSystem.IsWindows())
         {
-            #if WINDOWS
-            new XboxInstallScanner(),
-            new SteamInstallScanner(),
-            new EpicInstallScanner(),
-            new GogInstallScanner(),
-            #endif
-        };
+            scanners.Add(new XboxInstallScanner());
+            scanners.Add(new SteamInstallScanner());
+            scanners.Add(new EpicInstallScanner());
+            scanners.Add(new GogInstallScanner());
+        }
 
         // When ready:
         // scanners.Add(new SteamInstallScanner());
