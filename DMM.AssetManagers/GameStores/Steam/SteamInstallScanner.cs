@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
 
@@ -14,7 +15,11 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
 {
     public string StoreKey => StoreKeys.Steam;
 
+    // Back-compat for existing callers
     public StoreScanResult Scan(StoreScanContext context)
+        => ScanAsync(context, CancellationToken.None).GetAwaiter().GetResult();
+
+    public async Task<StoreScanResult> ScanAsync(StoreScanContext context, CancellationToken ct = default)
     {
         var issues = new List<ScanIssue>();
         var apps = new List<AppInstallSnapshot>();
@@ -22,10 +27,13 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
         List<string> steamAppsRoots;
         try
         {
+            ct.ThrowIfCancellationRequested();
+
             steamAppsRoots = (context.Roots is { Count: > 0 })
                 ? SteamGameCatalog.NormalizeSteamAppsRoots(context.Roots)
                 : SteamGameCatalog.DiscoverSteamAppsRoots(issues);
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             steamAppsRoots = new List<string>();
@@ -41,8 +49,10 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
         List<SteamGameCatalog.GameEntry> catalog;
         try
         {
+            ct.ThrowIfCancellationRequested();
             catalog = SteamGameCatalog.BuildCatalog(steamAppsRoots, issues);
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             catalog = new List<SteamGameCatalog.GameEntry>();
@@ -57,6 +67,8 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
 
         foreach (var e in catalog)
         {
+            ct.ThrowIfCancellationRequested();
+
             try
             {
                 apps.Add(MapEntry(e, context.IncludeVisualAssets));
@@ -86,9 +98,15 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
             });
         }
 
+        // Enrichment: async + cancellable
+        await SteamDataEnrichment.DoDataEnrichmentAsync(context, apps, issues, ct).ConfigureAwait(false);
 
-
-        return new StoreScanResult { StoreKey = StoreKey, Apps = apps, Issues = issues };
+        return new StoreScanResult
+        {
+            StoreKey = StoreKey,
+            Apps = apps,
+            Issues = issues
+        };
     }
 
     private AppInstallSnapshot MapEntry(SteamGameCatalog.GameEntry e, bool includeVisualAssets)
@@ -98,7 +116,7 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
             InstallFolder = new FolderRef { Path = e.InstallRoot },
             ContentFolder = null,
             DataFolder = null,
-            AdditionalFolders = Array.Empty<NamedFolderRef>(), 
+            AdditionalFolders = Array.Empty<NamedFolderRef>(),
         };
 
         AppVisualAssetsSnapshot? visuals = null;
@@ -150,13 +168,12 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
             InstallState = InstallState.Installed,
             LastUpdatedUtc = e.LastUpdatedUtc,
 
-            Tags = e.DerivedTags,       // <-- ADD THIS
-            Depots = depots,            // <-- CHANGE THIS (was e.Depots)
+            Tags = e.DerivedTags,
+            Depots = depots,
 
             StoreMetadata = meta,
             Issues = Array.Empty<ScanIssue>()
         };
-
     }
 
     private static VisualAssetRef? MakeVisual(string? path)

@@ -7,7 +7,12 @@ public interface IStoreInstallScanner
     string StoreKey { get; }
 
     StoreScanResult Scan(StoreScanContext context);
+
+    Task<StoreScanResult> ScanAsync(
+        StoreScanContext context,
+        CancellationToken ct = default);
 }
+
 
 public sealed record StoreScanContext
 {

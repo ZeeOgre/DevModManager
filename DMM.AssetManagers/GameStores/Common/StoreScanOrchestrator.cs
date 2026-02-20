@@ -1,6 +1,11 @@
-﻿namespace DMM.AssetManagers.GameStores.Common;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DMM.AssetManagers.GameStores.Common.Models;
+
+namespace DMM.AssetManagers.GameStores.Common;
 
 public sealed class StoreScanOrchestrator
 {
@@ -11,6 +16,7 @@ public sealed class StoreScanOrchestrator
         _scanners = scanners.ToDictionary(s => s.StoreKey, StringComparer.OrdinalIgnoreCase);
     }
 
+    // Existing sync API (keep)
     public InstallSnapshot ScanStore(string storeKey, StoreScanContext? context = null)
     {
         context ??= new StoreScanContext();
@@ -23,6 +29,7 @@ public sealed class StoreScanOrchestrator
         return BuildSnapshot(ScanScope.StoreSingle, new[] { result });
     }
 
+    // Existing sync API (keep)
     public InstallSnapshot ScanStores(StoreScanContext? context = null)
     {
         context ??= new StoreScanContext();
@@ -30,6 +37,35 @@ public sealed class StoreScanOrchestrator
         var results = _scanners.Values
             .Select(s => s.Scan(context))
             .ToList();
+
+        return BuildSnapshot(ScanScope.StoresAll, results);
+    }
+
+    // New async API
+    public async Task<InstallSnapshot> ScanStoreAsync(
+        string storeKey,
+        StoreScanContext? context = null,
+        CancellationToken ct = default)
+    {
+        context ??= new StoreScanContext();
+
+        if (!_scanners.TryGetValue(storeKey, out var scanner))
+            throw new ArgumentException($"Unknown storeKey '{storeKey}'", nameof(storeKey));
+
+        var result = await scanner.ScanAsync(context, ct).ConfigureAwait(false);
+        return BuildSnapshot(ScanScope.StoreSingle, new[] { result });
+    }
+
+    // New async API
+    public async Task<InstallSnapshot> ScanStoresAsync(
+        StoreScanContext? context = null,
+        CancellationToken ct = default)
+    {
+        context ??= new StoreScanContext();
+
+        // run stores in parallel
+        var tasks = _scanners.Values.Select(s => s.ScanAsync(context, ct));
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
         return BuildSnapshot(ScanScope.StoresAll, results);
     }

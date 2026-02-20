@@ -7,7 +7,7 @@ public sealed record AppVisualAssetsSnapshot
     public VisualAssetRef? Splash { get; init; }
 
     /// <summary>Any other store-provided images (hero art, background, etc.).</summary>
-    public IReadOnlyList<NamedVisualAssetRef> Additional { get; init; } = Array.Empty<NamedVisualAssetRef>();
+    public IList<NamedVisualAssetRef> Additional { get; set; } = new List<NamedVisualAssetRef>();
 }
 
 public sealed record VisualAssetRef
