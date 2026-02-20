@@ -46,10 +46,10 @@ public static class OutputWriter
 
     private static string ToYaml(object snapshot)
     {
-        var serializer = new SerializerBuilder()
+        new SerializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        .WithTypeConverter(new DateTimeOffsetIsoConverter())
-        .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+        .DisableAliases()
+        .ConfigureDefaultValuesHandling(DefaultValuesHandling.Preserve) // keep []
         .Build();
 
 
