@@ -229,6 +229,7 @@ public static class EpicGameCatalog
                 var appVersion = GetString(root, "AppVersionString");
                 var catalogNs = GetString(root, "CatalogNamespace");
                 var catalogItemId = GetString(root, "CatalogItemId");
+                var mainGameAppName = GetString(root, "MainGameAppName");
 
                 // Tags
                 var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -241,6 +242,10 @@ public static class EpicGameCatalog
                 // AppCategories: ["public","games","applications",...]
                 foreach (var c in GetStringArray(root, "AppCategories"))
                     tags.Add(c);
+
+                // InstallTags often carry useful enrichment hints (DLC/editor/etc.)
+                foreach (var t in GetStringArray(root, "InstallTags"))
+                    tags.Add(t);
 
                 // Store metadata (keep it flat, like Steam/Xbox)
                 var meta = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -256,6 +261,7 @@ public static class EpicGameCatalog
                 if (!string.IsNullOrWhiteSpace(appVersion)) meta["AppVersionString"] = appVersion!;
                 if (!string.IsNullOrWhiteSpace(catalogNs)) meta["CatalogNamespace"] = catalogNs!;
                 if (!string.IsNullOrWhiteSpace(catalogItemId)) meta["CatalogItemId"] = catalogItemId!;
+                if (!string.IsNullOrWhiteSpace(mainGameAppName)) meta["MainGameAppName"] = mainGameAppName!;
 
                 list.Add(new GameEntry(
                     AppName: appName!,
