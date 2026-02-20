@@ -8,6 +8,12 @@ using DMM.AssetManagers.GameStores.XBox;
 using DMM.AssetManagers.GameStores.Steam;
 using DMM.AssetManagers.GameStores.Epic;
 using DMM.AssetManagers.GameStores.Gog;
+using DMM.AssetManagers.GameStores.PSN;
+using DMM.AssetManagers.GameStores.BattleNet;
+using DMM.AssetManagers.GameStores.Minecraft;
+using DMM.AssetManagers.GameStores.EA;
+using DMM.AssetManagers.GameStores.Origin;
+using DMM.AssetManagers.GameStores.Rockstar;
 
 
 namespace DMM.Tests.Harness.Infrastructure;
@@ -23,6 +29,12 @@ public static class ScannerRegistry
             new SteamInstallScanner(),
             new EpicInstallScanner(),
             new GogInstallScanner(),
+            new PsnInstallScanner(),
+            new BattleNetInstallScanner(),
+            new MinecraftInstallScanner(),
+            new EaInstallScanner(),
+            new OriginInstallScanner(),
+            new RockstarInstallScanner(),
             #endif
         };
 
