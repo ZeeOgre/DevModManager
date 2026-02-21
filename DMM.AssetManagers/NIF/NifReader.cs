@@ -19,7 +19,7 @@ namespace DMM.AssetManagers.NIF
         public string OriginalMeshToken { get; init; } = "";
     }
 
-    public sealed class NIF
+    public sealed class NifReader
     {
         private static readonly Regex PrintableTokenRegex = new(@"[\u0020-\u007E]{4,}", RegexOptions.Compiled);
 

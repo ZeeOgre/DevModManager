@@ -20,7 +20,7 @@ public sealed class NifTests
                 "textures\\random.dds");
             File.WriteAllBytes(nifPath, bytes);
 
-            var nif = new NIF();
+            var nif = new NifReader();
             var result = nif.Read(nifPath);
 
             Assert.Contains("Data\\Materials\\darkstar\\foo.mat", result.Mats, StringComparer.OrdinalIgnoreCase);
@@ -46,7 +46,7 @@ public sealed class NifTests
             File.WriteAllBytes(sourceMesh, [1, 2, 3]);
             File.WriteAllBytes(nifPath, BuildBytes("geometries\\weapons\\hash_123"));
 
-            var nif = new NIF();
+            var nif = new NifReader();
             var plan = nif.BuildReadableMeshCopyPlan(nifPath, root).ToList();
 
             Assert.Single(plan);
