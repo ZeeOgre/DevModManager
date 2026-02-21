@@ -16,6 +16,9 @@ internal static class WindowsLauncherDiscovery
 
     public static string? TryFindInstallLocationByDisplayNameContains(string displayNameContains)
     {
+        if (!OperatingSystem.IsWindows())
+            return null;
+
         foreach (var hive in new[] { Registry.CurrentUser, Registry.LocalMachine })
         {
             foreach (var root in UninstallRegistryRoots)

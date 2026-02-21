@@ -46,7 +46,7 @@ public static class OutputWriter
 
     private static string ToYaml(object snapshot)
     {
-        new SerializerBuilder()
+        var serializer = new SerializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
         .DisableAliases()
         .ConfigureDefaultValuesHandling(DefaultValuesHandling.Preserve) // keep []
