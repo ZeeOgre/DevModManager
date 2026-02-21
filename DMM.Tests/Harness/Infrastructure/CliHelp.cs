@@ -11,6 +11,7 @@ public static class CliHelp
         Console.WriteLine("Commands:");
         Console.WriteLine("  stores");
         Console.WriteLine("  scan all [options]");
+        Console.WriteLine("  scan <storeKey> [options]");
         Console.WriteLine("  scan store <storeKey> [options]");
         Console.WriteLine();
         Console.WriteLine("Options:");

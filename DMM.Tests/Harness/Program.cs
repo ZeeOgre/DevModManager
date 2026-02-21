@@ -21,7 +21,7 @@ internal static class Program
 
         var parsed = CliArgs.Parse(args);
 
-        if (parsed.ScanAll)
+        if (parsed.ScanAll && parsed.Positionals.Count == 0)
         {
             parsed.Positionals.Clear();
             parsed.Positionals.Add("scan");
@@ -166,8 +166,9 @@ internal static class Program
         }
         else
         {
-            Console.WriteLine("Invalid scan syntax. Use: scan all | scan store <storeKey>");
-            return 1;
+            // Shorthand: scan <storeKey>
+            var storeKey = parsed.Positionals[1];
+            snapshot = orchestrator.ScanStore(storeKey, context);
         }
 
         scanSw.Stop();

@@ -48,8 +48,8 @@ public static class OutputWriter
     {
         var serializer = new SerializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        .WithTypeConverter(new DateTimeOffsetIsoConverter())
-        .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+        .DisableAliases()
+        .ConfigureDefaultValuesHandling(DefaultValuesHandling.Preserve) // keep []
         .Build();
 
 

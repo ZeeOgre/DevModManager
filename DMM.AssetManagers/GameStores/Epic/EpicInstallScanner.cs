@@ -134,6 +134,12 @@ public sealed class EpicInstallScanner : IStoreInstallScanner
         // InstallState: if InstallLocation folder is missing, consider it "Unknown" or "NotInstalled".
         // I’m using Unknown (less aggressive) and letting higher layers decide.
         var state = Directory.Exists(e.InstallLocation) ? InstallState.Installed : InstallState.Unknown;
+        DateTimeOffset? lastUpdatedUtc = null;
+        if (meta.TryGetValue("ManifestLastWriteUtc", out var lastWrite)
+            && DateTimeOffset.TryParse(lastWrite, out var parsedLastWrite))
+        {
+            lastUpdatedUtc = parsedLastWrite;
+        }
         if (state != InstallState.Installed)
         {
             // Per-app issue: missing folder on disk
@@ -146,7 +152,7 @@ public sealed class EpicInstallScanner : IStoreInstallScanner
                 VisualAssets = visuals,
                 Version = e.AppVersion,
                 InstallState = state,
-                LastUpdatedUtc = null,
+                LastUpdatedUtc = lastUpdatedUtc,
                 Depots = depots,
                 StoreMetadata = meta,
                 Issues = new[]
@@ -173,7 +179,7 @@ public sealed class EpicInstallScanner : IStoreInstallScanner
             VisualAssets = visuals,
             Version = e.AppVersion,
             InstallState = state,
-            LastUpdatedUtc = null,
+            LastUpdatedUtc = lastUpdatedUtc,
             Depots = depots,
             StoreMetadata = meta,
             Issues = Array.Empty<ScanIssue>(),
