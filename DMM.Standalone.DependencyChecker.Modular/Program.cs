@@ -8,6 +8,7 @@ namespace DmmDep.Modular
     {
         private static bool s_quiet;
         private static bool s_silent;
+        private static bool s_trace;
 
         private static class Log
         {
@@ -55,6 +56,7 @@ namespace DmmDep.Modular
             string? gameRoot = null;
             bool dryRun = false;
             bool overwrite = true;
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -80,6 +82,9 @@ namespace DmmDep.Modular
                     case "--silent":
                         s_silent = true;
                         s_quiet = true;
+                        break;
+                    case "--trace":
+                        s_trace = true;
                         break;
                     default:
                         return Fail($"Unknown option: {args[i]}");
@@ -108,6 +113,7 @@ namespace DmmDep.Modular
 
             foreach (string nifPath in nifFiles)
             {
+                var fileTimer = s_trace ? System.Diagnostics.Stopwatch.StartNew() : null;
                 IReadOnlyList<NifReadableMeshCopy> plan;
                 try
                 {
@@ -148,9 +154,14 @@ namespace DmmDep.Modular
                         Log.Warn($"Remap failed for '{nifPath}': {ex.Message}");
                     }
                 }
+
+                if (s_trace)
+                {
+                    Log.Always($"TRACE nif-readablemesh | file='{nifPath}', plan={plan.Count}, elapsedMs={fileTimer?.ElapsedMilliseconds ?? 0}");
+                }
             }
 
-            Log.Always($"nif-readablemesh complete | nif={nifFiles.Count}, plan={planEntries}, copied={copied}, rewritten={rewritten}, rewriteFailures={rewriteFailures}, dryrun={dryRun}");
+            Log.Always($"nif-readablemesh complete | nif={nifFiles.Count}, plan={planEntries}, copied={copied}, rewritten={rewritten}, rewriteFailures={rewriteFailures}, dryrun={dryRun}, elapsedMs={stopwatch.ElapsedMilliseconds}");
             return 0;
         }
 
@@ -177,6 +188,9 @@ namespace DmmDep.Modular
                         s_silent = true;
                         s_quiet = true;
                         break;
+                    case "--trace":
+                        s_trace = true;
+                        break;
                     default:
                         return Fail($"Unknown option: {args[i]}");
                 }
@@ -197,6 +211,7 @@ namespace DmmDep.Modular
             int remapTotal = 0;
             foreach (string nifPath in nifFiles)
             {
+                var fileTimer = s_trace ? System.Diagnostics.Stopwatch.StartNew() : null;
                 NifStringRewritePlan plan = editor.BuildDeduplicateStringPlan(nifPath);
                 if (plan.Remap.Count == 0)
                     continue;
@@ -207,6 +222,11 @@ namespace DmmDep.Modular
                 if (!dryRun)
                 {
                     Log.Warn($"nif-dedupestrings apply-mode is not yet implemented for '{nifPath}' (requires structured NIF reserialization).");
+                }
+
+                if (s_trace)
+                {
+                    Log.Always($"TRACE nif-dedupestrings | file='{nifPath}', remaps={plan.Remap.Count}, elapsedMs={fileTimer?.ElapsedMilliseconds ?? 0}");
                 }
             }
 
@@ -249,6 +269,7 @@ namespace DmmDep.Modular
             Console.WriteLine("  --dryrun              Plan only; do not copy or rewrite NIFs.");
             Console.WriteLine("  --apply               For nif-dedupestrings, attempt apply mode (currently reports unsupported per-file).");
             Console.WriteLine("  --no-overwrite        Do not overwrite destination mesh files.");
+            Console.WriteLine("  --trace               Print per-file timing diagnostics.");
             Console.WriteLine("  --quiet               Suppress skipped-file informational output.");
             Console.WriteLine("  --silent              Suppress non-essential output.");
         }

@@ -129,6 +129,27 @@ public sealed class NifReader
 
     public IEnumerable<string> ExtractMesh(string nifPath) => Read(nifPath).Meshes;
 
+    public IReadOnlyList<NifMeshStringEntry> ReadMeshStrings(string nifPath)
+    {
+        var entries = new List<NifMeshStringEntry>();
+
+        foreach (NifStringEntry entry in ReadStringTable(nifPath))
+        {
+            string rawToken = entry.Value.Replace('/', '\\').Trim();
+            if (!TryNormalizeMeshToken(rawToken, out string normalizedToken))
+                continue;
+
+            entries.Add(new NifMeshStringEntry
+            {
+                Index = entry.Index,
+                RawToken = rawToken,
+                NormalizedToken = normalizedToken
+            });
+        }
+
+        return entries;
+    }
+
     internal static bool TryNormalizeMatToken(string token, out string normalized)
     {
         normalized = string.Empty;

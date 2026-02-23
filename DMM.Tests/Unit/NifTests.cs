@@ -33,6 +33,32 @@ public sealed class NifTests
         }
     }
 
+
+    [Fact]
+    public void Reader_ReadMeshStrings_Returns_Only_Mesh_Tokens()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "sample.nif");
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "materials\\darkstar\\foo.mat",
+                "geometries\\darkstar\\block\\hash.mesh",
+                "meshes\\other.rig"));
+
+            var reader = new NifReader();
+            var meshEntries = reader.ReadMeshStrings(nifPath);
+
+            Assert.Single(meshEntries);
+            Assert.Equal("geometries\\darkstar\\block\\hash.mesh", meshEntries[0].RawToken);
+            Assert.Equal("Data\\Geometries\\darkstar\\block\\hash.mesh", meshEntries[0].NormalizedToken);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
     [Fact]
     public void Editor_BuildReadableMeshCopyPlan_Creates_Deterministic_Destination()
     {
@@ -60,6 +86,110 @@ public sealed class NifTests
             int copied = writer.ExecuteReadableMeshCopyPlan(plan);
             Assert.Equal(1, copied);
             Assert.True(File.Exists(plan[0].DestinationMeshPath));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Uses_ParentFolder_Name_For_Hashed_Mesh_File()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "terminal.nif");
+            string sourceMesh = Path.Combine(root, "Data", "Geometries", "darkstar", "DarkStar_jmpz11_Terminal_WallAttach", "fe729b8c345d07f78938.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(sourceMesh)!);
+
+            File.WriteAllBytes(sourceMesh, [1, 2, 3]);
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes("geometries\\darkstar\\DarkStar_jmpz11_Terminal_WallAttach\\fe729b8c345d07f78938.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.Equal(
+                Path.Combine("Geometries", "DarkStar", "terminal", "DarkStar_jmpz11_Terminal_WallAttach.mesh"),
+                plan[0].RewrittenMeshToken,
+                ignoreCase: true);
+            Assert.EndsWith(
+                Path.Combine("Data", "Geometries", "DarkStar", "terminal", "DarkStar_jmpz11_Terminal_WallAttach.mesh"),
+                plan[0].DestinationMeshPath,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Collision_Suffixes_Start_At_One()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "terminal.nif");
+            string mesh1 = Path.Combine(root, "Data", "Geometries", "darkstar", "WallAttach", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            string mesh2 = Path.Combine(root, "Data", "Geometries", "darkstar", "WallAttach", "bbbbbbbbbbbbbbbbbbbb.mesh");
+            string mesh3 = Path.Combine(root, "Data", "Geometries", "darkstar", "WallAttach", "cccccccccccccccccccc.mesh");
+            string mesh4 = Path.Combine(root, "Data", "Geometries", "darkstar", "WallAttach", "dddddddddddddddddddd.mesh");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(mesh1)!);
+            File.WriteAllBytes(mesh1, [1]);
+            File.WriteAllBytes(mesh2, [1]);
+            File.WriteAllBytes(mesh3, [1]);
+            File.WriteAllBytes(mesh4, [1]);
+
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "geometries\\darkstar\\WallAttach\\aaaaaaaaaaaaaaaaaaaa.mesh",
+                "geometries\\darkstar\\WallAttach\\bbbbbbbbbbbbbbbbbbbb.mesh",
+                "geometries\\darkstar\\WallAttach\\cccccccccccccccccccc.mesh",
+                "geometries\\darkstar\\WallAttach\\dddddddddddddddddddd.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Equal(4, plan.Count);
+            Assert.EndsWith(Path.Combine("DarkStar", "terminal", "WallAttach.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "terminal", "WallAttach_1.mesh"), plan[1].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "terminal", "WallAttach_2.mesh"), plan[2].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "terminal", "WallAttach_3.mesh"), plan[3].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Writer_RewriteStringsInPlace_Rewrites_Multiple_Tokens_In_One_Pass()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "sample.nif");
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes("a\\b", "c\\d", "keep"));
+
+            var writer = new NifWriter();
+            int rewritten = writer.RewriteStringsInPlace(nifPath, new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["a\\b"] = "first\\replacement.mesh",
+                ["c\\d"] = "second\\replacement.mesh"
+            });
+
+            Assert.Equal(2, rewritten);
+
+            byte[] bytes = File.ReadAllBytes(nifPath);
+            var strings = NifReader.ReadSerializedStrings(bytes).Select(x => x.Value).ToList();
+            Assert.Contains("first\\replacement.mesh", strings, StringComparer.Ordinal);
+            Assert.Contains("second\\replacement.mesh", strings, StringComparer.Ordinal);
+            Assert.Contains("keep", strings, StringComparer.Ordinal);
         }
         finally
         {

@@ -24,6 +24,13 @@ public sealed class NifReadableMeshCopy
     public string RewrittenMeshToken { get; init; } = "";
 }
 
+public sealed class NifMeshStringEntry
+{
+    public int Index { get; init; }
+    public string RawToken { get; init; } = "";
+    public string NormalizedToken { get; init; } = "";
+}
+
 public sealed class NifInvalidMatReference
 {
     public string NifPath { get; init; } = "";

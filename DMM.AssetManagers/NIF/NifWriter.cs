@@ -5,6 +5,8 @@ namespace DMM.AssetManagers.NIF;
 
 public sealed class NifWriter
 {
+    private readonly record struct PendingRewrite(NifSerializedString Entry, byte[] ReplacementBytes);
+
     public int ExecuteReadableMeshCopyPlan(IEnumerable<NifReadableMeshCopy> copies, bool overwrite = true)
     {
         if (copies == null) throw new ArgumentNullException(nameof(copies));
@@ -36,10 +38,9 @@ public sealed class NifWriter
         byte[] bytes = File.ReadAllBytes(nifPath);
         IReadOnlyList<NifSerializedString> strings = NifReader.ReadSerializedStrings(bytes);
 
-        int rewritten = 0;
-        byte[] current = bytes;
+        var rewrites = new List<PendingRewrite>();
 
-        foreach (NifSerializedString entry in strings.OrderByDescending(x => x.Offset))
+        foreach (NifSerializedString entry in strings)
         {
             if (!replacements.TryGetValue(entry.Value, out string? replacement))
                 continue;
@@ -48,34 +49,63 @@ public sealed class NifWriter
             if (entry.PrefixSize == 2 && repl.Length > ushort.MaxValue)
                 throw new InvalidOperationException($"Replacement '{replacement}' exceeds 16-bit sized-string capacity.");
 
-            current = ReplaceSerializedString(current, entry, repl);
-            rewritten++;
+            rewrites.Add(new PendingRewrite(entry, repl));
         }
 
-        if (rewritten > 0)
-            File.WriteAllBytes(nifPath, current);
+        if (rewrites.Count == 0)
+            return 0;
 
-        return rewritten;
+        byte[] rewrittenBytes = RewriteAllSerializedStrings(bytes, rewrites);
+        File.WriteAllBytes(nifPath, rewrittenBytes);
+
+        return rewrites.Count;
     }
 
-    private static byte[] ReplaceSerializedString(byte[] source, NifSerializedString entry, byte[] replacement)
+    private static byte[] RewriteAllSerializedStrings(byte[] source, IReadOnlyList<PendingRewrite> rewrites)
     {
-        int payloadStart = entry.Offset + entry.PrefixSize;
-        int payloadEnd = payloadStart + entry.Length;
+        List<PendingRewrite> ordered = rewrites
+            .OrderBy(x => x.Entry.Offset)
+            .ToList();
 
-        byte[] output = new byte[source.Length - entry.Length + replacement.Length];
+        int newLength = source.Length;
+        foreach (PendingRewrite rewrite in ordered)
+        {
+            newLength += rewrite.ReplacementBytes.Length - rewrite.Entry.Length;
+        }
 
-        Buffer.BlockCopy(source, 0, output, 0, entry.Offset);
+        byte[] output = new byte[newLength];
+        int sourceCursor = 0;
+        int outputCursor = 0;
 
-        if (entry.PrefixSize == 4)
-            BinaryPrimitives.WriteInt32LittleEndian(output.AsSpan(entry.Offset, 4), replacement.Length);
-        else
-            BinaryPrimitives.WriteUInt16LittleEndian(output.AsSpan(entry.Offset, 2), checked((ushort)replacement.Length));
+        foreach (PendingRewrite rewrite in ordered)
+        {
+            NifSerializedString entry = rewrite.Entry;
+            int prefixStart = entry.Offset;
+            int payloadStart = prefixStart + entry.PrefixSize;
+            int payloadEnd = payloadStart + entry.Length;
 
-        Buffer.BlockCopy(replacement, 0, output, payloadStart, replacement.Length);
+            int copyLen = prefixStart - sourceCursor;
+            if (copyLen < 0)
+                throw new InvalidOperationException("Detected overlapping or out-of-order NIF string rewrites.");
 
-        int tailLen = source.Length - payloadEnd;
-        Buffer.BlockCopy(source, payloadEnd, output, payloadStart + replacement.Length, tailLen);
+            Buffer.BlockCopy(source, sourceCursor, output, outputCursor, copyLen);
+            outputCursor += copyLen;
+
+            if (entry.PrefixSize == 4)
+                BinaryPrimitives.WriteInt32LittleEndian(output.AsSpan(outputCursor, 4), rewrite.ReplacementBytes.Length);
+            else
+                BinaryPrimitives.WriteUInt16LittleEndian(output.AsSpan(outputCursor, 2), checked((ushort)rewrite.ReplacementBytes.Length));
+
+            outputCursor += entry.PrefixSize;
+
+            Buffer.BlockCopy(rewrite.ReplacementBytes, 0, output, outputCursor, rewrite.ReplacementBytes.Length);
+            outputCursor += rewrite.ReplacementBytes.Length;
+
+            sourceCursor = payloadEnd;
+        }
+
+        int tailLen = source.Length - sourceCursor;
+        Buffer.BlockCopy(source, sourceCursor, output, outputCursor, tailLen);
 
         return output;
     }

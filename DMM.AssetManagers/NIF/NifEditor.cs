@@ -28,22 +28,20 @@ public sealed class NifEditor
 
         string nifDirRel = Path.GetDirectoryName(nifRelativeToMeshes) ?? string.Empty;
         string nifBase = Path.GetFileNameWithoutExtension(fullNifPath);
+        var destinationNameCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         var planned = new List<NifReadableMeshCopy>();
-        IReadOnlyList<NifStringEntry> strings = _reader.ReadStringTable(fullNifPath);
+        IReadOnlyList<NifMeshStringEntry> meshes = _reader.ReadMeshStrings(fullNifPath);
 
-        foreach (NifStringEntry entry in strings)
+        foreach (NifMeshStringEntry entry in meshes)
         {
-            string rawToken = entry.Value.Replace('/', '\\').Trim();
-            if (!NifReader.TryNormalizeMeshToken(rawToken, out string normalizedMeshToken))
-                continue;
-
-            string fullSourceMesh = Path.Combine(fullGameRoot, normalizedMeshToken);
+            string fullSourceMesh = Path.Combine(fullGameRoot, entry.NormalizedToken);
             if (!File.Exists(fullSourceMesh))
                 continue;
 
-            string blockName = Path.GetFileNameWithoutExtension(normalizedMeshToken);
-            string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, blockName + ".mesh");
+            string blockName = GetReadableMeshName(entry.NormalizedToken);
+            string uniqueBlockName = EnsureUniqueName(blockName, destinationNameCounts);
+            string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, uniqueBlockName + ".mesh");
             string fullDest = Path.GetFullPath(Path.Combine(fullGameRoot, destRel));
             string rewrittenMeshToken = Path.GetRelativePath(Path.Combine(fullGameRoot, "Data"), fullDest)
                 .Replace('/', '\\');
@@ -53,13 +51,52 @@ public sealed class NifEditor
                 NifPath = fullNifPath,
                 SourceMeshPath = fullSourceMesh,
                 DestinationMeshPath = fullDest,
-                OriginalMeshToken = rawToken,
-                OriginalMeshTokenNormalized = normalizedMeshToken,
+                OriginalMeshToken = entry.RawToken,
+                OriginalMeshTokenNormalized = entry.NormalizedToken,
                 RewrittenMeshToken = rewrittenMeshToken
             });
         }
 
         return planned;
+    }
+
+    private static string GetReadableMeshName(string normalizedMeshToken)
+    {
+        string fileBase = Path.GetFileNameWithoutExtension(normalizedMeshToken);
+        if (!LooksLikeHashedName(fileBase))
+            return fileBase;
+
+        string? parentFolder = Path.GetFileName(Path.GetDirectoryName(normalizedMeshToken));
+        return string.IsNullOrWhiteSpace(parentFolder) ? fileBase : parentFolder;
+    }
+
+    private static bool LooksLikeHashedName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length < 12)
+            return false;
+
+        foreach (char c in value)
+        {
+            bool hex = (c >= '0' && c <= '9')
+                       || (c >= 'a' && c <= 'f')
+                       || (c >= 'A' && c <= 'F');
+            if (!hex)
+                return false;
+        }
+
+        return true;
+    }
+
+    private static string EnsureUniqueName(string baseName, IDictionary<string, int> counts)
+    {
+        if (!counts.TryGetValue(baseName, out int count))
+        {
+            counts[baseName] = 1;
+            return baseName;
+        }
+
+        counts[baseName] = count + 1;
+        return $"{baseName}_{count}";
     }
 
     public NifStringRewritePlan BuildDeduplicateStringPlan(string nifPath)
