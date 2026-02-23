@@ -5,6 +5,8 @@ public sealed class NifReadResult
     public string Path { get; init; } = "";
     public List<string> Mats { get; } = new();
     public List<string> Meshes { get; } = new();
+    public List<string> Rigs { get; } = new();
+    public List<string> Havoks { get; } = new();
     public List<string> OtherAssets { get; } = new();
 }
 

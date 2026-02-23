@@ -18,6 +18,8 @@ public sealed class NifTests
             byte[] bytes = BuildSizedStringBytes(
                 "materials\\darkstar\\foo.mat",
                 "geometries\\weapons\\hash_123",
+                "actors\\humanoid\\skeleton.rig",
+                "animations\\behavior\\human.hvk",
                 "textures\\random.dds");
             File.WriteAllBytes(nifPath, bytes);
 
@@ -26,6 +28,8 @@ public sealed class NifTests
 
             Assert.Contains("Data\\Materials\\darkstar\\foo.mat", result.Mats, StringComparer.OrdinalIgnoreCase);
             Assert.Contains("Data\\Geometries\\weapons\\hash_123.mesh", result.Meshes, StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("Data\\Actors\\humanoid\\skeleton.rig", result.Rigs, StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("Data\\Animations\\behavior\\human.hvk", result.Havoks, StringComparer.OrdinalIgnoreCase);
         }
         finally
         {
@@ -52,6 +56,29 @@ public sealed class NifTests
             Assert.Single(meshEntries);
             Assert.Equal("geometries\\darkstar\\block\\hash.mesh", meshEntries[0].RawToken);
             Assert.Equal("Data\\Geometries\\darkstar\\block\\hash.mesh", meshEntries[0].NormalizedToken);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Reader_ExtractAll_Includes_Rig_And_Havok_Tokens()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "sample.nif");
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "actors\\humanoid\\skeleton.rig",
+                "animations\\behavior\\human.hvk"));
+
+            var reader = new NifReader();
+            var all = reader.ExtractAll(nifPath).ToList();
+
+            Assert.Contains("Data\\Actors\\humanoid\\skeleton.rig", all, StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("Data\\Animations\\behavior\\human.hvk", all, StringComparer.OrdinalIgnoreCase);
         }
         finally
         {

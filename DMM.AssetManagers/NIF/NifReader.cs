@@ -31,12 +31,26 @@ public sealed class NifReader
                 continue;
             }
 
+            if (TryNormalizeRigToken(normalized, out string rig))
+            {
+                result.Rigs.Add(rig);
+                continue;
+            }
+
+            if (TryNormalizeHavokToken(normalized, out string havok))
+            {
+                result.Havoks.Add(havok);
+                continue;
+            }
+
             if (LooksLikeAssetToken(normalized))
                 result.OtherAssets.Add(normalized.TrimStart('\\'));
         }
 
         DeduplicateSort(result.Mats);
         DeduplicateSort(result.Meshes);
+        DeduplicateSort(result.Rigs);
+        DeduplicateSort(result.Havoks);
         DeduplicateSort(result.OtherAssets);
 
         return result;
@@ -120,7 +134,7 @@ public sealed class NifReader
     public IEnumerable<string> ExtractAll(string nifPath)
     {
         var read = Read(nifPath);
-        return read.Mats.Concat(read.Meshes).Concat(read.OtherAssets)
+        return read.Mats.Concat(read.Meshes).Concat(read.Rigs).Concat(read.Havoks).Concat(read.OtherAssets)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
     }
@@ -128,6 +142,10 @@ public sealed class NifReader
     public IEnumerable<string> ExtractMat(string nifPath) => Read(nifPath).Mats;
 
     public IEnumerable<string> ExtractMesh(string nifPath) => Read(nifPath).Meshes;
+
+    public IEnumerable<string> ExtractRig(string nifPath) => Read(nifPath).Rigs;
+
+    public IEnumerable<string> ExtractHavok(string nifPath) => Read(nifPath).Havoks;
 
     public IReadOnlyList<NifMeshStringEntry> ReadMeshStrings(string nifPath)
     {
@@ -199,6 +217,54 @@ public sealed class NifReader
             : Path.Combine("Data", "Geometries", stem + ".mesh");
 
         normalized = NormalizePath(rel);
+        return true;
+    }
+
+    internal static bool TryNormalizeRigToken(string token, out string normalized)
+    {
+        return TryNormalizeDataTokenWithKnownRoots(token, ".rig", out normalized,
+            "Meshes", "Animations", "Actors", "Data");
+    }
+
+    internal static bool TryNormalizeHavokToken(string token, out string normalized)
+    {
+        return TryNormalizeDataTokenWithKnownRoots(token, ".hvk", out normalized,
+            "Meshes", "Animations", "Actors", "Data");
+    }
+
+    private static bool TryNormalizeDataTokenWithKnownRoots(
+        string token,
+        string extension,
+        out string normalized,
+        params string[] knownRootFolders)
+    {
+        normalized = string.Empty;
+
+        int index = token.IndexOf(extension, StringComparison.OrdinalIgnoreCase);
+        if (index < 0)
+            return false;
+
+        int end = index + extension.Length;
+        if (end < token.Length && char.IsLetterOrDigit(token[end]))
+            return false;
+
+        string path = token.Substring(0, end).TrimStart('\\');
+        if (!path.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (string knownRoot in knownRootFolders)
+            {
+                if (!path.StartsWith(knownRoot + "\\", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                path = Path.Combine("Data", path);
+                normalized = NormalizePath(path);
+                return true;
+            }
+
+            path = Path.Combine("Data", path);
+        }
+
+        normalized = NormalizePath(path);
         return true;
     }
 
