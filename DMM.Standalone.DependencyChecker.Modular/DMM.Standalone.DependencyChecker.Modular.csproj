@@ -31,6 +31,9 @@
     <!-- Windows-only target: copy the .exe apphost and managed DLL -->
     <Copy SourceFiles="$(TargetDir)$(AssemblyName).exe" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).exe')" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
+    <!-- Required for framework-dependent apphost execution -->
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).runtimeconfig.json" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).runtimeconfig.json')" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).deps.json" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).deps.json')" />
 
     <Message Text="Copied modular Windows build artifacts to $(DistributionDir)" Importance="high" />
   </Target>
