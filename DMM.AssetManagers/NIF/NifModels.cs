@@ -20,6 +20,7 @@ public sealed class NifReadableMeshCopy
     public string SourceMeshPath { get; init; } = "";
     public string DestinationMeshPath { get; init; } = "";
     public string OriginalMeshToken { get; init; } = "";
+    public string OriginalMeshTokenNormalized { get; init; } = "";
     public string RewrittenMeshToken { get; init; } = "";
 }
 

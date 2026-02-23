@@ -52,6 +52,8 @@ public sealed class NifTests
 
             Assert.Single(plan);
             Assert.EndsWith(Path.Combine("Data", "Geometries", "DarkStar", "folder", "sample", "hash_123.mesh"), plan[0].DestinationMeshPath, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal("geometries\\weapons\\hash_123", plan[0].OriginalMeshToken);
+            Assert.Equal("Data\\Geometries\\weapons\\hash_123.mesh", plan[0].OriginalMeshTokenNormalized);
             Assert.Equal(Path.Combine("Geometries", "DarkStar", "folder", "sample", "hash_123.mesh"), plan[0].RewrittenMeshToken);
 
             int copied = writer.ExecuteReadableMeshCopyPlan(plan);

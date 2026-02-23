@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
+    <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

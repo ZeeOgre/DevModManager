@@ -29,16 +29,20 @@ public sealed class NifEditor
         string nifDirRel = Path.GetDirectoryName(nifRelativeToMeshes) ?? string.Empty;
         string nifBase = Path.GetFileNameWithoutExtension(fullNifPath);
 
-        var read = _reader.Read(fullNifPath);
         var planned = new List<NifReadableMeshCopy>();
+        IReadOnlyList<NifStringEntry> strings = _reader.ReadStringTable(fullNifPath);
 
-        foreach (string meshToken in read.Meshes)
+        foreach (NifStringEntry entry in strings)
         {
-            string fullSourceMesh = Path.Combine(fullGameRoot, meshToken);
+            string rawToken = entry.Value.Replace('/', '\\').Trim();
+            if (!NifReader.TryNormalizeMeshToken(rawToken, out string normalizedMeshToken))
+                continue;
+
+            string fullSourceMesh = Path.Combine(fullGameRoot, normalizedMeshToken);
             if (!File.Exists(fullSourceMesh))
                 continue;
 
-            string blockName = Path.GetFileNameWithoutExtension(meshToken);
+            string blockName = Path.GetFileNameWithoutExtension(normalizedMeshToken);
             string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, blockName + ".mesh");
             string fullDest = Path.GetFullPath(Path.Combine(fullGameRoot, destRel));
             string rewrittenMeshToken = Path.GetRelativePath(Path.Combine(fullGameRoot, "Data"), fullDest)
@@ -49,7 +53,8 @@ public sealed class NifEditor
                 NifPath = fullNifPath,
                 SourceMeshPath = fullSourceMesh,
                 DestinationMeshPath = fullDest,
-                OriginalMeshToken = meshToken,
+                OriginalMeshToken = rawToken,
+                OriginalMeshTokenNormalized = normalizedMeshToken,
                 RewrittenMeshToken = rewrittenMeshToken
             });
         }
