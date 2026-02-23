@@ -10,7 +10,6 @@
     <AssemblyName>dmmtest</AssemblyName>
     <RootNamespace>DMM.Tests</RootNamespace>
 	<StartupObject>DMM.Tests.Harness.Program</StartupObject>
-    <RunArguments>--scanall</RunArguments>
   </PropertyGroup>
 
   <ItemGroup>
