@@ -3,11 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release</Configurations>
     <StartupObject>DmmDep.Modular.Program</StartupObject>
     <AssemblyName>dmmdeps-modular</AssemblyName>
+    <UseAppHost>true</UseAppHost>
     <DistributionDir>$(MSBuildProjectDirectory)\dist</DistributionDir>
   </PropertyGroup>
 
@@ -25,8 +27,12 @@
 
   <Target Name="CopyDebugOutputToDist" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
     <MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
+
+    <!-- Windows-only target: copy the .exe apphost and managed DLL -->
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).exe" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).exe')" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
-    <Message Text="Copied $(TargetFileName) to $(DistributionDir)" Importance="high" />
+
+    <Message Text="Copied modular Windows build artifacts to $(DistributionDir)" Importance="high" />
   </Target>
 
 </Project>
