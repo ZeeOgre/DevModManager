@@ -7,6 +7,8 @@
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release</Configurations>
     <StartupObject>DmmDep.Modular.Program</StartupObject>
+    <AssemblyName>dmmdeps-modular</AssemblyName>
+    <DistributionDir>$(MSBuildProjectDirectory)\dist</DistributionDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,5 +22,11 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
+
+  <Target Name="CopyDebugOutputToDist" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
+    <Message Text="Copied $(TargetFileName) to $(DistributionDir)" Importance="high" />
+  </Target>
 
 </Project>
