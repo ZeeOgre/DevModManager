@@ -7,10 +7,14 @@
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release</Configurations>
     <StartupObject>DmmDep.Modular.Program</StartupObject>
+    <AssemblyName>dmmdeps-modular</AssemblyName>
+    <UseAppHost>true</UseAppHost>
+    <DistributionDir>$(MSBuildProjectDirectory)\dist</DistributionDir>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
+    <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,5 +23,18 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
+
+  <Target Name="CopyDebugOutputToDist" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
+
+    <!-- Copy native host (preferred executable artifacts when present) -->
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).exe" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName).exe')" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName)" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" Condition="Exists('$(TargetDir)$(AssemblyName)')" />
+
+    <!-- Also copy managed entry assembly for completeness -->
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
+
+    <Message Text="Copied modular build artifacts to $(DistributionDir)" Importance="high" />
+  </Target>
 
 </Project>
