@@ -21,10 +21,7 @@ public sealed class NifEditor
         string fullNifPath = Path.GetFullPath(nifPath);
         string fullGameRoot = Path.GetFullPath(gameRoot);
 
-        string dataMeshesRoot = Path.Combine(fullGameRoot, "Data", "Meshes");
-        string nifRelativeToMeshes = Path.GetRelativePath(dataMeshesRoot, fullNifPath);
-        if (nifRelativeToMeshes.StartsWith("..", StringComparison.Ordinal))
-            throw new InvalidOperationException($"NIF '{nifPath}' is not under '{dataMeshesRoot}'.");
+        string nifRelativeToMeshes = ResolveNifRelativeToMeshes(fullNifPath, fullGameRoot);
 
         string nifDirRel = Path.GetDirectoryName(nifRelativeToMeshes) ?? string.Empty;
         string nifBase = Path.GetFileNameWithoutExtension(fullNifPath);
@@ -58,6 +55,24 @@ public sealed class NifEditor
         }
 
         return planned;
+    }
+
+    private static string ResolveNifRelativeToMeshes(string fullNifPath, string fullGameRoot)
+    {
+        string[] meshesRoots =
+        [
+            Path.Combine(fullGameRoot, "Data", "Meshes"),
+            Path.Combine(fullGameRoot, "Meshes")
+        ];
+
+        foreach (string meshesRoot in meshesRoots)
+        {
+            string rel = Path.GetRelativePath(meshesRoot, fullNifPath);
+            if (!rel.StartsWith("..", StringComparison.Ordinal))
+                return rel;
+        }
+
+        throw new InvalidOperationException($"NIF '{fullNifPath}' is not under Data\\Meshes or Meshes in '{fullGameRoot}'.");
     }
 
     private static string GetReadableMeshName(string normalizedMeshToken)
