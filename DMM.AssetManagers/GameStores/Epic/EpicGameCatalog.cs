@@ -247,6 +247,12 @@ public static class EpicGameCatalog
                 foreach (var t in GetStringArray(root, "InstallTags"))
                     tags.Add(t);
 
+                if (!string.IsNullOrWhiteSpace(mainGameAppName)
+                    && !string.Equals(mainGameAppName, appName, StringComparison.OrdinalIgnoreCase))
+                {
+                    tags.Add("addon");
+                }
+
                 // Store metadata (keep it flat, like Steam/Xbox)
                 var meta = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -257,11 +263,28 @@ public static class EpicGameCatalog
                     ["InstallLocation"] = installLocation!
                 };
 
+                try
+                {
+                    var lastWrite = File.GetLastWriteTimeUtc(f);
+                    meta["ManifestLastWriteUtc"] = lastWrite.ToString("O");
+                }
+                catch
+                {
+                    // ignore
+                }
+
                 if (!string.IsNullOrWhiteSpace(launchExe)) meta["LaunchExecutable"] = launchExe!;
                 if (!string.IsNullOrWhiteSpace(appVersion)) meta["AppVersionString"] = appVersion!;
                 if (!string.IsNullOrWhiteSpace(catalogNs)) meta["CatalogNamespace"] = catalogNs!;
                 if (!string.IsNullOrWhiteSpace(catalogItemId)) meta["CatalogItemId"] = catalogItemId!;
                 if (!string.IsNullOrWhiteSpace(mainGameAppName)) meta["MainGameAppName"] = mainGameAppName!;
+
+                CopyIfPresent(root, meta, "InstallSize");
+                CopyIfPresent(root, meta, "PrereqPath");
+                CopyIfPresent(root, meta, "PrereqArgs");
+                CopyIfPresent(root, meta, "PrereqIds");
+                CopyIfPresent(root, meta, "LaunchCommand");
+                CopyIfPresent(root, meta, "LaunchParameters");
 
                 list.Add(new GameEntry(
                     AppName: appName!,
