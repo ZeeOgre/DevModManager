@@ -390,3 +390,6 @@ DMM.Standalone.DependencyChecker/push-tag.log
 
 # Local-only test fixtures (mods/plugins not suitable for committing)
 tests/fixtures_local/
+
+# Local distributable outputs
+**/dist/

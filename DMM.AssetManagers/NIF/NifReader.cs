@@ -72,7 +72,7 @@ public sealed class NifReader
         return entries;
     }
 
-    internal static IReadOnlyList<NifSerializedString> ReadSerializedStrings(byte[] bytes)
+    public static IReadOnlyList<NifSerializedString> ReadSerializedStrings(byte[] bytes)
     {
         var results = new List<NifSerializedString>();
 
