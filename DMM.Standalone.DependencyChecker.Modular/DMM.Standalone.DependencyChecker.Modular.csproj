@@ -25,6 +25,16 @@
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
+  <!-- Debug/Release convenience: copy full build output set so project-reference DLLs are present -->
+  <Target Name="CopyBuildOutputToDist" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' AND ('$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release')">
+    <MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
+    <ItemGroup>
+      <BuildOutputFiles Include="$(TargetDir)*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BuildOutputFiles)" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
+    <Message Text="Copied full modular build output set to $(DistributionDir) for $(Configuration)" Importance="high" />
+  </Target>
+
   <Target Name="PublishOnBuild" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' AND ('$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish')">
     <MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
 
