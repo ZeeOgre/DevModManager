@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Text;
 
 namespace DMM.AssetManagers.NIF;
@@ -25,8 +26,7 @@ public sealed class NifWriter
         return copied;
     }
 
-    // Best-effort binary patcher: rewrites null-terminated string tokens in-place.
-    // This intentionally avoids broad binary reserialization until a dedicated block/index parser lands.
+    // Rewrites typed sized-string payloads (length-prefixed), allowing arbitrary replacement lengths.
     public int RewriteStringsInPlace(string nifPath, IReadOnlyDictionary<string, string> replacements)
     {
         if (nifPath == null) throw new ArgumentNullException(nameof(nifPath));
@@ -34,47 +34,49 @@ public sealed class NifWriter
         if (!File.Exists(nifPath)) throw new FileNotFoundException("NIF not found", nifPath);
 
         byte[] bytes = File.ReadAllBytes(nifPath);
-        int rewritten = 0;
+        IReadOnlyList<NifSerializedString> strings = NifReader.ReadSerializedStrings(bytes);
 
-        foreach ((int start, int length) in EnumerateAsciiSlices(bytes, 4))
+        int rewritten = 0;
+        byte[] current = bytes;
+
+        foreach (NifSerializedString entry in strings.OrderByDescending(x => x.Offset))
         {
-            string token = Encoding.ASCII.GetString(bytes, start, length);
-            if (!replacements.TryGetValue(token, out string? replacement))
+            if (!replacements.TryGetValue(entry.Value, out string? replacement))
                 continue;
 
             byte[] repl = Encoding.ASCII.GetBytes(replacement);
-            if (repl.Length > length)
-                throw new InvalidOperationException($"Replacement '{replacement}' is longer than source token '{token}'.");
+            if (entry.PrefixSize == 2 && repl.Length > ushort.MaxValue)
+                throw new InvalidOperationException($"Replacement '{replacement}' exceeds 16-bit sized-string capacity.");
 
-            Array.Clear(bytes, start, length);
-            Array.Copy(repl, 0, bytes, start, repl.Length);
+            current = ReplaceSerializedString(current, entry, repl);
             rewritten++;
         }
 
         if (rewritten > 0)
-            File.WriteAllBytes(nifPath, bytes);
+            File.WriteAllBytes(nifPath, current);
 
         return rewritten;
     }
 
-    private static IEnumerable<(int start, int length)> EnumerateAsciiSlices(byte[] bytes, int minLen)
+    private static byte[] ReplaceSerializedString(byte[] source, NifSerializedString entry, byte[] replacement)
     {
-        int i = 0;
-        while (i < bytes.Length)
-        {
-            if (bytes[i] < 32 || bytes[i] > 126)
-            {
-                i++;
-                continue;
-            }
+        int payloadStart = entry.Offset + entry.PrefixSize;
+        int payloadEnd = payloadStart + entry.Length;
 
-            int start = i;
-            while (i < bytes.Length && bytes[i] >= 32 && bytes[i] <= 126)
-                i++;
+        byte[] output = new byte[source.Length - entry.Length + replacement.Length];
 
-            int len = i - start;
-            if (len >= minLen)
-                yield return (start, len);
-        }
+        Buffer.BlockCopy(source, 0, output, 0, entry.Offset);
+
+        if (entry.PrefixSize == 4)
+            BinaryPrimitives.WriteInt32LittleEndian(output.AsSpan(entry.Offset, 4), replacement.Length);
+        else
+            BinaryPrimitives.WriteUInt16LittleEndian(output.AsSpan(entry.Offset, 2), checked((ushort)replacement.Length));
+
+        Buffer.BlockCopy(replacement, 0, output, payloadStart, replacement.Length);
+
+        int tailLen = source.Length - payloadEnd;
+        Buffer.BlockCopy(source, payloadEnd, output, payloadStart + replacement.Length, tailLen);
+
+        return output;
     }
 }

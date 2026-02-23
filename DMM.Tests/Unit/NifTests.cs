@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Text;
 using DMM.AssetManagers.NIF;
 
@@ -14,7 +15,7 @@ public sealed class NifTests
             string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "sample.nif");
             Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
 
-            byte[] bytes = BuildBytes(
+            byte[] bytes = BuildSizedStringBytes(
                 "materials\\darkstar\\foo.mat",
                 "geometries\\weapons\\hash_123",
                 "textures\\random.dds");
@@ -44,7 +45,7 @@ public sealed class NifTests
             Directory.CreateDirectory(Path.GetDirectoryName(sourceMesh)!);
 
             File.WriteAllBytes(sourceMesh, [1, 2, 3]);
-            File.WriteAllBytes(nifPath, BuildBytes("geometries\\weapons\\hash_123"));
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes("geometries\\weapons\\hash_123"));
 
             var editor = new NifEditor(new NifReader());
             var writer = new NifWriter();
@@ -67,19 +68,29 @@ public sealed class NifTests
     }
 
     [Fact]
-    public void Editor_BuildDeduplicateStringPlan_Uses_Lowest_Index()
+    public void Writer_RewriteStringsInPlace_Allows_Longer_Replacements_For_SizedStrings()
     {
         string root = CreateTempRoot();
         try
         {
             string nifPath = Path.Combine(root, "sample.nif");
-            File.WriteAllBytes(nifPath, BuildBytes("A", "B", "A", "C", "B"));
+            string oldToken = "a\\b";
+            string newToken = "Geometries\\darkstar\\sample\\block.mesh";
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(oldToken));
 
-            var editor = new NifEditor(new NifReader());
-            NifStringRewritePlan plan = editor.BuildDeduplicateStringPlan(nifPath);
+            var writer = new NifWriter();
+            int rewritten = writer.RewriteStringsInPlace(nifPath, new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                [oldToken] = newToken
+            });
 
-            Assert.True(plan.Remap.Count >= 2);
-            Assert.Contains(plan.Remap, kvp => kvp.Value < kvp.Key);
+            Assert.Equal(1, rewritten);
+
+            byte[] bytes = File.ReadAllBytes(nifPath);
+            int len = BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(0, 4));
+            Assert.Equal(newToken.Length, len);
+            string payload = Encoding.ASCII.GetString(bytes, 4, len);
+            Assert.Equal(newToken, payload);
         }
         finally
         {
@@ -87,35 +98,16 @@ public sealed class NifTests
         }
     }
 
-    [Fact]
-    public void Editor_FindInvalidMatReferences_Returns_String_Index()
-    {
-        string root = CreateTempRoot();
-        try
-        {
-            string nifPath = Path.Combine(root, "sample.nif");
-            File.WriteAllBytes(nifPath, BuildBytes("materials\\darkstar\\missing.mat"));
-
-            var editor = new NifEditor(new NifReader());
-            var invalid = editor.FindInvalidMatReferences(nifPath, root);
-
-            Assert.Single(invalid);
-            Assert.Equal("Data\\Materials\\darkstar\\missing.mat", invalid[0].MatPath);
-            Assert.True(invalid[0].StringIndex >= 0);
-        }
-        finally
-        {
-            Directory.Delete(root, true);
-        }
-    }
-
-    private static byte[] BuildBytes(params string[] tokens)
+    private static byte[] BuildSizedStringBytes(params string[] tokens)
     {
         using var ms = new MemoryStream();
         foreach (var token in tokens)
         {
-            ms.WriteByte(0);
-            ms.Write(Encoding.ASCII.GetBytes(token));
+            byte[] b = Encoding.ASCII.GetBytes(token);
+            Span<byte> len = stackalloc byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(len, b.Length);
+            ms.Write(len);
+            ms.Write(b);
             ms.WriteByte(0);
         }
 

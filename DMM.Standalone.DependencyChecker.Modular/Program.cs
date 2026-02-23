@@ -40,6 +40,11 @@ namespace DmmDep.Modular
                 return RunNifReadableMesh(args.Skip(1).ToArray());
             }
 
+            if (string.Equals(args[0], "nif-dedupestrings", StringComparison.OrdinalIgnoreCase))
+            {
+                return RunNifDedupeStrings(args.Skip(1).ToArray());
+            }
+
             PrintUsage();
             return 1;
         }
@@ -149,6 +154,66 @@ namespace DmmDep.Modular
             return 0;
         }
 
+        private static int RunNifDedupeStrings(string[] args)
+        {
+            string? folder = null;
+            bool dryRun = true;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i].ToLowerInvariant())
+                {
+                    case "--folder":
+                        if (++i >= args.Length) return Fail("Missing value for --folder");
+                        folder = args[i];
+                        break;
+                    case "--apply":
+                        dryRun = false;
+                        break;
+                    case "--quiet":
+                        s_quiet = true;
+                        break;
+                    case "--silent":
+                        s_silent = true;
+                        s_quiet = true;
+                        break;
+                    default:
+                        return Fail($"Unknown option: {args[i]}");
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(folder))
+                return Fail("--folder is required");
+
+            string fullFolder = Path.GetFullPath(folder);
+            if (!Directory.Exists(fullFolder))
+                return Fail($"Folder does not exist: {fullFolder}");
+
+            var reader = new NifReader();
+            var editor = new NifEditor(reader);
+            var nifFiles = Directory.EnumerateFiles(fullFolder, "*.nif", SearchOption.AllDirectories).ToList();
+
+            int filesWithDupes = 0;
+            int remapTotal = 0;
+            foreach (string nifPath in nifFiles)
+            {
+                NifStringRewritePlan plan = editor.BuildDeduplicateStringPlan(nifPath);
+                if (plan.Remap.Count == 0)
+                    continue;
+
+                filesWithDupes++;
+                remapTotal += plan.Remap.Count;
+
+                if (!dryRun)
+                {
+                    Log.Warn($"nif-dedupestrings apply-mode is not yet implemented for '{nifPath}' (requires structured NIF reserialization).");
+                }
+            }
+
+            Log.Always($"nif-dedupestrings complete | nif={nifFiles.Count}, filesWithDupes={filesWithDupes}, remaps={remapTotal}, apply={(!dryRun)}");
+            return 0;
+        }
+
         private static string ResolveGameRoot(string? explicitGameRoot, string folder)
         {
             if (!string.IsNullOrWhiteSpace(explicitGameRoot))
@@ -177,10 +242,12 @@ namespace DmmDep.Modular
         private static void PrintUsage()
         {
             Console.WriteLine("dmmdep_modular.exe nif-readablemesh --folder <Data\\Meshes\\...> [options]");
+            Console.WriteLine("dmmdep_modular.exe nif-dedupestrings --folder <Data\\Meshes\\...> [--apply] [options]");
             Console.WriteLine();
             Console.WriteLine("Options:");
             Console.WriteLine("  --gameroot <path>     Override game root (folder that contains Data).");
             Console.WriteLine("  --dryrun              Plan only; do not copy or rewrite NIFs.");
+            Console.WriteLine("  --apply               For nif-dedupestrings, attempt apply mode (currently reports unsupported per-file).");
             Console.WriteLine("  --no-overwrite        Do not overwrite destination mesh files.");
             Console.WriteLine("  --quiet               Suppress skipped-file informational output.");
             Console.WriteLine("  --silent              Suppress non-essential output.");

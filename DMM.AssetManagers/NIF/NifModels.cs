@@ -35,3 +35,5 @@ public sealed class NifStringRewritePlan
 {
     public Dictionary<int, int> Remap { get; } = new();
 }
+
+public readonly record struct NifSerializedString(int Offset, int PrefixSize, int Length, string Value);
