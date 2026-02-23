@@ -54,8 +54,11 @@ public sealed class GogInstallScanner : IStoreInstallScanner
             {
                 apps.Add(MapGameEntryBase(e));
 
-                foreach (var t in e.Tools)
-                    apps.Add(MapToolEntryBase(e, t));
+                if (e.Tools is not null)
+                {
+                    foreach (var t in e.Tools)
+                        apps.Add(MapToolEntryBase(e, t));
+                }
             }
             catch (Exception ex)
             {
