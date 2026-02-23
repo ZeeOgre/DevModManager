@@ -121,6 +121,33 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Supports_Meshes_Root_Without_Data_Folder()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Meshes", "Weapons", "Laser", "rifle.nif");
+            string sourceMesh = Path.Combine(root, "Data", "Geometries", "weapons", "laser", "hash_987.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(sourceMesh)!);
+
+            File.WriteAllBytes(sourceMesh, [1, 2, 3]);
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes("geometries\\weapons\\laser\\hash_987"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("Data", "Geometries", "Weapons", "Laser", "rifle", "hash_987.mesh"), plan[0].DestinationMeshPath, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(Path.Combine("Geometries", "Weapons", "Laser", "rifle", "hash_987.mesh"), plan[0].RewrittenMeshToken);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Editor_BuildReadableMeshCopyPlan_Uses_ParentFolder_Name_For_Hashed_Mesh_File()
     {
         string root = CreateTempRoot();
