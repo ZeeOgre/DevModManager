@@ -1,0 +1,166 @@
+name: Build NifSkope
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - develop
+    tags-ignore:
+      - 'v2*'
+
+jobs:
+  build_windows:
+    runs-on: windows-latest
+    name: Build MSYS2
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: 'Setup MSYS2'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        cache: true
+        install: 'base-devel mingw-w64-ucrt-x86_64-gcc msys/p7zip mingw-w64-ucrt-x86_64-qt6-base mingw-w64-ucrt-x86_64-qt6-imageformats mingw-w64-ucrt-x86_64-qt6-tools'
+
+    - name: 'Build with qmake'
+      shell: msys2 {0}
+      run: |
+        qmake6 noavx2=1 NifSkope.pro
+        make -j 8
+        mv -f release/NifSkope.exe release/NifSkope_noavx2.exe
+        wget https://github.com/fo76utils/CoACD/releases/download/1.0.7-20251215/CoACD-20251215-win64.7z
+        7za x CoACD-20251215-win64.7z
+        wget https://github.com/fo76utils/NifMopp/releases/download/1.0/NifMopp.zip
+        7za x NifMopp.zip
+        mv -f lib_coacd.dll LICENSE.CoACD NifMopp.exe release
+
+    - name: 'Upload Artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-win
+        path: |
+          release
+
+
+  build_linux:
+    runs-on: 'ubuntu-24.04'
+    name: Build Linux
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: 'Install required packages'
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install libsdl2-dev qt6-base-dev qt6-base-private-dev qt6-base-dev-tools qmake6 qt6-image-formats-plugins 7zip
+
+    - name: 'Build with qmake'
+      run: |
+        qmake6 noavx2=1 NifSkope.pro
+        make -j 8
+        mv -f release/NifSkope release/NifSkope_noavx2
+        curl --location -O https://github.com/SarahWeiii/CoACD/releases/download/1.0.7/coacd-1.0.7-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+        7za x coacd-1.0.7-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+        curl --location -O https://github.com/fo76utils/NifMopp/releases/download/1.0/NifMopp.zip
+        7za x NifMopp.zip
+        chmod 0755 NifMopp.exe
+        mkdir release/coacd
+        mv -f coacd/lib_coacd.so coacd-1.0.7.dist-info/LICENSE release/coacd
+        mv -f coacd.libs NifMopp.exe release
+
+    - name: 'Upload Artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-linux
+        path: 'release'
+
+
+  build_macos:
+    runs-on: macos-latest
+    name: Build MacOS
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: 'Install required packages'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.1'
+
+    - name: 'Install clang'
+      run: brew install llvm
+
+    - name: 'Build with qmake'
+      run: |
+        qmake6 QMAKE_APPLE_DEVICE_ARCHS="x86_64" noavx2=1 NifSkope.pro
+        make -j 8
+
+    - name: 'Create DMG image'
+      run: |
+        curl --location -O https://github.com/SarahWeiii/CoACD/releases/download/1.0.7/coacd-1.0.7-cp39-abi3-macosx_11_0_x86_64.whl
+        7za x coacd-1.0.7-cp39-abi3-macosx_11_0_x86_64.whl
+        curl --location -O https://github.com/fo76utils/NifMopp/releases/download/1.0/NifMopp.zip
+        7za x NifMopp.zip
+        mkdir release/coacd
+        mv coacd/lib_coacd.dylib coacd-1.0.7.dist-info/licenses/LICENSE release/coacd
+        mv release/*.xml release/coacd release/shaders release/qt.conf release/style.qss release/*.txt NifMopp.exe release/NifSkope.app/Contents/MacOS/
+        macdeployqt release/NifSkope.app -dmg
+
+    - name: 'Upload Artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-macos
+        path: release/NifSkope.dmg
+
+
+  build_clang64:
+    runs-on: windows-latest
+    name: Build MSYS2-CLANG64
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: 'Setup MSYS2'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: CLANG64
+        update: true
+        cache: true
+        install: 'base-devel mingw-w64-clang-x86_64-gcc msys/p7zip mingw-w64-clang-x86_64-qt6-base mingw-w64-clang-x86_64-qt6-imageformats mingw-w64-clang-x86_64-qt6-tools msys/wget'
+
+    - name: 'Build with qmake'
+      shell: msys2 {0}
+      run: |
+        qmake6 NifSkope.pro
+        make -j 8
+        wget https://github.com/fo76utils/CoACD/releases/download/1.0.7-20251215/CoACD-20251215-win64.7z
+        7za x CoACD-20251215-win64.7z
+        wget https://github.com/fo76utils/NifMopp/releases/download/1.0/NifMopp.zip
+        7za x NifMopp.zip
+        mv -f lib_coacd.dll LICENSE.CoACD NifMopp.exe release
+
+    - name: 'Upload Artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-clang64
+        path: |
+          release

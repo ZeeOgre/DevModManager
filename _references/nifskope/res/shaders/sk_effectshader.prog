@@ -1,0 +1,8 @@
+# normal mapping, vertex colors -> emissive
+
+# Skyrim
+check BSVersion >= 83
+check BSVersion <= 100
+check BSEffectShaderProperty
+
+shaders sk_effectshader.vert sk_effectshader.frag

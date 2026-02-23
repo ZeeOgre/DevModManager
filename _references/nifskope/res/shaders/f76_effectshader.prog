@@ -1,0 +1,8 @@
+# effect shader
+
+# Fallout 76
+check BSVersion >= 151
+check BSVersion < 170
+check BSEffectShaderProperty
+
+shaders f76_default.vert f76_effectshader.frag

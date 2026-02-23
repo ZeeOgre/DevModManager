@@ -1,0 +1,13 @@
+# default shader
+
+# Fallout 76
+check BSVersion >= 151
+check BSVersion < 170
+check BSLightingShaderProperty
+checkgroup begin or
+	check BSTriShape
+	check BSSubIndexTriShape
+	check BSMeshLODTriShape
+checkgroup end
+
+shaders f76_default.vert f76_default.frag

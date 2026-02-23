@@ -1,0 +1,5 @@
+# shader for drawing normals and tangents
+
+# never enabled on models by default
+
+shaders wireframe.vert normals.geom lines.frag

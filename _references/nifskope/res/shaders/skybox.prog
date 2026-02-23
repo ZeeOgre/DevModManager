@@ -1,0 +1,5 @@
+# skybox shader
+
+# never enabled on models
+
+shaders skybox.vert skybox.frag

@@ -1,0 +1,11 @@
+# default shader
+
+# Starfield
+check BSVersion >= 170
+check BSGeometry
+checkgroup begin or
+	check BSLightingShaderProperty
+	check BSEffectShaderProperty
+checkgroup end
+
+shaders stf_default.vert stf_default.frag

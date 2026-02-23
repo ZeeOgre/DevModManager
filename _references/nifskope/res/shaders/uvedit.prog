@@ -1,0 +1,5 @@
+# shader for rendering the texture and grid in the UV editor
+
+# never enabled on models by default
+
+shaders uvedit.vert uvedit.frag

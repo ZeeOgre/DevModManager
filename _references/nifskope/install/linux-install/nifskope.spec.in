@@ -1,0 +1,353 @@
+%define desktop_vendor niftools
+
+Name:           nifskope
+Version:        @VERSION@
+Release:        1%{?dist}
+Summary:        A tool for analyzing and editing NetImmerse/Gamebryo files
+
+Group:          Applications/Multimedia
+License:        BSD
+URL:            http://niftools.sourceforge.net
+Source0:        nifskope-%{version}.tar.bz2
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:  qt4-devel desktop-file-utils
+
+%description
+NifSkope is a tool for analyzing and editing NetImmerse/Gamebryo files.
+
+%prep
+%setup -q
+
+%build
+qmake-qt4 -after TARGET=nifskope
+make %{?_smp_mflags}
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%{__install} -Dp -m0755 release/nifskope $RPM_BUILD_ROOT/%{_bindir}/nifskope
+%{__install} -Dp -m0644 nifskope.png $RPM_BUILD_ROOT/%{_datadir}/pixmaps/nifskope.png
+%{__install} -d $RPM_BUILD_ROOT/%{_datadir}/nifskope/doc
+%{__install} -d $RPM_BUILD_ROOT/%{_datadir}/nifskope/shaders
+%{__install} -d $RPM_BUILD_ROOT/%{_datadir}/nifskope/lang
+%{__install} -Dp -m0644 nif.xml $RPM_BUILD_ROOT/%{_datadir}/nifskope/nif.xml
+%{__install} -Dp -m0644 kfm.xml $RPM_BUILD_ROOT/%{_datadir}/nifskope/kfm.xml
+%{__install} -Dp -m0644 style.qss $RPM_BUILD_ROOT/%{_datadir}/nifskope/style.qss
+%{__install} -Dp -m0644 shaders/*.frag $RPM_BUILD_ROOT/%{_datadir}/nifskope/shaders
+%{__install} -Dp -m0644 shaders/*.prog $RPM_BUILD_ROOT/%{_datadir}/nifskope/shaders
+%{__install} -Dp -m0644 shaders/*.vert $RPM_BUILD_ROOT/%{_datadir}/nifskope/shaders
+%{__install} -Dp -m0644 doc/*.html $RPM_BUILD_ROOT/%{_datadir}/nifskope/doc
+%{__install} -Dp -m0644 doc/docsys.css $RPM_BUILD_ROOT/%{_datadir}/nifskope/doc
+%{__install} -Dp -m0644 doc/favicon.ico $RPM_BUILD_ROOT/%{_datadir}/nifskope/doc
+%{__install} -Dp -m0644 lang/*.ts $RPM_BUILD_ROOT/%{_datadir}/nifskope/lang
+%{__install} -Dp -m0644 lang/*.qm $RPM_BUILD_ROOT/%{_datadir}/nifskope/lang
+
+%if %{?_without_freedesktop:1}0
+        %{__install} -Dp -m0644 nifskope.desktop %{buildroot}%{_datadir}/gnome/apps/Multimedia/nifskope.desktop
+%else
+	%{__install} -d -m0755 %{buildroot}%{_datadir}/applications/
+	desktop-file-install \
+		--vendor %{desktop_vendor} \
+		--dir %{buildroot}%{_datadir}/applications \
+		nifskope.desktop
+%endif
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%doc README.txt CHANGELOG.TXT LICENSE.TXT TODO.TXT
+%dir %{_datadir}/nifskope
+%dir %{_datadir}/nifskope/shaders
+%dir %{_datadir}/nifskope/doc
+%dir %{_datadir}/nifskope/lang
+%{_bindir}/nifskope
+%{_datadir}/pixmaps/nifskope.png
+%{_datadir}/nifskope/nif.xml
+%{_datadir}/nifskope/kfm.xml
+%{_datadir}/nifskope/style.qss
+%{_datadir}/nifskope/shaders/*.vert
+%{_datadir}/nifskope/shaders/*.frag
+%{_datadir}/nifskope/shaders/*.prog
+%{_datadir}/nifskope/doc/*.html
+%{_datadir}/nifskope/doc/docsys.css
+%{_datadir}/nifskope/doc/favicon.ico
+%{_datadir}/nifskope/lang/*.ts
+%{_datadir}/nifskope/lang/*.qm
+%{?_without_freedesktop:%{_datadir}/gnome/apps/Multimedia/nifskope.desktop}
+%{!?_without_freedesktop:%{_datadir}/applications/%{desktop_vendor}-nifskope.desktop}
+
+%changelog
+* Sat Nov 17 2012 amorilia - 1.1.3-1
+- Fix accidently broken xml for Fallout 3 (contributed by ttl269).
+- Qmake getting git hash no longer relies on git executable.
+- Code refactor: xml for ui of about form.
+- Fix for registry entry proliferation (niftools issue #3584193, reported by neomonkeus).
+* Sun Oct 28 2012 amorilia - 1.1.2-1
+- When combining material properties, keep original material names as much as possible (reported by koniption).
+- Fix display of transformed havok shapes (reported by koniption).
+- Skyrim material updates (contributed by ttl269).
+- Skyrim body part updates.
+- Document sane defaults for Skyrim bhkRigidBody "Unknown 7 Shorts" (reported by ttl296).
+- Rename: binormals are now more accurately called bitangents.
+- Collada export improvements (contributed by mharj).
+- Support node culling by regular expression in collada/obj export (contributed by mharj).
+- Fix block order of bhkCompressedMeshShapeData (reported by ttl269).
+* Mon Oct 1 2012 amorilia - 1.1.1-1
+- Fix unsigned int enum issue.
+* Tue Sep 18 2012 amorilia - 1.1.0-1
+- Collada export fixes for Skyrim and Blender (contributed by mharj).
+- Various small bug fixes in the xml.
+- Fix uv editor for Skyrim nifs.
+- Collada export (contributed by mharj).
+- Mac compile fixes.
+- Hierarchy fix for BSShaderProperty and derived blocks.
+- Hierarchy fix for NiParticlesData and derived blocks.
+- Support for Qt 4.8.
+- Qhull update.
+- Material fix for pack strips spell (issue #3413668).
+- Fix for property attach spell for Skyrim (issue #3451054).
+- Fix for resource files that could not be removed (issue #3452880).
+- Fix for node names in ControllerLink blocks (issue #3453556).
+- Add: protective check to increase robustness
+- Fix: fixed #3525690 NifSkope Crash: MoppBvTree Triangles
+- Fix: blocked invalid memory access when "triangles" is empty
+- Fix: stopped triangle reordering on .obj import into "FO:NV" "NiTriShape"
+- nif.xml: bhkCompressedMeshShape: merged "skyfox", "ttl296" and probably other peoples work
+- Added initial support for "BSLODTriShape" - its being rendered
+- Fixed a lot of stuff regarding .obj import when BSShaderPPLightingProperty is present
+- Fix: Handling of spaces in .mtl files filename
+- Fix: .kf attaching for 10.0.1.0 - renaming the fields in "nif.xml" works as well
+- Fix: double_sided rendering issue
+- Add: SF_Double_Sided handling for "BSEffectShaderProperty"
+- Fix #3468080: property "paste" now works for non-NiProperty blocks
+- Fix #3471254: temporary set global template for some properties
+- Fix: rendering of double-sided + alpha unsorted triangles issue
+- Add: "BSEffectShaderProperty" - initial support
+- Add: unknown properties are now reported by the property factory
+- Added support for "BSLightingShaderProperty" in the UV editor and exporter
+- Fixed two regressions
+- Fix: "havok material" no longer resets to "HAV_MAT_STONE" when packing strips
+- Modified "havok" axes visibility
+- Enabled double-sided rendering when specific flag specifies it
+- Initial handling of unknown (possibly animation) alpha component of
+   NiTriShape vertex colors
+- Fix: two regressions
+- Added View Toolbar and new action - "reset block details"
+- Fix: restoring the main window no longer resets "block details"
+- Automatic vertex weighting initial support
+- BSTreeNode initial support
+- block number is visible
+- made material editor dialog window modal
+- Update for new qhull
+- Fix: quat. rotation keys linear interpolation issue
+- Fix for Qt 4.8.0: naming clash with dds_swap
+- Fix: added handling of invalid "Triangles" indexes
+- Fix: Skyrim textures are visible
+- Fixed NvTriStripObjects build error on gcc
+- Fix: File->Quit was not storing the program settings
+- Fix: bhkPackedNiTriStripsShape highlighting now works
+- Fix: furniture below shapes is now correctly mouse
+- Fix: transpaarency no longer hides selected fragments
+- Fix: highlighting of bhkListShape. Also, group highlighting now works
+- Changed interactive selection approach
+- Fix for user version in big endian nifs
+- Require OpenGL 2.0 (this fixes a crash on older hardware)
+- fixed nifskope crash on mouse left click in the opengl context window
+- updated to Qt 4.6.2
+- reworked BSA code for Qt 4.6 changes
+- import window state and lighting settings from previous versions
+- better support for big-endian files
+- increased the number of decimal places for rotations (suggested by Ghogiel)
+- Split "Adjust Link Arrays" spell: "Reorder Link Arrays" which now works for versions 20.0.0.4 onwards and removes empty links (fixes issue #3037165); "Collapse Link Arrays" which removes all empty links and works for all versions
+- fix for corrupt version write
+- highlight subshape selection in bhkPackedNiTriStripsShape
+- add Fallout New Vegas to game texture auto-detection
+- updated to GLee 5.4.0
+- nif.xml updates for Divinity 2 and Fallout New Vegas
+- OpenGL fix for ATI/AMD graphics cards (contributed by corwin)
+- bounds calculations for OpenGL view now take BSBounds and old style bounding boxes into account
+* Sat Mar 20 2010 amorilia - 1.0.22-1
+- updated to Qt 4.5.3
+- added support for NiPersistentSrcTextureRendererData textures (alternate form of NiPixelData)
+- allow hexadecimal values in nif.xml enumeration options
+- added "String Palette->Replace Entries" spell for NiSequence blocks, and "Animation->Edit String Palettes" helper
+- fixed display of Fallout 3 morph animations (NiGeomMorpherController)
+- support reading nifs which use the JMI extension and header
+- added "Node->Attach Parent Node" (suggested by vurt2)
+- fix display of multiple decal textures (reported by Axel) - note that the number of texture units in your graphics card may limit how many textures can be displayed simultaneously
+- UV editor:
+  + added coordinate set selection / duplication to context menu
+  + added rotation and scaling / translation of selected vertices to context menu with respective shortcuts (suggested by psymoniser and snowfox)
+  + increased maximum zoom level, reworked grid lines and cursors
+- updated BSXFlags bit descriptions
+- re-add NiPixelData texture import ("Texture->Embed" spell)
+- load .texcache (Empire Earth II / III external NiPixelData files) and allow direct texture export; installer also registers .texcache and .pcpatch (unknown 8-bit 1-dimensional textures?) extensions
+- added "Havok->Create Convex Shape" using Qhull and old code by wz
+* Fri Oct 9 2009 amorilia - 1.0.21-1
+- added support for displaying 8-bit palettised DDS textures
+- added variable mipmap filtering display for NiTexturingProperty
+- added "Mesh->Flip Faces" spell
+- added "Texture->Add Flip Controller", "Texture->Edit Flip Controller" spells
+- added support for reading NeoSteam headers
+- "Combine Properties" spell will not combine properties that inherit BSShaderProperty since they need to be unique (reported by Saiden)
+- fixed A -> B spell for bhkHingeConstraint (issue #2835485 reported by nexekho)
+- selection highligting fixes for bhkPackedNiTriStripsShape (triangles and normals)
+- added support for KrazyRain and Zorsis blocks (control characters etc.)
+- synced block order algorithm with pyffi (fixes the "falling signs" bug in Oblivion)
+- allow UV editing of meshes without a base texture
+* Sun Jun 7 2009 amorilia - 1.0.20-1
+- updated to Qt 4.5.0
+- fix tooltips display for nif.xml annotations
+- Paste Block/Branch spells now set Controller and Target links when pasting controller blocks, and updates Effects array when pasting an effect block
+- Paste At End spell added to paste a branch without parenting
+- Flag spell updated for Vertex Color, Stencil Buffer, and Z Buffer properties
+- bug fix for file selection widget ("Load" and "Save As") textbox styling
+- performance improvements when attaching animation
+- set sequence controller NiMultiTargetTransformController when importing kfs
+- display of NiUVController for UV transformations
+- Add "Move Down" option to Texture Folders list
+- display of NiVisController
+- fixed display of NiMaterialColorController for versions < 10.1.0.0 and added flags editor
+- display of BSBounds (displayed with Havok), tweaks to display of Bounding Box, added a "Edit Bounds" spell
+- highlighting of strips
+- UV editing of textures other than the base texture
+- re-add hiding of rows not applicable to the current version
+* Thu Mar 26 2009 amorilia - 1.0.19-1
+- fixed "Multi Apply Mode" spell [ niftools-Bugs-2475705 ]
+- shortcut keys for "Copy Branch" and "Paste Branch"
+- new "Duplicate" and "Duplicate Branch" spells
+- new "Flip Normals" spell and option to scale normals in "Scale Vertices"
+- new "Mirror armature" spell for Morrowind
+- add flag editing for NiBillboardNode
+- automate NiTextureEffect attachment (found under Node->Attach Light)
+- adding a new texture now presents a file selection dialog
+- new "Collapse Array" spell to selectively remove empty links
+- re-add texture export: NiPixelData can be exported to TGA or DDS (default)
+- texture chooser pathing tweaks
+- new "Blocks->Sort By Name" spell
+- "Attach .KF" can handle multiple non-conflicting .kf files
+- Add support for UV editing of embedded textures and external nif textures
+- "failed to load file header" message now gives hexadecimal and string values instead of decimal
+- read nif.xml from current directory in preference
+- fix handling of signed values
+- allow enumeration defaults to be specified by name
+- enumerations now have their underlying data type displayed in tooltip
+- file types for KF and KFM changed to NetImmerse/Gamebryo Animation and NetImmerse/Gamebryo Animation Manager respectively
+- location now checks for an existing installation
+- ignore "QAccessibleWidget::rect: This implementation does not support subelements!" message
+- prevent warning message when attempting to load an empty texture filename
+- fix crash on exit if no file opened and inspect window not opened
+- Shortcut keys for "Load" and "Save As"
+* Sun Jan 25 2009 amorilia - 1.0.18-1
+- fixed corruption of BSShaderNoLightingProperty file names when using texture chooser
+- fixed rendering settings which sometimes broke texture rendering when shader not used
+- added settings page for selecting displayed user interface language
+- fixed Bitangents and Tangents swapped in Fallout 3 files [ niftools-Bugs-2466995 ]
+- added Block | Convert Spell for cleanly changing node type
+- set default stencil property flags to 19840 for Fallout 3 (suggested by Saiden)
+* Mon Dec 22 2008 amorilia - 1.0.17-1
+- (linux version not released)
+- force updateHeader and updateFooter to be called before save
+- introduce bitflag data type
+- add editor for bitflag types
+- update santize spells to better cleanup Fallout3 NIFs during export
+- custom Fallout 3 sanitize spell forcing NiGeometryData blocks to have names
+- more support for internationalization
+- bug fixes in the renderer which completely disabled shaders on common hardware
+- bug fix for showing BSDismemberedSkinInstance highlighting in viewer when partitions were selected
+- fix to make Fallout 3 normal map shader renderer work
+* Sat Nov 15 2008 amorilia - 1.0.16-1
+- add Transform Inspection window
+- add Fallout 3 to game texture auto detection
+- nif.xml updates for Fallout 3
+- add support for Fallout 3 BSA files
+- add material color override in settings
+- new version condition evaluation engine to handle Fallout
+- using GLee, so nifskope now also compiles on mac
+- update tangent and binormal update script for Fallout as well as rendering
+* Mon Oct 18 2008 tazpn - 1.0.15-1
+- fixed issues with attaching kf controller with nif/kf version >= 20.1.0.3
+- updated mopp code generation to use subshape materials
+- updated for Qt 4.4.3
+- support reading nifs which use the NDSNIF header used in Atlantica
+- new block types added from Atlantica, Florensia, Red Ocean
+* Mon Sep 15 2008 amorilia - 1.0.14-1
+- fixed bhkRigidBodyT transform
+- fixed (innocent but annoying) error message on blob type
+- fixed Oblivion archive support for BSA files for use with textures
+- fixed having wrong texture in render window under certain conditions
+* Fri Sep 12 2008 amorilia - 1.0.13-1
+- workaround for Qt 4.4.0 annoyance: QFileSystemWatcher no longer barfs
+- installer also registers kfm and nifcache extensions
+- remove empty modifiers from NiParticleSystem when sanitizing
+- fixed value column in hierarchy view when switching from list view
+- new mopp code generator spell (windows only), using havok library
+- some small nif.xml updates
+- warn user when exporting skinned mesh as .OBJ that skin weights will not be exported
+- updated skin partition spell to work also on NiTriStrips
+- when inserting a new NiStencilProperty block, its draw mode is set to 3 (DRAW_BOTH) by default (issue #2033534)
+- update block size when fixing headers on v 20.2 and later
+- updated for Qt 4.4.1
+- add support for embedded textures and external nif textures
+- display revision number in about box
+- new blob type to make large byte arrays more efficient
+- fixed bounding box location in opengl window
+* Thu Jun 12 2008 amorilia - 1.0.12-1
+- fixed animation slider and animation group selector being grayed out
+* Wed Jun 4 2008 amorilia - 1.0.11-1
+- added support for nif version 10.1.0.101 (used for instance by Oblivion furniture markers in some releases of the game)
+- fixed code to compile with Qt 4.4.0
+- creating new BSXFlags block sets name automatically to BSX (issue #1955870)
+- darker background for UV editor to ease editing of UV map (issue #1971002)
+- fixed bug which caused texture file path not to be stored between invokations of the texture file selector in certain circumstances (issue #1971132)
+- new crop to branch spell to remove everything in a nif file except for a single branch
+- new "Add Bump Map" and "Add Decal 0 Map" spells for NiTexturingProperty blocks (issue #1980709)
+- load mipmaps from DDS file rather than recalculating them from the first level texture (issue #1981056)
+* Wed Apr 9 2008 amorilia - 1.0.10-1
+- fixed bsa file compression bug for Morrowind
+- fixed havok block reorder sanitize spell (replaced with a global block reorder spell)
+* Sun Mar 23 2008 amorilia - 1.0.9-1
+- synced DDS decompression with upstream (nvidia texture tools rev 488)
+- fixed nif.xml for 10.2.0.0 Oblivion havok blocks
+- fixed DXT5 alpha channel corruption
+* Sat Mar 8 2008 amorilia - 1.0.8-1
+- Fixed texture DXT5 corruption on windows build.
+* Mon Feb 11 2008 amorilia - 1.0.7-1
+- Added + and - to expression parser.
+- Updates to nif and kfm format.
+- Fixes for the MinGW build.
+* Tue Jan 29 2008 amorilia - 1.0.6-1
+- Stylesheet for the linux version.
+- Activated update tangent space spell for 20.0.0.4 nifs
+- Temporarily disabled removing of the old unpacked strips when calling the pack strip spell as this crashes nifskope; remove the branch manually instead until this bug is fixed.
+- Texture path used for selecting new textures is saved.
+- Shortcuts in texture selection file dialog are now actually followed.
+* Wed Jan 16 2008 amorilia - 1.0.5-1
+- Fixed block deletion bug.
+- Settings between different versions of nifskope are no longer shared to avoid compatibility problems if multiple versions of nifskope are used on the same system.
+- Non-binary registry settings are copied from older versions of nifskope, if a newer version of nifskope is run for the first time.
+- NiMeshPSysData fixed and simplified
+- new version 20.3.0.2 from emerge demo
+- replaced Target in NiTimeController with unknown int to cope with invalid pointers in nif versions <= 3.1
+* Wed Dec 26 2007 amorilia - 1.0.4-1
+- XML update to fix the 'array "Constraints" much too large ... failed to load
+  block number X (bhkRigidBodyT) previous block was bhkMoppBvTreeShape'
+  problem.
+- Software DXT decompression for platforms that do not have the S3TC opengl
+  extension such as linux with vanilla xorg drivers, so DDS textures show up
+  even when S3TC extension is not supported in the driver (code ported from
+  nvidia texture tools project).
+- Started adding doxygen-style documentation in some source files.
+- Added nifcache and texcache to nif file extension list (used by Empire
+  Earth III)
+* Sat Nov 11 2007 amorilia - 1.0.3-1
+- Nothing (release affects Windows only).
+* Sat Nov 10 2007 amorilia - 1.0.2-1
+- Small bugs fixed.
+- Including shaders.
+* Sun Oct 21 2007 amorilia - 1.0.1-1
+- Initial package.

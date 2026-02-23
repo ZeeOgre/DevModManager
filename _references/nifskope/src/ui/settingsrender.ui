@@ -1,0 +1,1177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SettingsRender</class>
+ <widget class="QWidget" name="SettingsRender">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="name">
+     <property name="font">
+      <font>
+       <family>Segoe UI Semibold</family>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Render</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="render">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="general">
+      <attribute name="title">
+       <string>General</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item alignment="Qt::AlignTop">
+        <widget class="QFrame" name="frame_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0" rowspan="2" alignment="Qt::AlignTop">
+           <widget class="QGroupBox" name="rendering">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="title">
+             <string>Rendering</string>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+            <layout class="QFormLayout" name="formLayout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="lblAA">
+               <property name="text">
+                <string>Antialiasing</string>
+               </property>
+               <property name="buddy">
+                <cstring>msaaSamples</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="msaaSamples">
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="currentIndex">
+                <number>2</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Off</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2x</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>4x</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>8x</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>16x</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <widget class="QPushButton" name="btnDetectMSAA">
+               <property name="maximumSize">
+                <size>
+                 <width>180</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Detect MSAA Supported</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="lblAF">
+               <property name="text">
+                <string>Anisotropic Filtering</string>
+               </property>
+               <property name="buddy">
+                <cstring>anisotropicFiltering</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="anisotropicFiltering">
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="currentIndex">
+                <number>4</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>1x</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2x</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>4x</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>8x</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>16x</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="2">
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="lblMeshCache">
+               <property name="text">
+                <string>Geometry Cache Size</string>
+               </property>
+               <property name="buddy">
+                <cstring>meshCacheSize</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSpinBox" name="meshCacheSize">
+               <property name="minimum">
+                <number>8</number>
+               </property>
+               <property name="maximum">
+                <number>1024</number>
+               </property>
+               <property name="singleStep">
+                <number>8</number>
+               </property>
+               <property name="value">
+                <number>128</number>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0" colspan="2">
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="lblSFParallaxScale">
+               <property name="text">
+                <string>Starfield POM Scale</string>
+               </property>
+               <property name="buddy">
+                <cstring>sfParallaxScale</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QDoubleSpinBox" name="sfParallaxScale">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>0.0</double>
+               </property>
+               <property name="maximum">
+                <double>0.2</double>
+               </property>
+               <property name="singleStep">
+                <double>0.001</double>
+               </property>
+               <property name="value">
+                <double>0.0</double>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
+              <widget class="QLabel" name="lblSFParallaxOffset">
+               <property name="text">
+                <string>Starfield POM Offset</string>
+               </property>
+               <property name="buddy">
+                <cstring>sfParallaxOffset</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <widget class="QDoubleSpinBox" name="sfParallaxOffset">
+               <property name="decimals">
+                <number>2</number>
+               </property>
+               <property name="minimum">
+                <double>0.0</double>
+               </property>
+               <property name="maximum">
+                <double>1.0</double>
+               </property>
+               <property name="singleStep">
+                <double>0.05</double>
+               </property>
+               <property name="value">
+                <double>0.5</double>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0">
+              <widget class="QLabel" name="lblSFParallaxSteps">
+               <property name="text">
+                <string>Starfield POM Steps</string>
+               </property>
+               <property name="buddy">
+                <cstring>sfParallaxSteps</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="QSpinBox" name="sfParallaxSteps">
+               <property name="minimum">
+                <number>16</number>
+               </property>
+               <property name="maximum">
+                <number>512</number>
+               </property>
+               <property name="singleStep">
+                <number>1</number>
+               </property>
+               <property name="value">
+                <number>200</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="grpCamera">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="title">
+             <string>Camera</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout_2">
+             <item row="0" column="0">
+              <widget class="QLabel" name="lblFieldOfView">
+               <property name="text">
+                <string>Field of View</string>
+               </property>
+               <property name="buddy">
+                <cstring>fieldOfView</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="fieldOfView">
+               <property name="minimum">
+                <number>45</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="singleStep">
+                <number>5</number>
+               </property>
+               <property name="value">
+                <number>60</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="lblRotationSpeed">
+               <property name="text">
+                <string>Rotation Speed</string>
+               </property>
+               <property name="buddy">
+                <cstring>rotationSpeed</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="rotationSpeed">
+               <property name="minimum">
+                <number>15</number>
+               </property>
+               <property name="maximum">
+                <number>1500</number>
+               </property>
+               <property name="singleStep">
+                <number>15</number>
+               </property>
+               <property name="value">
+                <number>45</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="lblMovementSpeed">
+               <property name="text">
+                <string>Movement Speed</string>
+               </property>
+               <property name="buddy">
+                <cstring>movementSpeed</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="movementSpeed">
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>7000</number>
+               </property>
+               <property name="singleStep">
+                <number>50</number>
+               </property>
+               <property name="value">
+                <number>350</number>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="lblMWheelZoomSpeed">
+               <property name="text">
+                <string>Zoom Speed</string>
+               </property>
+               <property name="buddy">
+                <cstring>mwheelZoomSpeed</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSpinBox" name="mwheelZoomSpeed">
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>16</number>
+               </property>
+               <property name="singleStep">
+                <number>1</number>
+               </property>
+               <property name="value">
+                <number>8</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="lblStartupDirection">
+               <property name="text">
+                <string>Startup Direction</string>
+               </property>
+               <property name="buddy">
+                <cstring>startupDirection</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QComboBox" name="startupDirection">
+               <property name="currentIndex">
+                <number>1</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Left</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Front</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Top</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Right</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Back</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Bottom</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QGroupBox" name="grpModel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="title">
+             <string>Model</string>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+            <layout class="QFormLayout" name="formLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="lblUpAxis">
+               <property name="text">
+                <string>Up Axis</string>
+               </property>
+               <property name="buddy">
+                <cstring>upAxis</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="upAxis">
+               <property name="currentIndex">
+                <number>2</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Y</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Z</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="lblDefSkelRoot">
+               <property name="text">
+                <string>Default Skeleton Root</string>
+               </property>
+               <property name="buddy">
+                <cstring>defaultSkeletonRoot</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="defaultSkeletonRoot">
+               <property name="minimum">
+                <number>-1</number>
+               </property>
+               <property name="maximum">
+                <number>32767</number>
+               </property>
+               <property name="singleStep">
+                <number>1</number>
+               </property>
+               <property name="value">
+                <number>-1</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="2" rowspan="2">
+           <widget class="QGroupBox" name="grpStartup">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="title">
+             <string>Startup Defaults</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="2" column="0">
+              <widget class="QCheckBox" name="chkShowGrid">
+               <property name="text">
+                <string>Show Grid</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QCheckBox" name="chkShowNodes">
+               <property name="text">
+                <string>Show Nodes</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="chkShowAxes">
+               <property name="text">
+                <string>Show Axes</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
+              <widget class="QCheckBox" name="chkDoSkinning">
+               <property name="text">
+                <string>Do Skinning</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QCheckBox" name="chkShowMarkers">
+               <property name="text">
+                <string>Show Markers</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QCheckBox" name="chkShowCollision">
+               <property name="text">
+                <string>Show Collision</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QCheckBox" name="chkShowConstraints">
+               <property name="text">
+                <string>Show Constraints</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
+              <widget class="QCheckBox" name="chkShowHidden">
+               <property name="text">
+                <string>Show Hidden</string>
+               </property>
+              </widget>
+             </item>
+             <item row="10" column="0">
+              <widget class="QCheckBox" name="chkDoErrorColor">
+               <property name="text">
+                <string>Do Error Color</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item alignment="Qt::AlignBottom">
+        <widget class="QFrame" name="frame_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="cubemaps">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="title">
+             <string>Image Based Lighting</string>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="lblCMR">
+               <property name="maximumSize">
+                <size>
+                 <width>280</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>PBR Cube Map Size</string>
+               </property>
+               <property name="buddy">
+                <cstring>iblCubeMapResolution</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="iblCubeMapResolution">
+               <property name="maximumSize">
+                <size>
+                 <width>80</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="currentIndex">
+                <number>2</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>128x128 to 2x2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>256x256 to 4x4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>512x512 to 8x8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>1024x1024 to 16x16</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2048x2048 to 32x32 (slow)</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="btnClearCubeCache">
+               <property name="maximumSize">
+                <size>
+                 <width>180</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Clear Cube Map Cache</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="lblISC">
+               <property name="maximumSize">
+                <size>
+                 <width>280</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Importance Samples</string>
+               </property>
+               <property name="buddy">
+                <cstring>iblImportanceSampleCnt</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="iblImportanceSampleCnt">
+               <property name="maximumSize">
+                <size>
+                 <width>80</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="currentIndex">
+                <number>2</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>64</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>128</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>256</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>512</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>1024</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2048</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>4096 (slow)</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="lblHDRToneMap">
+               <property name="maximumSize">
+                <size>
+                 <width>280</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>HDR Tone Mapping (log2 scale)</string>
+               </property>
+               <property name="buddy">
+                <cstring>hdrToneMap</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="hdrToneMap">
+               <property name="maximumSize">
+                <size>
+                 <width>80</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>16</number>
+               </property>
+               <property name="singleStep">
+                <number>1</number>
+               </property>
+               <property name="value">
+                <number>8</number>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="lblCubeMapBgnd">
+               <property name="maximumSize">
+                <size>
+                 <width>280</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Cube Map Background Mip Level</string>
+               </property>
+               <property name="buddy">
+                <cstring>cubeMapBgnd</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSpinBox" name="cubeMapBgnd">
+               <property name="maximumSize">
+                <size>
+                 <width>80</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="minimum">
+                <number>-1</number>
+               </property>
+               <property name="maximum">
+                <number>6</number>
+               </property>
+               <property name="singleStep">
+                <number>1</number>
+               </property>
+               <property name="value">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="4">
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="lblCubeMapPathFO76">
+               <property name="maximumSize">
+                <size>
+                 <width>280</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Fallout 76 Default Environment Map</string>
+               </property>
+               <property name="buddy">
+                <cstring>cubeMapPathFO76</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1" colspan="2">
+              <widget class="QLineEdit" name="cubeMapPathFO76">
+               <property name="minimumSize">
+                <size>
+                 <width>400</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>textures/shared/cubemaps/mipblur_defaultoutside1.dds</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="3">
+              <widget class="QPushButton" name="btnLoadF76CubeMap">
+               <property name="maximumSize">
+                <size>
+                 <width>28</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="../../../res/nifskope.qrc">
+                 <normaloff>:/btn/load</normaloff>:/btn/load</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="lblCubeMapPathSTF">
+               <property name="maximumSize">
+                <size>
+                 <width>280</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Starfield Environment Map</string>
+               </property>
+               <property name="buddy">
+                <cstring>cubeMapPathSTF</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1" colspan="2">
+              <widget class="QLineEdit" name="cubeMapPathSTF">
+               <property name="minimumSize">
+                <size>
+                 <width>400</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>textures/cubemaps/cell_cityplazacube.dds</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="3">
+              <widget class="QPushButton" name="btnLoadSTFCubeMap">
+               <property name="maximumSize">
+                <size>
+                 <width>28</width>
+                 <height>26</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="../../../res/nifskope.qrc">
+                 <normaloff>:/btn/load</normaloff>:/btn/load</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="colors">
+      <attribute name="title">
+       <string>Colors</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="1">
+        <widget class="ColorLineEdit" name="background" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="ColorLineEdit" name="wireframe" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="ColorWheel" name="colorBackground" native="true"/>
+       </item>
+       <item row="1" column="3">
+        <widget class="ColorWheel" name="colorWireframe" native="true"/>
+       </item>
+       <item row="1" column="4">
+        <layout class="QHBoxLayout" name="layAlphaWire"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="ColorLineEdit" name="highlight" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="ColorLineEdit" name="gridColor" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="ColorWheel" name="colorHighlight" native="true"/>
+       </item>
+       <item row="3" column="2">
+        <layout class="QHBoxLayout" name="layAlphaHigh"/>
+       </item>
+       <item row="3" column="3">
+        <widget class="ColorWheel" name="colorGrid" native="true"/>
+       </item>
+       <item row="3" column="4">
+        <layout class="QHBoxLayout" name="layAlphaGrid"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ColorLineEdit</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/colorwheel.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ColorWheel</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/colorwheel.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

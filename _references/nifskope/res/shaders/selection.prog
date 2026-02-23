@@ -1,0 +1,5 @@
+# selection shader
+
+# never enabled on models by default
+
+shaders selection.vert selection.frag

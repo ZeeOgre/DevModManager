@@ -1,0 +1,5 @@
+# Default shader for Morrowind and other games
+
+check BSVersion == 0
+
+shaders default.vert default.frag

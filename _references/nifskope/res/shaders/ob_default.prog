@@ -1,0 +1,14 @@
+# Oblivion and Fallout 3/New Vegas
+
+check BSVersion < 83
+check BSVersion > 0
+
+checkgroup begin or
+	check NiTexturingProperty
+	check BSShaderPPLightingProperty
+	check BSShaderNoLightingProperty
+	check Lighting30ShaderProperty
+	check TallGrassShaderProperty
+checkgroup end
+
+shaders ob_default.vert ob_default.frag

@@ -1,0 +1,5 @@
+# line shader
+
+# never enabled on models by default
+
+shaders lines.vert lines.geom lines.frag

@@ -1,0 +1,8 @@
+# effect shader
+
+# Fallout 4
+check BSVersion >= 130
+check BSVersion <= 139
+check BSEffectShaderProperty
+
+shaders fo4_default.vert fo4_effectshader.frag

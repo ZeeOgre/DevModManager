@@ -1,0 +1,15 @@
+[submodule "qhull"]
+	path = lib/qhull
+	url = https://github.com/qhull/qhull.git
+[submodule "lib/gli"]
+	path = lib/gli
+	url = https://github.com/g-truc/gli.git
+[submodule "build/docsys/kfmxml"]
+	path = build/docsys/kfmxml
+	url = https://github.com/niftools/kfmxml.git
+[submodule "build/docsys/nifxml"]
+	path = build/docsys/nifxml
+	url = https://github.com/niftools/nifxml.git
+[submodule "lib/meshoptimizer"]
+	path = lib/meshoptimizer
+	url = https://github.com/zeux/meshoptimizer.git

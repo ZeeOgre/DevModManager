@@ -1,0 +1,92 @@
+name: Build NifSkope Qt 5 release packages
+
+on:
+  push:
+    tags:
+      - 'v2*'
+
+jobs:
+  build_windows:
+    runs-on: windows-latest
+    name: Build MSYS2
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: 'Setup MSYS2'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        cache: true
+        install: 'base-devel mingw-w64-ucrt-x86_64-gcc msys/p7zip mingw-w64-ucrt-x86_64-qt5-base mingw-w64-ucrt-x86_64-qt5-imageformats mingw-w64-ucrt-x86_64-qt5-tools'
+
+    - name: 'Build with qmake'
+      shell: msys2 {0}
+      run: |
+        qmake noavx=1 NifSkope.pro
+        make -j 8
+        mv -f release/NifSkope.exe release/NifSkope_noavx.exe
+        make clean
+        qmake noavx2=1 NifSkope.pro
+        make -j 8
+        mv -f release/NifSkope.exe release/NifSkope_noavx2.exe
+        make clean
+        qmake NifSkope.pro
+        make -j 8
+        mv -f release NifSkope
+        7za a -m0=lzma -mx=9 NifSkope_2_0_$(date +"%Y-%m-%d")-win64qt5_gcc.7z NifSkope
+
+    - name: 'Upload Artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-win
+        path: |
+          NifSkope*.7z
+
+
+  build_clang64:
+    runs-on: windows-latest
+    name: Build MSYS2-CLANG64
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: 'Setup MSYS2'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: CLANG64
+        update: true
+        cache: true
+        install: 'base-devel mingw-w64-clang-x86_64-gcc msys/p7zip mingw-w64-clang-x86_64-qt5-base mingw-w64-clang-x86_64-qt5-imageformats mingw-w64-clang-x86_64-qt5-tools'
+
+    - name: 'Build with qmake'
+      shell: msys2 {0}
+      run: |
+        qmake noavx=1 NifSkope.pro
+        make -j 8
+        mv -f release/NifSkope.exe release/NifSkope_noavx.exe
+        make clean
+        qmake noavx2=1 NifSkope.pro
+        make -j 8
+        mv -f release/NifSkope.exe release/NifSkope_noavx2.exe
+        make clean
+        qmake NifSkope.pro
+        make -j 8
+        mv -f release NifSkope
+        7za a -m0=lzma -mx=9 NifSkope_2_0_$(date +"%Y-%m-%d")-win64qt5_clang.7z NifSkope
+
+    - name: 'Upload Artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-clang64
+        path: |
+          NifSkope*.7z
