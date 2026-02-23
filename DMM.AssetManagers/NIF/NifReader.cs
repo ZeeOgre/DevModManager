@@ -1,18 +1,16 @@
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Buffers.Binary;
 
 namespace DMM.AssetManagers.NIF;
 
 public sealed class NifReader
 {
-    private static readonly Regex PrintableTokenRegex = new(@"[\u0020-\u007E]{4,}", RegexOptions.Compiled);
+    private const int MaxSizedStringLength = 0x8000;
 
     public NifReadResult Read(string nifPath)
     {
         if (nifPath == null) throw new ArgumentNullException(nameof(nifPath));
         if (!File.Exists(nifPath)) throw new FileNotFoundException("NIF not found", nifPath);
 
-        byte[] bytes = File.ReadAllBytes(nifPath);
         var result = new NifReadResult { Path = nifPath };
 
         foreach (NifStringEntry entry in ReadStringTable(nifPath))
@@ -50,14 +48,73 @@ public sealed class NifReader
         if (!File.Exists(nifPath)) throw new FileNotFoundException("NIF not found", nifPath);
 
         byte[] bytes = File.ReadAllBytes(nifPath);
-        var values = ExtractPrintableStrings(bytes, 4).Distinct(StringComparer.Ordinal).ToList();
-        var entries = new List<NifStringEntry>(values.Count);
-        for (int i = 0; i < values.Count; i++)
+        var serialized = ReadSerializedStrings(bytes);
+        var entries = new List<NifStringEntry>(serialized.Count);
+        for (int i = 0; i < serialized.Count; i++)
         {
-            entries.Add(new NifStringEntry { Index = i, Value = values[i] });
+            entries.Add(new NifStringEntry { Index = i, Value = serialized[i].Value });
         }
 
         return entries;
+    }
+
+    internal static IReadOnlyList<NifSerializedString> ReadSerializedStrings(byte[] bytes)
+    {
+        var results = new List<NifSerializedString>();
+
+        for (int i = 0; i <= bytes.Length - 4; i++)
+        {
+            int len32 = BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(i, 4));
+            if (len32 > 0 && len32 <= MaxSizedStringLength && i + 4 + len32 <= bytes.Length)
+            {
+                string s = ReadAscii(bytes, i + 4, len32);
+                if (IsLikelyNifString(s))
+                {
+                    results.Add(new NifSerializedString(i, 4, len32, s));
+                    i += 3 + len32;
+                    continue;
+                }
+            }
+
+            if (i <= bytes.Length - 2)
+            {
+                ushort len16 = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(i, 2));
+                if (len16 > 0 && len16 <= MaxSizedStringLength && i + 2 + len16 <= bytes.Length)
+                {
+                    string s = ReadAscii(bytes, i + 2, len16);
+                    if (IsLikelyNifString(s))
+                    {
+                        results.Add(new NifSerializedString(i, 2, len16, s));
+                        i += 1 + len16;
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+    private static string ReadAscii(byte[] bytes, int start, int length)
+    {
+        return System.Text.Encoding.ASCII.GetString(bytes, start, length);
+    }
+
+    private static bool IsLikelyNifString(string s)
+    {
+        if (string.IsNullOrWhiteSpace(s) || s.Length < 3)
+            return false;
+
+        int printable = 0;
+        foreach (char c in s)
+        {
+            if (c >= 32 && c <= 126)
+                printable++;
+        }
+
+        if (printable != s.Length)
+            return false;
+
+        return s.Contains('\\') || s.Contains('/') || s.Contains('.') || s.Contains("Data", StringComparison.OrdinalIgnoreCase);
     }
 
     public IEnumerable<string> ExtractAll(string nifPath)
@@ -133,39 +190,5 @@ public sealed class NifReader
         var distinct = values.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList();
         values.Clear();
         values.AddRange(distinct);
-    }
-
-    private static IEnumerable<string> ExtractPrintableStrings(byte[] bytes, int minLen)
-    {
-        var sb = new StringBuilder();
-        foreach (byte b in bytes)
-        {
-            if (b >= 32 && b <= 126)
-            {
-                sb.Append((char)b);
-                continue;
-            }
-
-            if (sb.Length >= minLen)
-            {
-                string candidate = sb.ToString();
-                foreach (Match match in PrintableTokenRegex.Matches(candidate))
-                {
-                    if (match.Value.Length >= minLen)
-                        yield return match.Value;
-                }
-            }
-            sb.Clear();
-        }
-
-        if (sb.Length >= minLen)
-        {
-            string candidate = sb.ToString();
-            foreach (Match match in PrintableTokenRegex.Matches(candidate))
-            {
-                if (match.Value.Length >= minLen)
-                    yield return match.Value;
-            }
-        }
     }
 }
