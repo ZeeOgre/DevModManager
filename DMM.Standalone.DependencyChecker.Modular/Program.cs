@@ -1,7 +1,4 @@
-﻿using DMM.Core.IO;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Diagnostics;
+﻿using DMM.AssetManagers.NIF;
 
 namespace DmmDep.Modular
 {
@@ -30,19 +27,6 @@ namespace DmmDep.Modular
             public static void Always(string message) => Console.WriteLine(message);
         }
 
-        private sealed class Options
-        {
-            public string PluginPath { get; set; } = "";
-            public string? GameRootOverride { get; set; }
-            public string? XboxDataOverride { get; set; }
-            public string? TifRootOverride { get; set; } = "..\\..\\Source\\TGATextures";
-            public string? ScriptsRootOverride { get; set; } = "Scripts";
-            public bool TestMode { get; set; }
-            public bool Quiet { get; set; }
-            public bool Silent { get; set; }
-            public bool SmartClobber { get; set; }
-        }
-
         internal static int Main(string[] args)
         {
             if (args.Length == 0)
@@ -51,129 +35,155 @@ namespace DmmDep.Modular
                 return 1;
             }
 
-            var swTotal = Stopwatch.StartNew();
-
-            try
+            if (string.Equals(args[0], "nif-readablemesh", StringComparison.OrdinalIgnoreCase))
             {
-                var options = ParseArgs(args);
-                if (options == null)
+                return RunNifReadableMesh(args.Skip(1).ToArray());
+            }
+
+            PrintUsage();
+            return 1;
+        }
+
+        private static int RunNifReadableMesh(string[] args)
+        {
+            string? folder = null;
+            string? gameRoot = null;
+            bool dryRun = false;
+            bool overwrite = true;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i].ToLowerInvariant())
                 {
-                    PrintUsage();
-                    return 1;
+                    case "--folder":
+                        if (++i >= args.Length) return Fail("Missing value for --folder");
+                        folder = args[i];
+                        break;
+                    case "--gameroot":
+                        if (++i >= args.Length) return Fail("Missing value for --gameroot");
+                        gameRoot = args[i];
+                        break;
+                    case "--dryrun":
+                        dryRun = true;
+                        break;
+                    case "--no-overwrite":
+                        overwrite = false;
+                        break;
+                    case "--quiet":
+                        s_quiet = true;
+                        break;
+                    case "--silent":
+                        s_silent = true;
+                        s_quiet = true;
+                        break;
+                    default:
+                        return Fail($"Unknown option: {args[i]}");
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(folder))
+                return Fail("--folder is required");
+
+            string fullFolder = Path.GetFullPath(folder);
+            if (!Directory.Exists(fullFolder))
+                return Fail($"Folder does not exist: {fullFolder}");
+
+            string resolvedGameRoot = ResolveGameRoot(gameRoot, fullFolder);
+            var reader = new NifReader();
+            var editor = new NifEditor(reader);
+            var writer = new NifWriter();
+
+            var nifFiles = Directory.EnumerateFiles(fullFolder, "*.nif", SearchOption.AllDirectories).ToList();
+            Log.Always($"nif-readablemesh: scanning {nifFiles.Count} NIF(s)");
+
+            int copied = 0;
+            int rewritten = 0;
+            int rewriteFailures = 0;
+            int planEntries = 0;
+
+            foreach (string nifPath in nifFiles)
+            {
+                IReadOnlyList<NifReadableMeshCopy> plan;
+                try
+                {
+                    plan = editor.BuildReadableMeshCopyPlan(nifPath, resolvedGameRoot);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn($"Skipping '{nifPath}': {ex.Message}");
+                    continue;
                 }
 
-                s_quiet = options.Quiet;
-                s_silent = options.Silent;
+                if (plan.Count == 0)
+                {
+                    Log.Info($"No mesh entries: {nifPath}", isSkipped: true);
+                    continue;
+                }
 
-                using IHost host = Host.CreateDefaultBuilder()
-                    .ConfigureServices(services =>
+                planEntries += plan.Count;
+
+                if (!dryRun)
+                {
+                    copied += writer.ExecuteReadableMeshCopyPlan(plan, overwrite);
+
+                    var replacementMap = new Dictionary<string, string>(StringComparer.Ordinal);
+                    foreach (NifReadableMeshCopy item in plan)
                     {
-                        services.AddFileSystem();
-                        // TODO: services.AddDependencyChecker(); (once we move logic into DMM.Core)
-                    })
-                    .Build();
+                        replacementMap[item.OriginalMeshToken] = item.RewrittenMeshToken;
+                        replacementMap[item.OriginalMeshTokenNormalized] = item.RewrittenMeshToken;
+                    }
 
-                var fs = host.Services.GetRequiredService<IFileSystem>();
-
-                string pluginPath = Path.GetFullPath(options.PluginPath);
-                if (!fs.FileExists(pluginPath))
-                    throw new FileNotFoundException("Plugin file not found", pluginPath);
-
-                Log.Always($"Starting dependency check (MODULAR): {Path.GetFileName(pluginPath)}");
-
-                // NOTE: For now this is intentionally a stub wrapper. Next step is to:
-                //  - move the dependency scanning to DMM.Core
-                //  - call that engine here
-                //
-                // This wrapper already guarantees:
-                //  - separate executable
-                //  - same CLI surface area
-                //  - DI + IFileSystem available for the modular implementation
-
-                Log.Info("ProgramModular is wired up. Next step: call DMM.Core dependency engine.");
-                swTotal.Stop();
-                Log.Always($"Done in {swTotal.Elapsed}");
-                return 0;
+                    try
+                    {
+                        rewritten += writer.RewriteStringsInPlace(nifPath, replacementMap);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        rewriteFailures++;
+                        Log.Warn($"Remap failed for '{nifPath}': {ex.Message}");
+                    }
+                }
             }
-            catch (Exception ex)
+
+            Log.Always($"nif-readablemesh complete | nif={nifFiles.Count}, plan={planEntries}, copied={copied}, rewritten={rewritten}, rewriteFailures={rewriteFailures}, dryrun={dryRun}");
+            return 0;
+        }
+
+        private static string ResolveGameRoot(string? explicitGameRoot, string folder)
+        {
+            if (!string.IsNullOrWhiteSpace(explicitGameRoot))
+                return Path.GetFullPath(explicitGameRoot);
+
+            string fullFolder = Path.GetFullPath(folder);
+            string marker = Path.DirectorySeparatorChar + Path.Combine("Data", "Meshes") + Path.DirectorySeparatorChar;
+            int idx = fullFolder.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (idx >= 0)
             {
-                Console.Error.WriteLine($"ERROR: {ex.GetType().Name}: {ex.Message}");
-                return 1;
+                return fullFolder.Substring(0, idx);
             }
+
+            // fallback: parent of folder's parent
+            DirectoryInfo? parent = Directory.GetParent(fullFolder);
+            DirectoryInfo? grand = parent?.Parent;
+            return grand?.FullName ?? fullFolder;
+        }
+
+        private static int Fail(string message)
+        {
+            Console.Error.WriteLine($"ERROR: {message}");
+            return 1;
         }
 
         private static void PrintUsage()
         {
-            Console.WriteLine("dmmdep_modular.exe <pluginPath> [options]");
+            Console.WriteLine("dmmdep_modular.exe nif-readablemesh --folder <Data\\Meshes\\...> [options]");
             Console.WriteLine();
             Console.WriteLine("Options:");
-            Console.WriteLine("  --gameroot <path>     Override inferred game root (parent of Data).");
-            Console.WriteLine("  --xboxdata <path>     Override XBOX Data root (default from CreationKit.ini).");
-            Console.WriteLine("  --tifroot <path>      Override TIF root (default ..\\..\\Source\\TGATextures).");
-            Console.WriteLine("  --scriptsroot <path>  Override Data\\Scripts root.");
-            Console.WriteLine("  --test                Write .achlist.test instead of .achlist.");
-            Console.WriteLine("  --quiet               Suppress output about skipped files (e.g. 'Skipping MAT').");
-            Console.WriteLine("  --silent              Suppress all informational output except starting and completion.");
-            Console.WriteLine("  --smartclobber        Seed candidates from existing .achlist.");
-        }
-
-        private static Options? ParseArgs(string[] args)
-        {
-            var opts = new Options();
-            int i = 0;
-
-            if (!args[0].StartsWith("-", StringComparison.Ordinal))
-            {
-                opts.PluginPath = args[0];
-                i = 1;
-            }
-
-            for (; i < args.Length; i++)
-            {
-                string arg = args[i];
-                switch (arg.ToLowerInvariant())
-                {
-                    case "--gameroot":
-                        if (++i >= args.Length) return null;
-                        opts.GameRootOverride = args[i];
-                        break;
-                    case "--xboxdata":
-                        if (++i >= args.Length) return null;
-                        opts.XboxDataOverride = args[i];
-                        break;
-                    case "--tifroot":
-                        if (++i >= args.Length) return null;
-                        opts.TifRootOverride = args[i];
-                        break;
-                    case "--scriptsroot":
-                        if (++i >= args.Length) return null;
-                        opts.ScriptsRootOverride = args[i];
-                        break;
-                    case "--test":
-                        opts.TestMode = true;
-                        break;
-                    case "--quiet":
-                        opts.Quiet = true;
-                        break;
-                    case "--silent":
-                        opts.Silent = true;
-                        break;
-                    case "--smartclobber":
-                        opts.SmartClobber = true;
-                        break;
-                    default:
-                        Console.Error.WriteLine($"Unknown option: {arg}");
-                        return null;
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(opts.PluginPath))
-                return null;
-
-            if (opts.Silent)
-                opts.Quiet = true;
-
-            return opts;
+            Console.WriteLine("  --gameroot <path>     Override game root (folder that contains Data).");
+            Console.WriteLine("  --dryrun              Plan only; do not copy or rewrite NIFs.");
+            Console.WriteLine("  --no-overwrite        Do not overwrite destination mesh files.");
+            Console.WriteLine("  --quiet               Suppress skipped-file informational output.");
+            Console.WriteLine("  --silent              Suppress non-essential output.");
         }
     }
 }

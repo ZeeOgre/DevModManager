@@ -3,14 +3,19 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Configurations>Debug;Release</Configurations>
+    <Configurations>Debug;Release;PublishFrameworkDependent;PublishSelfContained;Publish</Configurations>
     <StartupObject>DmmDep.Modular.Program</StartupObject>
+    <AssemblyName>dmmdeps-modular</AssemblyName>
+    <UseAppHost>true</UseAppHost>
+    <DistributionDir>$(MSBuildProjectDirectory)\dist</DistributionDir>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
+    <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,5 +24,22 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
+
+  <Target Name="PublishOnBuild" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' AND ('$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish')">
+    <MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
+
+    <!-- Skinny single-file EXE (requires installed .NET runtime) -->
+    <Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish'" Command="dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:AssemblyName=dmmdeps-modular -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
+
+    <!-- Fat single-file EXE (runtime bundled) -->
+    <Exec Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish'" Command="dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps-modular-fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
+
+    <Copy Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish'" SourceFiles="$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64\dmmdeps-modular.exe" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
+
+    <Copy Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish'" SourceFiles="$(MSBuildProjectDirectory)\publish\self-contained\win-x64\dmmdeps-modular-fat.exe" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
+
+    <Message Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish'" Text="Published dmmdeps-modular.exe (single-file framework-dependent) to $(DistributionDir)" Importance="high" />
+    <Message Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish'" Text="Published dmmdeps-modular-fat.exe (single-file self-contained) to $(DistributionDir)" Importance="high" />
+  </Target>
 
 </Project>
