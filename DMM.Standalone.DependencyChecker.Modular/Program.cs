@@ -140,6 +140,9 @@ namespace DmmDep.Modular
                     var replacementMap = new Dictionary<string, string>(StringComparer.Ordinal);
                     foreach (NifReadableMeshCopy item in plan)
                     {
+                        if (!SourceMeshExistsForRewrite(item.SourceMeshPath))
+                            continue;
+
                         replacementMap[item.OriginalMeshToken] = item.RewrittenMeshToken;
                         replacementMap[item.OriginalMeshTokenNormalized] = item.RewrittenMeshToken;
                     }
@@ -257,6 +260,22 @@ namespace DmmDep.Modular
         {
             Console.Error.WriteLine($"ERROR: {message}");
             return 1;
+        }
+
+        private static bool SourceMeshExistsForRewrite(string sourceMeshPath)
+        {
+            if (File.Exists(sourceMeshPath))
+                return true;
+
+            string marker = Path.DirectorySeparatorChar + Path.Combine("Data", "Geometries") + Path.DirectorySeparatorChar;
+            int idx = sourceMeshPath.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
+                return false;
+
+            string prefix = sourceMeshPath[..(idx + marker.Length)];
+            string remainder = sourceMeshPath[(idx + marker.Length)..];
+            string parsed = Path.Combine(prefix, "Parsed", remainder);
+            return File.Exists(parsed);
         }
 
         private static void PrintUsage()
