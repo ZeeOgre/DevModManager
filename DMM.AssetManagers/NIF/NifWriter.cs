@@ -14,18 +14,55 @@ public sealed class NifWriter
         int copied = 0;
         foreach (NifReadableMeshCopy copy in copies)
         {
-            if (!File.Exists(copy.SourceMeshPath))
+            string? effectiveSource = ResolveEffectiveSourcePath(copy.SourceMeshPath);
+            if (effectiveSource == null)
                 continue;
+
+            if (string.Equals(effectiveSource, copy.SourceMeshPath, StringComparison.OrdinalIgnoreCase))
+            {
+                string parsedSourcePath = BuildParsedPath(copy.SourceMeshPath);
+                string? parsedDir = Path.GetDirectoryName(parsedSourcePath);
+                if (!string.IsNullOrWhiteSpace(parsedDir))
+                    Directory.CreateDirectory(parsedDir);
+
+                if (!File.Exists(parsedSourcePath))
+                    File.Move(copy.SourceMeshPath, parsedSourcePath);
+                else
+                    File.Delete(copy.SourceMeshPath);
+
+                effectiveSource = parsedSourcePath;
+            }
 
             string? dir = Path.GetDirectoryName(copy.DestinationMeshPath);
             if (!string.IsNullOrWhiteSpace(dir))
                 Directory.CreateDirectory(dir);
 
-            File.Copy(copy.SourceMeshPath, copy.DestinationMeshPath, overwrite);
+            File.Copy(effectiveSource, copy.DestinationMeshPath, overwrite);
             copied++;
         }
 
         return copied;
+    }
+
+    private static string? ResolveEffectiveSourcePath(string sourceMeshPath)
+    {
+        if (File.Exists(sourceMeshPath))
+            return sourceMeshPath;
+
+        string parsed = BuildParsedPath(sourceMeshPath);
+        return File.Exists(parsed) ? parsed : null;
+    }
+
+    private static string BuildParsedPath(string sourceMeshPath)
+    {
+        string marker = Path.DirectorySeparatorChar + Path.Combine("Data", "Geometries") + Path.DirectorySeparatorChar;
+        int idx = sourceMeshPath.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+            return sourceMeshPath;
+
+        string prefix = sourceMeshPath[..(idx + marker.Length)];
+        string remainder = sourceMeshPath[(idx + marker.Length)..];
+        return Path.Combine(prefix, "Parsed", remainder);
     }
 
     // Rewrites typed sized-string payloads (length-prefixed), allowing arbitrary replacement lengths.

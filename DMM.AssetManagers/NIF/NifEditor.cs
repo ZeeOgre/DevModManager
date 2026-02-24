@@ -21,25 +21,24 @@ public sealed class NifEditor
         string fullNifPath = Path.GetFullPath(nifPath);
         string fullGameRoot = Path.GetFullPath(gameRoot);
 
-        string dataMeshesRoot = Path.Combine(fullGameRoot, "Data", "Meshes");
-        string nifRelativeToMeshes = Path.GetRelativePath(dataMeshesRoot, fullNifPath);
-        if (nifRelativeToMeshes.StartsWith("..", StringComparison.Ordinal))
-            throw new InvalidOperationException($"NIF '{nifPath}' is not under '{dataMeshesRoot}'.");
+        string nifRelativeToMeshes = ResolveNifRelativeToMeshes(fullNifPath, fullGameRoot);
 
         string nifDirRel = Path.GetDirectoryName(nifRelativeToMeshes) ?? string.Empty;
         string nifBase = Path.GetFileNameWithoutExtension(fullNifPath);
         var destinationNameCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         var planned = new List<NifReadableMeshCopy>();
+        byte[] nifBytes = File.ReadAllBytes(fullNifPath);
+        IReadOnlyList<NifSerializedString> serialized = NifReader.ReadSerializedStrings(nifBytes);
         IReadOnlyList<NifMeshStringEntry> meshes = _reader.ReadMeshStrings(fullNifPath);
+        IReadOnlyList<NifStringEntry> strings = _reader.ReadStringTable(fullNifPath);
 
         foreach (NifMeshStringEntry entry in meshes)
         {
             string fullSourceMesh = Path.Combine(fullGameRoot, entry.NormalizedToken);
-            if (!File.Exists(fullSourceMesh))
-                continue;
 
-            string blockName = GetReadableMeshName(entry.NormalizedToken);
+            string blockName = TryResolveNameFromReferencedStringId(nifBytes, serialized, strings, entry.Index)
+                               ?? GetReadableMeshName(entry.NormalizedToken);
             string uniqueBlockName = EnsureUniqueName(blockName, destinationNameCounts);
             string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, uniqueBlockName + ".mesh");
             string fullDest = Path.GetFullPath(Path.Combine(fullGameRoot, destRel));
@@ -58,6 +57,77 @@ public sealed class NifEditor
         }
 
         return planned;
+    }
+
+    private static string? TryResolveNameFromReferencedStringId(
+        byte[] bytes,
+        IReadOnlyList<NifSerializedString> serialized,
+        IReadOnlyList<NifStringEntry> strings,
+        int meshStringIndex)
+    {
+        if (meshStringIndex < 0 || meshStringIndex >= serialized.Count)
+            return null;
+
+        int meshOffset = serialized[meshStringIndex].Offset;
+        int minOffset = Math.Max(0, meshOffset - 512);
+
+        for (int pos = meshOffset - 4; pos >= minOffset; pos--)
+        {
+            int candidateIndex = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(pos, 4));
+            if (candidateIndex < 0 || candidateIndex >= strings.Count)
+                continue;
+
+            string sanitized = SanitizeSpellFileName(strings[candidateIndex].Value.Trim());
+            if (string.IsNullOrWhiteSpace(sanitized))
+                continue;
+
+            return sanitized;
+        }
+
+        return null;
+    }
+
+    private static string SanitizeSpellFileName(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        string lowered = input.ToLowerInvariant();
+        var filtered = new List<char>(lowered.Length);
+        foreach (char c in lowered)
+        {
+            if (c == '.' || c == ' ' || c == '/' || c == '\\')
+                continue;
+
+            char value = c switch
+            {
+                '<' or '>' or ':' or '"' or '|' or '?' or '*' => '_',
+                _ => c
+            };
+
+            if (value is >= ' ' and <= '~')
+                filtered.Add(value);
+        }
+
+        return new string(filtered.ToArray());
+    }
+
+    private static string ResolveNifRelativeToMeshes(string fullNifPath, string fullGameRoot)
+    {
+        string[] meshesRoots =
+        [
+            Path.Combine(fullGameRoot, "Data", "Meshes"),
+            Path.Combine(fullGameRoot, "Meshes")
+        ];
+
+        foreach (string meshesRoot in meshesRoots)
+        {
+            string rel = Path.GetRelativePath(meshesRoot, fullNifPath);
+            if (!rel.StartsWith("..", StringComparison.Ordinal))
+                return rel;
+        }
+
+        throw new InvalidOperationException($"NIF '{fullNifPath}' is not under Data\\Meshes or Meshes in '{fullGameRoot}'.");
     }
 
     private static string GetReadableMeshName(string normalizedMeshToken)
