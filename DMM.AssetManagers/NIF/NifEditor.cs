@@ -26,6 +26,7 @@ public sealed class NifEditor
         string nifDirRel = Path.GetDirectoryName(nifRelativeToMeshes) ?? string.Empty;
         string nifBase = Path.GetFileNameWithoutExtension(fullNifPath);
         var destinationNameCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var spellStyleLodCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         var planned = new List<NifReadableMeshCopy>();
         IReadOnlyList<NifMeshStringEntry> meshes = _reader.ReadMeshStrings(fullNifPath);
