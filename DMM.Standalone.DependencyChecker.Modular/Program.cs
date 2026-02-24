@@ -140,6 +140,9 @@ namespace DmmDep.Modular
                     var replacementMap = new Dictionary<string, string>(StringComparer.Ordinal);
                     foreach (NifReadableMeshCopy item in plan)
                     {
+                        if (!File.Exists(item.SourceMeshPath))
+                            continue;
+
                         replacementMap[item.OriginalMeshToken] = item.RewrittenMeshToken;
                         replacementMap[item.OriginalMeshTokenNormalized] = item.RewrittenMeshToken;
                     }
