@@ -97,7 +97,7 @@ public sealed class NifEditor
             if (!meshOffsetsByBlock.TryGetValue(block.Index, out List<int>? meshIndicesInBlock) || meshIndicesInBlock.Count == 0)
                 continue;
 
-            int? nameStringIndex = ReadBlockNameStringIndex(bytes, block, serialized, structure.HeaderStrings.Count);
+            int? nameStringIndex = ReadBlockNameStringIndex(bytes, block, serialized, structure.HeaderStrings);
             if (!nameStringIndex.HasValue)
                 continue;
 
@@ -132,19 +132,35 @@ public sealed class NifEditor
         byte[] bytes,
         NifBlockSpan block,
         IReadOnlyList<NifSerializedString> serialized,
-        int headerStringCount)
+        IReadOnlyList<string> headerStrings)
     {
-        if (block.StartOffset + 4 > block.EndOffsetExclusive || block.StartOffset + 4 > bytes.Length)
-            return null;
+        int scanStart = block.StartOffset;
+        int scanEndExclusive = Math.Min(block.EndOffsetExclusive, block.StartOffset + 32);
+        int? fallback = null;
 
-        if (IsInsideSerializedRecord(serialized, block.StartOffset))
-            return null;
+        for (int pos = scanStart; pos <= scanEndExclusive - 4; pos += 4)
+        {
+            if (IsInsideSerializedRecord(serialized, pos))
+                continue;
 
-        int candidateIndex = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(block.StartOffset, 4));
-        if (candidateIndex < 0 || candidateIndex >= headerStringCount)
-            return null;
+            int candidateIndex = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(pos, 4));
+            if (candidateIndex < 0 || candidateIndex >= headerStrings.Count)
+                continue;
 
-        return candidateIndex;
+            string value = headerStrings[candidateIndex].Trim();
+            if (string.IsNullOrWhiteSpace(value))
+                continue;
+
+            if (value.Contains('\\') || value.Contains('/') || value.Contains('.'))
+                continue;
+
+            if (value.Contains(':'))
+                return candidateIndex;
+
+            fallback ??= candidateIndex;
+        }
+
+        return fallback;
     }
 
     private static bool IsInsideSerializedRecord(IReadOnlyList<NifSerializedString> serialized, int position)

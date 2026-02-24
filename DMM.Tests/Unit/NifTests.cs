@@ -528,6 +528,36 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Prefers_Block_Name_When_First_Block_Int_Is_SuperParent_Name()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "activator_tall.nif");
+            string meshPath = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "c1111111111111111111.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(meshPath)!);
+            File.WriteAllBytes(meshPath, [1]);
+
+            File.WriteAllBytes(nifPath, BuildBethesdaLikeSingleBlockNifWithLeadingSuperParentNameRef(
+                "OutpostMenuActivator01",
+                "Box362:3",
+                "geometries\\darkstar\\src\\c1111111111111111111.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "box362_3.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("outpostmenuactivator01", plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Writer_RewriteStringsInPlace_Rewrites_Multiple_Tokens_In_One_Pass()
     {
         string root = CreateTempRoot();
@@ -781,6 +811,51 @@ public sealed class NifTests
         ms.Position = blockSizePosB;
         bw.Write(checked((int)(blockEndB - blockStartB)));
 
+        bw.Flush();
+        return ms.ToArray();
+    }
+
+    private static byte[] BuildBethesdaLikeSingleBlockNifWithLeadingSuperParentNameRef(
+        string superParentName,
+        string blockName,
+        string meshToken)
+    {
+        using var ms = new MemoryStream();
+        using var bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
+
+        bw.Write(Encoding.ASCII.GetBytes("Gamebryo File Format, Version 20.2.0.7\n"));
+        bw.Write(0x14020007u);
+        bw.Write((byte)1);
+        bw.Write(12u);
+        bw.Write(1);
+        bw.Write(172u);
+        WriteSized1(bw, "");
+        bw.Write(0u);
+        WriteSized1(bw, "");
+        WriteSized1(bw, "");
+        bw.Write((ushort)1);
+        WriteSized4(bw, "BSGeometry");
+        bw.Write((ushort)0);
+
+        long blockSizePosition = ms.Position;
+        bw.Write(0);
+
+        bw.Write(3u);
+        bw.Write((uint)Math.Max(Math.Max(superParentName.Length, blockName.Length), 1));
+        WriteSized4(bw, superParentName);
+        WriteSized4(bw, blockName);
+        WriteSized4(bw, "unused");
+
+        bw.Write(0);
+
+        long blockStart = ms.Position;
+        bw.Write(0);
+        bw.Write(1);
+        WriteSized4(bw, meshToken);
+        long blockEnd = ms.Position;
+
+        ms.Position = blockSizePosition;
+        bw.Write(checked((int)(blockEnd - blockStart)));
         bw.Flush();
         return ms.ToArray();
     }
