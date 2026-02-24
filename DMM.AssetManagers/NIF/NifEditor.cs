@@ -47,6 +47,7 @@ public sealed class NifEditor
             string fullDest = Path.GetFullPath(Path.Combine(fullGameRoot, destRel));
             string rewrittenMeshToken = Path.GetRelativePath(Path.Combine(fullGameRoot, "Data"), fullDest)
                 .Replace('/', '\\');
+            rewrittenMeshToken = RemoveMeshExtensionFromToken(rewrittenMeshToken);
 
             planned.Add(new NifReadableMeshCopy
             {
@@ -225,6 +226,13 @@ public sealed class NifEditor
         }
 
         throw new InvalidOperationException($"NIF '{fullNifPath}' is not under Data\\Meshes or Meshes in '{fullGameRoot}'.");
+    }
+
+    private static string RemoveMeshExtensionFromToken(string token)
+    {
+        return token.EndsWith(".mesh", StringComparison.OrdinalIgnoreCase)
+            ? token[..^5]
+            : token;
     }
 
     private static string GetReadableMeshName(string normalizedMeshToken)
