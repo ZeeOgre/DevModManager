@@ -13,7 +13,7 @@ namespace DMM.AssetManagers
             => $"{RelativePath} (size={FileSize}, from={Path.GetFileName(ArchivePath)})";
     }
 
-    public static class BA2Archive
+    public static partial class BA2Archive
     {
         // Reflection cache
         private static Type? s_ba2FileType;

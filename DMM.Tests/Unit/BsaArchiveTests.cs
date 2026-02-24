@@ -1,77 +1,77 @@
 using System.Text;
-using DMM.AssetManagers.BSA;
+using DMM.AssetManagers;
 using DMM.AssetManagers.Common;
 
 namespace DMM.Tests.Unit;
 
-public sealed class BsaArchiveTests
+public sealed class Ba2ArchiveTests
 {
     [Fact]
     public void CreateReadExtractAndAppend_Workflow_Works()
     {
-        string tempRoot = Path.Combine(Path.GetTempPath(), "dmm-bsa-tests", Guid.NewGuid().ToString("N"));
+        string tempRoot = Path.Combine(Path.GetTempPath(), "dmm-ba2-tests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempRoot);
         try
         {
-            string archivePath = Path.Combine(tempRoot, "test.bsa");
+            string archivePath = Path.Combine(tempRoot, "test.ba2");
 
-            BsaArchive.Create(
+            BA2Archive.Create(
                 archivePath,
                 new[]
                 {
-                    new BsaBuildFile
+                    new BA2BuildFile
                     {
                         ArchivePath = "meshes/a.nif",
                         Data = Encoding.UTF8.GetBytes("mesh-data"),
-                        Compression = BsaCompressionMode.Uncompressed
+                        Compression = BA2CompressionMode.Uncompressed
                     },
-                    new BsaBuildFile
+                    new BA2BuildFile
                     {
                         ArchivePath = "textures/a.dds",
                         Data = Encoding.UTF8.GetBytes("dds-data"),
-                        Compression = BsaCompressionMode.Smart
+                        Compression = BA2CompressionMode.Smart
                     },
-                    new BsaBuildFile
+                    new BA2BuildFile
                     {
                         ArchivePath = "sound/voice/sample.wem",
                         Data = Encoding.UTF8.GetBytes("wem-data"),
-                        Compression = BsaCompressionMode.Smart
+                        Compression = BA2CompressionMode.Smart
                     }
                 },
-                new BsaCreateOptions { ArchiveCompressedByDefault = true, TargetPlatform = BsaTargetPlatform.Pc });
+                new BA2CreateOptions { ArchiveCompressedByDefault = true, TargetPlatform = BA2TargetPlatform.Pc });
 
-            var index = BsaArchive.ReadIndex(archivePath);
+            var index = BA2Archive.ReadBuildIndex(archivePath);
             Assert.Equal(3, index.Count);
 
             var wem = index.Single(x => x.ArchiveInnerPath == "sound/voice/sample.wem");
             Assert.False(wem.IsCompressed);
 
-            var ddsBytes = BsaArchive.ExtractFile(archivePath, "textures/a.dds");
+            var ddsBytes = BA2Archive.ExtractBuiltFile(archivePath, "textures/a.dds");
             Assert.Equal("dds-data", Encoding.UTF8.GetString(ddsBytes));
 
-            BsaArchive.AddOrReplaceFiles(
+            BA2Archive.AddOrReplaceFiles(
                 archivePath,
                 new[]
                 {
-                    new BsaBuildFile
+                    new BA2BuildFile
                     {
                         ArchivePath = "textures/a.dds",
                         Data = Encoding.UTF8.GetBytes("dds-data-2"),
-                        Compression = BsaCompressionMode.Compressed
+                        Compression = BA2CompressionMode.Compressed
                     },
-                    new BsaBuildFile
+                    new BA2BuildFile
                     {
                         ArchivePath = "textures/b.dds",
                         Data = Encoding.UTF8.GetBytes("dds-data-b"),
-                        Compression = BsaCompressionMode.Compressed
+                        Compression = BA2CompressionMode.Compressed
                     }
                 },
-                new BsaCreateOptions { ArchiveCompressedByDefault = true, TargetPlatform = BsaTargetPlatform.Pc });
+                new BA2CreateOptions { ArchiveCompressedByDefault = true, TargetPlatform = BA2TargetPlatform.Pc });
 
-            string dds2 = Encoding.UTF8.GetString(BsaArchive.ExtractFile(archivePath, "textures/a.dds"));
+            string dds2 = Encoding.UTF8.GetString(BA2Archive.ExtractBuiltFile(archivePath, "textures/a.dds"));
             Assert.Equal("dds-data-2", dds2);
 
-            var updatedIndex = BsaArchive.ReadIndex(archivePath);
+            var updatedIndex = BA2Archive.ReadBuildIndex(archivePath);
             Assert.Equal(4, updatedIndex.Count);
         }
         finally
@@ -93,8 +93,8 @@ public sealed class BsaArchiveTests
 
         var entries = Achlist.Parse(content);
         Assert.Equal(3, entries.Count);
-        Assert.Equal(BsaCompressionMode.Uncompressed, entries[0].Compression);
-        Assert.Equal(BsaCompressionMode.Smart, entries[1].Compression);
-        Assert.Equal(BsaCompressionMode.InheritArchive, entries[2].Compression);
+        Assert.Equal(BA2CompressionMode.Uncompressed, entries[0].Compression);
+        Assert.Equal(BA2CompressionMode.Smart, entries[1].Compression);
+        Assert.Equal(BA2CompressionMode.InheritArchive, entries[2].Compression);
     }
 }
