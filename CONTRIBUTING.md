@@ -40,3 +40,6 @@ Include a simple script in the repository (e.g. `tools/check-cyrillic.sh`) that 
 
 ## Contact
 If unsure, open an issue or ask during code review for guidance.
+
+## Codex PR workflow note
+- If a pull request branch is updated outside Codex and Codex can no longer update that PR, create a new PR from the current branch head instead of attempting to reuse the old PR thread.
