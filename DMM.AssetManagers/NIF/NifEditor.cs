@@ -93,7 +93,34 @@ public sealed class NifEditor
         if (trimmed.Contains('\\') || trimmed.Contains('/') || trimmed.Contains('.'))
             return false;
 
+        if (IsLikelyNifTypeName(trimmed))
+            return false;
+
+        bool hasPayloadShape = trimmed.Any(char.IsDigit)
+                               || trimmed.Contains(':')
+                               || trimmed.Contains('_')
+                               || trimmed.Contains(' ')
+                               || trimmed.Contains('-');
+        if (!hasPayloadShape)
+            return false;
+
         return trimmed.Any(char.IsLetter);
+    }
+
+    private static bool IsLikelyNifTypeName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        if (value.StartsWith("Ni", StringComparison.Ordinal)
+            || value.StartsWith("BS", StringComparison.Ordinal)
+            || value.StartsWith("bhk", StringComparison.Ordinal)
+            || value.StartsWith("hk", StringComparison.Ordinal))
+        {
+            return value.All(char.IsLetterOrDigit);
+        }
+
+        return false;
     }
 
     private static string SanitizeSpellFileName(string input)

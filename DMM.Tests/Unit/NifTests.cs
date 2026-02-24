@@ -282,6 +282,36 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Prefers_Block_Name_Over_Nif_Class_Name()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "architecture", "landingpad", "slab80m.nif");
+            string meshPath = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(meshPath)!);
+            File.WriteAllBytes(meshPath, [1]);
+
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "NiIntegerExtraData",
+                "PavGenLandingStrMid023:8",
+                "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("DarkStar", "architecture", "landingpad", "slab80m", "pavgenlandingstrmid023_8_lod1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("niintegerextradata", plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Writer_RewriteStringsInPlace_Rewrites_Multiple_Tokens_In_One_Pass()
     {
         string root = CreateTempRoot();
@@ -304,6 +334,40 @@ public sealed class NifTests
             Assert.Contains("first\\replacement.mesh", strings, StringComparer.Ordinal);
             Assert.Contains("second\\replacement.mesh", strings, StringComparer.Ordinal);
             Assert.Contains("keep", strings, StringComparer.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Writer_ExecuteReadableMeshCopyPlan_Moves_Source_To_Parsed_And_Copies_To_Target()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string source = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            string destination = Path.Combine(root, "Data", "Geometries", "DarkStar", "activators", "sample", "block.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(source)!);
+            File.WriteAllBytes(source, [7, 8, 9]);
+
+            var writer = new NifWriter();
+            int copied = writer.ExecuteReadableMeshCopyPlan([
+                new NifReadableMeshCopy
+                {
+                    SourceMeshPath = source,
+                    DestinationMeshPath = destination
+                }
+            ]);
+
+            Assert.Equal(1, copied);
+            Assert.True(File.Exists(destination));
+
+            string parsedSource = Path.Combine(root, "Data", "Geometries", "Parsed", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            Assert.False(File.Exists(source));
+            Assert.True(File.Exists(parsedSource));
+            Assert.Equal(File.ReadAllBytes(parsedSource), File.ReadAllBytes(destination));
         }
         finally
         {
