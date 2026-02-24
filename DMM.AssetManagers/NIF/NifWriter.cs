@@ -30,6 +30,7 @@ public sealed class NifWriter
                 else
                     File.Delete(copy.SourceMeshPath);
 
+                DeleteEmptyGeometryAncestorFolders(copy.SourceMeshPath);
                 effectiveSource = parsedSourcePath;
             }
 
@@ -63,6 +64,27 @@ public sealed class NifWriter
         string prefix = sourceMeshPath[..(idx + marker.Length)];
         string remainder = sourceMeshPath[(idx + marker.Length)..];
         return Path.Combine(prefix, "Parsed", remainder);
+    }
+
+    private static void DeleteEmptyGeometryAncestorFolders(string sourceMeshPath)
+    {
+        string geometriesRoot = Path.Combine("Data", "Geometries");
+        int rootIdx = sourceMeshPath.IndexOf(geometriesRoot, StringComparison.OrdinalIgnoreCase);
+        if (rootIdx < 0)
+            return;
+
+        string fullGeometriesRoot = sourceMeshPath[..(rootIdx + geometriesRoot.Length)];
+        string? current = Path.GetDirectoryName(sourceMeshPath);
+
+        while (!string.IsNullOrWhiteSpace(current)
+               && !string.Equals(current, fullGeometriesRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            if (Directory.EnumerateFileSystemEntries(current).Any())
+                break;
+
+            Directory.Delete(current, false);
+            current = Path.GetDirectoryName(current);
+        }
     }
 
     // Rewrites typed sized-string payloads (length-prefixed), allowing arbitrary replacement lengths.

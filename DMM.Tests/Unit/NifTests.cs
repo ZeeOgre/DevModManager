@@ -483,6 +483,51 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Uses_Block_Name_Per_Block_And_Per_Mesh_Index()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "activator_tall.nif");
+            string[] meshPaths =
+            [
+                Path.Combine(root, "Data", "Geometries", "darkstar", "src", "a1111111111111111111.mesh"),
+                Path.Combine(root, "Data", "Geometries", "darkstar", "src", "a2222222222222222222.mesh"),
+                Path.Combine(root, "Data", "Geometries", "darkstar", "src", "b1111111111111111111.mesh"),
+                Path.Combine(root, "Data", "Geometries", "darkstar", "src", "b2222222222222222222.mesh")
+            ];
+
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            foreach (string meshPath in meshPaths)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(meshPath)!);
+                File.WriteAllBytes(meshPath, [1]);
+            }
+
+            File.WriteAllBytes(nifPath, BuildBethesdaLikeTwoBlocksNif(
+                "Box365:14",
+                "FullDisplay008:0",
+                "geometries\\darkstar\\src\\a1111111111111111111.mesh",
+                "geometries\\darkstar\\src\\a2222222222222222222.mesh",
+                "geometries\\darkstar\\src\\b1111111111111111111.mesh",
+                "geometries\\darkstar\\src\\b2222222222222222222.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Equal(4, plan.Count);
+            Assert.Contains(plan, x => x.RewrittenMeshToken.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "box365_14.mesh"), StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(plan, x => x.RewrittenMeshToken.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "box365_14_1.mesh"), StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(plan, x => x.RewrittenMeshToken.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "fulldisplay008_0.mesh"), StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(plan, x => x.RewrittenMeshToken.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "fulldisplay008_0_1.mesh"), StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Writer_RewriteStringsInPlace_Rewrites_Multiple_Tokens_In_One_Pass()
     {
         string root = CreateTempRoot();
@@ -539,6 +584,7 @@ public sealed class NifTests
             Assert.False(File.Exists(source));
             Assert.True(File.Exists(parsedSource));
             Assert.Equal(File.ReadAllBytes(parsedSource), File.ReadAllBytes(destination));
+            Assert.False(Directory.Exists(Path.Combine(root, "Data", "Geometries", "darkstar", "src")));
         }
         finally
         {
@@ -675,6 +721,66 @@ public sealed class NifTests
 
         ms.Position = blockSizePosition;
         bw.Write(checked((int)(blockEnd - blockStart)));
+        bw.Flush();
+        return ms.ToArray();
+    }
+
+    private static byte[] BuildBethesdaLikeTwoBlocksNif(
+        string blockNameA,
+        string blockNameB,
+        string meshA0,
+        string meshA1,
+        string meshB0,
+        string meshB1)
+    {
+        using var ms = new MemoryStream();
+        using var bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
+
+        bw.Write(Encoding.ASCII.GetBytes("Gamebryo File Format, Version 20.2.0.7\n"));
+        bw.Write(0x14020007u);
+        bw.Write((byte)1);
+        bw.Write(12u);
+        bw.Write(2);
+        bw.Write(172u);
+        WriteSized1(bw, "");
+        bw.Write(0u);
+        WriteSized1(bw, "");
+        WriteSized1(bw, "");
+        bw.Write((ushort)1);
+        WriteSized4(bw, "BSGeometry");
+        bw.Write((ushort)0);
+        bw.Write((ushort)0);
+
+        long blockSizePosA = ms.Position;
+        bw.Write(0);
+        long blockSizePosB = ms.Position;
+        bw.Write(0);
+
+        bw.Write(3u);
+        bw.Write((uint)Math.Max(Math.Max(blockNameA.Length, blockNameB.Length), 1));
+        WriteSized4(bw, blockNameA);
+        WriteSized4(bw, blockNameB);
+        WriteSized4(bw, "unused");
+
+        bw.Write(0);
+
+        long blockStartA = ms.Position;
+        bw.Write(0);
+        WriteSized4(bw, meshA0);
+        WriteSized4(bw, meshA1);
+        long blockEndA = ms.Position;
+
+        long blockStartB = ms.Position;
+        bw.Write(1);
+        WriteSized4(bw, meshB0);
+        WriteSized4(bw, meshB1);
+        long blockEndB = ms.Position;
+
+        ms.Position = blockSizePosA;
+        bw.Write(checked((int)(blockEndA - blockStartA)));
+        ms.Position = blockSizePosB;
+        bw.Write(checked((int)(blockEndB - blockStartB)));
+
         bw.Flush();
         return ms.ToArray();
     }

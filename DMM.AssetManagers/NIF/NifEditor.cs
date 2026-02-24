@@ -72,65 +72,79 @@ public sealed class NifEditor
         if (structure.HeaderStrings.Count == 0 || structure.Blocks.Count == 0 || meshes.Count == 0)
             return names;
 
-        var meshOffsets = new Dictionary<int, int>();
+        var meshOffsetsByBlock = new Dictionary<int, List<int>>();
         foreach (NifMeshStringEntry mesh in meshes)
         {
             if (mesh.Index < 0 || mesh.Index >= serialized.Count)
                 continue;
 
-            meshOffsets[serialized[mesh.Index].Offset] = mesh.Index;
-        }
+            int meshOffset = serialized[mesh.Index].Offset;
+            int blockIndex = FindContainingBlockIndex(structure.Blocks, meshOffset);
+            if (blockIndex < 0)
+                continue;
 
-        if (meshOffsets.Count == 0)
-            return names;
+            if (!meshOffsetsByBlock.TryGetValue(blockIndex, out List<int>? meshIndices))
+            {
+                meshIndices = new List<int>();
+                meshOffsetsByBlock[blockIndex] = meshIndices;
+            }
+
+            meshIndices.Add(mesh.Index);
+        }
 
         foreach (NifBlockSpan block in structure.Blocks)
         {
-            int? blockNameStringIndex = FindFirstStringRefInBlock(bytes, block.StartOffset, block.EndOffsetExclusive, serialized, structure.HeaderStrings.Count);
-            string? sanitizedBlockName = null;
-            if (blockNameStringIndex.HasValue)
-            {
-                string raw = structure.HeaderStrings[blockNameStringIndex.Value].Trim();
-                sanitizedBlockName = SanitizeSpellFileName(raw);
-                if (string.IsNullOrWhiteSpace(sanitizedBlockName))
-                    sanitizedBlockName = null;
-            }
-
-            if (sanitizedBlockName == null)
+            if (!meshOffsetsByBlock.TryGetValue(block.Index, out List<int>? meshIndicesInBlock) || meshIndicesInBlock.Count == 0)
                 continue;
 
-            foreach (KeyValuePair<int, int> pair in meshOffsets)
+            int? nameStringIndex = ReadBlockNameStringIndex(bytes, block, serialized, structure.HeaderStrings.Count);
+            if (!nameStringIndex.HasValue)
+                continue;
+
+            string sanitized = SanitizeSpellFileName(structure.HeaderStrings[nameStringIndex.Value].Trim());
+            if (string.IsNullOrWhiteSpace(sanitized))
+                continue;
+
+            meshIndicesInBlock.Sort((a, b) => serialized[a].Offset.CompareTo(serialized[b].Offset));
+            for (int i = 0; i < meshIndicesInBlock.Count; i++)
             {
-                int meshOffset = pair.Key;
-                int meshStringIndex = pair.Value;
-                if (meshOffset >= block.StartOffset && meshOffset < block.EndOffsetExclusive)
-                    names[meshStringIndex] = sanitizedBlockName;
+                int meshStringIndex = meshIndicesInBlock[i];
+                names[meshStringIndex] = i == 0 ? sanitized : $"{sanitized}_{i}";
             }
         }
 
         return names;
     }
 
-    private static int? FindFirstStringRefInBlock(
+    private static int FindContainingBlockIndex(IReadOnlyList<NifBlockSpan> blocks, int position)
+    {
+        for (int i = 0; i < blocks.Count; i++)
+        {
+            NifBlockSpan block = blocks[i];
+            if (position >= block.StartOffset && position < block.EndOffsetExclusive)
+                return block.Index;
+        }
+
+        return -1;
+    }
+
+    private static int? ReadBlockNameStringIndex(
         byte[] bytes,
-        int blockStart,
-        int blockEndExclusive,
+        NifBlockSpan block,
         IReadOnlyList<NifSerializedString> serialized,
         int headerStringCount)
     {
-        for (int pos = Align4(blockStart); pos <= blockEndExclusive - 4; pos += 4)
-        {
-            if (IsInsideSerializedRecord(serialized, pos))
-                continue;
+        if (block.StartOffset + 4 > block.EndOffsetExclusive || block.StartOffset + 4 > bytes.Length)
+            return null;
 
-            int candidateIndex = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(pos, 4));
-            if (candidateIndex < 0 || candidateIndex >= headerStringCount)
-                continue;
+        if (IsInsideSerializedRecord(serialized, block.StartOffset))
+            return null;
 
-            return candidateIndex;
-        }
+        int candidateIndex = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(block.StartOffset, 4));
+        if (candidateIndex < 0 || candidateIndex >= headerStringCount)
+            return null;
 
-        return null;
+        return candidateIndex;
     }
 
     private static bool IsInsideSerializedRecord(IReadOnlyList<NifSerializedString> serialized, int position)
@@ -144,12 +158,6 @@ public sealed class NifEditor
         }
 
         return false;
-    }
-
-    private static int Align4(int value)
-    {
-        int remainder = value & 0x3;
-        return remainder == 0 ? value : value + (4 - remainder);
     }
 
     private static string? TryGetResolvedName(string?[]? namesByMeshStringIndex, int meshStringIndex)
