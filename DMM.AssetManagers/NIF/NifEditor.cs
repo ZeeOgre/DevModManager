@@ -21,25 +21,26 @@ public sealed class NifEditor
         string fullNifPath = Path.GetFullPath(nifPath);
         string fullGameRoot = Path.GetFullPath(gameRoot);
 
-        string dataMeshesRoot = Path.Combine(fullGameRoot, "Data", "Meshes");
-        string nifRelativeToMeshes = Path.GetRelativePath(dataMeshesRoot, fullNifPath);
-        if (nifRelativeToMeshes.StartsWith("..", StringComparison.Ordinal))
-            throw new InvalidOperationException($"NIF '{nifPath}' is not under '{dataMeshesRoot}'.");
+        string nifRelativeToMeshes = ResolveNifRelativeToMeshes(fullNifPath, fullGameRoot);
 
         string nifDirRel = Path.GetDirectoryName(nifRelativeToMeshes) ?? string.Empty;
         string nifBase = Path.GetFileNameWithoutExtension(fullNifPath);
         var destinationNameCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         var planned = new List<NifReadableMeshCopy>();
+        byte[] nifBytes = File.ReadAllBytes(fullNifPath);
+        IReadOnlyList<NifSerializedString> serialized = NifReader.ReadSerializedStrings(nifBytes);
         IReadOnlyList<NifMeshStringEntry> meshes = _reader.ReadMeshStrings(fullNifPath);
+        string?[]? namesByMeshStringIndex = null;
+        if (NifReader.TryReadBethesdaStructure(nifBytes, out NifStructureScan structure))
+            namesByMeshStringIndex = ResolveMeshNamesFromBlockStructure(nifBytes, serialized, structure, meshes);
 
         foreach (NifMeshStringEntry entry in meshes)
         {
             string fullSourceMesh = Path.Combine(fullGameRoot, entry.NormalizedToken);
-            if (!File.Exists(fullSourceMesh))
-                continue;
 
-            string blockName = GetReadableMeshName(entry.NormalizedToken);
+            string blockName = TryGetResolvedName(namesByMeshStringIndex, entry.Index)
+                               ?? GetReadableMeshName(entry.NormalizedToken);
             string uniqueBlockName = EnsureUniqueName(blockName, destinationNameCounts);
             string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, uniqueBlockName + ".mesh");
             string fullDest = Path.GetFullPath(Path.Combine(fullGameRoot, destRel));
@@ -58,6 +59,171 @@ public sealed class NifEditor
         }
 
         return planned;
+    }
+
+    private static string?[] ResolveMeshNamesFromBlockStructure(
+        byte[] bytes,
+        IReadOnlyList<NifSerializedString> serialized,
+        NifStructureScan structure,
+        IReadOnlyList<NifMeshStringEntry> meshes)
+    {
+        var names = new string?[serialized.Count];
+        if (structure.HeaderStrings.Count == 0 || structure.Blocks.Count == 0 || meshes.Count == 0)
+            return names;
+
+        var meshOffsetsByBlock = new Dictionary<int, List<int>>();
+        foreach (NifMeshStringEntry mesh in meshes)
+        {
+            if (mesh.Index < 0 || mesh.Index >= serialized.Count)
+                continue;
+
+            int meshOffset = serialized[mesh.Index].Offset;
+            int blockIndex = FindContainingBlockIndex(structure.Blocks, meshOffset);
+            if (blockIndex < 0)
+                continue;
+
+            if (!meshOffsetsByBlock.TryGetValue(blockIndex, out List<int>? meshIndices))
+            {
+                meshIndices = new List<int>();
+                meshOffsetsByBlock[blockIndex] = meshIndices;
+            }
+
+            meshIndices.Add(mesh.Index);
+        }
+
+        foreach (NifBlockSpan block in structure.Blocks)
+        {
+            if (!meshOffsetsByBlock.TryGetValue(block.Index, out List<int>? meshIndicesInBlock) || meshIndicesInBlock.Count == 0)
+                continue;
+
+            int? nameStringIndex = ReadBlockNameStringIndex(bytes, block, serialized, structure.HeaderStrings);
+            if (!nameStringIndex.HasValue)
+                continue;
+
+            string sanitized = SanitizeSpellFileName(structure.HeaderStrings[nameStringIndex.Value].Trim());
+            if (string.IsNullOrWhiteSpace(sanitized))
+                continue;
+
+            meshIndicesInBlock.Sort((a, b) => serialized[a].Offset.CompareTo(serialized[b].Offset));
+            for (int i = 0; i < meshIndicesInBlock.Count; i++)
+            {
+                int meshStringIndex = meshIndicesInBlock[i];
+                names[meshStringIndex] = i == 0 ? sanitized : $"{sanitized}_{i}";
+            }
+        }
+
+        return names;
+    }
+
+    private static int FindContainingBlockIndex(IReadOnlyList<NifBlockSpan> blocks, int position)
+    {
+        for (int i = 0; i < blocks.Count; i++)
+        {
+            NifBlockSpan block = blocks[i];
+            if (position >= block.StartOffset && position < block.EndOffsetExclusive)
+                return block.Index;
+        }
+
+        return -1;
+    }
+
+    private static int? ReadBlockNameStringIndex(
+        byte[] bytes,
+        NifBlockSpan block,
+        IReadOnlyList<NifSerializedString> serialized,
+        IReadOnlyList<string> headerStrings)
+    {
+        int scanStart = block.StartOffset;
+        int scanEndExclusive = Math.Min(block.EndOffsetExclusive, block.StartOffset + 32);
+        int? fallback = null;
+
+        for (int pos = scanStart; pos <= scanEndExclusive - 4; pos += 4)
+        {
+            if (IsInsideSerializedRecord(serialized, pos))
+                continue;
+
+            int candidateIndex = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(pos, 4));
+            if (candidateIndex < 0 || candidateIndex >= headerStrings.Count)
+                continue;
+
+            string value = headerStrings[candidateIndex].Trim();
+            if (string.IsNullOrWhiteSpace(value))
+                continue;
+
+            if (value.Contains('\\') || value.Contains('/') || value.Contains('.'))
+                continue;
+
+            if (value.Contains(':'))
+                return candidateIndex;
+
+            fallback ??= candidateIndex;
+        }
+
+        return fallback;
+    }
+
+    private static bool IsInsideSerializedRecord(IReadOnlyList<NifSerializedString> serialized, int position)
+    {
+        foreach (NifSerializedString entry in serialized)
+        {
+            int recordStart = entry.Offset;
+            int recordEnd = entry.Offset + entry.PrefixSize + entry.Length;
+            if (position >= recordStart && position < recordEnd)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string? TryGetResolvedName(string?[]? namesByMeshStringIndex, int meshStringIndex)
+    {
+        if (namesByMeshStringIndex == null || meshStringIndex < 0 || meshStringIndex >= namesByMeshStringIndex.Length)
+            return null;
+
+        return namesByMeshStringIndex[meshStringIndex];
+    }
+
+    private static string SanitizeSpellFileName(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        string lowered = input.ToLowerInvariant();
+        var filtered = new List<char>(lowered.Length);
+        foreach (char c in lowered)
+        {
+            if (c == '.' || c == ' ' || c == '/' || c == '\\')
+                continue;
+
+            char value = c switch
+            {
+                '<' or '>' or ':' or '"' or '|' or '?' or '*' => '_',
+                _ => c
+            };
+
+            if (value is >= ' ' and <= '~')
+                filtered.Add(value);
+        }
+
+        return new string(filtered.ToArray());
+    }
+
+    private static string ResolveNifRelativeToMeshes(string fullNifPath, string fullGameRoot)
+    {
+        string[] meshesRoots =
+        [
+            Path.Combine(fullGameRoot, "Data", "Meshes"),
+            Path.Combine(fullGameRoot, "Meshes")
+        ];
+
+        foreach (string meshesRoot in meshesRoots)
+        {
+            string rel = Path.GetRelativePath(meshesRoot, fullNifPath);
+            if (!rel.StartsWith("..", StringComparison.Ordinal))
+                return rel;
+        }
+
+        throw new InvalidOperationException($"NIF '{fullNifPath}' is not under Data\\Meshes or Meshes in '{fullGameRoot}'.");
     }
 
     private static string GetReadableMeshName(string normalizedMeshToken)
