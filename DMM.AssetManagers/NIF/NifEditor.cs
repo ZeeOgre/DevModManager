@@ -36,7 +36,7 @@ public sealed class NifEditor
         {
             string fullSourceMesh = Path.Combine(fullGameRoot, entry.NormalizedToken);
 
-            string blockName = TryGetSpellStyleMeshName(strings, entry.Index, spellStyleLodCounts)
+            string blockName = TryGetSpellStyleMeshName(strings, entry.Index)
                                ?? GetReadableMeshName(entry.NormalizedToken);
             string uniqueBlockName = EnsureUniqueName(blockName, destinationNameCounts);
             string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, uniqueBlockName + ".mesh");
@@ -58,27 +58,20 @@ public sealed class NifEditor
         return planned;
     }
 
-    private static string? TryGetSpellStyleMeshName(IReadOnlyList<NifStringEntry> strings, int meshStringIndex, IDictionary<string, int> lodCounts)
+    private static string? TryGetSpellStyleMeshName(IReadOnlyList<NifStringEntry> strings, int meshStringIndex)
     {
-        string? objectName = null;
         for (int i = meshStringIndex - 1; i >= 0; i--)
         {
             string candidate = strings[i].Value.Trim();
             if (!LooksLikeGeometryObjectName(candidate))
                 continue;
 
-            objectName = SanitizeSpellFileName(candidate);
+            string objectName = SanitizeSpellFileName(candidate);
             if (!string.IsNullOrWhiteSpace(objectName))
-                break;
+                return objectName;
         }
 
-        if (string.IsNullOrWhiteSpace(objectName))
-            return null;
-
-        lodCounts.TryGetValue(objectName, out int current);
-        int lod = current + 1;
-        lodCounts[objectName] = lod;
-        return $"{objectName}_lod{lod}";
+        return null;
     }
 
     private static bool LooksLikeGeometryObjectName(string value)
@@ -96,8 +89,10 @@ public sealed class NifEditor
         if (IsLikelyNifTypeName(trimmed))
             return false;
 
-        bool hasPayloadShape = trimmed.Any(char.IsDigit)
-                               || trimmed.Contains(':')
+        if (LooksLikeHashedName(trimmed))
+            return false;
+
+        bool hasPayloadShape = trimmed.Contains(':')
                                || trimmed.Contains('_')
                                || trimmed.Contains(' ')
                                || trimmed.Contains('-');

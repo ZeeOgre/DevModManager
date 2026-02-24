@@ -238,6 +238,7 @@ public sealed class NifTests
 
             File.WriteAllBytes(nifPath, BuildSizedStringBytes(
                 "L2_Museum Button:1",
+                "0c80fbd66e324f86581e",
                 "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh",
                 "L2_Museum Button:1",
                 "geometries\\darkstar\\src\\bbbbbbbbbbbbbbbbbbbb.mesh"));
@@ -246,8 +247,8 @@ public sealed class NifTests
             var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
 
             Assert.Equal(2, plan.Count);
-            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1_lod1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
-            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1_lod2.mesh"), plan[1].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1_1.mesh"), plan[1].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
         }
         finally
         {
@@ -272,7 +273,7 @@ public sealed class NifTests
             var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
 
             Assert.Single(plan);
-            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1_lod1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
             Assert.False(File.Exists(plan[0].SourceMeshPath));
         }
         finally
@@ -302,7 +303,7 @@ public sealed class NifTests
             var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
 
             Assert.Single(plan);
-            Assert.EndsWith(Path.Combine("DarkStar", "architecture", "landingpad", "slab80m", "pavgenlandingstrmid023_8_lod1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "architecture", "landingpad", "slab80m", "pavgenlandingstrmid023_8.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("niintegerextradata", plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
         }
         finally
