@@ -21,25 +21,23 @@ public sealed class NifEditor
         string fullNifPath = Path.GetFullPath(nifPath);
         string fullGameRoot = Path.GetFullPath(gameRoot);
 
-        string dataMeshesRoot = Path.Combine(fullGameRoot, "Data", "Meshes");
-        string nifRelativeToMeshes = Path.GetRelativePath(dataMeshesRoot, fullNifPath);
-        if (nifRelativeToMeshes.StartsWith("..", StringComparison.Ordinal))
-            throw new InvalidOperationException($"NIF '{nifPath}' is not under '{dataMeshesRoot}'.");
+        string nifRelativeToMeshes = ResolveNifRelativeToMeshes(fullNifPath, fullGameRoot);
 
         string nifDirRel = Path.GetDirectoryName(nifRelativeToMeshes) ?? string.Empty;
         string nifBase = Path.GetFileNameWithoutExtension(fullNifPath);
         var destinationNameCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var spellStyleLodCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         var planned = new List<NifReadableMeshCopy>();
         IReadOnlyList<NifMeshStringEntry> meshes = _reader.ReadMeshStrings(fullNifPath);
+        IReadOnlyList<NifStringEntry> strings = _reader.ReadStringTable(fullNifPath);
 
         foreach (NifMeshStringEntry entry in meshes)
         {
             string fullSourceMesh = Path.Combine(fullGameRoot, entry.NormalizedToken);
-            if (!File.Exists(fullSourceMesh))
-                continue;
 
-            string blockName = GetReadableMeshName(entry.NormalizedToken);
+            string blockName = TryGetSpellStyleMeshName(strings, entry.Index, spellStyleLodCounts)
+                               ?? GetReadableMeshName(entry.NormalizedToken);
             string uniqueBlockName = EnsureUniqueName(blockName, destinationNameCounts);
             string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, uniqueBlockName + ".mesh");
             string fullDest = Path.GetFullPath(Path.Combine(fullGameRoot, destRel));
@@ -58,6 +56,114 @@ public sealed class NifEditor
         }
 
         return planned;
+    }
+
+    private static string? TryGetSpellStyleMeshName(IReadOnlyList<NifStringEntry> strings, int meshStringIndex, IDictionary<string, int> lodCounts)
+    {
+        string? objectName = null;
+        for (int i = meshStringIndex - 1; i >= 0; i--)
+        {
+            string candidate = strings[i].Value.Trim();
+            if (!LooksLikeGeometryObjectName(candidate))
+                continue;
+
+            objectName = SanitizeSpellFileName(candidate);
+            if (!string.IsNullOrWhiteSpace(objectName))
+                break;
+        }
+
+        if (string.IsNullOrWhiteSpace(objectName))
+            return null;
+
+        lodCounts.TryGetValue(objectName, out int current);
+        int lod = current + 1;
+        lodCounts[objectName] = lod;
+        return $"{objectName}_lod{lod}";
+    }
+
+    private static bool LooksLikeGeometryObjectName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        string trimmed = value.Trim();
+        if (trimmed.Length is < 2 or > 128)
+            return false;
+
+        if (trimmed.Contains('\\') || trimmed.Contains('/') || trimmed.Contains('.'))
+            return false;
+
+        if (IsLikelyNifTypeName(trimmed))
+            return false;
+
+        bool hasPayloadShape = trimmed.Any(char.IsDigit)
+                               || trimmed.Contains(':')
+                               || trimmed.Contains('_')
+                               || trimmed.Contains(' ')
+                               || trimmed.Contains('-');
+        if (!hasPayloadShape)
+            return false;
+
+        return trimmed.Any(char.IsLetter);
+    }
+
+    private static bool IsLikelyNifTypeName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        if (value.StartsWith("Ni", StringComparison.Ordinal)
+            || value.StartsWith("BS", StringComparison.Ordinal)
+            || value.StartsWith("bhk", StringComparison.Ordinal)
+            || value.StartsWith("hk", StringComparison.Ordinal))
+        {
+            return value.All(char.IsLetterOrDigit);
+        }
+
+        return false;
+    }
+
+    private static string SanitizeSpellFileName(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        string lowered = input.ToLowerInvariant();
+        var filtered = new List<char>(lowered.Length);
+        foreach (char c in lowered)
+        {
+            if (c == '.' || c == ' ' || c == '/' || c == '\\')
+                continue;
+
+            char value = c switch
+            {
+                '<' or '>' or ':' or '"' or '|' or '?' or '*' => '_',
+                _ => c
+            };
+
+            if (value is >= ' ' and <= '~')
+                filtered.Add(value);
+        }
+
+        return new string(filtered.ToArray());
+    }
+
+    private static string ResolveNifRelativeToMeshes(string fullNifPath, string fullGameRoot)
+    {
+        string[] meshesRoots =
+        [
+            Path.Combine(fullGameRoot, "Data", "Meshes"),
+            Path.Combine(fullGameRoot, "Meshes")
+        ];
+
+        foreach (string meshesRoot in meshesRoots)
+        {
+            string rel = Path.GetRelativePath(meshesRoot, fullNifPath);
+            if (!rel.StartsWith("..", StringComparison.Ordinal))
+                return rel;
+        }
+
+        throw new InvalidOperationException($"NIF '{fullNifPath}' is not under Data\\Meshes or Meshes in '{fullGameRoot}'.");
     }
 
     private static string GetReadableMeshName(string normalizedMeshToken)
