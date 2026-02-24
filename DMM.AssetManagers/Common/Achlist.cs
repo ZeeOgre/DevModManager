@@ -1,11 +1,9 @@
-using DMM.AssetManagers.BSA;
-
 namespace DMM.AssetManagers.Common;
 
 public sealed class AchlistEntry
 {
     public required string ArchivePath { get; init; }
-    public BsaCompressionMode Compression { get; init; } = BsaCompressionMode.InheritArchive;
+    public BA2CompressionMode Compression { get; init; } = BA2CompressionMode.InheritArchive;
 }
 
 public static class Achlist
@@ -31,7 +29,7 @@ public static class Achlist
             if (parts.Length == 0 || string.IsNullOrWhiteSpace(parts[0]))
                 continue;
 
-            var compression = BsaCompressionMode.InheritArchive;
+            var compression = BA2CompressionMode.InheritArchive;
             if (parts.Length > 1 && !string.IsNullOrWhiteSpace(parts[1]))
                 compression = ParseCompression(parts[1], lineNo);
 
@@ -45,14 +43,14 @@ public static class Achlist
         return entries;
     }
 
-    private static BsaCompressionMode ParseCompression(string value, int lineNo)
+    private static BA2CompressionMode ParseCompression(string value, int lineNo)
     {
         return value.Trim().ToLowerInvariant() switch
         {
-            "inherit" or "default" => BsaCompressionMode.InheritArchive,
-            "compressed" or "zip" or "zlib" => BsaCompressionMode.Compressed,
-            "uncompressed" or "store" or "none" => BsaCompressionMode.Uncompressed,
-            "smart" or "auto" => BsaCompressionMode.Smart,
+            "inherit" or "default" => BA2CompressionMode.InheritArchive,
+            "compressed" or "zip" or "zlib" => BA2CompressionMode.Compressed,
+            "uncompressed" or "store" or "none" => BA2CompressionMode.Uncompressed,
+            "smart" or "auto" => BA2CompressionMode.Smart,
             _ => throw new FormatException($"Unsupported achlist compression token '{value}' at line {lineNo}.")
         };
     }
