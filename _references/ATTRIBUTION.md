@@ -13,6 +13,7 @@ It is **not** used as a direct code source to copy/paste into this repository.
 The `bsa-rs` project (licensed under **0BSD**) is used as a design basis for the C# BSA implementation in this repository.
 
 - Upstream project: `bsa-rs`
+- Upstream Repository `https://github.com/Ryan-rsm-McKenzie/bsa-rs`
 - Upstream license: `0BSD`
 - Local project license: `MIT`
 
