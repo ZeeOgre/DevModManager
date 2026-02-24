@@ -366,6 +366,95 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Without_Reference_Falls_Back_To_Mesh_Derived_Name()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "activator_tall.nif");
+            string meshPath = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(meshPath)!);
+            File.WriteAllBytes(meshPath, [1]);
+
+            File.WriteAllBytes(nifPath, BuildMixedSizedStringBytes(
+                (2, "GenMachinery_CentralModuleD002:0"),
+                (2, "_t"),
+                (4, "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh")));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "src.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Uses_Referenced_String_Id_For_Name_Deterministically()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "activator_tall.nif");
+            string meshPath = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(meshPath)!);
+            File.WriteAllBytes(meshPath, [1]);
+
+            File.WriteAllBytes(nifPath, BuildMixedSizedStringBytesWithIntRefs(
+                (4, "GenMachinery_CentralModuleD002:0"),
+                (4, "_t"),
+                (4, "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh"),
+                0));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "genmachinery_centralmoduled002_0.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Uses_Referenced_Id_Even_For_Short_Tag_When_Present()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "activator_tall.nif");
+            string meshPath = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(meshPath)!);
+            File.WriteAllBytes(meshPath, [1]);
+
+            File.WriteAllBytes(nifPath, BuildMixedSizedStringBytesWithIntRefs(
+                (4, "GenMachinery_CentralModuleD002:0"),
+                (4, "_t"),
+                (4, "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh"),
+                1));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "_t.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Writer_RewriteStringsInPlace_Rewrites_Multiple_Tokens_In_One_Pass()
     {
         string root = CreateTempRoot();
@@ -500,6 +589,45 @@ public sealed class NifTests
         }
 
         return ms.ToArray();
+    }
+
+    private static byte[] BuildMixedSizedStringBytesWithIntRefs(
+        (int PrefixSize, string Value) first,
+        (int PrefixSize, string Value) second,
+        (int PrefixSize, string Value) mesh,
+        int referencedStringIndex)
+    {
+        using var ms = new MemoryStream();
+
+        WriteSized(ms, first.PrefixSize, first.Value);
+        WriteSized(ms, second.PrefixSize, second.Value);
+
+        Span<byte> idx = stackalloc byte[4];
+        BinaryPrimitives.WriteInt32LittleEndian(idx, referencedStringIndex);
+        ms.Write(idx);
+
+        WriteSized(ms, mesh.PrefixSize, mesh.Value);
+        return ms.ToArray();
+    }
+
+    private static void WriteSized(MemoryStream ms, int prefixSize, string value)
+    {
+        byte[] b = Encoding.ASCII.GetBytes(value);
+        if (prefixSize == 2)
+        {
+            Span<byte> len = stackalloc byte[2];
+            BinaryPrimitives.WriteUInt16LittleEndian(len, checked((ushort)b.Length));
+            ms.Write(len);
+        }
+        else
+        {
+            Span<byte> len = stackalloc byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(len, b.Length);
+            ms.Write(len);
+        }
+
+        ms.Write(b);
+        ms.WriteByte(0);
     }
 
     private static string CreateTempRoot()

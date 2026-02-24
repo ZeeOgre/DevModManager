@@ -29,6 +29,8 @@ public sealed class NifEditor
         var spellStyleLodCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         var planned = new List<NifReadableMeshCopy>();
+        byte[] nifBytes = File.ReadAllBytes(fullNifPath);
+        IReadOnlyList<NifSerializedString> serialized = NifReader.ReadSerializedStrings(nifBytes);
         IReadOnlyList<NifMeshStringEntry> meshes = _reader.ReadMeshStrings(fullNifPath);
         IReadOnlyList<NifStringEntry> strings = _reader.ReadStringTable(fullNifPath);
 
@@ -36,7 +38,7 @@ public sealed class NifEditor
         {
             string fullSourceMesh = Path.Combine(fullGameRoot, entry.NormalizedToken);
 
-            string blockName = TryGetSpellStyleMeshName(strings, entry.Index)
+            string blockName = TryResolveNameFromReferencedStringId(nifBytes, serialized, strings, entry.Index)
                                ?? GetReadableMeshName(entry.NormalizedToken);
             string uniqueBlockName = EnsureUniqueName(blockName, destinationNameCounts);
             string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, uniqueBlockName + ".mesh");
@@ -58,64 +60,32 @@ public sealed class NifEditor
         return planned;
     }
 
-    private static string? TryGetSpellStyleMeshName(IReadOnlyList<NifStringEntry> strings, int meshStringIndex)
+    private static string? TryResolveNameFromReferencedStringId(
+        byte[] bytes,
+        IReadOnlyList<NifSerializedString> serialized,
+        IReadOnlyList<NifStringEntry> strings,
+        int meshStringIndex)
     {
-        for (int i = meshStringIndex - 1; i >= 0; i--)
+        if (meshStringIndex < 0 || meshStringIndex >= serialized.Count)
+            return null;
+
+        int meshOffset = serialized[meshStringIndex].Offset;
+        int minOffset = Math.Max(0, meshOffset - 512);
+
+        for (int pos = meshOffset - 4; pos >= minOffset; pos--)
         {
-            string candidate = strings[i].Value.Trim();
-            if (!LooksLikeGeometryObjectName(candidate))
+            int candidateIndex = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(pos, 4));
+            if (candidateIndex < 0 || candidateIndex >= strings.Count)
                 continue;
 
-            string objectName = SanitizeSpellFileName(candidate);
-            if (!string.IsNullOrWhiteSpace(objectName))
-                return objectName;
+            string sanitized = SanitizeSpellFileName(strings[candidateIndex].Value.Trim());
+            if (string.IsNullOrWhiteSpace(sanitized))
+                continue;
+
+            return sanitized;
         }
 
         return null;
-    }
-
-    private static bool LooksLikeGeometryObjectName(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
-
-        string trimmed = value.Trim();
-        if (trimmed.Length is < 2 or > 128)
-            return false;
-
-        if (trimmed.Contains('\\') || trimmed.Contains('/') || trimmed.Contains('.'))
-            return false;
-
-        if (IsLikelyNifTypeName(trimmed))
-            return false;
-
-        if (LooksLikeHashedName(trimmed))
-            return false;
-
-        bool hasPayloadShape = trimmed.Contains(':')
-                               || trimmed.Contains('_')
-                               || trimmed.Contains(' ')
-                               || trimmed.Contains('-');
-        if (!hasPayloadShape)
-            return false;
-
-        return trimmed.Any(char.IsLetter);
-    }
-
-    private static bool IsLikelyNifTypeName(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
-
-        if (value.StartsWith("Ni", StringComparison.Ordinal)
-            || value.StartsWith("BS", StringComparison.Ordinal)
-            || value.StartsWith("bhk", StringComparison.Ordinal)
-            || value.StartsWith("hk", StringComparison.Ordinal))
-        {
-            return value.All(char.IsLetterOrDigit);
-        }
-
-        return false;
     }
 
     private static string SanitizeSpellFileName(string input)
