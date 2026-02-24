@@ -190,6 +190,234 @@ public sealed class NifReader
         return entries;
     }
 
+    public bool TryReadBethesdaStructure(string nifPath, out NifStructureScan structure)
+    {
+        if (nifPath == null) throw new ArgumentNullException(nameof(nifPath));
+        if (!File.Exists(nifPath)) throw new FileNotFoundException("NIF not found", nifPath);
+
+        return TryReadBethesdaStructure(File.ReadAllBytes(nifPath), out structure);
+    }
+
+    internal static bool TryReadBethesdaStructure(byte[] bytes, out NifStructureScan structure)
+    {
+        structure = new NifStructureScan();
+        try
+        {
+            int pos = 0;
+            if (!TryReadLine(bytes, ref pos, out _))
+                return false;
+
+            if (!TryReadUInt32(bytes, ref pos, out _))
+                return false;
+
+            if (!TryReadByte(bytes, ref pos, out _))
+                return false;
+
+            if (!TryReadUInt32(bytes, ref pos, out _))
+                return false;
+
+            if (!TryReadInt32(bytes, ref pos, out int blockCount) || blockCount <= 0)
+                return false;
+
+            if (!TryReadUInt32(bytes, ref pos, out uint streamVersion))
+                return false;
+
+            if (!TryReadSizedString1(bytes, ref pos, out _))
+                return false;
+
+            if (streamVersion > 130 && !TryReadUInt32(bytes, ref pos, out _))
+                return false;
+
+            if (!TryReadSizedString1(bytes, ref pos, out _))
+                return false;
+            if (!TryReadSizedString1(bytes, ref pos, out _))
+                return false;
+            if (streamVersion == 130 && !TryReadSizedString1(bytes, ref pos, out _))
+                return false;
+
+            if (!TryReadUInt16(bytes, ref pos, out ushort blockTypeCount))
+                return false;
+
+            for (int i = 0; i < blockTypeCount; i++)
+            {
+                if (!TryReadSizedString4(bytes, ref pos, out _))
+                    return false;
+            }
+
+            int blockTypeIndexBytes = blockCount * sizeof(ushort);
+            if (!TrySkip(bytes, ref pos, blockTypeIndexBytes))
+                return false;
+
+            var blockSizes = new List<int>(blockCount);
+            for (int i = 0; i < blockCount; i++)
+            {
+                if (!TryReadInt32(bytes, ref pos, out int blockSize) || blockSize < 0)
+                    return false;
+
+                blockSizes.Add(blockSize);
+            }
+
+            if (!TryReadUInt32(bytes, ref pos, out uint stringCountValue))
+                return false;
+            if (!TryReadUInt32(bytes, ref pos, out _))
+                return false;
+
+            int stringCount = checked((int)stringCountValue);
+            var headerStrings = new List<string>(stringCount);
+            for (int i = 0; i < stringCount; i++)
+            {
+                if (!TryReadSizedString4(bytes, ref pos, out string value))
+                    return false;
+
+                headerStrings.Add(value);
+            }
+
+            if (!TryReadInt32(bytes, ref pos, out int groupCount) || groupCount < 0)
+                return false;
+
+            if (!TrySkip(bytes, ref pos, groupCount * sizeof(int)))
+                return false;
+
+            int blocksStart = pos;
+            var blocks = new List<NifBlockSpan>(blockCount);
+            int runningOffset = blocksStart;
+            for (int i = 0; i < blockCount; i++)
+            {
+                int size = blockSizes[i];
+                int endOffset = runningOffset + size;
+                if (endOffset < runningOffset || endOffset > bytes.Length)
+                    return false;
+
+                blocks.Add(new NifBlockSpan
+                {
+                    Index = i,
+                    StartOffset = runningOffset,
+                    EndOffsetExclusive = endOffset
+                });
+
+                runningOffset = endOffset;
+            }
+
+            structure = new NifStructureScan
+            {
+                BlocksStartOffset = blocksStart,
+                HeaderStrings = headerStrings,
+                Blocks = blocks
+            };
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool TryReadLine(byte[] bytes, ref int pos, out string value)
+    {
+        int start = pos;
+        while (pos < bytes.Length && bytes[pos] != (byte)'\n')
+            pos++;
+
+        if (pos >= bytes.Length)
+        {
+            value = string.Empty;
+            return false;
+        }
+
+        value = System.Text.Encoding.ASCII.GetString(bytes, start, pos - start);
+        pos++;
+        return true;
+    }
+
+    private static bool TrySkip(byte[] bytes, ref int pos, int count)
+    {
+        if (count < 0 || pos + count > bytes.Length)
+            return false;
+
+        pos += count;
+        return true;
+    }
+
+    private static bool TryReadByte(byte[] bytes, ref int pos, out byte value)
+    {
+        if (pos + 1 > bytes.Length)
+        {
+            value = 0;
+            return false;
+        }
+
+        value = bytes[pos++];
+        return true;
+    }
+
+    private static bool TryReadUInt16(byte[] bytes, ref int pos, out ushort value)
+    {
+        if (pos + 2 > bytes.Length)
+        {
+            value = 0;
+            return false;
+        }
+
+        value = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(pos, 2));
+        pos += 2;
+        return true;
+    }
+
+    private static bool TryReadUInt32(byte[] bytes, ref int pos, out uint value)
+    {
+        if (pos + 4 > bytes.Length)
+        {
+            value = 0;
+            return false;
+        }
+
+        value = BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(pos, 4));
+        pos += 4;
+        return true;
+    }
+
+    private static bool TryReadInt32(byte[] bytes, ref int pos, out int value)
+    {
+        if (pos + 4 > bytes.Length)
+        {
+            value = 0;
+            return false;
+        }
+
+        value = BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(pos, 4));
+        pos += 4;
+        return true;
+    }
+
+    private static bool TryReadSizedString1(byte[] bytes, ref int pos, out string value)
+    {
+        value = string.Empty;
+        if (!TryReadByte(bytes, ref pos, out byte length))
+            return false;
+
+        if (pos + length > bytes.Length)
+            return false;
+
+        value = System.Text.Encoding.ASCII.GetString(bytes, pos, length);
+        pos += length;
+        return true;
+    }
+
+    private static bool TryReadSizedString4(byte[] bytes, ref int pos, out string value)
+    {
+        value = string.Empty;
+        if (!TryReadInt32(bytes, ref pos, out int length) || length < 0)
+            return false;
+
+        if (pos + length > bytes.Length)
+            return false;
+
+        value = System.Text.Encoding.ASCII.GetString(bytes, pos, length);
+        pos += length;
+        return true;
+    }
+
     internal static bool TryNormalizeMatToken(string token, out string normalized)
     {
         normalized = string.Empty;
