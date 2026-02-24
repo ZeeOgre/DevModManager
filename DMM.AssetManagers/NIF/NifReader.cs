@@ -128,7 +128,29 @@ public sealed class NifReader
         if (printable != s.Length)
             return false;
 
-        return s.Contains('\\') || s.Contains('/') || s.Contains('.') || s.Contains("Data", StringComparison.OrdinalIgnoreCase);
+        if (s.Contains('\\') || s.Contains('/') || s.Contains('.') || s.Contains("Data", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return LooksLikeNamePayload(s);
+    }
+
+    private static bool LooksLikeNamePayload(string s)
+    {
+        if (s.Length is < 3 or > 128)
+            return false;
+
+        bool hasLetter = false;
+        bool hasStructure = false;
+        foreach (char c in s)
+        {
+            if (char.IsLetter(c))
+                hasLetter = true;
+
+            if (char.IsDigit(c) || c == ':' || c == '_' || c == '-' || c == ' ')
+                hasStructure = true;
+        }
+
+        return hasLetter && hasStructure;
     }
 
     public IEnumerable<string> ExtractAll(string nifPath)

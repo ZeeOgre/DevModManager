@@ -64,6 +64,28 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Reader_ReadStringTable_Includes_SizedString2_Block_Name_Payloads()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "sample.nif");
+            File.WriteAllBytes(nifPath, BuildMixedSizedStringBytes(
+                (2, "GenMachinery_CentralModuleD002:0"),
+                (4, "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh")));
+
+            var reader = new NifReader();
+            var strings = reader.ReadStringTable(nifPath).Select(x => x.Value).ToList();
+
+            Assert.Contains("GenMachinery_CentralModuleD002:0", strings, StringComparer.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Reader_ExtractAll_Includes_Rig_And_Havok_Tokens()
     {
         string root = CreateTempRoot();
@@ -113,6 +135,33 @@ public sealed class NifTests
             int copied = writer.ExecuteReadableMeshCopyPlan(plan);
             Assert.Equal(1, copied);
             Assert.True(File.Exists(plan[0].DestinationMeshPath));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Supports_Meshes_Root_Without_Data_Folder()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Meshes", "Weapons", "Laser", "rifle.nif");
+            string sourceMesh = Path.Combine(root, "Data", "Geometries", "weapons", "laser", "hash_987.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(sourceMesh)!);
+
+            File.WriteAllBytes(sourceMesh, [1, 2, 3]);
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes("geometries\\weapons\\laser\\hash_987"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("Data", "Geometries", "Weapons", "Laser", "rifle", "hash_987.mesh"), plan[0].DestinationMeshPath, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(Path.Combine("Geometries", "Weapons", "Laser", "rifle", "hash_987.mesh"), plan[0].RewrittenMeshToken);
         }
         finally
         {
@@ -195,6 +244,128 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Uses_SpellStyle_ObjectName_Lod_Naming_When_Available()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "invis_museumbutton01.nif");
+            string mesh1 = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            string mesh2 = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "bbbbbbbbbbbbbbbbbbbb.mesh");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(mesh1)!);
+            File.WriteAllBytes(mesh1, [1]);
+            File.WriteAllBytes(mesh2, [1]);
+
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "L2_Museum Button:1",
+                "0c80fbd66e324f86581e",
+                "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh",
+                "L2_Museum Button:1",
+                "geometries\\darkstar\\src\\bbbbbbbbbbbbbbbbbbbb.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Equal(2, plan.Count);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1_1.mesh"), plan[1].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Includes_Entries_When_Source_Mesh_Is_Missing()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "invis_museumbutton01.nif");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "L2_Museum Button:1",
+                "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.False(File.Exists(plan[0].SourceMeshPath));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Prefers_Block_Name_Over_Nif_Class_Name()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "architecture", "landingpad", "slab80m.nif");
+            string meshPath = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(meshPath)!);
+            File.WriteAllBytes(meshPath, [1]);
+
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "NiIntegerExtraData",
+                "PavGenLandingStrMid023:8",
+                "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("DarkStar", "architecture", "landingpad", "slab80m", "pavgenlandingstrmid023_8.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("niintegerextradata", plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Uses_SizedString2_Name_For_Target_File_Basename()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "activator_tall.nif");
+            string meshPath = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "0c80fbd66e324f86581e.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(meshPath)!);
+            File.WriteAllBytes(meshPath, [1]);
+
+            File.WriteAllBytes(nifPath, BuildMixedSizedStringBytes(
+                (2, "GenMachinery_CentralModuleD002:0"),
+                (4, "geometries\\darkstar\\src\\0c80fbd66e324f86581e.mesh"),
+                (2, "GenMachinery_CentralModuleD002:0"),
+                (4, "geometries\\darkstar\\src\\1c40c7e82300b9b3e9e5.mesh")));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Equal(2, plan.Count);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "genmachinery_centralmoduled002_0.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "activator_tall", "genmachinery_centralmoduled002_0_1.mesh"), plan[1].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Writer_RewriteStringsInPlace_Rewrites_Multiple_Tokens_In_One_Pass()
     {
         string root = CreateTempRoot();
@@ -217,6 +388,40 @@ public sealed class NifTests
             Assert.Contains("first\\replacement.mesh", strings, StringComparer.Ordinal);
             Assert.Contains("second\\replacement.mesh", strings, StringComparer.Ordinal);
             Assert.Contains("keep", strings, StringComparer.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Writer_ExecuteReadableMeshCopyPlan_Moves_Source_To_Parsed_And_Copies_To_Target()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string source = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            string destination = Path.Combine(root, "Data", "Geometries", "DarkStar", "activators", "sample", "block.mesh");
+            Directory.CreateDirectory(Path.GetDirectoryName(source)!);
+            File.WriteAllBytes(source, [7, 8, 9]);
+
+            var writer = new NifWriter();
+            int copied = writer.ExecuteReadableMeshCopyPlan([
+                new NifReadableMeshCopy
+                {
+                    SourceMeshPath = source,
+                    DestinationMeshPath = destination
+                }
+            ]);
+
+            Assert.Equal(1, copied);
+            Assert.True(File.Exists(destination));
+
+            string parsedSource = Path.Combine(root, "Data", "Geometries", "Parsed", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            Assert.False(File.Exists(source));
+            Assert.True(File.Exists(parsedSource));
+            Assert.Equal(File.ReadAllBytes(parsedSource), File.ReadAllBytes(destination));
         }
         finally
         {
@@ -264,6 +469,32 @@ public sealed class NifTests
             Span<byte> len = stackalloc byte[4];
             BinaryPrimitives.WriteInt32LittleEndian(len, b.Length);
             ms.Write(len);
+            ms.Write(b);
+            ms.WriteByte(0);
+        }
+
+        return ms.ToArray();
+    }
+
+    private static byte[] BuildMixedSizedStringBytes(params (int PrefixSize, string Value)[] tokens)
+    {
+        using var ms = new MemoryStream();
+        foreach ((int prefixSize, string value) in tokens)
+        {
+            byte[] b = Encoding.ASCII.GetBytes(value);
+            if (prefixSize == 2)
+            {
+                Span<byte> len = stackalloc byte[2];
+                BinaryPrimitives.WriteUInt16LittleEndian(len, checked((ushort)b.Length));
+                ms.Write(len);
+            }
+            else
+            {
+                Span<byte> len = stackalloc byte[4];
+                BinaryPrimitives.WriteInt32LittleEndian(len, b.Length);
+                ms.Write(len);
+            }
+
             ms.Write(b);
             ms.WriteByte(0);
         }
