@@ -222,6 +222,66 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Uses_SpellStyle_ObjectName_Lod_Naming_When_Available()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "invis_museumbutton01.nif");
+            string mesh1 = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "aaaaaaaaaaaaaaaaaaaa.mesh");
+            string mesh2 = Path.Combine(root, "Data", "Geometries", "darkstar", "src", "bbbbbbbbbbbbbbbbbbbb.mesh");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(mesh1)!);
+            File.WriteAllBytes(mesh1, [1]);
+            File.WriteAllBytes(mesh2, [1]);
+
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "L2_Museum Button:1",
+                "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh",
+                "L2_Museum Button:1",
+                "geometries\\darkstar\\src\\bbbbbbbbbbbbbbbbbbbb.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Equal(2, plan.Count);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1_lod1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1_lod2.mesh"), plan[1].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public void Editor_BuildReadableMeshCopyPlan_Includes_Entries_When_Source_Mesh_Is_Missing()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "Data", "Meshes", "DarkStar", "activators", "invis_museumbutton01.nif");
+            Directory.CreateDirectory(Path.GetDirectoryName(nifPath)!);
+
+            File.WriteAllBytes(nifPath, BuildSizedStringBytes(
+                "L2_Museum Button:1",
+                "geometries\\darkstar\\src\\aaaaaaaaaaaaaaaaaaaa.mesh"));
+
+            var editor = new NifEditor(new NifReader());
+            var plan = editor.BuildReadableMeshCopyPlan(nifPath, root).ToList();
+
+            Assert.Single(plan);
+            Assert.EndsWith(Path.Combine("DarkStar", "activators", "invis_museumbutton01", "l2_museumbutton_1_lod1.mesh"), plan[0].RewrittenMeshToken, StringComparison.OrdinalIgnoreCase);
+            Assert.False(File.Exists(plan[0].SourceMeshPath));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Writer_RewriteStringsInPlace_Rewrites_Multiple_Tokens_In_One_Pass()
     {
         string root = CreateTempRoot();
