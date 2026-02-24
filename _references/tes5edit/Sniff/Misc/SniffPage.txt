@@ -1,0 +1,113 @@
+A batch NIF processing tool intended for intelligent [url=https://fallout.fandom.com/wiki/S%27Lanter]S'Lanters[/url]
+When input and output folders are the same files will be updated in place.
+Drag&dropping files and folders on Sniff window will run the selected operation on them.
+Clicking on "Processed files" label allows to set up processed files extensions per operation.
+Window style (dark theme) can be changed from the right click menu.
+
+[center][img]https://staticdelivery.nexusmods.com/mods/130/images/67829/67829-1680446417-1522923342.jpeg[/img][/center]
+NIF
+[list]
+[*][color=#f6b26b]Update tangents and binormals[/color] - recalculate tangents, binormals and optionally normal vectors in shapes using modified Unity's code
+[*][color=#f6b26b]Update bounds[/color] - recalculate bounding sphere (center and radius) in BSTriShape, NiTriShapeData and NiTriStripsData
+[*][color=#f6b26b]Optimize mesh[/color] - triangulation, stripification and various optimizations using [url=https://github.com/zeux/meshoptimizer]MeshOptimizer[/url] library
+[*][color=#f6b26b]Search and replace assets[/color] - perform search and replace on assets paths (textures and other referenced files) in meshes
+[*][color=#f6b26b]Convert to and from JSON[/color] - convert *.nif and *.kf files to text JSON format (for viewing, comparing, editing) and back
+[*][color=#f6b26b]Universal tweaker[/color] - change any value in any block types or in the single block specified by path
+[*][color=#f6b26b]Universal fixer[/color] - fix some common nif issues
+[*][color=#f6b26b]Apply transformation[/color] - apply transformation to shapes and nodes with adjustable exceptions
+[*][color=#f6b26b]Adjust transformation[/color] - adjust transformation of the root node or nodes matched by Name
+[*][color=#f6b26b]Rename strings[/color] - search and replace in the Strings list in NiHeader
+[*][color=#f6b26b]Attach parent NiNode[/color] - the same as Attach Parent in NifSkope applied to NiNode or its descendants with defined name
+[*][color=#f6b26b]Copy geometry blocks[/color] - copy geometry data in BSTriShape, NiTriShape and NiTriStrips blocks between meshes preserving existing links. Blocks are matched by name. Used to copy updated geometry data back from reexported meshes preserving original nif data structure and settings
+[*][color=#f6b26b]Vertex color painting[/color] - set/adjust/remove vertex colors and/or alpha
+[*][color=#f6b26b]Group shapes[/color] - group children shapes of the root node using the same diffuse texture or FO4 material under newely created parent NiNode named after texture file
+[*][color=#f6b26b]Merge shapes[/color] - merge BSTriShape, NiTriShape and NiTriStrips blocks under NiNodes matched by name. Running Group shapes and then Merge shapes containing ".dds" basically works as precombination
+[*][color=#f6b26b]Remove nodes[/color] - remove nodes matched by name or type (the whole branch including children)
+[*][color=#f6b26b]Remove unused nodes[/color] - remove blocks not used by anything, optionally remove extra root nodes except single one
+[*][color=#f6b26b]Convert root node[/color] - convert the root node type
+[*][color=#f6b26b]Change partition slot[/color] - change partition slot in BSDismemberSkinInstance
+[*][color=#f6b26b]Dismember NiSkinInstance[/color] - convert NiSkinInstance blocks to BSDismemberSkinInstance
+[*][color=#f6b26b]Add NiLODNode[/color] - move strips and shapes to the added NiLODNode block
+[*][color=#f6b26b]Add RootCollisionNode[/color] - create RootCollisionNode containing all shapes in TES3 meshes
+[*][color=#f6b26b]Add bounding box[/color] - add NiNode named "Bounding Box" to the root node if missing with BOX_BV bounding volume data in TES3 meshes
+[*][color=#f6b26b]Set missing names[/color] - rename unnamed nodes and optionally the root node after the file name (more readable crash logs and less CK assertions)
+[*][color=#f6b26b]Update author[/color] - update Author, Process and Export Script fields in NiHeader
+[/list]
+
+Report
+[list]
+[*][color=#f6b26b]Check for errors[/color] - find and report some common errors
+[*][color=#f6b26b]Analyze mesh[/color] - calculate mesh efficiency using [url=https://github.com/zeux/meshoptimizer]MeshOptimizer[/url] library
+[*][color=#f6b26b]Find unwelded vertices[/color] - find vertices within specified distance to each other in the same shape
+[*][color=#f6b26b]Find several strips[/color] - find NiTriStripsData blocks with Strips Num larger than the defined value. Each additional strip requires a separate draw call which negatively affects performance. Ideally Strips Num should be 1, larger values indicate unoptimized or badly exported meshes
+[*][color=#f6b26b]Find excessive draw calls[/color] - find meshes causing excessive amount of draw calls (rough estimation)
+[*][color=#f6b26b]Find UVs[/color] - find meshes having UVs outside of defined range
+[/list]
+
+Animation
+[list]
+[*][color=#f6b26b]Copy anim controlled blocks[/color] - copy missing cotrolled blocks between *.kf animation files
+[*][color=#f6b26b]Copy anim priorities[/color] - copy priorities of controlled blocks between kf files matched by name
+[*][color=#f6b26b]Rename controlled blocks[/color] - rename controlled blocks in *.kf animation files
+[*][color=#f6b26b]Remove controlled blocks[/color] - remove controlled blocks in *.kf animation files containing provided strings
+[*][color=#f6b26b]Update priority of controlled blocks[/color] - change Priority values in controlled blocks of NiControllerSequence matched by name
+[*][color=#f6b26b]Quadratic to linear anim[/color] - change quadratic interpolation to linear in matched controlled blocks
+[*][color=#f6b26b]Fix 3DS exported KF[/color] - several fixes for *.kf files after exporting from 3DS Max
+[*][color=#f6b26b]Optimize KF animations[/color] - remove excess repeated keys from transform data blocks
+[*][color=#f6b26b]Add headtracking anim[/color] - add headtracking animation
+[*][color=#f6b26b]Add facial anim[/color] - add facial animations
+[*][color=#f6b26b]Add NiTransformData[/color] - add NiTransformData with quaternion Rotation keys and optionally Translation keys to NiTransformInterpolator
+[*][color=#f6b26b]Weijiesen's blow up thing[/color] - postprocessing for blowing up animation
+[*][color=#f6b26b]Add blocks from skeleton[/color] - create anim controlled blocks in death animation for skeleton bones without collision
+[/list]
+
+Collision
+[list]
+[*][color=#f6b26b]Update MOPP code[/color] - update MOPP collision code with the proper working one (x86 Sniff only, requires NifMopp.dll)
+[*][color=#f6b26b]Update Havok settings[/color] - change collision parameters (material, mass, friction, etc.)
+[*][color=#f6b26b]Update Havok inertia[/color] - ñalculate inertia tensor matrix in simple collision shapes: box, sphere, capsule. Optionally calculate collision center
+[*][color=#f6b26b]Update ragdoll constraint[/color] - ñalculate Twist plane axis (Motor in NifSkope) A and B values in bhkRagdollConstraint
+[*][color=#f6b26b]Search for Havok material[/color] - find meshes using the specified Havok collision type
+[*][color=#f6b26b]Convert FO3 collision[/color] - change bhkConvexListShape used in FO3 but unsupported in FNV to bhkListShape
+[/list]
+
+Shader
+[list]
+[*][color=#f6b26b]Update shader flags[/color] - update shader flags in BSLightingShaderProperty and BSShaderPPLightingProperty
+[*][color=#f6b26b]Update parallax settings[/color] - change parallax values in shaders
+[*][color=#f6b26b]Convert to shader 3.0[/color] - convert BSShaderPPLightingProperty to Lighting30ShaderProperty
+[*][color=#f6b26b]Real Time Reflections - NVSE[/color] - add RL reflections flag (Unknown10) and remove light fade flag in shaders with environment mapping
+[/list]
+
+Command Line
+[code]-OP:"Universal tweaker"
+    Automatically start processing with the specified operation and close the app when done
+-S:"c:\Sniff\My.ini"
+    Use the custom ini settings file instead of the default Sniff.ini. If provided name
+    is not an absolute path then it is treated as relative to the Sniff folder.
+    Can be used to create settings for operations running from command line. Just select
+    the operation, set values and press Exit.
+-I:"c:\Input"
+    Set Input directory
+-O:"c:\Output"
+    Set Output directory
+-P:"armor"
+    Set Path contains value to process files which path or file name contain the string
+-subdir:yes
+    Include subdirectories (any other value means "no")
+-skip:yes
+    Skip on errors (any other value means "no")
+-all:yes
+    Copy all input files (any other value means "no")
+-LOG:"C:\Sniff\log.txt"
+    Save messages into the specified file
+
+Update tangents in the folder
+Sniff.exe -OP:"Update tangents and binormals" -I:"D:\Mod\Meshes" -O:"D:\Mod\Meshes" -subdir:yes
+
+Change Alpha flags on armors (create ini with desired settings beforehand)
+Sniff.exe -OP:"Universal tweaker" -S:"ChangeAlphaFlags.ini" -I:"D:\Mod\Meshes" -O:"D:\Mod\Meshes" -P:"armor" -subdir:yes
+
+Check for errors and save report (create ini with desired checks beforehand)
+Sniff.exe -OP:"Check for errors" -S:"Checks.ini" -I:"D:\Mod\Meshes" -LOG:"D:\Mod\ErrorMeshes.txt" -subdir:yes
+[/code]

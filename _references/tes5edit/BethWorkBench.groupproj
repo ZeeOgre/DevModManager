@@ -1,0 +1,84 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{B7D687DF-B0C5-44E1-BF8B-D527D515D81B}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="xEdit.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="xDump.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="BSArch.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="BSArchPro.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Sniff.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="xEdit">
+        <MSBuild Projects="xEdit.dproj"/>
+    </Target>
+    <Target Name="xEdit:Clean">
+        <MSBuild Projects="xEdit.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="xEdit:Make">
+        <MSBuild Projects="xEdit.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="xDump">
+        <MSBuild Projects="xDump.dproj"/>
+    </Target>
+    <Target Name="xDump:Clean">
+        <MSBuild Projects="xDump.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="xDump:Make">
+        <MSBuild Projects="xDump.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="BSArch">
+        <MSBuild Projects="BSArch.dproj"/>
+    </Target>
+    <Target Name="BSArch:Clean">
+        <MSBuild Projects="BSArch.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="BSArch:Make">
+        <MSBuild Projects="BSArch.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="BSArchPro">
+        <MSBuild Projects="BSArchPro.dproj"/>
+    </Target>
+    <Target Name="BSArchPro:Clean">
+        <MSBuild Projects="BSArchPro.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="BSArchPro:Make">
+        <MSBuild Projects="BSArchPro.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Sniff">
+        <MSBuild Projects="Sniff.dproj"/>
+    </Target>
+    <Target Name="Sniff:Clean">
+        <MSBuild Projects="Sniff.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Sniff:Make">
+        <MSBuild Projects="Sniff.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="xEdit;xDump;BSArch;BSArchPro;Sniff"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="xEdit:Clean;xDump:Clean;BSArch:Clean;BSArchPro:Clean;Sniff:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="xEdit:Make;xDump:Make;BSArch:Make;BSArchPro:Make;Sniff:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

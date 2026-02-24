@@ -1,0 +1,35 @@
+[package]
+authors = ["Ryan McKenzie"]
+categories = ["encoding", "game-development"]
+description = "A Rust library for working with the Bethesda archive file format"
+documentation = "https://ryan-rsm-mckenzie.github.io/bsa-rs/ba2/index.html"
+edition = "2021"
+homepage = "https://github.com/Ryan-rsm-McKenzie/bsa-rs"
+include = [
+  "src/*",
+  "Cargo.toml",
+  "LICENSE",
+  "README.md",
+]
+keywords = ["archive", "ba2", "bethesda", "bgs", "bsa"]
+license = "0BSD"
+name = "ba2"
+readme = "README.md"
+repository = "https://github.com/Ryan-rsm-McKenzie/bsa-rs"
+version = "3.0.1"
+
+[dependencies]
+bitflags = "2.4.1"
+bstr = "1.7.0"
+directxtex = "1.1.0"
+flate2 = {version = "1.0.28", default-features = false, features = ["any_zlib"]}
+lzzzz = "1.0.4"
+memmap2 = "0.9.0"
+thiserror = "1.0.50"
+
+[dev-dependencies]
+anyhow = "1.0.75"
+walkdir = "2.4.0"
+
+[features]
+default = ["flate2/zlib"]

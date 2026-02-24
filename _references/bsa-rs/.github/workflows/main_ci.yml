@@ -1,0 +1,41 @@
+name: Main CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/main_ci.yml"
+      - "data/**/*"
+      - "src/**/*.rs"
+      - "Cargo.lock"
+      - "Cargo.toml"
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Nightly
+        run: |
+          rustup toolchain install nightly --component clippy
+          rustup override set nightly
+
+      - name: Clippy
+        run: cargo clippy -- -Dwarnings
+
+      - name: Build
+        run: cargo build
+
+      - name: Test
+        run: cargo test
