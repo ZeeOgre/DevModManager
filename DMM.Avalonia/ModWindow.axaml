@@ -5,6 +5,7 @@
         xmlns:local="using:DMM.Avalonia"
         mc:Ignorable="d"
         x:Class="DMM.Avalonia.ModWindow"
+        x:DataType="local:ModWindowViewModel"
         Width="760"
         Height="600"
         MinWidth="700"

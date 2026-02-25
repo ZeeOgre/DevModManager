@@ -5,6 +5,7 @@
         xmlns:local="using:DMM.Avalonia"
         mc:Ignorable="d"
         x:Class="DMM.Avalonia.MainWindow"
+        x:DataType="local:MainWindowViewModel"
         Width="1350"
         Height="820"
         MinWidth="1080"
