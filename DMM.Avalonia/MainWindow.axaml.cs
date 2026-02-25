@@ -39,6 +39,10 @@ public partial class MainWindow : Window
         {
             _viewModel.StatusMessage = $"Open backup archive requested for {modName}.";
         }
+
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
     }
 
     private void OpenBethesda_Click(object? sender, RoutedEventArgs e)
