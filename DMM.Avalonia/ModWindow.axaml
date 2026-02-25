@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:DMM.Avalonia"
+        mc:Ignorable="d"
+        x:Class="DMM.Avalonia.ModWindow"
+        Width="760"
+        Height="600"
+        MinWidth="700"
+        MinHeight="540"
+        Title="Mod Focus">
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="16" RowSpacing="12">
+        <Border Background="#1F242E" CornerRadius="8" Padding="12">
+            <StackPanel Spacing="3">
+                <TextBlock Text="{Binding ModName}" FontSize="24" FontWeight="Bold" />
+                <TextBlock Text="{Binding PluginInfo}" Opacity="0.85" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Background="#1F242E" CornerRadius="8" Padding="12">
+            <Grid ColumnDefinitions="Auto,220,Auto,220" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <TextBlock Text="Game Folder:" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding GameFolders}" SelectedItem="{Binding SelectedGameFolder}" />
+                <TextBlock Grid.Column="2" Text="Active Stage:" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="3" ItemsSource="{Binding StageOptions}" SelectedItem="{Binding SelectedStage}" />
+
+                <TextBlock Grid.Row="1" Text="Initialization Rule:" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
+                           Text="ESP present => init DEV. ESM/ESL only => init RELEASE then clone to DEV and convert to ESP."
+                           TextWrapping="Wrap" Opacity="0.85" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Background="#1F242E" CornerRadius="8" Padding="12">
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="10">
+                <Button Content="Convert Type (ESP/ESM/ESL)" CommandParameter="Convert Type" Click="Action_Click" />
+                <Button Grid.Column="1" Content="Gather Dependencies" CommandParameter="Gather Dependencies" Click="Action_Click" />
+                <Button Grid.Column="2" Content="Make BA2 Archives" CommandParameter="Make BA2 Archives" Click="Action_Click" />
+
+                <Button Grid.Row="1" Content="Convert NIFs to Readable Meshes" CommandParameter="Convert NIFs" Click="Action_Click" />
+                <Button Grid.Row="1" Grid.Column="1" Content="Generate Icons" CommandParameter="Generate Icons" Click="Action_Click" />
+                <Button Grid.Row="1" Grid.Column="2" Content="Create Dated Backup" CommandParameter="Create Dated Backup" Click="Action_Click" />
+
+                <Button Grid.Row="2" Content="Promote Stage" CommandParameter="Promote Stage" Click="Action_Click" />
+                <Button Grid.Row="2" Grid.Column="1" Content="Prepare Production Bundles" CommandParameter="Prepare Production Bundles" Click="Action_Click" />
+                <Button Grid.Row="2" Grid.Column="2" Content="Deploy To Game Folder" CommandParameter="Deploy To Game Folder" Click="Action_Click" />
+
+                <Button Grid.Row="3" Content="Open Stage Folder" CommandParameter="Open Stage Folder" Click="Action_Click" />
+                <Button Grid.Row="3" Grid.Column="1" Content="Git Sync" CommandParameter="Git Sync" Click="Action_Click" />
+                <Button Grid.Row="3" Grid.Column="2" Content="Close" HorizontalAlignment="Stretch" Click="Close_Click" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="3" Background="#1F242E" CornerRadius="8" Padding="10">
+            <TextBlock Text="{Binding StatusMessage}" />
+        </Border>
+    </Grid>
+</Window>
