@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 
 namespace DMM.Avalonia;
 
@@ -60,6 +61,33 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OpenGameFolder_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = $"Open game folder requested: {_viewModel.SelectedGameFolder}.";
+
+    private void LaunchCreationKit_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage =
+            $"Launch Creation Kit requested for {_viewModel.SelectedGameFolder}; if missing, prompt install.";
+
+    private void LaunchXEdit_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Launch xEdit requested from central tools folder.";
+
+    private void LaunchNifSkope_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Launch NifSkope requested from central tools folder.";
+
+    private void LaunchAssetWatcher_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage =
+            $"Launch AssetWatcher requested from per-game tool folder for {_viewModel.SelectedGameFolder}.";
+
+    private void LaunchIde_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Launch preferred IDE requested (typically VS Code).";
+
+    private void OpenPluginsTxt_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage =
+            $"Open plugins.txt requested for {_viewModel.SelectedGameFolder}.";
+
+    private void OpenLoadOrderManager_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Open Load Order manager requested.";
+
     private async void OpenModWindow_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { CommandParameter: ModListItem mod })
@@ -106,11 +134,11 @@ public sealed class MainWindowViewModel : NotifyBase
         vm.StageOptions.Add("PRERELEASE");
         vm.StageOptions.Add("RELEASE");
 
-        vm.Mods.Add(new ModListItem("ZO_AIOGamePlayTweaks", "ZO_AIOGamePlayTweaks.esp", "DEV", "f7dc7ac6...", "345221"));
-        vm.Mods.Add(new ModListItem("ZO_DenserOutposts", "ZO_DenserOutposts.esm", "RELEASE", "c5bbdd20...", "817744"));
-        vm.Mods.Add(new ModListItem("ZO_HandScannerTweaks", "ZO_HandScannerTweaks.esl", "TEST", "3f102ab3...", "593188"));
-        vm.Mods.Add(new ModListItem("WT_SmartDoc", "WT_SmartDoc.esp", "DEV", "2120ee1a...", "772843"));
-        vm.Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194"));
+        vm.Mods.Add(new ModListItem("ZO_AIOGamePlayTweaks", "ZO_AIOGamePlayTweaks.esp", "DEV", "f7dc7ac6...", "345221", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+        vm.Mods.Add(new ModListItem("ZO_DenserOutposts", "ZO_DenserOutposts.esm", "RELEASE", "c5bbdd20...", "817744", new SolidColorBrush(Color.Parse("#343434"))));
+        vm.Mods.Add(new ModListItem("ZO_HandScannerTweaks", "ZO_HandScannerTweaks.esl", "TEST", "3f102ab3...", "593188", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+        vm.Mods.Add(new ModListItem("WT_SmartDoc", "WT_SmartDoc.esp", "DEV", "2120ee1a...", "772843", new SolidColorBrush(Color.Parse("#343434"))));
+        vm.Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194", new SolidColorBrush(Color.Parse("#2B2B2B"))));
 
         return vm;
     }
@@ -118,13 +146,14 @@ public sealed class MainWindowViewModel : NotifyBase
 
 public sealed class ModListItem
 {
-    public ModListItem(string name, string primaryPlugin, string currentStage, string bethesdaId, string nexusId)
+    public ModListItem(string name, string primaryPlugin, string currentStage, string bethesdaId, string nexusId, IBrush rowBackground)
     {
         Name = name;
         PrimaryPlugin = primaryPlugin;
         CurrentStage = currentStage;
         BethesdaId = bethesdaId;
         NexusId = nexusId;
+        RowBackground = rowBackground;
     }
 
     public string Name { get; }
@@ -132,6 +161,7 @@ public sealed class ModListItem
     public string CurrentStage { get; }
     public string BethesdaId { get; }
     public string NexusId { get; }
+    public IBrush RowBackground { get; }
 }
 
 public abstract class NotifyBase : INotifyPropertyChanged
