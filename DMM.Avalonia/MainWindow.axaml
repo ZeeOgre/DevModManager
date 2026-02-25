@@ -2,8 +2,105 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:local="using:DMM.Avalonia"
+        mc:Ignorable="d"
         x:Class="DMM.Avalonia.MainWindow"
-        Title="DMM.Avalonia">
-    Welcome to Avalonia!
+        x:DataType="local:MainWindowViewModel"
+        Width="1350"
+        Height="820"
+        MinWidth="1080"
+        MinHeight="640"
+        Title="DevModManager - Avalonia Prototype">
+    <Window.Resources>
+        <SolidColorBrush x:Key="PanelBackground">#1F242E</SolidColorBrush>
+        <SolidColorBrush x:Key="RowBackground">#262C38</SolidColorBrush>
+        <SolidColorBrush x:Key="RowBorder">#3D4452</SolidColorBrush>
+        <SolidColorBrush x:Key="HeaderBackground">#1567B0</SolidColorBrush>
+    </Window.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="16" RowSpacing="12">
+        <Border Background="{StaticResource PanelBackground}" CornerRadius="8" Padding="14">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="DevModManager" FontSize="26" FontWeight="Bold" />
+                    <TextBlock Text="Track in-development mods, stage progression, and per-mod operations." Opacity="0.8" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Grid.Column="1">
+                    <Button Content="Scan Game Folder" Click="ScanGameFolder_Click" />
+                    <Button Content="Load Order" Click="LoadOrder_Click" />
+                    <Button Content="Settings" Click="OpenSettings_Click" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Background="{StaticResource PanelBackground}" CornerRadius="8" Padding="10">
+            <Grid ColumnDefinitions="Auto,280,Auto,180,Auto,*" ColumnSpacing="10" RowDefinitions="Auto">
+                <TextBlock VerticalAlignment="Center" Text="Game Folder:" />
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding GameFolders}"
+                          SelectedItem="{Binding SelectedGameFolder}" />
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="Reserved Platform Paths:" />
+                <TextBlock Grid.Column="3" VerticalAlignment="Center" Text="XBOX / PS / SWITCH" />
+                <TextBlock Grid.Column="4" VerticalAlignment="Center" Text="Core Stages:" />
+                <TextBlock Grid.Column="5" VerticalAlignment="Center" Text="DEV → TEST → RELEASE (extensible)" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="4">
+            <Border Background="{StaticResource HeaderBackground}" Padding="8" CornerRadius="6,6,0,0">
+                <Grid ColumnDefinitions="3*,1.4*,1.1*,1.3*,1.2*,1.2*,1.4*" ColumnSpacing="8">
+                    <TextBlock Text="Mod" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1" Text="Primary Plugin" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="2" Text="Current Stage" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="3" Text="Backup Folder" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="4" Text="Bethesda" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="5" Text="Nexus" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="6" Text="Actions" FontWeight="SemiBold" />
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl ItemsSource="{Binding Mods}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="local:ModListItem">
+                            <Border Background="{StaticResource RowBackground}"
+                                    BorderBrush="{StaticResource RowBorder}"
+                                    BorderThickness="1"
+                                    Padding="8">
+                                <Grid ColumnDefinitions="3*,1.4*,1.1*,1.3*,1.2*,1.2*,1.4*" ColumnSpacing="8">
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding PrimaryPlugin}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding CurrentStage}" VerticalAlignment="Center" />
+                                    <Button Grid.Column="3"
+                                            Content="Open Backups"
+                                            CommandParameter="{Binding Name}"
+                                            Click="OpenBackups_Click" />
+                                    <Button Grid.Column="4"
+                                            Content="Bethesda"
+                                            CommandParameter="{Binding Name}"
+                                            Click="OpenBethesda_Click" />
+                                    <Button Grid.Column="5"
+                                            Content="Nexus"
+                                            CommandParameter="{Binding Name}"
+                                            Click="OpenNexus_Click" />
+                                    <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="6">
+                                        <Button Content="Focus"
+                                                CommandParameter="{Binding}"
+                                                Click="OpenModWindow_Click" />
+                                        <Button Content="Deploy"
+                                                CommandParameter="{Binding Name}"
+                                                Click="DeployToGameFolder_Click" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <Border Grid.Row="3" Background="{StaticResource PanelBackground}" CornerRadius="8" Padding="10">
+            <TextBlock Text="{Binding StatusMessage}" />
+        </Border>
+    </Grid>
 </Window>
