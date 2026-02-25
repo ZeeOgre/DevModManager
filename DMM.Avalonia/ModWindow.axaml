@@ -1,0 +1,140 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:DMM.Avalonia"
+        mc:Ignorable="d"
+        x:Class="DMM.Avalonia.ModWindow"
+        x:DataType="local:ModWindowViewModel"
+        Width="920"
+        Height="700"
+        MinWidth="860"
+        MinHeight="620"
+        Title="Mod Focus"
+        Background="#252525"
+        Foreground="#FFFFFF">
+    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Margin="16" RowSpacing="12">
+        <Border Background="#2B2B2B" CornerRadius="8" Padding="12">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="{Binding ModName}" FontSize="24" FontWeight="Bold" />
+                    <TextBlock Text="{Binding PluginInfo}" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="Help" Click="OpenHelp_Click" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Background="#323232" CornerRadius="8" Padding="12">
+            <Grid ColumnDefinitions="Auto,220,Auto,220" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <TextBlock Text="Game Folder:" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding GameFolders}" SelectedItem="{Binding SelectedGameFolder}" />
+                <TextBlock Grid.Column="2" Text="Active Stage:" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="3" ItemsSource="{Binding StageOptions}" SelectedItem="{Binding SelectedStage}" />
+
+                <TextBlock Grid.Row="1" Text="Initialization Rule:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
+                           Text="ESP present => init DEV. ESM/ESL only => init RELEASE then clone to DEV and convert to ESP."
+                           TextWrapping="Wrap" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Background="#2B2B2B" CornerRadius="8" Padding="12">
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="10">
+                <Button Content="Convert Type" CommandParameter="Convert Type" Click="Action_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="ESM -> ESP" CommandParameter="Convert Type: ESM -> ESP" Click="ContextAction_Click" />
+                            <MenuItem Header="ESP -> ESM Full" CommandParameter="Convert Type: ESP -> ESM Full" Click="ContextAction_Click" />
+                            <MenuItem Header="ESP -> ESM Medium" CommandParameter="Convert Type: ESP -> ESM Medium" Click="ContextAction_Click" />
+                            <MenuItem Header="ESP -> ESM Small" CommandParameter="Convert Type: ESP -> ESM Small" Click="ContextAction_Click" />
+                            <MenuItem Header="ESP -> ESL" CommandParameter="Convert Type: ESP -> ESL" Click="ContextAction_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+
+                <Button Grid.Column="1" Content="Gather Dependencies" CommandParameter="Gather Dependencies" Click="Action_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Gather Dependencies" CommandParameter="Gather Dependencies" Click="ContextAction_Click" />
+                            <MenuItem Header="Build Achlist" CommandParameter="Build Achlist" Click="ContextAction_Click" />
+                            <MenuItem Header="Convert Audio ESP -> ESM" CommandParameter="Convert Audio ESP -> ESM" Click="ContextAction_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+
+                <Button Grid.Column="2" Content="Make BA2 Archives" CommandParameter="Make BA2 Archives" Click="Action_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="PC" CommandParameter="Make BA2: PC" Click="ContextAction_Click" />
+                            <MenuItem Header="XBox" CommandParameter="Make BA2: XBox" Click="ContextAction_Click" />
+                            <MenuItem Header="PSN" CommandParameter="Make BA2: PSN" Click="ContextAction_Click" />
+                            <MenuItem Header="Switch" CommandParameter="Make BA2: Switch" Click="ContextAction_Click" />
+                            <MenuItem Header="ALL" CommandParameter="Make BA2: ALL" Click="ContextAction_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+
+                <Button Grid.Row="1" Content="NIF Operations" CommandParameter="NIF Operations" Click="Action_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Batch Convert Nif Readable Mesh" CommandParameter="NIF: Batch Convert Readable Mesh" Click="ContextAction_Click" />
+                            <MenuItem Header="Batch Nif Deduplicate Strings" CommandParameter="NIF: Deduplicate Strings" Click="ContextAction_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+
+                <Button Grid.Row="1" Grid.Column="1" Content="Generate Icons" CommandParameter="Generate Icons" Click="Action_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Workshop" CommandParameter="Generate Icons: Workshop" Click="ContextAction_Click" />
+                            <MenuItem Header="Inventory" CommandParameter="Generate Icons: Inventory" Click="ContextAction_Click" />
+                            <MenuItem Header="ShipBuilder" CommandParameter="Generate Icons: ShipBuilder" Click="ContextAction_Click" />
+                            <MenuItem Header="ALL" CommandParameter="Generate Icons: ALL" Click="ContextAction_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+
+                <Button Grid.Row="1" Grid.Column="2" Content="Backup" CommandParameter="Backup" Click="Action_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Create Dated Backup" CommandParameter="Backup: Create Dated Backup" Click="ContextAction_Click" />
+                            <MenuItem Header="Open Backup Folder" CommandParameter="Backup: Open Backup Folder" Click="ContextAction_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+
+                <Button Grid.Row="2" Content="Promote Stage (Wizard)" CommandParameter="Promote Stage (Wizard)" Click="Action_Click" />
+
+                <Button Grid.Row="2" Grid.Column="1" Content="Prepare Production Bundles" CommandParameter="Prepare Production Bundles" Click="Action_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Creations" CommandParameter="Prepare Bundle: Creations" Click="ContextAction_Click" />
+                            <MenuItem Header="Nexus" CommandParameter="Prepare Bundle: Nexus" Click="ContextAction_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+
+                <Button Grid.Row="2" Grid.Column="2" Content="Deploy (Wizard)" CommandParameter="Deploy (Wizard)" Click="Action_Click" />
+
+                <Button x:Name="StageFolderButton" Grid.Row="3" Content="Open Stage Folder" CommandParameter="Open Stage Folder" Click="Action_Click" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="3" Background="#323232" CornerRadius="8" Padding="10">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <TextBlock Text="Git Control" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    <Button Content="↑" Width="34" Height="30" Click="GitUp_Click" />
+                    <Button Content="⟳" Width="34" Height="30" Click="GitSync_Click" />
+                    <Button Content="↓" Width="34" Height="30" Click="GitDown_Click" />
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="Close" Width="120" Click="Close_Click" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="4" Background="#0A3F78" CornerRadius="8" Padding="10">
+            <TextBlock Text="{Binding StatusMessage}" />
+        </Border>
+    </Grid>
+</Window>

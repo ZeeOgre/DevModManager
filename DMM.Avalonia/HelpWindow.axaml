@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:DMM.Avalonia"
+        mc:Ignorable="d"
+        x:Class="DMM.Avalonia.HelpWindow"
+        x:DataType="local:HelpWindowViewModel"
+        Width="920"
+        Height="700"
+        MinWidth="760"
+        MinHeight="520"
+        Title="DevModManager Help"
+        Background="#252525"
+        Foreground="#FFFFFF">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="12" RowSpacing="8">
+        <Border Background="#0A3F78" CornerRadius="8" Padding="10">
+            <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="18" />
+        </Border>
+
+        <Border Grid.Row="1" Background="#2B2B2B" CornerRadius="8" Padding="10">
+            <ScrollViewer>
+                <SelectableTextBlock Text="{Binding Content}" TextWrapping="Wrap" />
+            </ScrollViewer>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="Close" Width="120" Click="Close_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
