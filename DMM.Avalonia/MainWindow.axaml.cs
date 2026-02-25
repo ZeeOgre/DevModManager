@@ -23,8 +23,12 @@ public partial class MainWindow : Window
         _viewModel.StatusMessage =
             "Scan requested: discovering mods from game folder and inferring default branch initialization rules.";
 
-    private void LoadOrder_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.StatusMessage = "Load Order manager launch is currently a stub.";
+    private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
+    {
+        var helpWindow = HelpWindow.ForSection("Main");
+        await helpWindow.ShowDialog(this);
+        _viewModel.StatusMessage = "Help viewed.";
+    }
 
     private void OpenSettings_Click(object? sender, RoutedEventArgs e) =>
         _viewModel.StatusMessage = "Settings window launch is currently a stub.";
@@ -35,6 +39,10 @@ public partial class MainWindow : Window
         {
             _viewModel.StatusMessage = $"Open backup archive requested for {modName}.";
         }
+
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
     }
 
     private void OpenBethesda_Click(object? sender, RoutedEventArgs e)
@@ -81,12 +89,18 @@ public partial class MainWindow : Window
     private void LaunchIde_Click(object? sender, RoutedEventArgs e) =>
         _viewModel.StatusMessage = "Launch preferred IDE requested (typically VS Code).";
 
-    private void OpenPluginsTxt_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.StatusMessage =
-            $"Open plugins.txt requested for {_viewModel.SelectedGameFolder}.";
-
     private void OpenLoadOrderManager_Click(object? sender, RoutedEventArgs e) =>
         _viewModel.StatusMessage = "Open Load Order manager requested.";
+
+
+    private void GitUp_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Git control: push/up requested.";
+
+    private void GitSync_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Git control: sync requested.";
+
+    private void GitDown_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Git control: pull/down requested.";
 
     private async void OpenModWindow_Click(object? sender, RoutedEventArgs e)
     {

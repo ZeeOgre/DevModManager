@@ -13,15 +13,59 @@ public partial class ModWindow : Window
         InitializeComponent();
         _viewModel = new ModWindowViewModel(mod, gameFolders, stages);
         DataContext = _viewModel;
+        BuildStageFolderContextMenu();
+    }
+
+    private void BuildStageFolderContextMenu()
+    {
+        var menu = new ContextMenu();
+        foreach (var stage in _viewModel.StageOptions)
+        {
+            var item = new MenuItem
+            {
+                Header = stage,
+                CommandParameter = $"Open Stage Folder: {stage}"
+            };
+            item.Click += ContextAction_Click;
+            menu.Items.Add(item);
+        }
+
+        StageFolderButton.ContextMenu = menu;
     }
 
     private void Action_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { CommandParameter: string action })
         {
-            _viewModel.StatusMessage = $"{action} requested for {_viewModel.ModName} ({_viewModel.SelectedStage} @ {_viewModel.SelectedGameFolder}).";
+            _viewModel.StatusMessage =
+                $"{action} requested for {_viewModel.ModName} ({_viewModel.SelectedStage} @ {_viewModel.SelectedGameFolder}). Right-click for options.";
         }
     }
+
+    private void ContextAction_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { CommandParameter: string action })
+        {
+            _viewModel.StatusMessage =
+                $"{action} requested for {_viewModel.ModName} ({_viewModel.SelectedStage} @ {_viewModel.SelectedGameFolder}).";
+        }
+    }
+
+    private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
+    {
+        var helpWindow = HelpWindow.ForSection("ModFocus");
+        await helpWindow.ShowDialog(this);
+        _viewModel.StatusMessage = "Help viewed (ModFocus section).";
+    }
+
+    private void GitUp_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Git control: push/up requested for current mod.";
+
+    private void GitSync_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Git control: sync requested for current mod.";
+
+    private void GitDown_Click(object? sender, RoutedEventArgs e) =>
+        _viewModel.StatusMessage = "Git control: pull/down requested for current mod.";
 
     private void Close_Click(object? sender, RoutedEventArgs e) => Close();
 }
@@ -45,7 +89,7 @@ public sealed class ModWindowViewModel : NotifyBase
 
         SelectedGameFolder = GameFolders.Count > 0 ? GameFolders[0] : "Primary Game Folder";
         SelectedStage = StageOptions.Contains(mod.CurrentStage) ? mod.CurrentStage : "DEV";
-        StatusMessage = "Select an action to run a workflow stub.";
+        StatusMessage = "Select an action. Right-click buttons for detailed options.";
     }
 
     public string ModName { get; }
