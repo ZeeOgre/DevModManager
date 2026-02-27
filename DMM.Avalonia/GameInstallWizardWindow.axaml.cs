@@ -102,7 +102,9 @@ public partial class GameInstallWizardWindow : Window
         install.Manage = editable.Manage;
         install.GameStore = editable.GameStore;
         install.ManagedGame = editable.ManagedGame;
+        install.StoreAppId = editable.StoreAppId;
         install.InstallPath = editable.InstallPath;
+        install.IsDlc = editable.IsDlc;
     }
 
     private void SaveSelection_Click(object? sender, RoutedEventArgs e)
