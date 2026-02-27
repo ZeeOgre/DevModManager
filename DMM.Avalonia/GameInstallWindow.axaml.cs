@@ -16,10 +16,10 @@ public partial class GameInstallWindow : Window
     public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)
     {
         InitializeComponent();
-        DataContext = install;
         ManagedGames = managedGames;
         ShowNavigation = showNavigation;
         _onManagedGameAdded = onManagedGameAdded;
+        DataContext = install;
     }
 
     private async void BrowseFolder_Click(object? sender, RoutedEventArgs e)
