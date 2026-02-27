@@ -5,7 +5,8 @@
         xmlns:local="using:DMM.Avalonia"
         mc:Ignorable="d"
         x:Class="DMM.Avalonia.GameInstallWindow"
-        x:DataType="local:GameInstallRecord"
+        x:Name="Root"
+        x:DataType="local:GameInstallWindow"
         Width="760"
         Height="420"
         Background="#252525"
@@ -18,8 +19,8 @@
         <Style Selector="ComboBox"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#323232" /></Style>
     </Window.Styles>
 
-    <Grid Margin="14" RowDefinitions="*,Auto">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="170,* ,Auto" RowSpacing="10" ColumnSpacing="8">
+    <Grid Margin="14" RowDefinitions="*,Auto" x:DataType="local:GameInstallRecord">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="170,*,Auto" RowSpacing="10" ColumnSpacing="8">
             <TextBlock Text="Managed:" VerticalAlignment="Center" />
             <CheckBox Grid.Column="1" IsChecked="{Binding Manage}" />
 
@@ -31,12 +32,15 @@
             <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Click="BrowseFolder_Click" />
 
             <TextBlock Grid.Row="3" Text="Managed Game:" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding $parent[Window].ManagedGames}" SelectedItem="{Binding ManagedGame}" />
+            <ComboBox Grid.Row="3" Grid.Column="1"
+                      ItemsSource="{Binding ManagedGames, ElementName=Root}"
+                      SelectedItem="{Binding ManagedGame}" />
             <Button Grid.Row="3" Grid.Column="2" Content="Add New" Click="AddManagedGame_Click" />
         </Grid>
 
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
-            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding $parent[Window].ShowNavigation}">
+            <StackPanel Orientation="Horizontal" Spacing="8"
+                        IsVisible="{Binding ShowNavigation, ElementName=Root}">
                 <Button Content="◀ Previous" />
                 <Button Content="Next ▶" />
             </StackPanel>

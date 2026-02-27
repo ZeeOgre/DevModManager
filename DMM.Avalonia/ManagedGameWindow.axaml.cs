@@ -5,6 +5,12 @@ namespace DMM.Avalonia;
 
 public partial class ManagedGameWindow : Window
 {
+    public ManagedGameWindow()
+    {
+        InitializeComponent();
+        DataContext = new ManagedGame();
+    }
+
     public ManagedGameWindow(ManagedGame game)
     {
         InitializeComponent();
