@@ -1,0 +1,26 @@
+# virtualenv
+.venv/
+venv/
+
+# pytest
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+
+# build artifacts
+build/
+output/
+*.spec
+
+# editors
+.idea
+.vscode
+
+# game description cache
+cache.dat
+cache.bak
+cache.dir
+
+# debug files
+debug.py
+credentials.data

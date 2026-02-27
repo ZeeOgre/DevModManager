@@ -1,0 +1,16 @@
+# debug purposes and local dev stuff
+.venv
+credentials.data
+Pipfile
+
+# tools
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+
+build/
+output/
+*.spec
+
+.idea/
+.vscode/

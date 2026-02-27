@@ -1,0 +1,14 @@
+{
+    "forks_to_sync": [
+        "update-test-integration",
+        "galaxy-integration-bethesda",
+        "galaxy-integration-rockstar",
+        "galaxy-integration-gw2",
+        "galaxy-integration-humble",
+        "galaxy-integration-wargaming",
+        "galaxy-integration-pathofexile",
+        "galaxy-integration-minecraft",
+        "galaxy-integration-blizzard",
+        "galaxy-integration-ffxiv"
+    ]
+}

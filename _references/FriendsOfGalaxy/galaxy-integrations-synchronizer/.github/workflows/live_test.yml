@@ -1,0 +1,41 @@
+name: Live test
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - 'scripts.py'
+
+jobs:
+  update_test_repo:
+    runs-on: ubuntu-18.04
+    steps:
+
+    - uses: actions/checkout@v1
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Update and release test repository
+      env:
+        GITHUB_TOKEN: ${{ secrets.TEST_REPO_TOKEN }}
+      run: |
+        git clone https://FriendsOfGalaxyTester:${{ secrets.TEST_REPO_TOKEN }}@github.com/FriendsOfGalaxyTester/test-integration.git
+        cd test-integration
+        pip install -r requirements.txt
+        git config --local user.email "FriendsOfGalaxy+1@gmail.com"
+        git config --local user.name "FriendsOfGalaxyTester"
+        inv autoincrement
+        git commit -a -m "autoincrement"
+        git push origin master
+        inv release
+        cd ..
+
+    - name: Trigger sync event on test repo fork
+      env:
+        GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+      run: 
+        python send_dispatch.py test-integration-fork sync --token $GITHUB_TOKEN

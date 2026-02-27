@@ -1,0 +1,117 @@
+{
+  "plugins":
+  [
+    {
+      "platform": "origin",
+      "guid": "7f53219b-4e2b-4591-9f4f-dfc5f4ba9eb0",
+      "name": "Galaxy plugin Origin",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-origin",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-origin/master/current_version.json",
+      "popular": true
+    },
+    {
+      "platform": "steam",
+      "guid": "ca27391f-2675-49b1-92c0-896d43afa4f8",
+      "name": "Galaxy plugin Steam",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-steam",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-steam/master/current_version.json",
+      "popular": true
+    },
+    {
+      "platform": "psn",
+      "guid": "38087aea-3c30-439f-867d-ddf9fae8fe6f",
+      "name": "Galaxy plugin PSN",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-psn",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-psn/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "uplay",
+      "guid": "afb5a69c-b2ee-4d58-b916-f4cd75d4999a",
+      "name": "Galaxy plugin Uplay",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-uplay",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-uplay/master/current_version.json",
+      "popular": true
+    },
+    {
+      "platform": "bethesda",
+      "guid": "cb57391f-1675-35b1-05c0-896d43bdf4f8",
+      "name": "Galaxy plugin Bethesda",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-bethesda",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-bethesda/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "paradox",
+      "guid": "bfa5a6c9-r0c3-5g28-b921-f4cd75d4999a",
+      "name": "Galaxy plugin Paradox",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-paradox",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-paradox/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "gw2",
+      "guid": "637b1fd4-b1d0-4de8-9bf6-757e639807f3",
+      "name": "Galaxy plugin Guild Wars 2",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-gw2",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-gw2/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "humble",
+      "guid": "f0ca3d80-a432-4d35-a9e3-60f27161ac3a",
+      "name": "Galaxy plugin Humble Bundle",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-humble",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-humble/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "minecraft",
+      "guid": "cb57391f-1675-35b1-05c0-896d43bdf8f4",
+      "name": "Galaxy plugin Minecraft",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-minecraft",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-minecraft/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "pathofexile",
+      "guid": "52d06761-1c23-d725-9720-57ee0b8b14bc",
+      "name": "Galaxy plugin PathOfExile",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-pathofexile",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-pathofexile/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "wargaming",
+      "guid": "91728e8a-33c3-4b6d-8382-4dd31043dec1",
+      "name": "Galaxy plugin Wargaming",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-wargaming",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-wargaming/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "rockstar",
+      "guid": "774732b5-69c4-405c-b6c9-92cd55740cfe",
+      "name": "Galaxy plugin Rockstar",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-rockstar",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-rockstar/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "battlenet",
+      "guid": "ba170431-0649-482f-863b-d248592f1842",
+      "name": "Galaxy plugin Battle.net",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-blizzard",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-blizzard/master/current_version.json",
+      "popular": false
+    },
+    {
+      "platform": "ffxiv",
+      "guid": "0a9eb0eb-812a-45a1-bc40-c1cd82195313",
+      "name": "Galaxy plugin FFXIV",
+      "url": "https://github.com/FriendsOfGalaxy/galaxy-integration-ffxiv",
+      "update_url": "https://raw.githubusercontent.com/FriendsOfGalaxy/galaxy-integration-ffxiv/master/current_version.json",
+      "popular": false
+    }
+  ]
+}

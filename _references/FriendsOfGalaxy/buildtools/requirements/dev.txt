@@ -1,0 +1,4 @@
+setuptools~=80.9
+pytest~=8.4
+twine~=6.2
+invoke~=2.2

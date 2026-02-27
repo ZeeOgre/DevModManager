@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Connect with Wargaming.net</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="content">
+            <header class="main-header">
+                <div class="main-header__container">
+                    <img class="wargaming-logo-icon" src="img/icon-wargaming-logo.svg" alt="Steam logo">
+                    <div class="main-header__title">
+                        <h1 class="title">Connect with Wargaming.net</h1>
+                        <p class="subtitle">To an existing Wargaming.net account</p>
+                    </div>
+                </div>
+                <div class="main-header__container padlock-icon-container">
+                    <svg class="padlock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15">
+                        <g fill-rule="evenodd">
+                            <path d="M7.5 0c2 0 3.5 1.6 3.5 3.5V5h1a2 2 0 012 2v6a2 2 0 01-2 2H3a2 2 0 01-2-2V7c0-1.1.9-2 2-2h1V3.5C4 1.5 5.6 0 7.5 0zm0 8c-.2 0-.4.2-.5.4v3.1a.5.5 0 001 0v-3c0-.3-.2-.5-.5-.5zm0-7C6.2 1 5.1 2 5 3.3V5h5V3.5C10 2.2 9 1.1 7.7 1h-.2z"/>
+                        </g>
+                    </svg>
+                    <span class="tooltip">GOG Galaxy does not hold your data. Your login and password will be sent as encrypted data to Wargaming.net servers.</span>
+                </div>
+            </header>
+            
+            <section class="main-content">
+                <form id="main-form" class="main-form" action="/login" method="POST">
+
+                    <fieldset id="fieldset_login" style="display: none;">
+                        <legend>Login with your Wargaming.net account below to access your Wargaming.net games and friends from GOG Galaxy.</legend>
+                        <div class="field-group">
+                            <label for="step-1-realm">Realm</label>
+                            <select class="basic-input login-input" id="step-1-realm" name="realm" disabled="disabled">
+                                <option>RU</option>
+                                <option>EU</option>
+                                <option>NA</option>
+                                <option>ASIA</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label for="step-1-email">Wargaming.net email</label>
+                            <input class="basic-input login-input" type="email" id="step-1-email" name="email" disabled="disabled" placeholder="name@example.com">
+                        </div>
+                        <div class="field-group">
+                            <label for="step-1-password">Password</label>
+                            <input class="basic-input login-input" type="password" id="step-1-password" name="password" disabled="disabled">
+                        </div>
+                    </fieldset>
+
+                    <fieldset id="fieldset_login_error" style="display: none;">
+                        <p class="error-message">
+                            <img src="img/icon-error.svg" alt="" class="error-icon"> Unknown has occurred. Please try again.
+                        </p>
+                    </fieldset>
+
+
+                    <fieldset id="fieldset_login_error_logpass" style="display: none;">
+                        <p class="error-message">
+                            <img src="img/icon-error.svg" alt="" class="error-icon"> You have entered your account credentials incorrectly. Please check them and try again.
+                        </p>
+                    </fieldset>
+
+                    <fieldset id="fieldset_login_ban" style="display: none;">
+                        <p class="error-message">
+                            <img src="img/icon-error.svg" alt="" class="error-icon"> Your account was banned.
+                        </p>
+                    </fieldset>
+
+                    <fieldset id="fieldset_server_error" style="display: none;">
+                        <p class="error-message">
+                            <img src="img/icon-error.svg" alt="" class="error-icon"> Some error was occurred on the server. Please try again later.
+                        </p>
+                    </fieldset>
+                    
+                    <fieldset id="fieldset_2fa" style="display: none;">
+                        <legend>As an additional security measure, you’ll need to enter the current code from the Authenticator.</legend>
+                        <div class="field-group field-group--no-justify">
+                            <label for="step-3-authcode">Authenticator code</label>
+                            <input class="basic-input two-factor-input" type="text" id="step-3-authcode" name="authcode" disabled="disabled" placeholder="123456">
+                        </div>
+                        <div class="field-group field-group--no-justify">
+                            <input type="checkbox" class="basic-input" name="use_backup" id="step-3-usebackup">
+                            <label for="step-3-usebackup">Use backup code instead of one-time password</label>
+                        </div>
+                    </fieldset>
+
+                    <fieldset id="fieldset_2fa_error_code" style="display: none;">
+                        <p class="error-message">
+                            <img src="img/icon-error.svg" alt="" class="error-icon"> Invalid authenticator code
+                        </p>
+                    </fieldset>
+
+                    <fieldset id="fieldset_2fa_error_backup" style="display: none;">
+                        <p class="error-message">
+                            <img src="img/icon-error.svg" alt="" class="error-icon"> Invalid backup code
+                        </p>
+                    </fieldset>
+
+                    <fieldset id="fieldset_canceled" style="display: none;">
+                        <legend>Login canceled.</legend>
+                    </fieldset>
+
+                    <fieldset id="fieldset_finished" style="display: none;">
+                        <legend>Login finished.</legend>
+                    </fieldset>
+                </form>
+            </section>
+            <footer class="main-footer">
+                <div class="main-footer__container"></div>
+                <div class="main-footer__container">
+                    <button class="basic-button main-footer__button main-footer__button--primary" type="submit" form="main-form">Continue</button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+<script>
+        // Handling urlParams, form actions and enabling inputs
+        const viewStates = [
+            {
+                url: "?view=login",
+                display: [ '#fieldset_login' ],
+                classes: {},
+                inputs: ['#fieldset_login input', '#fieldset_login select'],
+                action: '/login',
+            },
+            {
+                url: "?view=login&subview=error",
+                display: ['#fieldset_login', '#fieldset_login_error'],
+                classes: {  },
+                inputs: ['#fieldset_login input', '#fieldset_login select'],
+                action: '/login',
+            },
+            {
+                url: "?view=login&subview=invalid_login",
+                display: ['#fieldset_login', '#fieldset_login_error_logpass'],
+                classes: {
+                    '#step-1-email': 'errored',
+                    '#step-1-password': 'errored',
+                },
+                inputs: ['#fieldset_login input', '#fieldset_login select'],
+                action: '/login',
+            },
+            {
+                url: "?view=login&subview=ban",
+                display: ['#fieldset_login', '#fieldset_login_ban'],
+                classes: {},
+                inputs: ['#fieldset_login input', '#fieldset_login select'],
+                action: '/login',
+            },
+            {
+                url: "?view=login&subview=server_error",
+                display: ['#fieldset_login', '#fieldset_login_servererror'],
+                classes: {},
+                inputs: ['#fieldset_login input', '#fieldset_login select'],
+                action: '/login',
+            },
+            {
+                url: "?view=2fa",
+                display: ['#fieldset_2fa'],
+                classes: {},
+                inputs: ["#fieldset_2fa input"],
+                action: '/2fa',
+            },
+            {
+                url: "?view=2fa&subview=error_code",
+                display: ['#fieldset_2fa', '#fieldset_2fa_error_code'],
+                classes: {
+                    '#step-3-authcode': 'errored',
+                },
+                inputs: ["#fieldset_2fa input"],
+                action: '/2fa',
+            },
+            {
+                url: "?view=2fa&subview=error_backup",
+                display: ['#fieldset_2fa', '#fieldset_2fa_error_backup'],
+                classes: {
+                    '#step-3-authcode': 'errored',
+                },
+                inputs: ["#fieldset_2fa input"],
+                action: '/2fa',
+            },
+            {
+                url: "?view=finished",
+                display: [ '#fieldset_finished' ],
+                classes: {},
+                inputs: [],
+                action: '',
+            },
+            {
+                url: "?view=canceled",
+                display: [ '#fieldset_canceled' ],
+                classes: {},
+                inputs: [],
+                action: '',
+            },
+        ]
+
+        function onLoad() {
+            viewStates.forEach(element => {
+                if(element['url'] == window.location.search){
+
+                    element['display'].forEach(display_selector => {
+                        document.querySelector(display_selector).style.display = "block";
+                    });
+
+                    for (const [key, value] of Object.entries(element['classes'])) {
+                        document.querySelector(key).classList.add(value);
+                    }
+
+                    element['inputs'].forEach(input_selector => {
+                        document.querySelectorAll(input_selector).forEach(input_element => {
+                            input_element.disabled = false;
+                        });
+                    });
+
+                    document.querySelector("#main-form").action = element["action"];
+                }
+            });
+        }
+
+        window.addEventListener("load", onLoad);
+    </script>
+</body>
+
+</html>

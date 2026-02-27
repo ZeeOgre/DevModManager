@@ -1,0 +1,26 @@
+# tools
+__pycache__/
+.pytest_cache/
+*.spec
+.idea/
+.vscode/
+.mypy_cache/
+.venv
+
+# dev
+build/
+output/
+*.log
+*.log.[1-9]
+/.vs
+/env
+*.user
+/env1
+
+/protoc
+*.zip
+*.gz
+/.env
+
+*.workspace
+*.code-workspace

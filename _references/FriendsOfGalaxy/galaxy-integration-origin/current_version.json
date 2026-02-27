@@ -1,0 +1,13 @@
+{
+    "tag_name": "v0.40",
+    "assets": [
+        {
+            "browser_download_url": "https://github.com/FriendsOfGalaxy/galaxy-integration-origin/releases/download/v0.40/windows.zip",
+            "name": "windows.zip"
+        },
+        {
+            "browser_download_url": "https://github.com/FriendsOfGalaxy/galaxy-integration-origin/releases/download/v0.40/macos.zip",
+            "name": "macos.zip"
+        }
+    ]
+}
