@@ -1,0 +1,37 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:DMM.Avalonia"
+        mc:Ignorable="d"
+        x:Class="DMM.Avalonia.ManagedGameWindow"
+        x:DataType="local:ManagedGame"
+        Width="620"
+        Height="300"
+        Background="#252525"
+        Foreground="White"
+        Title="Managed Game">
+    <Window.Styles>
+        <Style Selector="TextBlock"><Setter Property="Foreground" Value="White" /></Style>
+        <Style Selector="Button"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#3A3A3A" /></Style>
+        <Style Selector="TextBox"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#323232" /></Style>
+    </Window.Styles>
+
+    <Grid Margin="14" RowDefinitions="*,Auto">
+        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="180,*" RowSpacing="10" ColumnSpacing="8">
+            <TextBlock Text="Game Name:" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" Text="{Binding Name}" />
+
+            <TextBlock Grid.Row="1" Text="Executable:" VerticalAlignment="Center" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Executable}" />
+
+            <TextBlock Grid.Row="2" Text="Store App ID (optional):" VerticalAlignment="Center" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding StoreId}" />
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="Cancel" Click="Cancel_Click" />
+            <Button Content="Save" Click="Save_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

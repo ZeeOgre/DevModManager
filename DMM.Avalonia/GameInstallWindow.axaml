@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:DMM.Avalonia"
+        mc:Ignorable="d"
+        x:Class="DMM.Avalonia.GameInstallWindow"
+        x:DataType="local:GameInstallRecord"
+        Width="760"
+        Height="420"
+        Background="#252525"
+        Foreground="White"
+        Title="Game Install">
+    <Window.Styles>
+        <Style Selector="TextBlock"><Setter Property="Foreground" Value="White" /></Style>
+        <Style Selector="Button"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#3A3A3A" /></Style>
+        <Style Selector="TextBox"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#323232" /></Style>
+        <Style Selector="ComboBox"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#323232" /></Style>
+    </Window.Styles>
+
+    <Grid Margin="14" RowDefinitions="*,Auto">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="170,* ,Auto" RowSpacing="10" ColumnSpacing="8">
+            <TextBlock Text="Managed:" VerticalAlignment="Center" />
+            <CheckBox Grid.Column="1" IsChecked="{Binding Manage}" />
+
+            <TextBlock Grid.Row="1" Text="Game Store:" VerticalAlignment="Center" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding GameStore}" />
+
+            <TextBlock Grid.Row="2" Text="Install Folder:" VerticalAlignment="Center" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding InstallPath}" />
+            <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Click="BrowseFolder_Click" />
+
+            <TextBlock Grid.Row="3" Text="Managed Game:" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding $parent[Window].ManagedGames}" SelectedItem="{Binding ManagedGame}" />
+            <Button Grid.Row="3" Grid.Column="2" Content="Add New" Click="AddManagedGame_Click" />
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding $parent[Window].ShowNavigation}">
+                <Button Content="◀ Previous" />
+                <Button Content="Next ▶" />
+            </StackPanel>
+            <Button Grid.Column="2" Content="Cancel" Click="Cancel_Click" />
+            <Button Grid.Column="3" Content="Save" Click="Save_Click" />
+        </Grid>
+    </Grid>
+</Window>

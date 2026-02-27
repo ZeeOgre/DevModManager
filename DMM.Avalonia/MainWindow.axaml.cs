@@ -1,7 +1,6 @@
-using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -17,6 +16,22 @@ public partial class MainWindow : Window
         InitializeComponent();
         _viewModel = MainWindowViewModel.CreateSample();
         DataContext = _viewModel;
+        Opened += MainWindow_Opened;
+    }
+
+    private async void MainWindow_Opened(object? sender, System.EventArgs e)
+    {
+        if (_viewModel.GameInstalls.Count > 0)
+        {
+            return;
+        }
+
+        var wizard = new GameInstallWizardWindow(_viewModel, isFirstRun: true);
+        await wizard.ShowDialog(this);
+        _viewModel.SyncGameFoldersFromInstalls();
+        _viewModel.StatusMessage = _viewModel.GameInstalls.Count > 0
+            ? $"First-run game setup completed. Added {_viewModel.GameInstalls.Count} game install(s)."
+            : "First-run setup closed without selecting game installs.";
     }
 
     private void ScanGameFolder_Click(object? sender, RoutedEventArgs e) =>
@@ -30,8 +45,13 @@ public partial class MainWindow : Window
         _viewModel.StatusMessage = "Help viewed.";
     }
 
-    private void OpenSettings_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.StatusMessage = "Settings window launch is currently a stub.";
+    private async void OpenSettings_Click(object? sender, RoutedEventArgs e)
+    {
+        var wizard = new GameInstallWizardWindow(_viewModel, isFirstRun: false);
+        await wizard.ShowDialog(this);
+        _viewModel.SyncGameFoldersFromInstalls();
+        _viewModel.StatusMessage = "Settings: scan for new games completed.";
+    }
 
     private void OpenBackups_Click(object? sender, RoutedEventArgs e)
     {
@@ -114,6 +134,8 @@ public sealed class MainWindowViewModel : NotifyBase
     public ObservableCollection<string> GameFolders { get; } = new();
     public ObservableCollection<string> StageOptions { get; } = new();
     public ObservableCollection<ModListItem> Mods { get; } = new();
+    public ObservableCollection<ManagedGame> ManagedGames { get; } = new();
+    public ObservableCollection<GameInstallRecord> GameInstalls { get; } = new();
 
     private string? _selectedGameFolder;
     public string? SelectedGameFolder
@@ -133,10 +155,9 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         var vm = new MainWindowViewModel();
 
-        vm.GameFolders.Add("Primary Game Folder");
-        vm.GameFolders.Add("Alternate Test Folder");
-        vm.GameFolders.Add("XBOX Sandbox Folder");
-        vm.SelectedGameFolder = vm.GameFolders[0];
+        vm.ManagedGames.Add(new ManagedGame { Name = "Starfield", Executable = "Starfield.exe", StoreId = "1716740" });
+        vm.ManagedGames.Add(new ManagedGame { Name = "Fallout 4", Executable = "Fallout4.exe", StoreId = "377160" });
+        vm.ManagedGames.Add(new ManagedGame { Name = "Skyrim Special Edition", Executable = "SkyrimSE.exe", StoreId = "489830" });
 
         vm.StageOptions.Add("DEV");
         vm.StageOptions.Add("TEST");
@@ -151,6 +172,33 @@ public sealed class MainWindowViewModel : NotifyBase
         vm.Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194", new SolidColorBrush(Color.Parse("#2B2B2B"))));
 
         return vm;
+    }
+
+    public void SyncGameFoldersFromInstalls()
+    {
+        var selected = SelectedGameFolder;
+        GameFolders.Clear();
+        foreach (var path in GameInstalls.Select(x => x.InstallPath).Distinct())
+        {
+            GameFolders.Add(path);
+        }
+
+        SelectedGameFolder = selected is not null && GameFolders.Contains(selected)
+            ? selected
+            : GameFolders.FirstOrDefault();
+    }
+
+    public IReadOnlyList<GameInstallRecord> DiscoverInstallCandidates()
+    {
+        var mapped = ManagedGames.ToDictionary(x => x.Name, x => x);
+        return
+        [
+            new GameInstallRecord { Manage = true, GameStore = "Steam", ManagedGame = mapped["Fallout 4"], InstallPath = @"G:\games\steam\fallout4" },
+            new GameInstallRecord { Manage = true, GameStore = "Steam", ManagedGame = mapped["Skyrim Special Edition"], InstallPath = @"G:\games\steam\SkyrimSpecialEdition" },
+            new GameInstallRecord { Manage = true, GameStore = "Steam", ManagedGame = mapped["Starfield"], InstallPath = @"G:\Games\Steam\Starfield" },
+            new GameInstallRecord { Manage = false, GameStore = "GamePass", ManagedGame = mapped["Starfield"], InstallPath = @"M:\Games\Starfield\Content" },
+            new GameInstallRecord { Manage = false, GameStore = "Epic", ManagedGame = mapped["Fallout 4"], InstallPath = @"G:\Games\Fallout4" }
+        ];
     }
 }
 
@@ -172,21 +220,4 @@ public sealed class ModListItem
     public string BethesdaId { get; }
     public string NexusId { get; }
     public IBrush RowBackground { get; }
-}
-
-public abstract class NotifyBase : INotifyPropertyChanged
-{
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (Equals(field, value))
-        {
-            return false;
-        }
-
-        field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        return true;
-    }
 }
