@@ -614,7 +614,7 @@ namespace DmmDep
                     }
                     else
                     {
-                        Log.Info($"[3] MAT has no existing custom textures (keeping MAT only): {matRel}", isSkipped: true);
+                        Log.Info($"[3] MAT has no existing custom textures (kept MAT dependency): {matRel}");
                     }
                 }
 
