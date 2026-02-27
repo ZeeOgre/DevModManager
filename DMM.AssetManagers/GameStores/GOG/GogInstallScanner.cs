@@ -75,6 +75,7 @@ public sealed class GogInstallScanner : IStoreInstallScanner
         }
 
         await GogDataEnrichment.DoDataEnrichmentAsync(context, apps, issues, ct).ConfigureAwait(false);
+        StoreDataEnrichmentBase.EnrichWithBaseGameFileManifests(StoreKey, apps, issues);
 
         if ((context.Roots?.Count ?? 0) > 0 && apps.Count == 0)
         {
