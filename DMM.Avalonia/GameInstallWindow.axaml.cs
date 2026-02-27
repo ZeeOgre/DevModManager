@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System;
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 
@@ -12,7 +13,7 @@ public partial class GameInstallWindow : Window
     public bool ShowNavigation { get; }
     private readonly Action<ManagedGame>? _onManagedGameAdded;
 
-    public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation)
+    public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)
     {
         InitializeComponent();
         DataContext = install;

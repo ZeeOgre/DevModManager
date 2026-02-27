@@ -245,6 +245,9 @@ public sealed class MainWindowViewModel : NotifyBase
             : GameFolders.FirstOrDefault();
     }
 
+    public IReadOnlyList<GameInstallRecord> DiscoverInstallCandidates() =>
+        DiscoverInstallCandidatesAsync().GetAwaiter().GetResult();
+
     public async Task<IReadOnlyList<GameInstallRecord>> DiscoverInstallCandidatesAsync(IProgress<string>? progress = null, CancellationToken ct = default)
     {
         var scanners = CreateAvailableScanners();
@@ -368,7 +371,7 @@ public sealed class MainWindowViewModel : NotifyBase
     }
 }
 
-file sealed class GameSetupRepository
+internal sealed class GameSetupRepository
 {
     private readonly DatabaseManager _database = new();
 

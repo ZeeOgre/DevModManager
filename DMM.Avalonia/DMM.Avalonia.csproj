@@ -14,15 +14,10 @@
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Avalonia.Diagnostics">
-      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
-      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Avalonia.Controls.Markdown" />
+    <PackageReference Include="Avalonia.Controls.TreeDataGrid" />
+    <PackageReference Include="Avalonia.Diagnostics" Condition="'$(Configuration)' == 'Debug'" />
     <PackageReference Include="YamlDotNet" />
-  </ItemGroup>
-  <ItemGroup>
-	<AvaloniaUILicenseKey Include="avln_on_key:v1:587a06793020418f8b7546c0019f1b43" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
