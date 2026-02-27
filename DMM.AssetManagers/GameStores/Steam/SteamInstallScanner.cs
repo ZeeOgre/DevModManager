@@ -100,6 +100,7 @@ public sealed class SteamInstallScanner : IStoreInstallScanner
 
         // Enrichment: async + cancellable
         await SteamDataEnrichment.DoDataEnrichmentAsync(context, apps, issues, ct).ConfigureAwait(false);
+        StoreDataEnrichmentBase.EnrichWithBaseGameFileManifests(StoreKey, apps, issues);
 
         return new StoreScanResult
         {

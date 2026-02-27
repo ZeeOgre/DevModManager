@@ -83,6 +83,8 @@ public sealed class XboxInstallScanner : IStoreInstallScanner
             }
         }
 
+        StoreDataEnrichmentBase.EnrichWithBaseGameFileManifests(StoreKey, apps, issues);
+
         return new StoreScanResult
         {
             StoreKey = StoreKey,
