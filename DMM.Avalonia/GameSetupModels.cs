@@ -100,7 +100,7 @@ public sealed class GameInstallRecord : NotifyBase
 
 public sealed class GameInstallWizardViewModel : NotifyBase
 {
-    private const int PageSize = 20;
+    private const int PageSize = 10;
     private int _currentPageIndex;
     private bool _isScanning;
     private string _scanStatus = "Ready to scan.";

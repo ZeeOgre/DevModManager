@@ -257,67 +257,76 @@ public sealed class MainWindowViewModel : NotifyBase
             return Array.Empty<GameInstallRecord>();
         }
 
-        var discovered = new List<GameInstallRecord>();
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var storesByKey = scanners.ToDictionary(x => x.StoreKey, x => x, StringComparer.OrdinalIgnoreCase);
-
-        progress?.Report($"Scanning {scanners.Count} game stores for installs...");
-
-        foreach (var scanner in scanners)
+        var managedGamesSnapshot = ManagedGames.ToList();
+        var lightweightContext = new StoreScanContext
         {
-            ct.ThrowIfCancellationRequested();
-            progress?.Report($"Scanning {ToStoreLabel(scanner.StoreKey)}...");
+            IncludeVisualAssets = false
+        };
 
-            StoreScanResult result;
-            try
-            {
-                result = await scanner.ScanAsync(new StoreScanContext(), ct);
-            }
-            catch
-            {
-                continue;
-            }
+        return await Task.Run(async () =>
+        {
+            var discovered = new List<GameInstallRecord>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var storesByKey = scanners.ToDictionary(x => x.StoreKey, x => x, StringComparer.OrdinalIgnoreCase);
 
-            foreach (var app in result.Apps)
-            {
-                var installPath = app.InstallFolders.InstallFolder?.Path
-                    ?? app.InstallFolders.ContentFolder?.Path
-                    ?? app.InstallFolders.DataFolder?.Path;
+            progress?.Report($"Scanning {scanners.Count} game stores for installs...");
 
-                if (string.IsNullOrWhiteSpace(installPath))
+            foreach (var scanner in scanners)
+            {
+                ct.ThrowIfCancellationRequested();
+                progress?.Report($"Scanning {ToStoreLabel(scanner.StoreKey)}...");
+
+                StoreScanResult result;
+                try
+                {
+                    result = await scanner.ScanAsync(lightweightContext, ct).ConfigureAwait(false);
+                }
+                catch
                 {
                     continue;
                 }
 
-                var key = $"{ToStoreLabel(app.Id.StoreKey)}|{installPath}";
-                if (!seen.Add(key))
+                foreach (var app in result.Apps)
                 {
-                    continue;
+                    var installPath = app.InstallFolders.InstallFolder?.Path
+                        ?? app.InstallFolders.ContentFolder?.Path
+                        ?? app.InstallFolders.DataFolder?.Path;
+
+                    if (string.IsNullOrWhiteSpace(installPath))
+                    {
+                        continue;
+                    }
+
+                    var key = $"{ToStoreLabel(app.Id.StoreKey)}|{installPath}";
+                    if (!seen.Add(key))
+                    {
+                        continue;
+                    }
+
+                    var managedGame = MatchManagedGame(app);
+                    discovered.Add(new GameInstallRecord
+                    {
+                        Manage = managedGame is not null,
+                        GameStore = ToStoreLabel(app.Id.StoreKey),
+                        StoreAppId = app.Id.StoreAppId,
+                        ManagedGame = managedGame,
+                        InstallPath = installPath
+                    });
                 }
-
-                var managedGame = MatchManagedGame(app);
-                discovered.Add(new GameInstallRecord
-                {
-                    Manage = managedGame is not null,
-                    GameStore = ToStoreLabel(app.Id.StoreKey),
-                    StoreAppId = app.Id.StoreAppId,
-                    ManagedGame = managedGame,
-                    InstallPath = installPath
-                });
             }
-        }
 
-        progress?.Report($"Scan complete. Found {discovered.Count} installs across {storesByKey.Count} stores.");
+            progress?.Report($"Scan complete. Found {discovered.Count} installs across {storesByKey.Count} stores.");
 
-        return discovered
-            .OrderByDescending(x => x.Manage)
-            .ThenBy(x => x.ManagedGame?.Name ?? x.InstallPath)
-            .ThenBy(x => x.GameStore)
-            .ToList();
+            return (IReadOnlyList<GameInstallRecord>)discovered
+                .OrderByDescending(x => x.Manage)
+                .ThenBy(x => x.ManagedGame?.Name ?? x.InstallPath)
+                .ThenBy(x => x.GameStore)
+                .ToList();
+        }, ct);
 
         ManagedGame? MatchManagedGame(AppInstallSnapshot app)
         {
-            var knownByStoreId = ManagedGames.FirstOrDefault(x =>
+            var knownByStoreId = managedGamesSnapshot.FirstOrDefault(x =>
                 !string.IsNullOrWhiteSpace(x.StoreId) &&
                 string.Equals(x.StoreId, app.Id.StoreAppId, System.StringComparison.OrdinalIgnoreCase));
             if (knownByStoreId is not null)
@@ -325,7 +334,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 return knownByStoreId;
             }
 
-            var knownByExe = ManagedGames.FirstOrDefault(x =>
+            var knownByExe = managedGamesSnapshot.FirstOrDefault(x =>
                 !string.IsNullOrWhiteSpace(x.Executable) &&
                 string.Equals(x.Executable, app.ExecutableName, System.StringComparison.OrdinalIgnoreCase));
             if (knownByExe is not null)
@@ -333,7 +342,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 return knownByExe;
             }
 
-            return ManagedGames.FirstOrDefault(x =>
+            return managedGamesSnapshot.FirstOrDefault(x =>
                 string.Equals(x.Name, app.DisplayName, System.StringComparison.OrdinalIgnoreCase));
         }
 
