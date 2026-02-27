@@ -5,6 +5,7 @@
         xmlns:local="using:DMM.Avalonia"
         mc:Ignorable="d"
         x:Class="DMM.Avalonia.GameInstallWindow"
+        x:Name="InstallWindow"
         x:DataType="local:GameInstallRecord"
         Width="760"
         Height="420"
@@ -39,7 +40,8 @@
         </Grid>
 
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
-            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding $parent[Window].ShowNavigation}">
+            <StackPanel Orientation="Horizontal" Spacing="8"
+                        IsVisible="{Binding ShowNavigation, ElementName=Root}">
                 <Button Content="◀ Previous" />
                 <Button Content="Next ▶" />
             </StackPanel>

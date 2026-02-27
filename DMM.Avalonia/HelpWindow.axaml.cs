@@ -7,6 +7,12 @@ namespace DMM.Avalonia;
 
 public partial class HelpWindow : Window
 {
+    public HelpWindow()
+    {
+        InitializeComponent();
+        DataContext = new HelpWindowViewModel("Help", string.Empty);
+    }
+
     public HelpWindow(HelpWindowViewModel viewModel)
     {
         InitializeComponent();

@@ -351,7 +351,7 @@ namespace DMM.AssetManagers.TES
                 if (tokenLen < 6)
                     continue;
 
-                Span<byte> tmp = tokenLen <= 512 ? stackalloc byte[tokenLen] : new byte[tokenLen];
+                byte[] tmp = new byte[tokenLen];
                 int w = 0;
                 for (int k = start; k < end; k++)
                 {
@@ -364,7 +364,7 @@ namespace DMM.AssetManagers.TES
                 if (w < 6)
                     continue;
 
-                string token = Encoding.ASCII.GetString(tmp[..w]).Trim();
+                string token = Encoding.ASCII.GetString(tmp, 0, w).Trim();
                 if (!token.Contains('\\') && !token.Contains('/'))
                     continue;
 

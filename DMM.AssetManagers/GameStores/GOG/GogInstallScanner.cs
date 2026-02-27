@@ -77,12 +77,13 @@ public sealed class GogInstallScanner : IStoreInstallScanner
         await GogDataEnrichment.DoDataEnrichmentAsync(context, apps, issues, ct).ConfigureAwait(false);
         StoreDataEnrichmentBase.EnrichWithBaseGameFileManifests(StoreKey, apps, issues);
 
-        if ((context.Roots?.Count ?? 0) > 0 && apps.Count == 0)
+        var rootCount = context.Roots?.Count ?? 0;
+        if (rootCount > 0 && apps.Count == 0)
         {
             issues.Add(new ScanIssue
             {
                 Code = "GOG_NO_APPS_FOUND",
-                Message = $"GOG roots supplied ({context.Roots.Count}) but no installs were discovered.",
+                Message = $"GOG roots supplied ({rootCount}) but no installs were discovered.",
                 StoreKey = StoreKey
             });
         }
