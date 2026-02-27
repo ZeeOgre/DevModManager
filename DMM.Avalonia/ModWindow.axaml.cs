@@ -1,12 +1,22 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 
 namespace DMM.Avalonia;
 
 public partial class ModWindow : Window
 {
     private readonly ModWindowViewModel _viewModel;
+
+    public ModWindow()
+    {
+        InitializeComponent();
+        var placeholderMod = new ModListItem("Mod", "", "DEV", "", "", new SolidColorBrush(Colors.Transparent));
+        _viewModel = new ModWindowViewModel(placeholderMod, new ObservableCollection<string>(), new ObservableCollection<string>());
+        DataContext = _viewModel;
+        BuildStageFolderContextMenu();
+    }
 
     public ModWindow(ModListItem mod, ObservableCollection<string> gameFolders, ObservableCollection<string> stages)
     {
