@@ -5,6 +5,7 @@
         xmlns:local="using:DMM.Avalonia"
         mc:Ignorable="d"
         x:Class="DMM.Avalonia.GameInstallWizardWindow"
+        x:Name="WizardWindow"
         x:DataType="local:GameInstallWizardViewModel"
         Width="1100"
         Height="700"
@@ -22,6 +23,8 @@
                 <TextBlock FontSize="22" FontWeight="Bold" Text="Game Install Wizard" />
                 <TextBlock Text="Discover installs from game stores and choose what to manage." />
                 <TextBlock IsVisible="{Binding IsFirstRun}" Text="No installs are configured yet. Complete this step before continuing." FontWeight="SemiBold" />
+                <TextBlock Text="{Binding ScanStatus}" FontWeight="SemiBold" />
+                <ProgressBar IsVisible="{Binding IsScanning}" IsIndeterminate="True" Height="6" Margin="0,6,0,0" />
             </StackPanel>
         </Border>
 
@@ -46,7 +49,7 @@
                                     <TextBlock Grid.Column="1" Text="{Binding GameStore}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="2" Text="{Binding GameName}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="3" Text="{Binding InstallPath}" VerticalAlignment="Center" />
-                                    <Button Grid.Column="4" Content="Open" CommandParameter="{Binding}" Click="OpenInstall_Click" />
+                                    <Button Grid.Column="4" Content="Open" IsEnabled="{Binding #WizardWindow.DataContext.CanEditInstalls}" CommandParameter="{Binding}" Click="OpenInstall_Click" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -57,13 +60,13 @@
 
         <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
             <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button Content="Add Unlisted Game" Click="AddUnlistedGame_Click" />
-                <Button Content="Scan Again" Click="ScanAgain_Click" />
+                <Button Content="Add Unlisted Game" IsEnabled="{Binding CanEditInstalls}" Click="AddUnlistedGame_Click" />
+                <Button Content="Scan Again" IsEnabled="{Binding CanEditInstalls}" Click="ScanAgain_Click" />
             </StackPanel>
             <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding PageSummary}" />
             <Button Grid.Column="2" Content="◀ Previous" IsEnabled="{Binding CanGoPrevious}" Click="PreviousPage_Click" />
             <Button Grid.Column="3" Content="Next ▶" IsEnabled="{Binding CanGoNext}" Click="NextPage_Click" />
-            <Button Grid.Column="4" Content="Save Selection" Click="SaveSelection_Click" />
+            <Button Grid.Column="4" Content="Save Selection" IsEnabled="{Binding CanEditInstalls}" Click="SaveSelection_Click" />
         </Grid>
     </Grid>
 </Window>
