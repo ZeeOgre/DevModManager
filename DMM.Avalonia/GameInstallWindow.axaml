@@ -5,8 +5,7 @@
         xmlns:local="using:DMM.Avalonia"
         mc:Ignorable="d"
         x:Class="DMM.Avalonia.GameInstallWindow"
-        x:Name="InstallWindow"
-        x:DataType="local:GameInstallRecord"
+        x:DataType="local:GameInstallWindow"
         Width="760"
         Height="420"
         Background="#252525"
@@ -19,8 +18,8 @@
         <Style Selector="ComboBox"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#323232" /></Style>
     </Window.Styles>
 
-    <Grid Margin="14" RowDefinitions="*,Auto">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="170,* ,Auto" RowSpacing="10" ColumnSpacing="8">
+    <Grid Margin="14" RowDefinitions="*,Auto" x:DataType="local:GameInstallRecord">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="170,*,Auto" RowSpacing="10" ColumnSpacing="8">
             <TextBlock Text="Managed:" VerticalAlignment="Center" />
             <CheckBox Grid.Column="1" IsChecked="{Binding Manage}" />
 
@@ -32,7 +31,9 @@
             <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Click="BrowseFolder_Click" />
 
             <TextBlock Grid.Row="3" Text="Main Game:" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding #InstallWindow.ManagedGames}" SelectedItem="{Binding ManagedGame}" />
+            <ComboBox Grid.Row="3" Grid.Column="1"
+                      ItemsSource="{Binding ManagedGames, RelativeSource={RelativeSource AncestorType=local:GameInstallWindow}}"
+                      SelectedItem="{Binding ManagedGame}" />
             <Button Grid.Row="3" Grid.Column="2" Content="Add New" Click="AddManagedGame_Click" />
 
             <TextBlock Grid.Row="4" Text="DLC:" VerticalAlignment="Center" />
