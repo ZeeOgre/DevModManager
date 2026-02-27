@@ -1,8 +1,6 @@
 -- Idempotent baseline seed data for DevModManager.
 -- Safe to run repeatedly on existing databases.
 
-BEGIN TRANSACTION;
-
 INSERT INTO Game (Name, Executable)
 SELECT 'Starfield', 'Starfield.exe'
 WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield');
@@ -192,5 +190,3 @@ INSERT OR IGNORE INTO UrlRule (Name, URLRule) VALUES
 ('GamePass-Product', 'https://www.xbox.com/games/store/{slug}'),
 ('Epic-Product', 'https://store.epicgames.com/p/{slug}'),
 ('GoG-Product', 'https://www.gog.com/en/game/{slug}');
-
-COMMIT;
