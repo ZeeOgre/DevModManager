@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
@@ -8,13 +9,15 @@ public partial class GameInstallWindow : Window
 {
     public ObservableCollection<ManagedGame> ManagedGames { get; }
     public bool ShowNavigation { get; }
+    private readonly Action<ManagedGame>? _onManagedGameAdded;
 
-    public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation)
+    public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)
     {
         InitializeComponent();
         DataContext = install;
         ManagedGames = managedGames;
         ShowNavigation = showNavigation;
+        _onManagedGameAdded = onManagedGameAdded;
     }
 
     private async void BrowseFolder_Click(object? sender, RoutedEventArgs e)
@@ -47,6 +50,7 @@ public partial class GameInstallWindow : Window
         }
 
         ManagedGames.Add(game);
+        _onManagedGameAdded?.Invoke(game);
         if (DataContext is GameInstallRecord install)
         {
             install.ManagedGame = game;
