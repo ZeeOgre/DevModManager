@@ -74,6 +74,8 @@ public sealed class EpicInstallScanner : IStoreInstallScanner
             });
         }
 
+        StoreDataEnrichmentBase.EnrichWithBaseGameFileManifests(StoreKey, apps, issues);
+
         return new StoreScanResult
         {
             StoreKey = StoreKey,
