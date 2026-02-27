@@ -19,7 +19,7 @@
     </Window.Styles>
 
     <Grid Margin="14" RowDefinitions="*,Auto">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="170,* ,Auto" RowSpacing="10" ColumnSpacing="8">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="170,* ,Auto" RowSpacing="10" ColumnSpacing="8">
             <TextBlock Text="Managed:" VerticalAlignment="Center" />
             <CheckBox Grid.Column="1" IsChecked="{Binding Manage}" />
 
@@ -30,9 +30,12 @@
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding InstallPath}" />
             <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Click="BrowseFolder_Click" />
 
-            <TextBlock Grid.Row="3" Text="Managed Game:" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="3" Text="Main Game:" VerticalAlignment="Center" />
             <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding $parent[Window].ManagedGames}" SelectedItem="{Binding ManagedGame}" />
             <Button Grid.Row="3" Grid.Column="2" Content="Add New" Click="AddManagedGame_Click" />
+
+            <TextBlock Grid.Row="4" Text="DLC:" VerticalAlignment="Center" />
+            <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding IsDlc}" />
         </Grid>
 
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
