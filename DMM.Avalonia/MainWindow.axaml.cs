@@ -1,9 +1,23 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using DMM.AssetManagers.GameStores.BattleNet;
+using DMM.AssetManagers.GameStores.Common;
+using DMM.AssetManagers.GameStores.Common.Models;
+using DMM.AssetManagers.GameStores.EA;
+using DMM.AssetManagers.GameStores.Epic;
+using DMM.AssetManagers.GameStores.Gog;
+using DMM.AssetManagers.GameStores.Minecraft;
+using DMM.AssetManagers.GameStores.Origin;
+using DMM.AssetManagers.GameStores.PSN;
+using DMM.AssetManagers.GameStores.Rockstar;
+using DMM.AssetManagers.GameStores.Steam;
+using DMM.AssetManagers.GameStores.XBox;
 
 namespace DMM.Avalonia;
 
@@ -188,16 +202,124 @@ public sealed class MainWindowViewModel : NotifyBase
             : GameFolders.FirstOrDefault();
     }
 
-    public IReadOnlyList<GameInstallRecord> DiscoverInstallCandidates()
+    public async Task<IReadOnlyList<GameInstallRecord>> DiscoverInstallCandidatesAsync(IProgress<string>? progress = null, CancellationToken ct = default)
     {
-        var mapped = ManagedGames.ToDictionary(x => x.Name, x => x);
+        var scanners = CreateAvailableScanners();
+        if (scanners.Count == 0)
+        {
+            progress?.Report("Store scanners are only available on Windows.");
+            return Array.Empty<GameInstallRecord>();
+        }
+
+        var discovered = new List<GameInstallRecord>();
+        var seen = new HashSet<(string Store, string Path)>(StringComparer.OrdinalIgnoreCase);
+        var storesByKey = scanners.ToDictionary(x => x.StoreKey, x => x, StringComparer.OrdinalIgnoreCase);
+
+        progress?.Report($"Scanning {scanners.Count} game stores for installs...");
+
+        foreach (var scanner in scanners)
+        {
+            ct.ThrowIfCancellationRequested();
+            progress?.Report($"Scanning {ToStoreLabel(scanner.StoreKey)}...");
+
+            StoreScanResult result;
+            try
+            {
+                result = await scanner.ScanAsync(new StoreScanContext(), ct);
+            }
+            catch
+            {
+                continue;
+            }
+
+            foreach (var app in result.Apps)
+            {
+                var installPath = app.InstallFolders.InstallFolder?.Path
+                    ?? app.InstallFolders.ContentFolder?.Path
+                    ?? app.InstallFolders.DataFolder?.Path;
+
+                if (string.IsNullOrWhiteSpace(installPath))
+                {
+                    continue;
+                }
+
+                var key = (ToStoreLabel(app.Id.StoreKey), installPath);
+                if (!seen.Add(key))
+                {
+                    continue;
+                }
+
+                var managedGame = MatchManagedGame(app);
+                discovered.Add(new GameInstallRecord
+                {
+                    Manage = managedGame is not null,
+                    GameStore = ToStoreLabel(app.Id.StoreKey),
+                    ManagedGame = managedGame,
+                    InstallPath = installPath
+                });
+            }
+        }
+
+        progress?.Report($"Scan complete. Found {discovered.Count} installs across {storesByKey.Count} stores.");
+
+        return discovered
+            .OrderByDescending(x => x.Manage)
+            .ThenBy(x => x.ManagedGame?.Name ?? x.InstallPath)
+            .ThenBy(x => x.GameStore)
+            .ToList();
+
+        ManagedGame? MatchManagedGame(AppInstallSnapshot app)
+        {
+            var knownByStoreId = ManagedGames.FirstOrDefault(x =>
+                !string.IsNullOrWhiteSpace(x.StoreId) &&
+                string.Equals(x.StoreId, app.Id.StoreAppId, System.StringComparison.OrdinalIgnoreCase));
+            if (knownByStoreId is not null)
+            {
+                return knownByStoreId;
+            }
+
+            var knownByExe = ManagedGames.FirstOrDefault(x =>
+                !string.IsNullOrWhiteSpace(x.Executable) &&
+                string.Equals(x.Executable, app.ExecutableName, System.StringComparison.OrdinalIgnoreCase));
+            if (knownByExe is not null)
+            {
+                return knownByExe;
+            }
+
+            return ManagedGames.FirstOrDefault(x =>
+                string.Equals(x.Name, app.DisplayName, System.StringComparison.OrdinalIgnoreCase));
+        }
+
+        static string ToStoreLabel(string storeKey) => storeKey.ToLowerInvariant() switch
+        {
+            StoreKeys.BattleNet => "Battle.net",
+            StoreKeys.Ea => "EA",
+            StoreKeys.Gog => "GOG",
+            StoreKeys.Psn => "PSN",
+            StoreKeys.Xbox => "Game Pass",
+            _ => string.IsNullOrWhiteSpace(storeKey) ? "Unknown" : char.ToUpperInvariant(storeKey[0]) + storeKey[1..]
+        };
+    }
+
+    private static IReadOnlyList<IStoreInstallScanner> CreateAvailableScanners()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return Array.Empty<IStoreInstallScanner>();
+        }
+
         return
         [
-            new GameInstallRecord { Manage = true, GameStore = "Steam", ManagedGame = mapped["Fallout 4"], InstallPath = @"G:\games\steam\fallout4" },
-            new GameInstallRecord { Manage = true, GameStore = "Steam", ManagedGame = mapped["Skyrim Special Edition"], InstallPath = @"G:\games\steam\SkyrimSpecialEdition" },
-            new GameInstallRecord { Manage = true, GameStore = "Steam", ManagedGame = mapped["Starfield"], InstallPath = @"G:\Games\Steam\Starfield" },
-            new GameInstallRecord { Manage = false, GameStore = "GamePass", ManagedGame = mapped["Starfield"], InstallPath = @"M:\Games\Starfield\Content" },
-            new GameInstallRecord { Manage = false, GameStore = "Epic", ManagedGame = mapped["Fallout 4"], InstallPath = @"G:\Games\Fallout4" }
+            new XboxInstallScanner(),
+            new SteamInstallScanner(),
+            new EpicInstallScanner(),
+            new GogInstallScanner(),
+            new PsnInstallScanner(),
+            new BattleNetInstallScanner(),
+            new MinecraftInstallScanner(),
+            new EaInstallScanner(),
+            new OriginInstallScanner(),
+            new RockstarInstallScanner()
         ];
     }
 }

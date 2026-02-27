@@ -86,6 +86,8 @@ public sealed class GameInstallWizardViewModel : NotifyBase
 {
     private const int PageSize = 20;
     private int _currentPageIndex;
+    private bool _isScanning;
+    private string _scanStatus = "Ready to scan.";
 
     public ObservableCollection<GameInstallRecord> DiscoveredInstalls { get; }
     public ObservableCollection<ManagedGame> ManagedGames { get; }
@@ -104,8 +106,30 @@ public sealed class GameInstallWizardViewModel : NotifyBase
 
     public int CurrentPage => _currentPageIndex + 1;
     public int TotalPages => Math.Max(1, (int)Math.Ceiling(DiscoveredInstalls.Count / (double)PageSize));
-    public bool CanGoPrevious => _currentPageIndex > 0;
-    public bool CanGoNext => _currentPageIndex + 1 < TotalPages;
+    public bool CanGoPrevious => _currentPageIndex > 0 && !IsScanning;
+    public bool CanGoNext => _currentPageIndex + 1 < TotalPages && !IsScanning;
+
+    public bool IsScanning
+    {
+        get => _isScanning;
+        set
+        {
+            if (SetField(ref _isScanning, value))
+            {
+                OnPropertyChanged(nameof(CanGoPrevious));
+                OnPropertyChanged(nameof(CanGoNext));
+                OnPropertyChanged(nameof(CanEditInstalls));
+            }
+        }
+    }
+
+    public bool CanEditInstalls => !IsScanning;
+
+    public string ScanStatus
+    {
+        get => _scanStatus;
+        set => SetField(ref _scanStatus, value);
+    }
 
     public string PageSummary => $"Page {CurrentPage} / {TotalPages} · {DiscoveredInstalls.Count} discovered installs";
 
