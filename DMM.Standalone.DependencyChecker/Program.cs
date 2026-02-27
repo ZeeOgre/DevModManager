@@ -49,6 +49,7 @@ namespace DmmDep
         // New switches
         public bool Quiet { get; set; }   // --quiet : suppress skipped-file messages
         public bool Silent { get; set; }  // --silent: only show start and completion
+        public bool Verbose { get; set; } // --verbose: emit detailed ignored-file diagnostics
 
         public bool SmartClobber { get; set; } // --smartclobber : seed candidates from existing .achlist
     }
@@ -58,6 +59,7 @@ namespace DmmDep
         // runtime flags populated from options
         private static bool s_quiet = false;
         private static bool s_silent = false;
+        private static bool s_verbose = false;
 
         // logger helpers honoring --quiet / --silent
         private static class Log
@@ -146,6 +148,7 @@ namespace DmmDep
 
                 s_quiet = options.Quiet;
                 s_silent = options.Silent;
+                s_verbose = options.Verbose;
 
                 // ---- Root detection ----
 
@@ -268,10 +271,7 @@ namespace DmmDep
                                 : Path.Combine("Data\\Materials", rel);
                         }
                         rel = NormalizeRel(rel);
-                        if (File.Exists(Path.Combine(gameRoot, rel)))
-                        {
-                            matRelPaths.Add(rel);
-                        }
+                        matRelPaths.Add(rel);
                     }
                     // --- Terrain .btd ---
                     else if (s.EndsWith(".btd", StringComparison.OrdinalIgnoreCase))
@@ -373,6 +373,14 @@ namespace DmmDep
                             }
                         }
                     }
+                }
+
+                int matCountBeforeLmsw = matRelPaths.Count;
+                CollectMatPathsFromLmswRecords(pluginBytes, xboxDataRoot, matRelPaths);
+                int matCountFromLmsw = matRelPaths.Count - matCountBeforeLmsw;
+                if (matCountFromLmsw > 0)
+                {
+                    Log.Info($"[1] LMSW/REFL discovered {matCountFromLmsw} MAT path(s)");
                 }
 
                 // Terrain backup-only folder Data\terrain\<modname>\**
@@ -521,7 +529,12 @@ namespace DmmDep
                 {
                     string fullMat = Path.Combine(gameRoot, matRel);
                     if (!File.Exists(fullMat))
+                    {
+                        AddIgnoredFileNotFound(manifest, matRel, "mat-missing-on-disk");
+                        if (s_verbose)
+                            Log.Warn($"[verbose] Ignored MAT (file not found): {matRel}");
                         continue;
+                    }
 
                     string matText = File.ReadAllText(fullMat);
                     var found = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -682,7 +695,11 @@ namespace DmmDep
                 Log.Info($"Wrote deps (csv) : {csvPath} (total {manifest.Files.Count})");
 
                 string jsonPath = Path.Combine(outputRoot, pluginName + "_deps.json");
-                Log.Info($"Skipped writing JSON deps file: {jsonPath} (disabled to reduce output size)");
+                if (!options.Silent)
+                {
+                    WriteDepsJson(jsonPath, manifest);
+                    Log.Info($"Wrote deps (json): {jsonPath} (total {manifest.Files.Count})");
+                }
 
                 swTotal.Stop();
                 Log.Always($"Done in {swTotal.Elapsed} | achlist={achlistPaths.Count}, deps={manifest.Files.Count}");
@@ -707,6 +724,7 @@ namespace DmmDep
             Console.WriteLine("  --test                Write .achlist.test instead of .achlist.");
             Console.WriteLine("  --quiet               Suppress output about skipped files (e.g. 'Skipping MAT').");
             Console.WriteLine("  --silent              Suppress all informational output except starting and completion.");
+            Console.WriteLine("  --verbose             Emit detailed ignored/missing-file diagnostics and record ignored-filenotfound entries in deps outputs.");
             Console.WriteLine("  --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf).");
         }
 
@@ -753,6 +771,9 @@ namespace DmmDep
                         break;
                     case "--smartclobber":
                         opts.SmartClobber = true;
+                        break;
+                    case "--verbose":
+                        opts.Verbose = true;
                         break;
                     default:
                         Console.Error.WriteLine($"Unknown option: {arg}");
@@ -861,6 +882,217 @@ namespace DmmDep
                 yield return sb.ToString();
         }
 
+        private static void CollectMatPathsFromLmswRecords(
+            byte[] pluginBytes,
+            string xboxDataRoot,
+            HashSet<string> matRelPaths)
+        {
+            _ = xboxDataRoot;
+
+            const int recordHeaderSize = 24;
+            const int groupHeaderSize = 24;
+
+            int pos = 0;
+            int len = pluginBytes.Length;
+            var groupEnds = new Stack<int>();
+
+            while (pos + 4 <= len)
+            {
+                while (groupEnds.Count > 0 && pos >= groupEnds.Peek())
+                    groupEnds.Pop();
+
+                string sig = ReadAscii4(pluginBytes, pos);
+                if (sig == "GRUP")
+                {
+                    if (pos + groupHeaderSize > len) break;
+
+                    int groupSize = ReadInt32LE(pluginBytes, pos + 4);
+                    if (groupSize < groupHeaderSize) break;
+
+                    int groupEnd = pos + groupSize;
+                    if (groupEnd > len) break;
+
+                    groupEnds.Push(groupEnd);
+                    pos += groupHeaderSize;
+                    continue;
+                }
+
+                if (pos + recordHeaderSize > len) break;
+                int dataSize = ReadInt32LE(pluginBytes, pos + 4);
+                if (dataSize < 0) break;
+
+                int payloadStart = pos + recordHeaderSize;
+                int payloadEnd = payloadStart + dataSize;
+                if (payloadEnd > len) break;
+
+                if (sig == "LMSW")
+                {
+                    ReadOnlySpan<byte> payload = new(pluginBytes, payloadStart, dataSize);
+                    foreach (var sub in EnumerateSubrecords(payload))
+                    {
+                        if (!string.Equals(sub.Type, "REFL", StringComparison.Ordinal))
+                            continue;
+
+                        ReadOnlySpan<byte> subData = payload.Slice(sub.Offset, sub.Length);
+                        foreach (string matToken in ScrapeMatTokensFromBlob(subData))
+                        {
+                            string rel = NormalizeMatTokenToRelPath(matToken);
+                            if (string.IsNullOrEmpty(rel))
+                                continue;
+                            matRelPaths.Add(rel);
+                        }
+                    }
+                }
+
+                pos = payloadEnd;
+            }
+        }
+
+        private static string NormalizeMatTokenToRelPath(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return "";
+
+            string t = token.Replace('/', '\\').Trim().TrimStart('\\');
+            int matIndex = t.IndexOf(".mat", StringComparison.OrdinalIgnoreCase);
+            if (matIndex >= 0)
+                t = t[..(matIndex + 4)];
+
+            if (!t.EndsWith(".mat", StringComparison.OrdinalIgnoreCase))
+                return "";
+
+            if (t.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                return NormalizeRel(t);
+
+            if (t.StartsWith("Materials\\", StringComparison.OrdinalIgnoreCase))
+                return NormalizeRel(Path.Combine("Data", t));
+
+            return NormalizeRel(Path.Combine("Data\\Materials", t));
+        }
+
+        private static IEnumerable<(string Type, int Offset, int Length)> EnumerateSubrecords(ReadOnlySpan<byte> payload)
+        {
+            int i = 0;
+            while (i + 6 <= payload.Length)
+            {
+                string type = Encoding.ASCII.GetString(payload.Slice(i, 4));
+                ushort sz = ReadUInt16LE(payload, i + 4);
+                i += 6;
+
+                if (type == "XXXX")
+                {
+                    if (i + 4 > payload.Length) yield break;
+                    int extSize = ReadInt32LE(payload, i);
+                    i += 4;
+
+                    if (i + 6 > payload.Length) yield break;
+                    type = Encoding.ASCII.GetString(payload.Slice(i, 4));
+                    i += 4;
+                    _ = ReadUInt16LE(payload, i);
+                    i += 2;
+
+                    if (extSize < 0 || i + extSize > payload.Length) yield break;
+                    yield return (type, i, extSize);
+                    i += extSize;
+                    continue;
+                }
+
+                if (i + sz > payload.Length) yield break;
+                yield return (type, i, sz);
+                i += sz;
+            }
+        }
+
+        private static IEnumerable<string> ScrapeMatTokensFromBlob(ReadOnlySpan<byte> blob)
+        {
+            static bool IsTokenChar(byte b)
+            {
+                if (b >= (byte)'a' && b <= (byte)'z') return true;
+                if (b >= (byte)'A' && b <= (byte)'Z') return true;
+                if (b >= (byte)'0' && b <= (byte)'9') return true;
+                return b is (byte)'\\' or (byte)'/' or (byte)'_' or (byte)'-' or (byte)'.' or (byte)' ';
+            }
+
+            var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i <= blob.Length - 4; i++)
+            {
+                if (blob[i] != (byte)'.')
+                    continue;
+
+                if (!IsAsciiCI(blob[i + 1], (byte)'m')) continue;
+                if (!IsAsciiCI(blob[i + 2], (byte)'a')) continue;
+                if (!IsAsciiCI(blob[i + 3], (byte)'t')) continue;
+
+                int end = i + 4;
+                int start = i - 1;
+                while (start >= 0 && IsTokenChar(blob[start]))
+                    start--;
+                start++;
+
+                int tokenLen = end - start;
+                if (tokenLen < 6)
+                    continue;
+
+                Span<byte> tmp = tokenLen <= 512 ? stackalloc byte[tokenLen] : new byte[tokenLen];
+                int w = 0;
+                for (int k = start; k < end; k++)
+                {
+                    byte c = blob[k];
+                    if (c == 0 || !IsTokenChar(c))
+                        continue;
+                    tmp[w++] = c;
+                }
+
+                if (w < 6)
+                    continue;
+
+                string token = Encoding.ASCII.GetString(tmp[..w]).Trim();
+                if (!token.Contains('\\') && !token.Contains('/'))
+                    continue;
+
+                token = token.Replace('/', '\\');
+                if (results.Add(token))
+                    yield return token;
+            }
+        }
+
+        private static bool IsAsciiCI(byte actual, byte expectedLower)
+        {
+            if (actual == expectedLower)
+                return true;
+            byte upper = (byte)(expectedLower - 32);
+            return actual == upper;
+        }
+
+        private static string ReadAscii4(byte[] data, int offset)
+        {
+            if (offset + 4 > data.Length)
+                return "";
+            return Encoding.ASCII.GetString(data, offset, 4);
+        }
+
+        private static int ReadInt32LE(byte[] data, int offset)
+        {
+            return data[offset]
+                | (data[offset + 1] << 8)
+                | (data[offset + 2] << 16)
+                | (data[offset + 3] << 24);
+        }
+
+        private static int ReadInt32LE(ReadOnlySpan<byte> data, int offset)
+        {
+            return data[offset]
+                | (data[offset + 1] << 8)
+                | (data[offset + 2] << 16)
+                | (data[offset + 3] << 24);
+        }
+
+        private static ushort ReadUInt16LE(ReadOnlySpan<byte> data, int offset)
+        {
+            return (ushort)(data[offset] | (data[offset + 1] << 8));
+        }
+
         private static string GetRelativePath(string root, string fullPath)
         {
 #if NET8_0_OR_GREATER
@@ -926,6 +1158,21 @@ namespace DmmDep
                     XboxPath = null,
                     Kind = FileKind.BackupOnly.ToString().ToLowerInvariant(),
                     Source = source
+                });
+            }
+        }
+
+        private static void AddIgnoredFileNotFound(DependencyManifest manifest, string relPcPath, string source)
+        {
+            relPcPath = NormalizeRel(relPcPath);
+            if (!manifest.Files.Any(f => string.Equals(f.PcPath, relPcPath, StringComparison.OrdinalIgnoreCase)))
+            {
+                manifest.Files.Add(new FileEntry
+                {
+                    PcPath = relPcPath,
+                    XboxPath = null,
+                    Kind = FileKind.Warn.ToString().ToLowerInvariant(),
+                    Source = $"ignored-filenotfound:{source}"
                 });
             }
         }
@@ -1115,6 +1362,17 @@ namespace DmmDep
                 sw.WriteLine($"{f.Kind},{f.Source},{pc},{xb}");
             }
             sw.Flush();
+        }
+
+        private static void WriteDepsJson(string path, DependencyManifest manifest)
+        {
+            var jsonOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+
+            string json = JsonSerializer.Serialize(manifest, jsonOptions);
+            File.WriteAllText(path, json, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
 
 

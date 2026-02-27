@@ -70,6 +70,8 @@
                             <MenuItem Header="PSN" CommandParameter="Make BA2: PSN" Click="ContextAction_Click" />
                             <MenuItem Header="Switch" CommandParameter="Make BA2: Switch" Click="ContextAction_Click" />
                             <MenuItem Header="ALL" CommandParameter="Make BA2: ALL" Click="ContextAction_Click" />
+                            <Separator />
+                            <MenuItem Header="Add Files Manually..." CommandParameter="Make BA2: Add Files Manually" Click="ContextAction_Click" />
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>

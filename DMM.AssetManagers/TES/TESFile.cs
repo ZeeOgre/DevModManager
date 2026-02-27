@@ -135,6 +135,8 @@ namespace DMM.AssetManagers.TES
                 }
             }
 
+            CollectMatPathsFromLmswRecords(bytes, seenMats, result);
+
             // 2) Script name tokens (colon-delimited, e.g. Foo:Bar or Foo:Bar:Baz).
             //    These are the Bethesda ScriptName forms we can map to PSC/PEX later:
             //       Data\Scripts\  + name.Replace(':','\\') + ".pex"
@@ -198,6 +200,212 @@ namespace DMM.AssetManagers.TES
 
             if (sb.Length >= minLen)
                 yield return sb.ToString();
+        }
+
+        private static void CollectMatPathsFromLmswRecords(byte[] pluginBytes, HashSet<string> seenMats, TesFileResult result)
+        {
+            const int recordHeaderSize = 24;
+            const int groupHeaderSize = 24;
+            int pos = 0;
+            int len = pluginBytes.Length;
+            var groupEnds = new Stack<int>();
+
+            while (pos + 4 <= len)
+            {
+                while (groupEnds.Count > 0 && pos >= groupEnds.Peek())
+                    groupEnds.Pop();
+
+                string sig = ReadAscii4(pluginBytes, pos);
+                if (sig == "GRUP")
+                {
+                    if (pos + groupHeaderSize > len) break;
+                    int groupSize = ReadInt32LE(pluginBytes, pos + 4);
+                    if (groupSize < groupHeaderSize) break;
+
+                    int groupEnd = pos + groupSize;
+                    if (groupEnd > len) break;
+
+                    groupEnds.Push(groupEnd);
+                    pos += groupHeaderSize;
+                    continue;
+                }
+
+                if (pos + recordHeaderSize > len) break;
+                int dataSize = ReadInt32LE(pluginBytes, pos + 4);
+                if (dataSize < 0) break;
+
+                int payloadStart = pos + recordHeaderSize;
+                int payloadEnd = payloadStart + dataSize;
+                if (payloadEnd > len) break;
+
+                if (sig == "LMSW")
+                {
+                    ReadOnlySpan<byte> payload = new(pluginBytes, payloadStart, dataSize);
+                    foreach (var sub in EnumerateSubrecords(payload))
+                    {
+                        if (!string.Equals(sub.Type, "REFL", StringComparison.Ordinal))
+                            continue;
+
+                        foreach (string token in ScrapeMatTokensFromBlob(payload.Slice(sub.Offset, sub.Length)))
+                        {
+                            string rel = NormalizeMatTokenToRelPath(token);
+                            if (string.IsNullOrEmpty(rel))
+                                continue;
+
+                            if (seenMats.Add(rel))
+                                result.ReferencedMats.Add(rel);
+                        }
+                    }
+                }
+
+                pos = payloadEnd;
+            }
+        }
+
+        private static string NormalizeMatTokenToRelPath(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return "";
+
+            string t = token.Replace('/', '\\').Trim().TrimStart('\\');
+            int matIndex = t.IndexOf(".mat", StringComparison.OrdinalIgnoreCase);
+            if (matIndex >= 0)
+                t = t[..(matIndex + 4)];
+
+            if (!t.EndsWith(".mat", StringComparison.OrdinalIgnoreCase))
+                return "";
+
+            if (t.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                return NormalizeRel(t);
+
+            if (t.StartsWith("Materials\\", StringComparison.OrdinalIgnoreCase))
+                return NormalizeRel(Path.Combine("Data", t));
+
+            return NormalizeRel(Path.Combine("Data\\Materials", t));
+        }
+
+        private static IEnumerable<(string Type, int Offset, int Length)> EnumerateSubrecords(ReadOnlySpan<byte> payload)
+        {
+            int i = 0;
+            while (i + 6 <= payload.Length)
+            {
+                string type = Encoding.ASCII.GetString(payload.Slice(i, 4));
+                ushort sz = ReadUInt16LE(payload, i + 4);
+                i += 6;
+
+                if (type == "XXXX")
+                {
+                    if (i + 4 > payload.Length) yield break;
+                    int extSize = ReadInt32LE(payload, i);
+                    i += 4;
+
+                    if (i + 6 > payload.Length) yield break;
+                    type = Encoding.ASCII.GetString(payload.Slice(i, 4));
+                    i += 4;
+                    _ = ReadUInt16LE(payload, i);
+                    i += 2;
+
+                    if (extSize < 0 || i + extSize > payload.Length) yield break;
+                    yield return (type, i, extSize);
+                    i += extSize;
+                    continue;
+                }
+
+                if (i + sz > payload.Length) yield break;
+                yield return (type, i, sz);
+                i += sz;
+            }
+        }
+
+        private static IEnumerable<string> ScrapeMatTokensFromBlob(ReadOnlySpan<byte> blob)
+        {
+            static bool IsTokenChar(byte b)
+            {
+                if (b >= (byte)'a' && b <= (byte)'z') return true;
+                if (b >= (byte)'A' && b <= (byte)'Z') return true;
+                if (b >= (byte)'0' && b <= (byte)'9') return true;
+                return b is (byte)'\\' or (byte)'/' or (byte)'_' or (byte)'-' or (byte)'.' or (byte)' ';
+            }
+
+            var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i <= blob.Length - 4; i++)
+            {
+                if (blob[i] != (byte)'.')
+                    continue;
+
+                if (!IsAsciiCI(blob[i + 1], (byte)'m')) continue;
+                if (!IsAsciiCI(blob[i + 2], (byte)'a')) continue;
+                if (!IsAsciiCI(blob[i + 3], (byte)'t')) continue;
+
+                int end = i + 4;
+                int start = i - 1;
+                while (start >= 0 && IsTokenChar(blob[start]))
+                    start--;
+                start++;
+
+                int tokenLen = end - start;
+                if (tokenLen < 6)
+                    continue;
+
+                Span<byte> tmp = tokenLen <= 512 ? stackalloc byte[tokenLen] : new byte[tokenLen];
+                int w = 0;
+                for (int k = start; k < end; k++)
+                {
+                    byte c = blob[k];
+                    if (c == 0 || !IsTokenChar(c))
+                        continue;
+                    tmp[w++] = c;
+                }
+
+                if (w < 6)
+                    continue;
+
+                string token = Encoding.ASCII.GetString(tmp[..w]).Trim();
+                if (!token.Contains('\\') && !token.Contains('/'))
+                    continue;
+
+                token = token.Replace('/', '\\');
+                if (results.Add(token))
+                    yield return token;
+            }
+        }
+
+        private static bool IsAsciiCI(byte actual, byte expectedLower)
+        {
+            if (actual == expectedLower)
+                return true;
+
+            byte upper = (byte)(expectedLower - 32);
+            return actual == upper;
+        }
+
+        private static string ReadAscii4(byte[] data, int offset)
+        {
+            if (offset + 4 > data.Length)
+                return "";
+
+            return Encoding.ASCII.GetString(data, offset, 4);
+        }
+
+        private static int ReadInt32LE(byte[] data, int offset)
+        {
+            return data[offset]
+                | (data[offset + 1] << 8)
+                | (data[offset + 2] << 16)
+                | (data[offset + 3] << 24);
+        }
+
+        private static int ReadInt32LE(ReadOnlySpan<byte> data, int offset)
+        {
+            return data[offset]
+                | (data[offset + 1] << 8)
+                | (data[offset + 2] << 16)
+                | (data[offset + 3] << 24);
+        }
+
+        private static ushort ReadUInt16LE(ReadOnlySpan<byte> data, int offset)
+        {
+            return (ushort)(data[offset] | (data[offset + 1] << 8));
         }
     }
 }
