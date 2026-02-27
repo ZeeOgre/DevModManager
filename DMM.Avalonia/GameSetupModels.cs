@@ -39,6 +39,7 @@ public sealed class GameInstallRecord : NotifyBase
     private bool _manage;
     private string _gameStore = string.Empty;
     private string _installPath = string.Empty;
+    private string _storeAppId = string.Empty;
     private ManagedGame? _managedGame;
 
     public bool Manage
@@ -57,6 +58,12 @@ public sealed class GameInstallRecord : NotifyBase
     {
         get => _installPath;
         set => SetField(ref _installPath, value);
+    }
+
+    public string StoreAppId
+    {
+        get => _storeAppId;
+        set => SetField(ref _storeAppId, value);
     }
 
     public ManagedGame? ManagedGame
@@ -78,6 +85,7 @@ public sealed class GameInstallRecord : NotifyBase
         Manage = Manage,
         GameStore = GameStore,
         InstallPath = InstallPath,
+        StoreAppId = StoreAppId,
         ManagedGame = ManagedGame
     };
 }

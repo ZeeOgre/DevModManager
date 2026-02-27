@@ -65,7 +65,7 @@ public partial class GameInstallWizardWindow : Window
     private async void AddUnlistedGame_Click(object? sender, RoutedEventArgs e)
     {
         var install = new GameInstallRecord { Manage = true, GameStore = "Custom" };
-        var installWindow = new GameInstallWindow(install, _mainViewModel.ManagedGames, showNavigation: false);
+        var installWindow = new GameInstallWindow(install, _mainViewModel.ManagedGames, showNavigation: false, _mainViewModel.PersistManagedGame);
         var result = await installWindow.ShowDialog<bool>(this);
         if (!result)
         {
@@ -84,7 +84,7 @@ public partial class GameInstallWizardWindow : Window
         }
 
         var editable = install.Clone();
-        var installWindow = new GameInstallWindow(editable, _mainViewModel.ManagedGames, showNavigation: true);
+        var installWindow = new GameInstallWindow(editable, _mainViewModel.ManagedGames, showNavigation: true, _mainViewModel.PersistManagedGame);
         var result = await installWindow.ShowDialog<bool>(this);
         if (!result)
         {
@@ -99,11 +99,8 @@ public partial class GameInstallWizardWindow : Window
 
     private void SaveSelection_Click(object? sender, RoutedEventArgs e)
     {
-        _mainViewModel.GameInstalls.Clear();
-        foreach (var install in _viewModel.SelectedInstalls().Where(x => !string.IsNullOrWhiteSpace(x.InstallPath)))
-        {
-            _mainViewModel.GameInstalls.Add(install.Clone());
-        }
+        var selected = _viewModel.SelectedInstalls().Where(x => !string.IsNullOrWhiteSpace(x.InstallPath)).ToList();
+        _mainViewModel.PersistSelectedInstalls(selected);
 
         Close();
     }

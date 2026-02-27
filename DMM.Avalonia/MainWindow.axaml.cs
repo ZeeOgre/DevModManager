@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +20,8 @@ using DMM.AssetManagers.GameStores.PSN;
 using DMM.AssetManagers.GameStores.Rockstar;
 using DMM.AssetManagers.GameStores.Steam;
 using DMM.AssetManagers.GameStores.XBox;
+using DMM.Data;
+using Microsoft.Data.Sqlite;
 
 namespace DMM.Avalonia;
 
@@ -145,6 +149,8 @@ public partial class MainWindow : Window
 
 public sealed class MainWindowViewModel : NotifyBase
 {
+    private readonly GameSetupRepository _repository = new();
+
     public ObservableCollection<string> GameFolders { get; } = new();
     public ObservableCollection<string> StageOptions { get; } = new();
     public ObservableCollection<ModListItem> Mods { get; } = new();
@@ -168,10 +174,8 @@ public sealed class MainWindowViewModel : NotifyBase
     public static MainWindowViewModel CreateSample()
     {
         var vm = new MainWindowViewModel();
-
-        vm.ManagedGames.Add(new ManagedGame { Name = "Starfield", Executable = "Starfield.exe", StoreId = "1716740" });
-        vm.ManagedGames.Add(new ManagedGame { Name = "Fallout 4", Executable = "Fallout4.exe", StoreId = "377160" });
-        vm.ManagedGames.Add(new ManagedGame { Name = "Skyrim Special Edition", Executable = "SkyrimSE.exe", StoreId = "489830" });
+        vm.LoadManagedGames();
+        vm.LoadPersistedInstalls();
 
         vm.StageOptions.Add("DEV");
         vm.StageOptions.Add("TEST");
@@ -186,6 +190,45 @@ public sealed class MainWindowViewModel : NotifyBase
         vm.Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194", new SolidColorBrush(Color.Parse("#2B2B2B"))));
 
         return vm;
+    }
+
+    private void LoadManagedGames()
+    {
+        foreach (var game in _repository.LoadManagedGames())
+        {
+            ManagedGames.Add(game);
+        }
+
+        if (ManagedGames.Count > 0)
+        {
+            return;
+        }
+
+        ManagedGames.Add(new ManagedGame { Name = "Starfield", Executable = "Starfield.exe", StoreId = "1716740" });
+        ManagedGames.Add(new ManagedGame { Name = "Fallout 4", Executable = "Fallout4.exe", StoreId = "377160" });
+        ManagedGames.Add(new ManagedGame { Name = "Skyrim Special Edition", Executable = "SkyrimSE.exe", StoreId = "489830" });
+    }
+
+    private void LoadPersistedInstalls()
+    {
+        foreach (var install in _repository.LoadManagedInstalls(ManagedGames))
+        {
+            GameInstalls.Add(install);
+        }
+
+        SyncGameFoldersFromInstalls();
+    }
+
+    public void PersistManagedGame(ManagedGame game) => _repository.UpsertManagedGame(game);
+
+    public void PersistSelectedInstalls(IReadOnlyList<GameInstallRecord> selectedInstalls)
+    {
+        _repository.ReplaceManagedInstalls(selectedInstalls, ManagedGames);
+        GameInstalls.Clear();
+        foreach (var install in selectedInstalls)
+        {
+            GameInstalls.Add(install.Clone());
+        }
     }
 
     public void SyncGameFoldersFromInstalls()
@@ -254,6 +297,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 {
                     Manage = managedGame is not null,
                     GameStore = ToStoreLabel(app.Id.StoreKey),
+                    StoreAppId = app.Id.StoreAppId,
                     ManagedGame = managedGame,
                     InstallPath = installPath
                 });
@@ -321,6 +365,263 @@ public sealed class MainWindowViewModel : NotifyBase
             new OriginInstallScanner(),
             new RockstarInstallScanner()
         ];
+    }
+}
+
+file sealed class GameSetupRepository
+{
+    private readonly DatabaseManager _database = new();
+
+    public IReadOnlyList<ManagedGame> LoadManagedGames()
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT Name, COALESCE(Executable, '') FROM Game ORDER BY Name";
+
+        var storeIds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Starfield"] = "1716740",
+            ["Fallout 4"] = "377160",
+            ["Skyrim Special Edition"] = "489830"
+        };
+
+        var games = new List<ManagedGame>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var name = reader.GetString(0);
+            games.Add(new ManagedGame
+            {
+                Name = name,
+                Executable = reader.GetString(1),
+                StoreId = storeIds.GetValueOrDefault(name, string.Empty)
+            });
+        }
+
+        return games;
+    }
+
+    public IReadOnlyList<GameInstallRecord> LoadManagedInstalls(IEnumerable<ManagedGame> managedGames)
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT COALESCE(gs.Name, ''), COALESCE(g.Name, ''), COALESCE(gsi.StoreAppId, ''), COALESCE(f.Path, '')
+            FROM GameStoreInstall gsi
+            LEFT JOIN GameStoreRoot gsr ON gsr.id = gsi.GameStoreRootId
+            LEFT JOIN GameSource gs ON gs.id = gsr.GameSourceId
+            LEFT JOIN Game g ON g.id = gsi.GameId
+            LEFT JOIN Folders f ON f.id = gsi.InstallFolderId
+            ORDER BY gsi.LastSeenDT DESC
+            """;
+
+        var managedByName = managedGames.ToDictionary(x => x.Name, x => x, StringComparer.OrdinalIgnoreCase);
+        var installs = new List<GameInstallRecord>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var gameName = reader.GetString(1);
+            managedByName.TryGetValue(gameName, out var game);
+            installs.Add(new GameInstallRecord
+            {
+                Manage = true,
+                GameStore = reader.GetString(0),
+                ManagedGame = game,
+                StoreAppId = reader.GetString(2),
+                InstallPath = reader.GetString(3)
+            });
+        }
+
+        return installs;
+    }
+
+    public void UpsertManagedGame(ManagedGame game)
+    {
+        using var connection = _database.OpenConnection();
+
+        using var exists = connection.CreateCommand();
+        exists.CommandText = "SELECT id FROM Game WHERE Name = $name LIMIT 1";
+        exists.Parameters.AddWithValue("$name", game.Name);
+        var existingId = exists.ExecuteScalar();
+
+        using var command = connection.CreateCommand();
+        if (existingId is null)
+        {
+            command.CommandText = "INSERT INTO Game (Name, Executable) VALUES ($name, $exe)";
+        }
+        else
+        {
+            command.CommandText = "UPDATE Game SET Executable = $exe WHERE id = $id";
+            command.Parameters.AddWithValue("$id", (long)existingId);
+        }
+
+        command.Parameters.AddWithValue("$name", game.Name);
+        command.Parameters.AddWithValue("$exe", game.Executable);
+        command.ExecuteNonQuery();
+    }
+
+    public void ReplaceManagedInstalls(IReadOnlyList<GameInstallRecord> installs, IReadOnlyCollection<ManagedGame> managedGames)
+    {
+        using var connection = _database.OpenConnection();
+        using var tx = connection.BeginTransaction();
+
+        using (var clear = connection.CreateCommand())
+        {
+            clear.Transaction = tx;
+            clear.CommandText = "DELETE FROM GameStoreInstall";
+            clear.ExecuteNonQuery();
+        }
+
+        var gameIdLookup = LoadGameIdLookup(connection, tx);
+        var folderTypeId = EnsureFolderType(connection, tx, "GameInstall");
+        var folderRoleId = EnsureFolderRole(connection, tx, "GameInstall");
+
+        foreach (var install in installs)
+        {
+            var installFolderId = EnsureFolder(connection, tx, install.InstallPath, folderTypeId, folderRoleId);
+            var rootPath = Path.GetPathRoot(install.InstallPath) ?? install.InstallPath;
+            var rootFolderId = EnsureFolder(connection, tx, rootPath, folderTypeId, folderRoleId);
+            var sourceId = EnsureGameSource(connection, tx, install.GameStore);
+            var rootId = EnsureStoreRoot(connection, tx, sourceId, rootFolderId);
+
+            var storeAppId = !string.IsNullOrWhiteSpace(install.StoreAppId)
+                ? install.StoreAppId
+                : !string.IsNullOrWhiteSpace(install.ManagedGame?.StoreId)
+                    ? install.ManagedGame.StoreId
+                    : $"custom:{install.InstallPath}";
+
+            gameIdLookup.TryGetValue(install.ManagedGame?.Name ?? string.Empty, out var gameId);
+
+            using var cmd = connection.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = """
+                INSERT INTO GameStoreInstall (
+                    GameStoreRootId, InstallFolderId, GameId, StoreAppId, DisplayName, ExecutableName, LastSeenDT)
+                VALUES ($rootId, $installFolderId, $gameId, $storeAppId, $displayName, $exe, $now)
+                """;
+            cmd.Parameters.AddWithValue("$rootId", rootId);
+            cmd.Parameters.AddWithValue("$installFolderId", installFolderId);
+            cmd.Parameters.AddWithValue("$gameId", gameId is null ? DBNull.Value : gameId.Value);
+            cmd.Parameters.AddWithValue("$storeAppId", storeAppId);
+            cmd.Parameters.AddWithValue("$displayName", install.ManagedGame?.Name ?? "Unknown");
+            cmd.Parameters.AddWithValue("$exe", install.ManagedGame?.Executable ?? string.Empty);
+            cmd.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
+            cmd.ExecuteNonQuery();
+        }
+
+        tx.Commit();
+    }
+
+    private static Dictionary<string, long> LoadGameIdLookup(SqliteConnection connection, SqliteTransaction tx)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "SELECT id, Name FROM Game";
+        var result = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            result[reader.GetString(1)] = reader.GetInt64(0);
+        }
+        return result;
+    }
+
+    private static long EnsureFolderType(SqliteConnection connection, SqliteTransaction tx, string name)
+        => EnsureByName(connection, tx, "FolderType", name);
+
+    private static long EnsureFolderRole(SqliteConnection connection, SqliteTransaction tx, string name)
+        => EnsureByName(connection, tx, "FolderRole", name);
+
+    private static long EnsureByName(SqliteConnection connection, SqliteTransaction tx, string tableName, string name)
+    {
+        using var select = connection.CreateCommand();
+        select.Transaction = tx;
+        select.CommandText = $"SELECT id FROM {tableName} WHERE Name = $name LIMIT 1";
+        select.Parameters.AddWithValue("$name", name);
+        var existing = select.ExecuteScalar();
+        if (existing is long id)
+        {
+            return id;
+        }
+
+        using var insert = connection.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = $"INSERT INTO {tableName} (Name) VALUES ($name)";
+        insert.Parameters.AddWithValue("$name", name);
+        insert.ExecuteNonQuery();
+        return connection.LastInsertRowId;
+    }
+
+    private static long EnsureFolder(SqliteConnection connection, SqliteTransaction tx, string path, long folderTypeId, long folderRoleId)
+    {
+        using var select = connection.CreateCommand();
+        select.Transaction = tx;
+        select.CommandText = "SELECT id FROM Folders WHERE Path = $path LIMIT 1";
+        select.Parameters.AddWithValue("$path", path);
+        var existing = select.ExecuteScalar();
+        if (existing is long id)
+        {
+            return id;
+        }
+
+        using var insert = connection.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = "INSERT INTO Folders (Path, FolderTypeId, FolderRoleId) VALUES ($path, $typeId, $roleId)";
+        insert.Parameters.AddWithValue("$path", path);
+        insert.Parameters.AddWithValue("$typeId", folderTypeId);
+        insert.Parameters.AddWithValue("$roleId", folderRoleId);
+        insert.ExecuteNonQuery();
+        return connection.LastInsertRowId;
+    }
+
+    private static long EnsureGameSource(SqliteConnection connection, SqliteTransaction tx, string store)
+    {
+        var sourceName = store switch
+        {
+            "Game Pass" => "GamePass",
+            "GOG" => "GoG",
+            _ => store
+        };
+
+        using var select = connection.CreateCommand();
+        select.Transaction = tx;
+        select.CommandText = "SELECT id FROM GameSource WHERE Name = $name LIMIT 1";
+        select.Parameters.AddWithValue("$name", sourceName);
+        var existing = select.ExecuteScalar();
+        if (existing is long id)
+        {
+            return id;
+        }
+
+        using var insert = connection.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = "INSERT INTO GameSource (Name) VALUES ($name)";
+        insert.Parameters.AddWithValue("$name", sourceName);
+        insert.ExecuteNonQuery();
+        return connection.LastInsertRowId;
+    }
+
+    private static long EnsureStoreRoot(SqliteConnection connection, SqliteTransaction tx, long gameSourceId, long rootFolderId)
+    {
+        using var select = connection.CreateCommand();
+        select.Transaction = tx;
+        select.CommandText = "SELECT id FROM GameStoreRoot WHERE GameSourceId = $sourceId AND RootFolderId = $folderId AND RootType = 'Library' LIMIT 1";
+        select.Parameters.AddWithValue("$sourceId", gameSourceId);
+        select.Parameters.AddWithValue("$folderId", rootFolderId);
+        var existing = select.ExecuteScalar();
+        if (existing is long id)
+        {
+            return id;
+        }
+
+        using var insert = connection.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = "INSERT INTO GameStoreRoot (GameSourceId, RootFolderId, RootType, LastSeenDT) VALUES ($sourceId, $folderId, 'Library', $now)";
+        insert.Parameters.AddWithValue("$sourceId", gameSourceId);
+        insert.Parameters.AddWithValue("$folderId", rootFolderId);
+        insert.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
+        insert.ExecuteNonQuery();
+        return connection.LastInsertRowId;
     }
 }
 
