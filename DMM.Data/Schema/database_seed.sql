@@ -189,26 +189,47 @@ CREATE TABLE IF NOT EXISTS FileFolderDeploymentState (
 -- Table: FileInfo
 DROP TABLE IF EXISTS FileInfo;
 
+-- Table: FileStorageKind
+DROP TABLE IF EXISTS FileStorageKind;
+
+CREATE TABLE IF NOT EXISTS FileStorageKind (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name        TEXT    UNIQUE
+                        NOT NULL,
+    Description TEXT
+);
+
 CREATE TABLE IF NOT EXISTS FileInfo (
-    id               INTEGER  PRIMARY KEY AUTOINCREMENT,
-    Name             TEXT     NOT NULL,
-    DTStamp          DATETIME NOT NULL,
-    Size             NUMERIC  NOT NULL,
-    Hash             BLOB     NULL,
-    GameId           INTEGER  REFERENCES Game (id) ON DELETE CASCADE
-                                                   ON UPDATE CASCADE,
-    ArchiveFileId    INTEGER  REFERENCES FileInfo (id) ON DELETE SET NULL
+    id                   INTEGER  PRIMARY KEY AUTOINCREMENT,
+    Name                 TEXT     NOT NULL,
+    DTStamp              DATETIME NOT NULL,
+    Size                 NUMERIC  NOT NULL,
+    StoreHashAlgorithm   TEXT     NULL,-- e.g. MD5/SHA1 from store manifest metadata
+    StoreHash            BLOB     NULL,
+    FastHashAlgorithm    TEXT     NULL,-- DMM fast/high-confidence comparator fingerprint scheme id
+    FastHash             BLOB     NULL,
+    FastHashMetadata     BLOB     NULL,-- Optional serialized fingerprint metadata (e.g. sampled block offsets/sizes)
+    GameId               INTEGER  REFERENCES Game (id) ON DELETE CASCADE
                                                        ON UPDATE CASCADE,
-    JunctionSourceId INTEGER  REFERENCES FileInfo (id) ON DELETE SET NULL
-                                                       ON UPDATE CASCADE,
-    RelativeFolderId INTEGER  NULL
-                              REFERENCES Folders (id) ON DELETE SET NULL
-                                                      ON UPDATE CASCADE,
-    FileTypeId       INTEGER  REFERENCES FileType (id) ON DELETE SET NULL
-                                                       ON UPDATE CASCADE,
-    ModId            INTEGER  NULL
-                              REFERENCES ModItems (id) ON DELETE SET NULL
-                                                       ON UPDATE CASCADE
+    ArchiveFileId        INTEGER  REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                           ON UPDATE CASCADE,
+    JunctionSourceId     INTEGER  REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                           ON UPDATE CASCADE,
+    RelativeFolderId     INTEGER  NULL
+                                  REFERENCES Folders (id) ON DELETE SET NULL
+                                                          ON UPDATE CASCADE,
+    FileTypeId           INTEGER  REFERENCES FileType (id) ON DELETE SET NULL
+                                                           ON UPDATE CASCADE,
+    ModId                INTEGER  NULL
+                                  REFERENCES ModItems (id) ON DELETE SET NULL
+                                                           ON UPDATE CASCADE,
+    FileStorageKindId    INTEGER  NOT NULL
+                                  DEFAULT (1)
+                                  REFERENCES FileStorageKind (id) ON DELETE RESTRICT
+                                                                   ON UPDATE CASCADE,
+    DeclaredByFileInfoId INTEGER  NULL
+                                  REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                           ON UPDATE CASCADE
 );
 
 
@@ -567,6 +588,9 @@ CREATE TABLE IF NOT EXISTS GameStoreInstall (
     ManifestFileId    INTEGER  NULL
                                REFERENCES FileInfo (id) ON DELETE SET NULL
                                                         ON UPDATE CASCADE,
+    GameId            INTEGER  NULL
+                               REFERENCES Game (id) ON DELETE SET NULL
+                                                    ON UPDATE CASCADE,
     StoreAppId        TEXT     NOT NULL,
     IdentityName      TEXT     NULL,
     TitleId           TEXT     NULL,
@@ -580,6 +604,37 @@ CREATE TABLE IF NOT EXISTS GameStoreInstall (
         GameStoreRootId,
         StoreAppId,
         InstallFolderId
+    )
+);
+
+
+
+-- Table: GameStoreInstallFile
+DROP TABLE IF EXISTS GameStoreInstallFile;
+
+CREATE TABLE IF NOT EXISTS GameStoreInstallFile (
+    id                  INTEGER  PRIMARY KEY AUTOINCREMENT,
+    InstallId           INTEGER  NOT NULL
+                                 REFERENCES GameStoreInstall (id) ON DELETE CASCADE
+                                                              ON UPDATE CASCADE,
+    FileInfoId          INTEGER  NOT NULL
+                                 REFERENCES FileInfo (id) ON DELETE CASCADE
+                                                         ON UPDATE CASCADE,
+    RelativePath        TEXT     NULL,
+    RelativePathKey     TEXT     GENERATED ALWAYS AS (IFNULL(RelativePath, '') ) STORED,
+    FileRole            TEXT     NOT NULL
+                                 CHECK (FileRole IN ('Actual', 'Reference') ),
+    IsPresentOnDisk     INTEGER  NOT NULL
+                                 DEFAULT (1)
+                                 CHECK (IsPresentOnDisk IN (0, 1) ),
+    QuickCheckAlgorithm TEXT     NULL,
+    QuickCheckSignature BLOB     NULL,
+    LastValidatedDT     DATETIME NULL,
+    UNIQUE (
+        InstallId,
+        FileInfoId,
+        FileRole,
+        RelativePathKey
     )
 );
 
@@ -758,6 +813,9 @@ INSERT INTO Platform (id, Name, ArchiveNamePattern) VALUES (2, 'PlayStation', '_
 INSERT INTO Platform (id, Name, ArchiveNamePattern) VALUES (3, 'SteamDeck', NULL);
 INSERT INTO Platform (id, Name, ArchiveNamePattern) VALUES (4, 'Nintendo Switch', '_switch');
 
+INSERT INTO FileStorageKind (id, Name, Description) VALUES (1, 'OnDisk', 'Observed at a concrete filesystem path during a scan.');
+INSERT INTO FileStorageKind (id, Name, Description) VALUES (2, 'ManifestReference', 'Declared by a manifest/INI/archive index but not yet observed on disk.');
+
 -- Table: ReservedFolderNames
 DROP TABLE IF EXISTS ReservedFolderNames;
 
@@ -842,6 +900,14 @@ CREATE INDEX IF NOT EXISTS IX_GameStoreInstall_GameStoreRootId ON GameStoreInsta
 );
 
 
+-- Index: IX_GameStoreInstall_GameId
+DROP INDEX IF EXISTS IX_GameStoreInstall_GameId;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreInstall_GameId ON GameStoreInstall (
+    GameId
+);
+
+
 -- Index: IX_GameStoreInstall_IdentityName
 DROP INDEX IF EXISTS IX_GameStoreInstall_IdentityName;
 
@@ -863,6 +929,22 @@ DROP INDEX IF EXISTS IX_GameStoreInstall_StoreAppId;
 
 CREATE INDEX IF NOT EXISTS IX_GameStoreInstall_StoreAppId ON GameStoreInstall (
     StoreAppId
+);
+
+
+-- Index: IX_GameStoreInstallFile_FileInfoId
+DROP INDEX IF EXISTS IX_GameStoreInstallFile_FileInfoId;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreInstallFile_FileInfoId ON GameStoreInstallFile (
+    FileInfoId
+);
+
+
+-- Index: IX_GameStoreInstallFile_InstallId
+DROP INDEX IF EXISTS IX_GameStoreInstallFile_InstallId;
+
+CREATE INDEX IF NOT EXISTS IX_GameStoreInstallFile_InstallId ON GameStoreInstallFile (
+    InstallId
 );
 
 
