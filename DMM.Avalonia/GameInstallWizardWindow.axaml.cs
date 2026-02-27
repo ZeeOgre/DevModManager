@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
@@ -13,23 +15,51 @@ public partial class GameInstallWizardWindow : Window
     {
         InitializeComponent();
         _mainViewModel = mainViewModel;
-        _viewModel = new GameInstallWizardViewModel(_mainViewModel.DiscoverInstallCandidates(), _mainViewModel.ManagedGames, isFirstRun);
+        _viewModel = new GameInstallWizardViewModel(Array.Empty<GameInstallRecord>(), _mainViewModel.ManagedGames, isFirstRun);
         DataContext = _viewModel;
+        Opened += async (_, _) => await RunStoreScanAsync();
     }
 
     private void NextPage_Click(object? sender, RoutedEventArgs e) => _viewModel.NextPage();
 
     private void PreviousPage_Click(object? sender, RoutedEventArgs e) => _viewModel.PreviousPage();
 
-    private void ScanAgain_Click(object? sender, RoutedEventArgs e)
+    private async void ScanAgain_Click(object? sender, RoutedEventArgs e) => await RunStoreScanAsync();
+
+    private async Task RunStoreScanAsync()
     {
-        _viewModel.DiscoveredInstalls.Clear();
-        foreach (var install in _mainViewModel.DiscoverInstallCandidates())
+        if (_viewModel.IsScanning)
         {
-            _viewModel.DiscoveredInstalls.Add(install);
+            return;
         }
 
-        _viewModel.RefreshPaging();
+        _viewModel.IsScanning = true;
+        _viewModel.ScanStatus = "Preparing store scan...";
+
+        try
+        {
+            var progress = new Progress<string>(status => _viewModel.ScanStatus = status);
+            var discovered = await _mainViewModel.DiscoverInstallCandidatesAsync(progress);
+
+            _viewModel.DiscoveredInstalls.Clear();
+            foreach (var install in discovered)
+            {
+                _viewModel.DiscoveredInstalls.Add(install);
+            }
+
+            _viewModel.ScanStatus = discovered.Count == 0
+                ? "No installs found. Add an unlisted game or scan again."
+                : $"Scan complete. Found {discovered.Count} install(s).";
+        }
+        catch (Exception ex)
+        {
+            _viewModel.ScanStatus = $"Scan failed: {ex.Message}";
+        }
+        finally
+        {
+            _viewModel.IsScanning = false;
+            _viewModel.RefreshPaging();
+        }
     }
 
     private async void AddUnlistedGame_Click(object? sender, RoutedEventArgs e)
