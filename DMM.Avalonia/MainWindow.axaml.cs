@@ -409,7 +409,11 @@ internal sealed class GameSetupRepository
         using var connection = _database.OpenConnection();
         using var command = connection.CreateCommand();
         command.CommandText = """
-            SELECT COALESCE(gs.Name, ''), COALESCE(g.Name, ''), COALESCE(gsi.StoreAppId, ''), COALESCE(f.Path, '')
+            SELECT COALESCE(gs.Name, ''), COALESCE(g.Name, ''), COALESCE(gsi.StoreAppId, ''), COALESCE(f.Path, ''),
+                   CASE WHEN EXISTS (
+                       SELECT 1 FROM GameStoreProductLink l
+                       WHERE l.ChildInstallId = gsi.id AND l.LinkType = 'DLC'
+                   ) THEN 1 ELSE 0 END AS IsDlc
             FROM GameStoreInstall gsi
             LEFT JOIN GameStoreRoot gsr ON gsr.id = gsi.GameStoreRootId
             LEFT JOIN GameSource gs ON gs.id = gsr.GameSourceId
@@ -431,7 +435,8 @@ internal sealed class GameSetupRepository
                 GameStore = reader.GetString(0),
                 ManagedGame = game,
                 StoreAppId = reader.GetString(2),
-                InstallPath = reader.GetString(3)
+                InstallPath = reader.GetString(3),
+                IsDlc = reader.GetInt64(4) == 1
             });
         }
 
@@ -512,6 +517,22 @@ internal sealed class GameSetupRepository
             cmd.Parameters.AddWithValue("$exe", install.ManagedGame?.Executable ?? string.Empty);
             cmd.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
             cmd.ExecuteNonQuery();
+
+            var childInstallId = ReadLastInsertRowId(connection, tx);
+            if (install.IsDlc && !string.IsNullOrWhiteSpace(install.ManagedGame?.StoreId))
+            {
+                using var link = connection.CreateCommand();
+                link.Transaction = tx;
+                link.CommandText = """
+                    INSERT OR IGNORE INTO GameStoreProductLink (
+                        ChildInstallId, ParentGameSourceId, ParentStoreAppId, LinkType)
+                    VALUES ($childInstallId, $parentGameSourceId, $parentStoreAppId, 'DLC')
+                    """;
+                link.Parameters.AddWithValue("$childInstallId", childInstallId);
+                link.Parameters.AddWithValue("$parentGameSourceId", sourceId);
+                link.Parameters.AddWithValue("$parentStoreAppId", install.ManagedGame.StoreId);
+                link.ExecuteNonQuery();
+            }
         }
 
         tx.Commit();
