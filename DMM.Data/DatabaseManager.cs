@@ -74,18 +74,14 @@ CREATE TABLE IF NOT EXISTS SeedHistory (
             return;
         }
 
-        using var transaction = connection.BeginTransaction();
-
-        ExecuteSqlScript(connection, LoadSqlScript("database_seed.sql"), transaction);
+        var seedSql = LoadSqlScript("database_seed.sql");
+        ExecuteSqlScript(connection, seedSql);
 
         using var markAppliedCommand = connection.CreateCommand();
-        markAppliedCommand.Transaction = transaction;
         markAppliedCommand.CommandText = "INSERT INTO SeedHistory (Version, AppliedAt) VALUES ($version, $appliedAt)";
         markAppliedCommand.Parameters.AddWithValue("$version", BaselineSeedVersion);
         markAppliedCommand.Parameters.AddWithValue("$appliedAt", DateTimeOffset.UtcNow.ToString("O"));
         markAppliedCommand.ExecuteNonQuery();
-
-        transaction.Commit();
     }
 
     private static void ExecuteSqlScript(SqliteConnection connection, string sql, SqliteTransaction? transaction = null)
