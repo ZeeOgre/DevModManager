@@ -11,6 +11,14 @@ public partial class GameInstallWizardWindow : Window
     private readonly MainWindowViewModel _mainViewModel;
     private readonly GameInstallWizardViewModel _viewModel;
 
+    public GameInstallWizardWindow()
+    {
+        InitializeComponent();
+        _mainViewModel = MainWindowViewModel.CreateSample();
+        _viewModel = new GameInstallWizardViewModel(_mainViewModel.DiscoverInstallCandidates(), _mainViewModel.ManagedGames, isFirstRun: false);
+        DataContext = _viewModel;
+    }
+
     public GameInstallWizardWindow(MainWindowViewModel mainViewModel, bool isFirstRun)
     {
         InitializeComponent();

@@ -11,15 +11,15 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Controls.Markdown" />
+    <PackageReference Include="Avalonia.Controls.TreeDataGrid" />
+    <PackageReference Include="Avalonia.Controls.WebView" />
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
-    <PackageReference Include="Avalonia.Controls.Markdown" />
-    <PackageReference Include="Avalonia.Controls.TreeDataGrid" />
     <PackageReference Include="Avalonia.Diagnostics" Condition="'$(Configuration)' == 'Debug'" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
     <ProjectReference Include="..\DMM.Data\DMM.Data.csproj" />

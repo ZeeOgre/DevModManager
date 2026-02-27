@@ -626,12 +626,12 @@ public sealed class NifTests
     private static byte[] BuildSizedStringBytes(params string[] tokens)
     {
         using var ms = new MemoryStream();
+        var lenBuffer = new byte[4];
         foreach (var token in tokens)
         {
             byte[] b = Encoding.ASCII.GetBytes(token);
-            Span<byte> len = stackalloc byte[4];
-            BinaryPrimitives.WriteInt32LittleEndian(len, b.Length);
-            ms.Write(len);
+            BinaryPrimitives.WriteInt32LittleEndian(lenBuffer, b.Length);
+            ms.Write(lenBuffer);
             ms.Write(b);
             ms.WriteByte(0);
         }
@@ -642,20 +642,20 @@ public sealed class NifTests
     private static byte[] BuildMixedSizedStringBytes(params (int PrefixSize, string Value)[] tokens)
     {
         using var ms = new MemoryStream();
+        var len2 = new byte[2];
+        var len4 = new byte[4];
         foreach ((int prefixSize, string value) in tokens)
         {
             byte[] b = Encoding.ASCII.GetBytes(value);
             if (prefixSize == 2)
             {
-                Span<byte> len = stackalloc byte[2];
-                BinaryPrimitives.WriteUInt16LittleEndian(len, checked((ushort)b.Length));
-                ms.Write(len);
+                BinaryPrimitives.WriteUInt16LittleEndian(len2, checked((ushort)b.Length));
+                ms.Write(len2);
             }
             else
             {
-                Span<byte> len = stackalloc byte[4];
-                BinaryPrimitives.WriteInt32LittleEndian(len, b.Length);
-                ms.Write(len);
+                BinaryPrimitives.WriteInt32LittleEndian(len4, b.Length);
+                ms.Write(len4);
             }
 
             ms.Write(b);
@@ -676,12 +676,32 @@ public sealed class NifTests
         WriteSized(ms, first.PrefixSize, first.Value);
         WriteSized(ms, second.PrefixSize, second.Value);
 
-        Span<byte> idx = stackalloc byte[4];
+        var idx = new byte[4];
         BinaryPrimitives.WriteInt32LittleEndian(idx, referencedStringIndex);
         ms.Write(idx);
 
         WriteSized(ms, mesh.PrefixSize, mesh.Value);
         return ms.ToArray();
+    }
+
+    private static void WriteSized(MemoryStream ms, int prefixSize, string value)
+    {
+        byte[] b = Encoding.ASCII.GetBytes(value);
+        if (prefixSize == 2)
+        {
+            var len = new byte[2];
+            BinaryPrimitives.WriteUInt16LittleEndian(len, checked((ushort)b.Length));
+            ms.Write(len);
+        }
+        else
+        {
+            var len = new byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(len, b.Length);
+            ms.Write(len);
+        }
+
+        ms.Write(b);
+        ms.WriteByte(0);
     }
 
     private static byte[] BuildBethesdaLikeSingleBlockNif(string blockName, string meshToken)
@@ -842,26 +862,6 @@ public sealed class NifTests
         byte[] b = Encoding.ASCII.GetBytes(value);
         bw.Write(b.Length);
         bw.Write(b);
-    }
-
-    private static void WriteSized(MemoryStream ms, int prefixSize, string value)
-    {
-        byte[] b = Encoding.ASCII.GetBytes(value);
-        if (prefixSize == 2)
-        {
-            Span<byte> len = stackalloc byte[2];
-            BinaryPrimitives.WriteUInt16LittleEndian(len, checked((ushort)b.Length));
-            ms.Write(len);
-        }
-        else
-        {
-            Span<byte> len = stackalloc byte[4];
-            BinaryPrimitives.WriteInt32LittleEndian(len, b.Length);
-            ms.Write(len);
-        }
-
-        ms.Write(b);
-        ms.WriteByte(0);
     }
 
     private static string CreateTempRoot()
