@@ -258,7 +258,7 @@ public sealed class MainWindowViewModel : NotifyBase
         }
 
         var discovered = new List<GameInstallRecord>();
-        var seen = new HashSet<(string Store, string Path)>(StringComparer.OrdinalIgnoreCase);
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var storesByKey = scanners.ToDictionary(x => x.StoreKey, x => x, StringComparer.OrdinalIgnoreCase);
 
         progress?.Report($"Scanning {scanners.Count} game stores for installs...");
@@ -289,7 +289,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     continue;
                 }
 
-                var key = (ToStoreLabel(app.Id.StoreKey), installPath);
+                var key = $"{ToStoreLabel(app.Id.StoreKey)}|{installPath}";
                 if (!seen.Add(key))
                 {
                     continue;
@@ -493,7 +493,9 @@ internal sealed class GameSetupRepository
                     ? install.ManagedGame.StoreId
                     : $"custom:{install.InstallPath}";
 
-            gameIdLookup.TryGetValue(install.ManagedGame?.Name ?? string.Empty, out var gameId);
+            long? gameId = gameIdLookup.TryGetValue(install.ManagedGame?.Name ?? string.Empty, out var resolvedGameId)
+                ? resolvedGameId
+                : null;
 
             using var cmd = connection.CreateCommand();
             cmd.Transaction = tx;
@@ -504,7 +506,7 @@ internal sealed class GameSetupRepository
                 """;
             cmd.Parameters.AddWithValue("$rootId", rootId);
             cmd.Parameters.AddWithValue("$installFolderId", installFolderId);
-            cmd.Parameters.AddWithValue("$gameId", gameId is null ? DBNull.Value : gameId.Value);
+            cmd.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("$storeAppId", storeAppId);
             cmd.Parameters.AddWithValue("$displayName", install.ManagedGame?.Name ?? "Unknown");
             cmd.Parameters.AddWithValue("$exe", install.ManagedGame?.Executable ?? string.Empty);
@@ -552,7 +554,7 @@ internal sealed class GameSetupRepository
         insert.CommandText = $"INSERT INTO {tableName} (Name) VALUES ($name)";
         insert.Parameters.AddWithValue("$name", name);
         insert.ExecuteNonQuery();
-        return connection.LastInsertRowId;
+        return ReadLastInsertRowId(connection, tx);
     }
 
     private static long EnsureFolder(SqliteConnection connection, SqliteTransaction tx, string path, long folderTypeId, long folderRoleId)
@@ -574,7 +576,7 @@ internal sealed class GameSetupRepository
         insert.Parameters.AddWithValue("$typeId", folderTypeId);
         insert.Parameters.AddWithValue("$roleId", folderRoleId);
         insert.ExecuteNonQuery();
-        return connection.LastInsertRowId;
+        return ReadLastInsertRowId(connection, tx);
     }
 
     private static long EnsureGameSource(SqliteConnection connection, SqliteTransaction tx, string store)
@@ -601,7 +603,7 @@ internal sealed class GameSetupRepository
         insert.CommandText = "INSERT INTO GameSource (Name) VALUES ($name)";
         insert.Parameters.AddWithValue("$name", sourceName);
         insert.ExecuteNonQuery();
-        return connection.LastInsertRowId;
+        return ReadLastInsertRowId(connection, tx);
     }
 
     private static long EnsureStoreRoot(SqliteConnection connection, SqliteTransaction tx, long gameSourceId, long rootFolderId)
@@ -624,7 +626,15 @@ internal sealed class GameSetupRepository
         insert.Parameters.AddWithValue("$folderId", rootFolderId);
         insert.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
         insert.ExecuteNonQuery();
-        return connection.LastInsertRowId;
+        return ReadLastInsertRowId(connection, tx);
+    }
+
+    private static long ReadLastInsertRowId(SqliteConnection connection, SqliteTransaction tx)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "SELECT last_insert_rowid();";
+        return Convert.ToInt64(cmd.ExecuteScalar());
     }
 }
 
