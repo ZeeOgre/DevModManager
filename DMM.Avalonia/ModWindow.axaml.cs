@@ -46,6 +46,13 @@ public partial class ModWindow : Window
     {
         if (sender is MenuItem { CommandParameter: string action })
         {
+            if (action == "Make BA2: Add Files Manually")
+            {
+                _viewModel.StatusMessage =
+                    $"{action} selected for {_viewModel.ModName}. UI wiring is pending; this will become the manual archive-file picker.";
+                return;
+            }
+
             _viewModel.StatusMessage =
                 $"{action} requested for {_viewModel.ModName} ({_viewModel.SelectedStage} @ {_viewModel.SelectedGameFolder}).";
         }
