@@ -536,6 +536,11 @@ namespace DmmDep
                         continue;
                     }
 
+                    // Keep MATs that are explicitly referenced and present on disk,
+                    // even when they do not point to custom DDS files. Material parameter
+                    // edits can still be meaningful without custom textures.
+                    AddFile(manifest, achlistPaths, matRel, FileKind.Mat, "mat-referenced", gameRoot, xboxDataRoot);
+
                     string matText = File.ReadAllText(fullMat);
                     var found = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     bool hasCustomTextures = false;
@@ -606,11 +611,10 @@ namespace DmmDep
                     if (hasCustomTextures)
                     {
                         matsWithCustom++;
-                        AddFile(manifest, achlistPaths, matRel, FileKind.Mat, "mat-with-custom-dds", gameRoot, xboxDataRoot);
                     }
                     else
                     {
-                        Log.Info($"[3] Skipping MAT (no existing custom textures): {matRel}", isSkipped: true);
+                        Log.Info($"[3] MAT has no existing custom textures (keeping MAT only): {matRel}", isSkipped: true);
                     }
                 }
 
