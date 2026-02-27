@@ -240,13 +240,12 @@ namespace DMM.AssetManagers.TES
 
                 if (sig == "LMSW")
                 {
-                    ReadOnlySpan<byte> payload = new(pluginBytes, payloadStart, dataSize);
-                    foreach (var sub in EnumerateSubrecords(payload))
+                    foreach (var sub in EnumerateSubrecords(pluginBytes, payloadStart, dataSize))
                     {
                         if (!string.Equals(sub.Type, "REFL", StringComparison.Ordinal))
                             continue;
 
-                        foreach (string token in ScrapeMatTokensFromBlob(payload.Slice(sub.Offset, sub.Length)))
+                        foreach (string token in ScrapeMatTokensFromBlob(pluginBytes, sub.Offset, sub.Length))
                         {
                             string rel = NormalizeMatTokenToRelPath(token);
                             if (string.IsNullOrEmpty(rel))
@@ -284,40 +283,43 @@ namespace DMM.AssetManagers.TES
             return NormalizeRel(Path.Combine("Data\\Materials", t));
         }
 
-        private static IEnumerable<(string Type, int Offset, int Length)> EnumerateSubrecords(ReadOnlySpan<byte> payload)
+        private static List<(string Type, int Offset, int Length)> EnumerateSubrecords(byte[] payloadSource, int payloadStart, int payloadLength)
         {
+            var items = new List<(string Type, int Offset, int Length)>();
             int i = 0;
-            while (i + 6 <= payload.Length)
+            while (i + 6 <= payloadLength)
             {
-                string type = Encoding.ASCII.GetString(payload.Slice(i, 4));
-                ushort sz = ReadUInt16LE(payload, i + 4);
+                string type = Encoding.ASCII.GetString(payloadSource, payloadStart + i, 4);
+                ushort sz = ReadUInt16LE(payloadSource, payloadStart + i + 4);
                 i += 6;
 
                 if (type == "XXXX")
                 {
-                    if (i + 4 > payload.Length) yield break;
-                    int extSize = ReadInt32LE(payload, i);
+                    if (i + 4 > payloadLength) break;
+                    int extSize = ReadInt32LE(payloadSource, payloadStart + i);
                     i += 4;
 
-                    if (i + 6 > payload.Length) yield break;
-                    type = Encoding.ASCII.GetString(payload.Slice(i, 4));
+                    if (i + 6 > payloadLength) break;
+                    type = Encoding.ASCII.GetString(payloadSource, payloadStart + i, 4);
                     i += 4;
-                    _ = ReadUInt16LE(payload, i);
+                    _ = ReadUInt16LE(payloadSource, payloadStart + i);
                     i += 2;
 
-                    if (extSize < 0 || i + extSize > payload.Length) yield break;
-                    yield return (type, i, extSize);
+                    if (extSize < 0 || i + extSize > payloadLength) break;
+                    items.Add((type, payloadStart + i, extSize));
                     i += extSize;
                     continue;
                 }
 
-                if (i + sz > payload.Length) yield break;
-                yield return (type, i, sz);
+                if (i + sz > payloadLength) break;
+                items.Add((type, payloadStart + i, sz));
                 i += sz;
             }
+
+            return items;
         }
 
-        private static IEnumerable<string> ScrapeMatTokensFromBlob(ReadOnlySpan<byte> blob)
+        private static List<string> ScrapeMatTokensFromBlob(byte[] blobSource, int blobStart, int blobLength)
         {
             static bool IsTokenChar(byte b)
             {
@@ -328,18 +330,20 @@ namespace DMM.AssetManagers.TES
             }
 
             var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            for (int i = 0; i <= blob.Length - 4; i++)
+            var ordered = new List<string>();
+            for (int i = 0; i <= blobLength - 4; i++)
             {
-                if (blob[i] != (byte)'.')
+                int idx = blobStart + i;
+                if (blobSource[idx] != (byte)'.')
                     continue;
 
-                if (!IsAsciiCI(blob[i + 1], (byte)'m')) continue;
-                if (!IsAsciiCI(blob[i + 2], (byte)'a')) continue;
-                if (!IsAsciiCI(blob[i + 3], (byte)'t')) continue;
+                if (!IsAsciiCI(blobSource[idx + 1], (byte)'m')) continue;
+                if (!IsAsciiCI(blobSource[idx + 2], (byte)'a')) continue;
+                if (!IsAsciiCI(blobSource[idx + 3], (byte)'t')) continue;
 
                 int end = i + 4;
                 int start = i - 1;
-                while (start >= 0 && IsTokenChar(blob[start]))
+                while (start >= 0 && IsTokenChar(blobSource[blobStart + start]))
                     start--;
                 start++;
 
@@ -351,7 +355,7 @@ namespace DMM.AssetManagers.TES
                 int w = 0;
                 for (int k = start; k < end; k++)
                 {
-                    byte c = blob[k];
+                    byte c = blobSource[blobStart + k];
                     if (c == 0 || !IsTokenChar(c))
                         continue;
                     tmp[w++] = c;
@@ -366,8 +370,10 @@ namespace DMM.AssetManagers.TES
 
                 token = token.Replace('/', '\\');
                 if (results.Add(token))
-                    yield return token;
+                    ordered.Add(token);
             }
+
+            return ordered;
         }
 
         private static bool IsAsciiCI(byte actual, byte expectedLower)
@@ -395,15 +401,7 @@ namespace DMM.AssetManagers.TES
                 | (data[offset + 3] << 24);
         }
 
-        private static int ReadInt32LE(ReadOnlySpan<byte> data, int offset)
-        {
-            return data[offset]
-                | (data[offset + 1] << 8)
-                | (data[offset + 2] << 16)
-                | (data[offset + 3] << 24);
-        }
-
-        private static ushort ReadUInt16LE(ReadOnlySpan<byte> data, int offset)
+        private static ushort ReadUInt16LE(byte[] data, int offset)
         {
             return (ushort)(data[offset] | (data[offset + 1] << 8));
         }
