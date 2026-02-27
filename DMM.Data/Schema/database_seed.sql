@@ -10,8 +10,8 @@ SELECT 'Fallout 4', 'Fallout4.exe'
 WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4');
 
 INSERT INTO Game (Name, Executable)
-SELECT 'Skyrim', 'SkyrimSE.exe'
-WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Skyrim');
+SELECT 'Skyrim Special Edition', 'SkyrimSE.exe'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Skyrim Special Edition');
 
 INSERT OR IGNORE INTO GameSource (Name, SourceGameId, URL, URI) VALUES
 ('Steam', NULL, 'https://store.steampowered.com/', 'steam://'),
