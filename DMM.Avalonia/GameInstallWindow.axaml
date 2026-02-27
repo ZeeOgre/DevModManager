@@ -32,7 +32,9 @@
             <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Click="BrowseFolder_Click" />
 
             <TextBlock Grid.Row="3" Text="Main Game:" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding #InstallWindow.ManagedGames}" SelectedItem="{Binding ManagedGame}" />
+            <ComboBox Grid.Row="3" Grid.Column="1"
+                      ItemsSource="{Binding ManagedGames, RelativeSource={RelativeSource AncestorType=local:GameInstallWindow}}"
+                      SelectedItem="{Binding ManagedGame}" />
             <Button Grid.Row="3" Grid.Column="2" Content="Add New" Click="AddManagedGame_Click" />
 
             <TextBlock Grid.Row="4" Text="DLC:" VerticalAlignment="Center" />
@@ -41,7 +43,7 @@
 
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
             <StackPanel Orientation="Horizontal" Spacing="8"
-                        IsVisible="{Binding ShowNavigation, ElementName=Root}">
+                        IsVisible="{Binding ShowNavigation, RelativeSource={RelativeSource AncestorType=local:GameInstallWindow}}">
                 <Button Content="◀ Previous" />
                 <Button Content="Next ▶" />
             </StackPanel>
