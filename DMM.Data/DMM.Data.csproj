@@ -12,5 +12,9 @@
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Schema\database_schema.sql" CopyToOutputDirectory="PreserveNewest" Link="Schema\database_schema.sql" />
+    <None Include="Schema\database_seed.sql" CopyToOutputDirectory="PreserveNewest" Link="Schema\database_seed.sql" />
+  </ItemGroup>
 
 </Project>

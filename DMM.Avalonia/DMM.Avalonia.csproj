@@ -21,4 +21,9 @@
     </PackageReference>
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DMM.Data\DMM.Data.csproj" />
+  </ItemGroup>
+
 </Project>
