@@ -146,7 +146,48 @@
     <Node Id="GameSource_SourceGameId" Label="SourceGameId" Category="Field Optional" Description="text" />
     <Node Id="GameSource_URL" Label="URL" Category="Field Optional" Description="text" />
     <Node Id="GameSource_URI" Label="URI" Category="Field Optional" Description="text" />
-    <Node Id="GameSource_SourceRepoId" Label="SourceRepoId" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall" Label="GameStoreInstall" Category="Table" Group="Collapsed" />
+    <Node Id="GameStoreInstall_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameStoreInstall_GameStoreRootId" Label="GameStoreRootId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstall_InstallFolderId" Label="InstallFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstall_ContentFolderId" Label="ContentFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstall_DataFolderId" Label="DataFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstall_ManifestFileId" Label="ManifestFileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstall_StoreAppId" Label="StoreAppId" Category="Field" Description="text" />
+    <Node Id="GameStoreInstall_InstallInstanceId" Label="InstallInstanceId" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall_DisplayName" Label="DisplayName" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall_ExecutableName" Label="ExecutableName" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall_Version" Label="Version" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall_IconFileId" Label="IconFileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstall_LogoFileId" Label="LogoFileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstall_SplashFileId" Label="SplashFileId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstall_IdentityName" Label="IdentityName" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall_TitleId" Label="TitleId" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall_ProductId" Label="ProductId" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall_ContentIdOverride" Label="ContentIdOverride" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstall_LastSeenDT" Label="LastSeenDT" Category="Field" Description="datetime" />
+    <Node Id="GameStoreInstallDepot" Label="GameStoreInstallDepot" Category="Table" Group="Collapsed" />
+    <Node Id="GameStoreInstallDepot_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameStoreInstallDepot_InstallId" Label="InstallId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreInstallDepot_DepotId" Label="DepotId" Category="Field" Description="text" />
+    <Node Id="GameStoreInstallDepot_ManifestId" Label="ManifestId" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstallDepot_BranchName" Label="BranchName" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstallDepot_ManifestKey" Label="ManifestKey" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstallDepot_BranchKey" Label="BranchKey" Category="Field Optional" Description="text" />
+    <Node Id="GameStoreInstallDepot_IsDlcDepot" Label="IsDlcDepot" Category="Field" Description="bigint" />
+    <Node Id="GameStoreInstallDepot_LastSeenDT" Label="LastSeenDT" Category="Field" Description="datetime" />
+    <Node Id="GameStoreProductLink" Label="GameStoreProductLink" Category="Table" Group="Collapsed" />
+    <Node Id="GameStoreProductLink_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameStoreProductLink_ChildInstallId" Label="ChildInstallId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreProductLink_ParentGameSourceId" Label="ParentGameSourceId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreProductLink_ParentStoreAppId" Label="ParentStoreAppId" Category="Field" Description="text" />
+    <Node Id="GameStoreProductLink_LinkType" Label="LinkType" Category="Field" Description="text" />
+    <Node Id="GameStoreRoot" Label="GameStoreRoot" Category="Table" Group="Collapsed" />
+    <Node Id="GameStoreRoot_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameStoreRoot_GameSourceId" Label="GameSourceId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreRoot_RootFolderId" Label="RootFolderId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameStoreRoot_RootType" Label="RootType" Category="Field" Description="text" />
+    <Node Id="GameStoreRoot_LastSeenDT" Label="LastSeenDT" Category="Field" Description="datetime" />
     <Node Id="GameVersion" Label="GameVersion" Category="Table" Group="Collapsed" />
     <Node Id="GameVersion_id" Label="id" Category="Field Primary" Description="bigint" />
     <Node Id="GameVersion_Version" Label="Version" Category="Field Optional" Description="text" />
@@ -159,6 +200,12 @@
     <Node Id="GameVersionFiles_ArchiveId" Label="ArchiveId" Category="Field Foreign" Description="bigint" />
     <Node Id="GameVersionFiles_GameVersionId" Label="GameVersionId" Category="Field Foreign" Description="bigint" />
     <Node Id="GameVersionFiles_ModId" Label="ModId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameVersionSteamDepot" Label="GameVersionSteamDepot" Category="Table" Group="Collapsed" />
+    <Node Id="GameVersionSteamDepot_id" Label="id" Category="Field Primary" Description="bigint" />
+    <Node Id="GameVersionSteamDepot_GameVersionId" Label="GameVersionId" Category="Field Foreign" Description="bigint" />
+    <Node Id="GameVersionSteamDepot_AppId" Label="AppId" Category="Field" Description="text" />
+    <Node Id="GameVersionSteamDepot_DepotId" Label="DepotId" Category="Field" Description="text" />
+    <Node Id="GameVersionSteamDepot_ManifestId" Label="ManifestId" Category="Field" Description="text" />
     <Node Id="InitializationStatus" Label="InitializationStatus" Category="Table" Group="Collapsed" />
     <Node Id="InitializationStatus_id" Label="id" Category="Field Primary" Description="bigint" />
     <Node Id="InitializationStatus_IsInitialized" Label="IsInitialized" Category="Field" Description="bigint" />
@@ -416,7 +463,61 @@
     <Link Source="GameSource" Target="GameSource_SourceGameId" Category="Contains" />
     <Link Source="GameSource" Target="GameSource_URL" Category="Contains" />
     <Link Source="GameSource" Target="GameSource_URI" Category="Contains" />
-    <Link Source="GameSource" Target="GameSource_SourceRepoId" Category="Contains" />
+    <Link Source="Database" Target="GameStoreInstall" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_id" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_GameStoreRootId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_InstallFolderId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_ContentFolderId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_DataFolderId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_ManifestFileId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_StoreAppId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_InstallInstanceId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_DisplayName" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_ExecutableName" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_Version" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_IconFileId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_LogoFileId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_SplashFileId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_IdentityName" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_TitleId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_ProductId" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_ContentIdOverride" Category="Contains" />
+    <Link Source="GameStoreInstall" Target="GameStoreInstall_LastSeenDT" Category="Contains" />
+    <Link Source="GameStoreInstall_SplashFileId" Target="FileInfo_id" Label="FK_GameStoreInstall_0_0" Category="Foreign Key" />
+    <Link Source="GameStoreInstall_LogoFileId" Target="FileInfo_id" Label="FK_GameStoreInstall_1_0" Category="Foreign Key" />
+    <Link Source="GameStoreInstall_IconFileId" Target="FileInfo_id" Label="FK_GameStoreInstall_2_0" Category="Foreign Key" />
+    <Link Source="GameStoreInstall_ManifestFileId" Target="FileInfo_id" Label="FK_GameStoreInstall_3_0" Category="Foreign Key" />
+    <Link Source="GameStoreInstall_DataFolderId" Target="Folders_id" Label="FK_GameStoreInstall_4_0" Category="Foreign Key" />
+    <Link Source="GameStoreInstall_ContentFolderId" Target="Folders_id" Label="FK_GameStoreInstall_5_0" Category="Foreign Key" />
+    <Link Source="GameStoreInstall_InstallFolderId" Target="Folders_id" Label="FK_GameStoreInstall_6_0" Category="Foreign Key" />
+    <Link Source="GameStoreInstall_GameStoreRootId" Target="GameStoreRoot_id" Label="FK_GameStoreInstall_7_0" Category="Foreign Key" />
+    <Link Source="Database" Target="GameStoreInstallDepot" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_id" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_InstallId" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_DepotId" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_ManifestId" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_BranchName" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_ManifestKey" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_BranchKey" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_IsDlcDepot" Category="Contains" />
+    <Link Source="GameStoreInstallDepot" Target="GameStoreInstallDepot_LastSeenDT" Category="Contains" />
+    <Link Source="GameStoreInstallDepot_InstallId" Target="GameStoreInstall_id" Label="FK_GameStoreInstallDepot_0_0" Category="Foreign Key" />
+    <Link Source="Database" Target="GameStoreProductLink" Category="Contains" />
+    <Link Source="GameStoreProductLink" Target="GameStoreProductLink_id" Category="Contains" />
+    <Link Source="GameStoreProductLink" Target="GameStoreProductLink_ChildInstallId" Category="Contains" />
+    <Link Source="GameStoreProductLink" Target="GameStoreProductLink_ParentGameSourceId" Category="Contains" />
+    <Link Source="GameStoreProductLink" Target="GameStoreProductLink_ParentStoreAppId" Category="Contains" />
+    <Link Source="GameStoreProductLink" Target="GameStoreProductLink_LinkType" Category="Contains" />
+    <Link Source="GameStoreProductLink_ParentGameSourceId" Target="GameSource_id" Label="FK_GameStoreProductLink_0_0" Category="Foreign Key" />
+    <Link Source="GameStoreProductLink_ChildInstallId" Target="GameStoreInstall_id" Label="FK_GameStoreProductLink_1_0" Category="Foreign Key" />
+    <Link Source="Database" Target="GameStoreRoot" Category="Contains" />
+    <Link Source="GameStoreRoot" Target="GameStoreRoot_id" Category="Contains" />
+    <Link Source="GameStoreRoot" Target="GameStoreRoot_GameSourceId" Category="Contains" />
+    <Link Source="GameStoreRoot" Target="GameStoreRoot_RootFolderId" Category="Contains" />
+    <Link Source="GameStoreRoot" Target="GameStoreRoot_RootType" Category="Contains" />
+    <Link Source="GameStoreRoot" Target="GameStoreRoot_LastSeenDT" Category="Contains" />
+    <Link Source="GameStoreRoot_RootFolderId" Target="Folders_id" Label="FK_GameStoreRoot_0_0" Category="Foreign Key" />
+    <Link Source="GameStoreRoot_GameSourceId" Target="GameSource_id" Label="FK_GameStoreRoot_1_0" Category="Foreign Key" />
     <Link Source="Database" Target="GameVersion" Category="Contains" />
     <Link Source="GameVersion" Target="GameVersion_id" Category="Contains" />
     <Link Source="GameVersion" Target="GameVersion_Version" Category="Contains" />
@@ -435,6 +536,13 @@
     <Link Source="GameVersionFiles_GameVersionId" Target="GameVersion_id" Label="FK_GameVersionFiles_1_0" Category="Foreign Key" />
     <Link Source="GameVersionFiles_ArchiveId" Target="FileInfo_id" Label="FK_GameVersionFiles_2_0" Category="Foreign Key" />
     <Link Source="GameVersionFiles_FileId" Target="FileInfo_id" Label="FK_GameVersionFiles_3_0" Category="Foreign Key" />
+    <Link Source="Database" Target="GameVersionSteamDepot" Category="Contains" />
+    <Link Source="GameVersionSteamDepot" Target="GameVersionSteamDepot_id" Category="Contains" />
+    <Link Source="GameVersionSteamDepot" Target="GameVersionSteamDepot_GameVersionId" Category="Contains" />
+    <Link Source="GameVersionSteamDepot" Target="GameVersionSteamDepot_AppId" Category="Contains" />
+    <Link Source="GameVersionSteamDepot" Target="GameVersionSteamDepot_DepotId" Category="Contains" />
+    <Link Source="GameVersionSteamDepot" Target="GameVersionSteamDepot_ManifestId" Category="Contains" />
+    <Link Source="GameVersionSteamDepot_GameVersionId" Target="GameVersion_id" Label="FK_GameVersionSteamDepot_0_0" Category="Foreign Key" />
     <Link Source="Database" Target="InitializationStatus" Category="Contains" />
     <Link Source="InitializationStatus" Target="InitializationStatus_id" Category="Contains" />
     <Link Source="InitializationStatus" Target="InitializationStatus_IsInitialized" Category="Contains" />
