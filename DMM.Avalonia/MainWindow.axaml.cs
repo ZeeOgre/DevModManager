@@ -229,13 +229,18 @@ public sealed class MainWindowViewModel : NotifyBase
         {
             GameInstalls.Add(install.Clone());
         }
+
+        SyncGameFoldersFromInstalls();
     }
 
     public void SyncGameFoldersFromInstalls()
     {
         var selected = SelectedGameFolder;
         GameFolders.Clear();
-        foreach (var path in GameInstalls.Select(x => x.InstallPath).Distinct())
+        foreach (var path in GameInstalls
+                     .Where(x => !x.IsDlc)
+                     .Select(x => x.InstallPath)
+                     .Distinct())
         {
             GameFolders.Add(path);
         }
