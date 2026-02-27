@@ -89,6 +89,13 @@ public static class StoreDataEnrichmentBase
         AppInstallSnapshot app,
         List<ScanIssue> issues)
     {
+        // Base-game manifests should only be generated for installed game entries.
+        if (app.InstallState != InstallState.Installed)
+            return;
+
+        if (app.Tags.Contains("tool", StringComparer.OrdinalIgnoreCase))
+            return;
+
         if (app.InstallFolders?.InstallFolder?.Path is not { Length: > 0 } installRoot)
             return;
 
