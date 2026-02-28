@@ -1,0 +1,34 @@
+Skyrim includes the following, which are all all fully patched in and available to anyone Skyrim: Special Edition. All of this is considered "base game":
+
+Dawnguard, Hearthfire, Dragonborn
+Saints & Seducers, Rare Curios, Survival Mode, Fishing
+_ResourcePack.esl
+Root dungeon kit
+Ayleid dungeon kit
+Note: Skyrim content cannot conflict with any Creation Club content, including everything in the full Anniversary Edition upgrade. Even though this content cannot be a dependency.
+
+Information
+Fallout 4 includes only the base game and the following additions, which have been patched in for all players:
+
+ccSBJFO4003-Grenade.esl - Makeshift Weapon Pack - When Pigs Fly
+ccFSVFO4007-Halloween.esl - Halloween Workshop Pack - All Hallows' Eve
+Enclave Pack
+ccOTMFO4001-Remnants.esl - Enclave Remnants - Echoes of the Past
+ccBGSFO4046-TesCan.esl - Tesla Cannon - Best of Three
+ccBGSFO4044-HellfirePowerArmor.esl - Hellfire Power Armor - Pyromaniac
+ccBGSFO4115-X02.esl - X02 Power Armor - Speak of the Devil
+ccBGSFO4116-HeavyFlamer.esl - Heavy Incinerator - Crucible
+ccBGSFO4096-AS_Enclave.esl - Enclave Armor Skins
+ccBGSFO4110-WS_Enclave.esl - Enclave Weapon Skins
+The VC program does not support other Creation Club content or Fallout 4 DLC at this time.
+
+Note: Fallout 4 content cannot conflict with any DLC or Creation Club content. Even though this content cannot be a dependency.
+
+Information
+Starfield includes the base game and a small number of additions, but no other official releases or DLC.
+
+SFBGS003 - Trackers Alliance support (but not expansions to this, like The Vulture)
+SFBGS004 - Vehicle/Rev8
+SFBGS006 - Ship Decoration
+SFBGS007 - Gameplay Options
+SFBGS008 - City Maps Data
