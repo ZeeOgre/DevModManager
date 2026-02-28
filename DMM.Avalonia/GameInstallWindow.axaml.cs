@@ -28,11 +28,6 @@ public partial class GameInstallWindow : Window
         ShowNavigation = showNavigation;
         _onManagedGameAdded = onManagedGameAdded;
 
-        if (install.ManagedGame is not null)
-        {
-            install.ManagedGame = ResolveManagedGameReference(install.ManagedGame);
-        }
-
         DataContext = install;
         InitializeComponent();
     }
@@ -140,16 +135,16 @@ public partial class GameInstallWindow : Window
     {
         if (DataContext is GameInstallRecord install)
         {
-            var selectedGame = ResolveManagedGameReference(MainGameComboBox.SelectedItem as ManagedGame);
+            var selectedGame = MainGameComboBox.SelectedItem as ManagedGame;
             if (selectedGame is null && MainGameComboBox.SelectedIndex >= 0 && MainGameComboBox.SelectedIndex < ManagedGames.Count)
             {
-                selectedGame = ResolveManagedGameReference(ManagedGames[MainGameComboBox.SelectedIndex]);
+                selectedGame = ManagedGames[MainGameComboBox.SelectedIndex];
             }
 
             if (selectedGame is null && !string.IsNullOrWhiteSpace(MainGameComboBox.Text))
             {
-                selectedGame = ResolveManagedGameReference(ManagedGames.FirstOrDefault(x =>
-                    string.Equals(x.Name, MainGameComboBox.Text, StringComparison.OrdinalIgnoreCase)));
+                selectedGame = ManagedGames.FirstOrDefault(x =>
+                    string.Equals(x.Name, MainGameComboBox.Text, StringComparison.OrdinalIgnoreCase));
             }
 
             if (selectedGame is not null)
