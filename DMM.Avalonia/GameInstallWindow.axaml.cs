@@ -12,6 +12,7 @@ public partial class GameInstallWindow : Window
     public ObservableCollection<ManagedGame> ManagedGames { get; }
     public bool ShowNavigation { get; }
     private readonly Action<ManagedGame>? _onManagedGameAdded;
+    private ManagedGame? _lastMainGameSelection;
 
     public GameInstallWindow()
     {
@@ -94,6 +95,21 @@ public partial class GameInstallWindow : Window
         install.ManagedGame = ResolveManagedGameReference(selected);
     }
 
+    private void MainGameComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not ComboBox combo)
+        {
+            return;
+        }
+
+        var selectedGame = combo.SelectedItem as ManagedGame
+            ?? e.AddedItems?.OfType<ManagedGame>().FirstOrDefault();
+        if (selectedGame is not null)
+        {
+            _lastMainGameSelection = selectedGame;
+        }
+    }
+
     private async void BrowseFolder_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GameInstallRecord install)
@@ -147,6 +163,7 @@ public partial class GameInstallWindow : Window
                     string.Equals(x.Name, MainGameComboBox.Text, StringComparison.OrdinalIgnoreCase));
             }
 
+            selectedGame ??= _lastMainGameSelection;
             if (selectedGame is not null)
             {
                 install.ManagedGame = selectedGame;
