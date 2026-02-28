@@ -1,7 +1,7 @@
-using System.Collections.ObjectModel;
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Platform.Storage;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 
@@ -53,13 +53,37 @@ public partial class GameInstallWindow : Window
 
         ManagedGames.Add(game);
         _onManagedGameAdded?.Invoke(game);
+
         if (DataContext is GameInstallRecord install)
         {
             install.ManagedGame = game;
         }
     }
 
-    private void Save_Click(object? sender, RoutedEventArgs e) => Close(true);
+    private void Save_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is GameInstallRecord install)
+        {
+            var selectedGame = MainGameComboBox.SelectedItem as ManagedGame;
+            if (selectedGame is null && MainGameComboBox.SelectedIndex >= 0 && MainGameComboBox.SelectedIndex < ManagedGames.Count)
+            {
+                selectedGame = ManagedGames[MainGameComboBox.SelectedIndex];
+            }
+
+            if (selectedGame is null && !string.IsNullOrWhiteSpace(MainGameComboBox.Text))
+            {
+                selectedGame = ManagedGames.FirstOrDefault(x =>
+                    string.Equals(x.Name, MainGameComboBox.Text, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (selectedGame is not null)
+            {
+                install.ManagedGame = selectedGame;
+            }
+        }
+
+        Close(true);
+    }
 
     private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(false);
 }
