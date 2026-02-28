@@ -49,7 +49,14 @@ public partial class GameInstallWindow : Window
             return;
         }
 
-        install.ManagedGame = ResolveManagedGameReference(combo.SelectedItem as ManagedGame);
+        var selected = combo.SelectedItem as ManagedGame
+            ?? e.AddedItems?.OfType<ManagedGame>().FirstOrDefault();
+        if (selected is null)
+        {
+            return;
+        }
+
+        install.ManagedGame = ResolveManagedGameReference(selected);
     }
 
     private async void BrowseFolder_Click(object? sender, RoutedEventArgs e)
@@ -89,7 +96,15 @@ public partial class GameInstallWindow : Window
         }
     }
 
-    private void Save_Click(object? sender, RoutedEventArgs e) => Close(true);
+    private void Save_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is GameInstallRecord install && MainGameComboBox.SelectedItem is ManagedGame selected)
+        {
+            install.ManagedGame = ResolveManagedGameReference(selected);
+        }
+
+        Close(true);
+    }
 
     private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(false);
 }
