@@ -80,6 +80,7 @@ public sealed class GameInstallRecord : NotifyBase
         {
             if (SetField(ref _managedGame, value))
             {
+                StoreAppId = value?.StoreId ?? string.Empty;
                 OnPropertyChanged(nameof(GameName));
             }
         }

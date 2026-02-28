@@ -13,9 +13,17 @@ public partial class GameInstallWindow : Window
     public bool ShowNavigation { get; }
     private readonly Action<ManagedGame>? _onManagedGameAdded;
 
-    public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)
+    public GameInstallWindow()
     {
+        ManagedGames = new ObservableCollection<ManagedGame>();
+        ShowNavigation = false;
+        _onManagedGameAdded = null;
+        DataContext = new GameInstallRecord();
         InitializeComponent();
+    }
+
+    public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)    
+    {
         ManagedGames = managedGames;
         ShowNavigation = showNavigation;
         _onManagedGameAdded = onManagedGameAdded;
@@ -24,8 +32,14 @@ public partial class GameInstallWindow : Window
         {
             install.ManagedGame = ResolveManagedGameReference(install.ManagedGame);
         }
+        else if (!string.IsNullOrWhiteSpace(install.StoreAppId))
+        {
+            install.ManagedGame = ManagedGames.FirstOrDefault(x =>
+                string.Equals(x.StoreId, install.StoreAppId, StringComparison.OrdinalIgnoreCase));
+        }
 
         DataContext = install;
+        InitializeComponent();
     }
 
     private ManagedGame? ResolveManagedGameReference(ManagedGame? candidate)
