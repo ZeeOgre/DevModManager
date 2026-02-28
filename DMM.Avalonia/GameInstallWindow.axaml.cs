@@ -3,7 +3,7 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
+using System.Linq;
 
 namespace DMM.Avalonia;
 
@@ -19,7 +19,37 @@ public partial class GameInstallWindow : Window
         ManagedGames = managedGames;
         ShowNavigation = showNavigation;
         _onManagedGameAdded = onManagedGameAdded;
+
+        if (install.ManagedGame is not null)
+        {
+            install.ManagedGame = ResolveManagedGameReference(install.ManagedGame);
+        }
+
         DataContext = install;
+    }
+
+    private ManagedGame? ResolveManagedGameReference(ManagedGame? candidate)
+    {
+        if (candidate is null)
+        {
+            return null;
+        }
+
+        return ManagedGames.FirstOrDefault(x =>
+                   (!string.IsNullOrWhiteSpace(candidate.StoreId) &&
+                    string.Equals(x.StoreId, candidate.StoreId, StringComparison.OrdinalIgnoreCase)) ||
+                   string.Equals(x.Name, candidate.Name, StringComparison.OrdinalIgnoreCase))
+               ?? candidate;
+    }
+
+    private void MainGame_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is not GameInstallRecord install || sender is not ComboBox combo)
+        {
+            return;
+        }
+
+        install.ManagedGame = ResolveManagedGameReference(combo.SelectedItem as ManagedGame);
     }
 
     private async void BrowseFolder_Click(object? sender, RoutedEventArgs e)

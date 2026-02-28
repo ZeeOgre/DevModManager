@@ -33,7 +33,8 @@
             <TextBlock Grid.Row="3" Text="Main Game:" VerticalAlignment="Center" />
             <ComboBox Grid.Row="3" Grid.Column="1"
                       ItemsSource="{Binding ManagedGames, RelativeSource={RelativeSource AncestorType=local:GameInstallWindow}}"
-                      SelectedItem="{Binding ManagedGame}" />
+                      SelectedItem="{Binding ManagedGame, Mode=TwoWay}"
+                      SelectionChanged="MainGame_SelectionChanged" />
             <Button Grid.Row="3" Grid.Column="2" Content="Add New" Click="AddManagedGame_Click" />
 
             <TextBlock Grid.Row="4" Text="DLC:" VerticalAlignment="Center" />
