@@ -29,6 +29,7 @@ public partial class GameInstallWindow : Window
         ShowNavigation = showNavigation;
         _onManagedGameAdded = onManagedGameAdded;
 
+        install.ManagedGame = CanonicalizeManagedGame(install.ManagedGame);
         DataContext = install;
         InitializeComponent();
     }
@@ -110,6 +111,21 @@ public partial class GameInstallWindow : Window
         }
     }
 
+
+    private ManagedGame? CanonicalizeManagedGame(ManagedGame? candidate)
+    {
+        if (candidate is null)
+        {
+            return null;
+        }
+
+        return ManagedGames.FirstOrDefault(x =>
+                   (!string.IsNullOrWhiteSpace(candidate.StoreId) &&
+                    string.Equals(x.StoreId, candidate.StoreId, StringComparison.OrdinalIgnoreCase)) ||
+                   string.Equals(x.Name, candidate.Name, StringComparison.OrdinalIgnoreCase))
+               ?? candidate;
+    }
+
     private async void BrowseFolder_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not GameInstallRecord install)
@@ -165,7 +181,7 @@ public partial class GameInstallWindow : Window
 
             if (selectedGame is not null)
             {
-                install.ManagedGame = selectedGame;
+                install.ManagedGame = CanonicalizeManagedGame(selectedGame);
             }
         }
 
