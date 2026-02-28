@@ -35,7 +35,7 @@
             <ComboBox x:Name="MainGameComboBox" Grid.Row="3" Grid.Column="1"
                       ItemsSource="{Binding ManagedGames, RelativeSource={RelativeSource AncestorType=local:GameInstallWindow}}"
                       SelectedItem="{Binding ManagedGame, Mode=TwoWay}"
-                      SelectionChanged="MainGameComboBox_SelectionChanged" />
+                      SelectionChanged="MainGame_SelectionChanged" />
             <Button Grid.Row="3" Grid.Column="2" Content="Add New" Click="AddManagedGame_Click" />
 
             <TextBlock Grid.Row="4" Text="DLC:" VerticalAlignment="Center" />

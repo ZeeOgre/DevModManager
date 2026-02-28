@@ -23,7 +23,7 @@ public partial class GameInstallWindow : Window
         InitializeComponent();
     }
 
-    public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)    
+    public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)
     {
         ManagedGames = managedGames;
         ShowNavigation = showNavigation;
@@ -61,53 +61,9 @@ public partial class GameInstallWindow : Window
             return;
         }
 
-        install.ManagedGame = ResolveManagedGameReference(selected);
-    }
-
-    private ManagedGame? ResolveManagedGameReference(ManagedGame? candidate)
-    {
-        if (candidate is null)
-        {
-            return null;
-        }
-
-        return ManagedGames.FirstOrDefault(x =>
-                   (!string.IsNullOrWhiteSpace(candidate.StoreId) &&
-                    string.Equals(x.StoreId, candidate.StoreId, StringComparison.OrdinalIgnoreCase)) ||
-                   string.Equals(x.Name, candidate.Name, StringComparison.OrdinalIgnoreCase))
-               ?? candidate;
-    }
-
-    private void MainGame_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (DataContext is not GameInstallRecord install || sender is not ComboBox combo)
-        {
-            return;
-        }
-
-        var selected = combo.SelectedItem as ManagedGame
-            ?? e.AddedItems?.OfType<ManagedGame>().FirstOrDefault();
-        if (selected is null)
-        {
-            return;
-        }
-
-        install.ManagedGame = ResolveManagedGameReference(selected);
-    }
-
-    private void MainGameComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (sender is not ComboBox combo)
-        {
-            return;
-        }
-
-        var selectedGame = combo.SelectedItem as ManagedGame
-            ?? e.AddedItems?.OfType<ManagedGame>().FirstOrDefault();
-        if (selectedGame is not null)
-        {
-            _lastMainGameSelection = selectedGame;
-        }
+        var resolved = ResolveManagedGameReference(selected);
+        install.ManagedGame = resolved;
+        _lastMainGameSelection = resolved;
     }
 
     private async void BrowseFolder_Click(object? sender, RoutedEventArgs e)
@@ -144,6 +100,7 @@ public partial class GameInstallWindow : Window
         if (DataContext is GameInstallRecord install)
         {
             install.ManagedGame = game;
+            _lastMainGameSelection = game;
         }
     }
 
@@ -151,19 +108,9 @@ public partial class GameInstallWindow : Window
     {
         if (DataContext is GameInstallRecord install)
         {
-            var selectedGame = MainGameComboBox.SelectedItem as ManagedGame;
-            if (selectedGame is null && MainGameComboBox.SelectedIndex >= 0 && MainGameComboBox.SelectedIndex < ManagedGames.Count)
-            {
-                selectedGame = ManagedGames[MainGameComboBox.SelectedIndex];
-            }
+            var selectedGame = MainGameComboBox.SelectedItem as ManagedGame
+                ?? _lastMainGameSelection;
 
-            if (selectedGame is null && !string.IsNullOrWhiteSpace(MainGameComboBox.Text))
-            {
-                selectedGame = ManagedGames.FirstOrDefault(x =>
-                    string.Equals(x.Name, MainGameComboBox.Text, StringComparison.OrdinalIgnoreCase));
-            }
-
-            selectedGame ??= _lastMainGameSelection;
             if (selectedGame is not null)
             {
                 install.ManagedGame = selectedGame;
