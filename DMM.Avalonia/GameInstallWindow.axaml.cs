@@ -3,7 +3,7 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
+using System.Linq;
 
 namespace DMM.Avalonia;
 
@@ -19,7 +19,24 @@ public partial class GameInstallWindow : Window
         ManagedGames = managedGames;
         ShowNavigation = showNavigation;
         _onManagedGameAdded = onManagedGameAdded;
+
+        install.ManagedGame = CanonicalizeManagedGame(install.ManagedGame);
         DataContext = install;
+    }
+
+
+    private ManagedGame? CanonicalizeManagedGame(ManagedGame? candidate)
+    {
+        if (candidate is null)
+        {
+            return null;
+        }
+
+        return ManagedGames.FirstOrDefault(x =>
+                   (!string.IsNullOrWhiteSpace(candidate.StoreId) &&
+                    string.Equals(x.StoreId, candidate.StoreId, StringComparison.OrdinalIgnoreCase)) ||
+                   string.Equals(x.Name, candidate.Name, StringComparison.OrdinalIgnoreCase))
+               ?? candidate;
     }
 
     private async void BrowseFolder_Click(object? sender, RoutedEventArgs e)
@@ -59,7 +76,30 @@ public partial class GameInstallWindow : Window
         }
     }
 
-    private void Save_Click(object? sender, RoutedEventArgs e) => Close(true);
+    private void Save_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is GameInstallRecord install)
+        {
+            var selectedGame = MainGameComboBox.SelectedItem as ManagedGame;
+            if (selectedGame is null && MainGameComboBox.SelectedIndex >= 0 && MainGameComboBox.SelectedIndex < ManagedGames.Count)
+            {
+                selectedGame = ManagedGames[MainGameComboBox.SelectedIndex];
+            }
+
+            if (selectedGame is null && !string.IsNullOrWhiteSpace(MainGameComboBox.Text))
+            {
+                selectedGame = ManagedGames.FirstOrDefault(x =>
+                    string.Equals(x.Name, MainGameComboBox.Text, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (selectedGame is not null)
+            {
+                install.ManagedGame = CanonicalizeManagedGame(selectedGame);
+            }
+        }
+
+        Close(true);
+    }
 
     private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(false);
 }
