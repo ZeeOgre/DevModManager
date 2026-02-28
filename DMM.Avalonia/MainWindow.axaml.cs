@@ -229,13 +229,18 @@ public sealed class MainWindowViewModel : NotifyBase
         {
             GameInstalls.Add(install.Clone());
         }
+
+        SyncGameFoldersFromInstalls();
     }
 
     public void SyncGameFoldersFromInstalls()
     {
         var selected = SelectedGameFolder;
         GameFolders.Clear();
-        foreach (var path in GameInstalls.Select(x => x.InstallPath).Distinct())
+        foreach (var path in GameInstalls
+                     .Where(x => !x.IsDlc)
+                     .Select(x => x.InstallPath)
+                     .Distinct())
         {
             GameFolders.Add(path);
         }
@@ -490,6 +495,11 @@ internal sealed class GameSetupRepository
         }
 
         var gameIdLookup = LoadGameIdLookup(connection, tx);
+        foreach (var game in managedGames)
+        {
+            EnsureGameId(connection, tx, gameIdLookup, game);
+        }
+
         var folderTypeId = EnsureFolderType(connection, tx, "GameInstall");
         var folderRoleId = EnsureFolderRole(connection, tx, "GameInstall");
 
@@ -507,9 +517,7 @@ internal sealed class GameSetupRepository
                     ? install.ManagedGame.StoreId
                     : $"custom:{install.InstallPath}";
 
-            long? gameId = gameIdLookup.TryGetValue(install.ManagedGame?.Name ?? string.Empty, out var resolvedGameId)
-                ? resolvedGameId
-                : null;
+            long? gameId = EnsureGameId(connection, tx, gameIdLookup, install.ManagedGame);
 
             using var cmd = connection.CreateCommand();
             cmd.Transaction = tx;
@@ -545,6 +553,34 @@ internal sealed class GameSetupRepository
         }
 
         tx.Commit();
+    }
+
+    private static long? EnsureGameId(
+        SqliteConnection connection,
+        SqliteTransaction tx,
+        IDictionary<string, long> gameIdLookup,
+        ManagedGame? game)
+    {
+        if (game is null || string.IsNullOrWhiteSpace(game.Name))
+        {
+            return null;
+        }
+
+        if (gameIdLookup.TryGetValue(game.Name, out var existingId))
+        {
+            return existingId;
+        }
+
+        using var insert = connection.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = "INSERT INTO Game (Name, Executable) VALUES ($name, $exe)";
+        insert.Parameters.AddWithValue("$name", game.Name);
+        insert.Parameters.AddWithValue("$exe", game.Executable ?? string.Empty);
+        insert.ExecuteNonQuery();
+
+        var createdId = ReadLastInsertRowId(connection, tx);
+        gameIdLookup[game.Name] = createdId;
+        return createdId;
     }
 
     private static Dictionary<string, long> LoadGameIdLookup(SqliteConnection connection, SqliteTransaction tx)
