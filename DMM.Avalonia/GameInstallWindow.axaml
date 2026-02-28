@@ -5,6 +5,7 @@
         xmlns:local="using:DMM.Avalonia"
         mc:Ignorable="d"
         x:Class="DMM.Avalonia.GameInstallWindow"
+        x:Name="InstallWindow"
         x:DataType="local:GameInstallWindow"
         Width="760"
         Height="420"
