@@ -161,7 +161,13 @@ public sealed class MainWindowViewModel : NotifyBase
     public string? SelectedGameFolder
     {
         get => _selectedGameFolder;
-        set => SetField(ref _selectedGameFolder, value);
+        set
+        {
+            if (SetField(ref _selectedGameFolder, value))
+            {
+                RebuildMods();
+            }
+        }
     }
 
     private string _statusMessage = "Ready. Choose a mod and open Focus for per-mod operations.";
@@ -183,11 +189,7 @@ public sealed class MainWindowViewModel : NotifyBase
         vm.StageOptions.Add("PRERELEASE");
         vm.StageOptions.Add("RELEASE");
 
-        vm.Mods.Add(new ModListItem("ZO_AIOGamePlayTweaks", "ZO_AIOGamePlayTweaks.esp", "DEV", "f7dc7ac6...", "345221", new SolidColorBrush(Color.Parse("#2B2B2B"))));
-        vm.Mods.Add(new ModListItem("ZO_DenserOutposts", "ZO_DenserOutposts.esm", "RELEASE", "c5bbdd20...", "817744", new SolidColorBrush(Color.Parse("#343434"))));
-        vm.Mods.Add(new ModListItem("ZO_HandScannerTweaks", "ZO_HandScannerTweaks.esl", "TEST", "3f102ab3...", "593188", new SolidColorBrush(Color.Parse("#2B2B2B"))));
-        vm.Mods.Add(new ModListItem("WT_SmartDoc", "WT_SmartDoc.esp", "DEV", "2120ee1a...", "772843", new SolidColorBrush(Color.Parse("#343434"))));
-        vm.Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+        vm.RebuildMods();
 
         return vm;
     }
@@ -217,6 +219,7 @@ public sealed class MainWindowViewModel : NotifyBase
         }
 
         SyncGameFoldersFromInstalls();
+        RebuildMods();
     }
 
     public void PersistManagedGame(ManagedGame game) => _repository.UpsertManagedGame(game);
@@ -231,6 +234,62 @@ public sealed class MainWindowViewModel : NotifyBase
         }
 
         SyncGameFoldersFromInstalls();
+        RebuildMods();
+    }
+
+    private void RebuildMods()
+    {
+        Mods.Clear();
+
+        var baseInstalls = GameInstalls
+            .Where(x => !x.IsDlc)
+            .Where(x => x.ManagedGame is not null)
+            .Where(x => string.IsNullOrWhiteSpace(SelectedGameFolder) || string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var row = 0;
+        foreach (var install in baseInstalls)
+        {
+            foreach (var builtin in BuiltInBethesdaMods.ForGame(install.ManagedGame!.Name))
+            {
+                if (!PluginExists(install.InstallPath, builtin.Plugin))
+                {
+                    continue;
+                }
+
+                Mods.Add(new ModListItem(
+                    builtin.DisplayName,
+                    builtin.Plugin,
+                    "BASE",
+                    string.Empty,
+                    string.Empty,
+                    new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
+            }
+        }
+
+        if (Mods.Count > 0)
+        {
+            StatusMessage = $"Loaded {Mods.Count} built-in Bethesda mod entries from managed installs.";
+            return;
+        }
+
+        Mods.Add(new ModListItem("ZO_AIOGamePlayTweaks", "ZO_AIOGamePlayTweaks.esp", "DEV", "f7dc7ac6...", "345221", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+        Mods.Add(new ModListItem("ZO_DenserOutposts", "ZO_DenserOutposts.esm", "RELEASE", "c5bbdd20...", "817744", new SolidColorBrush(Color.Parse("#343434"))));
+        Mods.Add(new ModListItem("ZO_HandScannerTweaks", "ZO_HandScannerTweaks.esl", "TEST", "3f102ab3...", "593188", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+        Mods.Add(new ModListItem("WT_SmartDoc", "WT_SmartDoc.esp", "DEV", "2120ee1a...", "772843", new SolidColorBrush(Color.Parse("#343434"))));
+        Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+    }
+
+    private static bool PluginExists(string installPath, string pluginFileName)
+    {
+        var inRoot = Path.Combine(installPath, pluginFileName);
+        if (File.Exists(inRoot))
+        {
+            return true;
+        }
+
+        var inData = Path.Combine(installPath, "Data", pluginFileName);
+        return File.Exists(inData);
     }
 
     public void SyncGameFoldersFromInstalls()
@@ -722,4 +781,64 @@ public sealed class ModListItem
     public string BethesdaId { get; }
     public string NexusId { get; }
     public IBrush RowBackground { get; }
+}
+
+internal static class BuiltInBethesdaMods
+{
+    private static readonly BuiltInMod[] StarfieldBaseMods =
+    [
+        new("Trackers Alliance support", "SFBGS003.esm"),
+        new("Vehicle / REV-8", "SFBGS004.esm"),
+        new("Ship Decoration", "SFBGS006.esm"),
+        new("Gameplay Options", "SFBGS007.esm"),
+        new("City Maps Data", "SFBGS008.esm")
+    ];
+
+    private static readonly BuiltInMod[] Fallout4BaseMods =
+    [
+        new("Makeshift Weapon Pack - When Pigs Fly", "ccSBJFO4003-Grenade.esl"),
+        new("Halloween Workshop Pack - All Hallows' Eve", "ccFSVFO4007-Halloween.esl"),
+        new("Enclave Remnants - Echoes of the Past", "ccOTMFO4001-Remnants.esl"),
+        new("Tesla Cannon - Best of Three", "ccBGSFO4046-TesCan.esl"),
+        new("Hellfire Power Armor - Pyromaniac", "ccBGSFO4044-HellfirePowerArmor.esl"),
+        new("X-02 Power Armor - Speak of the Devil", "ccBGSFO4115-X02.esl"),
+        new("Heavy Incinerator - Crucible", "ccBGSFO4116-HeavyFlamer.esl"),
+        new("Enclave Armor Skins", "ccBGSFO4096-AS_Enclave.esl"),
+        new("Enclave Weapon Skins", "ccBGSFO4110-WS_Enclave.esl")
+    ];
+
+    private static readonly BuiltInMod[] SkyrimSeBaseMods =
+    [
+        new("Dawnguard", "Dawnguard.esm"),
+        new("Hearthfire", "HearthFires.esm"),
+        new("Dragonborn", "Dragonborn.esm"),
+        new("Saints & Seducers", "ccBGSSSE025-AdvDSGS.esm"),
+        new("Rare Curios", "ccBGSSSE037-Curios.esl"),
+        new("Survival Mode", "ccQDRSSE001-SurvivalMode.esl"),
+        new("Fishing", "ccBGSSSE001-Fish.esm"),
+        new("Resource Pack", "_ResourcePack.esl")
+    ];
+
+    public static IReadOnlyList<BuiltInMod> ForGame(string gameName)
+    {
+        if (gameName.Contains("Starfield", StringComparison.OrdinalIgnoreCase))
+        {
+            return StarfieldBaseMods;
+        }
+
+        if (gameName.Contains("Fallout 4", StringComparison.OrdinalIgnoreCase) ||
+            gameName.Contains("Fallout4", StringComparison.OrdinalIgnoreCase))
+        {
+            return Fallout4BaseMods;
+        }
+
+        if (gameName.Contains("Skyrim", StringComparison.OrdinalIgnoreCase))
+        {
+            return SkyrimSeBaseMods;
+        }
+
+        return Array.Empty<BuiltInMod>();
+    }
+
+    internal readonly record struct BuiltInMod(string DisplayName, string Plugin);
 }
