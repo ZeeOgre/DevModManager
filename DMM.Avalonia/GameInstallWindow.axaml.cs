@@ -32,14 +32,40 @@ public partial class GameInstallWindow : Window
         {
             install.ManagedGame = ResolveManagedGameReference(install.ManagedGame);
         }
-        else if (!string.IsNullOrWhiteSpace(install.StoreAppId))
-        {
-            install.ManagedGame = ManagedGames.FirstOrDefault(x =>
-                string.Equals(x.StoreId, install.StoreAppId, StringComparison.OrdinalIgnoreCase));
-        }
 
         DataContext = install;
         InitializeComponent();
+    }
+
+    private ManagedGame? ResolveManagedGameReference(ManagedGame? candidate)
+    {
+        if (candidate is null)
+        {
+            return null;
+        }
+
+        return ManagedGames.FirstOrDefault(x =>
+                   (!string.IsNullOrWhiteSpace(candidate.StoreId) &&
+                    string.Equals(x.StoreId, candidate.StoreId, StringComparison.OrdinalIgnoreCase)) ||
+                   string.Equals(x.Name, candidate.Name, StringComparison.OrdinalIgnoreCase))
+               ?? candidate;
+    }
+
+    private void MainGame_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is not GameInstallRecord install || sender is not ComboBox combo)
+        {
+            return;
+        }
+
+        var selected = combo.SelectedItem as ManagedGame
+            ?? e.AddedItems?.OfType<ManagedGame>().FirstOrDefault();
+        if (selected is null)
+        {
+            return;
+        }
+
+        install.ManagedGame = ResolveManagedGameReference(selected);
     }
 
     private ManagedGame? ResolveManagedGameReference(ManagedGame? candidate)
@@ -112,9 +138,24 @@ public partial class GameInstallWindow : Window
 
     private void Save_Click(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is GameInstallRecord install && MainGameComboBox.SelectedItem is ManagedGame selected)
+        if (DataContext is GameInstallRecord install)
         {
-            install.ManagedGame = ResolveManagedGameReference(selected);
+            var selectedGame = ResolveManagedGameReference(MainGameComboBox.SelectedItem as ManagedGame);
+            if (selectedGame is null && MainGameComboBox.SelectedIndex >= 0 && MainGameComboBox.SelectedIndex < ManagedGames.Count)
+            {
+                selectedGame = ResolveManagedGameReference(ManagedGames[MainGameComboBox.SelectedIndex]);
+            }
+
+            if (selectedGame is null && !string.IsNullOrWhiteSpace(MainGameComboBox.Text))
+            {
+                selectedGame = ResolveManagedGameReference(ManagedGames.FirstOrDefault(x =>
+                    string.Equals(x.Name, MainGameComboBox.Text, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            if (selectedGame is not null)
+            {
+                install.ManagedGame = selectedGame;
+            }
         }
 
         Close(true);

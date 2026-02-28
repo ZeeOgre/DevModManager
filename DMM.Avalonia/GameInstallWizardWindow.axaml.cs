@@ -92,7 +92,7 @@ public partial class GameInstallWizardWindow : Window
         }
 
         var editable = install.Clone();
-        var installWindow = new GameInstallWindow(editable, _mainViewModel.ManagedGames, showNavigation: true, _mainViewModel.PersistManagedGame);
+        var installWindow = new GameInstallWindow(editable, _mainViewModel.ManagedGames, showNavigation: false, _mainViewModel.PersistManagedGame);
         var result = await installWindow.ShowDialog<bool>(this);
         if (!result)
         {
