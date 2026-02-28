@@ -163,7 +163,6 @@ public partial class GameInstallWindow : Window
                     string.Equals(x.Name, MainGameComboBox.Text, StringComparison.OrdinalIgnoreCase));
             }
 
-            selectedGame ??= _lastMainGameSelection;
             if (selectedGame is not null)
             {
                 install.ManagedGame = selectedGame;
