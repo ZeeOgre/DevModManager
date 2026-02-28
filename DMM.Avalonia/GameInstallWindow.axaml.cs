@@ -12,16 +12,120 @@ public partial class GameInstallWindow : Window
     public ObservableCollection<ManagedGame> ManagedGames { get; }
     public bool ShowNavigation { get; }
     private readonly Action<ManagedGame>? _onManagedGameAdded;
+    private ManagedGame? _lastMainGameSelection;
+
+    public GameInstallWindow()
+    {
+        ManagedGames = new ObservableCollection<ManagedGame>();
+        ShowNavigation = false;
+        _onManagedGameAdded = null;
+        DataContext = new GameInstallRecord();
+        InitializeComponent();
+    }
 
     public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)
     {
-        InitializeComponent();
         ManagedGames = managedGames;
         ShowNavigation = showNavigation;
         _onManagedGameAdded = onManagedGameAdded;
 
         install.ManagedGame = CanonicalizeManagedGame(install.ManagedGame);
         DataContext = install;
+        InitializeComponent();
+    }
+
+    private ManagedGame? ResolveManagedGameReference(ManagedGame? candidate)
+    {
+        if (candidate is null)
+        {
+            return null;
+        }
+
+        return ManagedGames.FirstOrDefault(x =>
+                   (!string.IsNullOrWhiteSpace(candidate.StoreId) &&
+                    string.Equals(x.StoreId, candidate.StoreId, StringComparison.OrdinalIgnoreCase)) ||
+                   string.Equals(x.Name, candidate.Name, StringComparison.OrdinalIgnoreCase))
+               ?? candidate;
+    }
+
+    private void MainGame_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is not GameInstallRecord install || sender is not ComboBox combo)
+        {
+            return;
+        }
+
+        var selected = combo.SelectedItem as ManagedGame
+            ?? e.AddedItems?.OfType<ManagedGame>().FirstOrDefault();
+        if (selected is null)
+        {
+            return;
+        }
+
+        var resolved = ResolveManagedGameReference(selected);
+        install.ManagedGame = resolved;
+        _lastMainGameSelection = resolved;
+    }
+
+    private ManagedGame? ResolveManagedGameReference(ManagedGame? candidate)
+    {
+        if (candidate is null)
+        {
+            return null;
+        }
+
+        return ManagedGames.FirstOrDefault(x =>
+                   (!string.IsNullOrWhiteSpace(candidate.StoreId) &&
+                    string.Equals(x.StoreId, candidate.StoreId, StringComparison.OrdinalIgnoreCase)) ||
+                   string.Equals(x.Name, candidate.Name, StringComparison.OrdinalIgnoreCase))
+               ?? candidate;
+    }
+
+    private void MainGame_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is not GameInstallRecord install || sender is not ComboBox combo)
+        {
+            return;
+        }
+
+        var selected = combo.SelectedItem as ManagedGame
+            ?? e.AddedItems?.OfType<ManagedGame>().FirstOrDefault();
+        if (selected is null)
+        {
+            return;
+        }
+
+        install.ManagedGame = ResolveManagedGameReference(selected);
+    }
+
+    private void MainGameComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not ComboBox combo)
+        {
+            return;
+        }
+
+        var selectedGame = combo.SelectedItem as ManagedGame
+            ?? e.AddedItems?.OfType<ManagedGame>().FirstOrDefault();
+        if (selectedGame is not null)
+        {
+            _lastMainGameSelection = selectedGame;
+        }
+    }
+
+
+    private ManagedGame? CanonicalizeManagedGame(ManagedGame? candidate)
+    {
+        if (candidate is null)
+        {
+            return null;
+        }
+
+        return ManagedGames.FirstOrDefault(x =>
+                   (!string.IsNullOrWhiteSpace(candidate.StoreId) &&
+                    string.Equals(x.StoreId, candidate.StoreId, StringComparison.OrdinalIgnoreCase)) ||
+                   string.Equals(x.Name, candidate.Name, StringComparison.OrdinalIgnoreCase))
+               ?? candidate;
     }
 
 
@@ -104,6 +208,7 @@ public partial class GameInstallWindow : Window
         if (DataContext is GameInstallRecord install)
         {
             install.ManagedGame = game;
+            _lastMainGameSelection = game;
         }
     }
 
