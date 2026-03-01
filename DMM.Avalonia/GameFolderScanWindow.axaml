@@ -1,0 +1,61 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:DMM.Avalonia"
+        mc:Ignorable="d"
+        x:Class="DMM.Avalonia.GameFolderScanWindow"
+        x:DataType="local:GameFolderScanWindowViewModel"
+        Width="980"
+        Height="680"
+        Background="#252525"
+        Foreground="White"
+        Title="Game Folder Scan Results">
+    <Window.Styles>
+        <Style Selector="TextBlock"><Setter Property="Foreground" Value="White" /></Style>
+        <Style Selector="Button"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#3A3A3A" /></Style>
+        <Style Selector="ComboBox"><Setter Property="Foreground" Value="White" /><Setter Property="Background" Value="#3A3A3A" /></Style>
+    </Window.Styles>
+
+    <Grid Margin="14" RowDefinitions="Auto,*,Auto" RowSpacing="10">
+        <Border Background="#2B2B2B" Padding="10" CornerRadius="8">
+            <StackPanel>
+                <TextBlock FontSize="22" FontWeight="Bold" Text="Scan Game Folder" />
+                <TextBlock Text="Choose how to stage each discovered mod plugin. Default action is Ignore." />
+                <TextBlock Text="Each selected mod is queued independently for stage population." FontStyle="Italic" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="4">
+            <Border Background="#0A3F78" Padding="8" CornerRadius="6,6,0,0">
+                <Grid ColumnDefinitions="3*,2*,2*" ColumnSpacing="8">
+                    <TextBlock Text="Mod" FontWeight="Bold" />
+                    <TextBlock Grid.Column="1" Text="Plugin" FontWeight="Bold" />
+                    <TextBlock Grid.Column="2" Text="Action / Stage" FontWeight="Bold" />
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl ItemsSource="{Binding Candidates}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="local:GameFolderScanCandidateSelection">
+                            <Border Background="#323232" BorderBrush="#4D4D4D" BorderThickness="1" Padding="8">
+                                <Grid ColumnDefinitions="3*,2*,2*" ColumnSpacing="8">
+                                    <TextBlock Text="{Binding ModName}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding PluginName}" VerticalAlignment="Center" />
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding StageChoices}" SelectedItem="{Binding SelectedStage}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBlock VerticalAlignment="Center" Text="{Binding SummaryText}" />
+            <Button Grid.Column="1" Content="Cancel" Click="Cancel_Click" />
+            <Button Grid.Column="2" Content="Apply Selection" Click="Apply_Click" />
+        </Grid>
+    </Grid>
+</Window>
