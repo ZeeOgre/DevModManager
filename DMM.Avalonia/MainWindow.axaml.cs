@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -530,14 +531,16 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         try
         {
-            File.CreateHardLink(linkPath, existingFilePath);
-            return true;
+            return CreateHardLinkWindows(linkPath, existingFilePath, IntPtr.Zero);
         }
         catch
         {
             return false;
         }
     }
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    private static extern bool CreateHardLinkWindows(string lpFileName, string lpExistingFileName, IntPtr lpSecurityAttributes);
 
     private void RebuildMods()
     {
