@@ -250,16 +250,16 @@ public sealed class MainWindowViewModel : NotifyBase
         var row = 0;
         foreach (var install in baseInstalls)
         {
-            foreach (var builtin in BuiltInBethesdaMods.ForGame(install.ManagedGame!.Name))
+            foreach (var builtin in _repository.LoadKnownPluginsForGame(install.ManagedGame!.Name))
             {
-                if (!PluginExists(install.InstallPath, builtin.Plugin))
+                if (!PluginExists(install.InstallPath, builtin.PluginName))
                 {
                     continue;
                 }
 
                 Mods.Add(new ModListItem(
                     builtin.DisplayName,
-                    builtin.Plugin,
+                    builtin.PluginName,
                     "BASE",
                     string.Empty,
                     string.Empty,
@@ -390,6 +390,8 @@ public sealed class MainWindowViewModel : NotifyBase
 
         ManagedGame? MatchManagedGame(AppInstallSnapshot app)
         {
+            var normalizedDisplayName = NormalizeGameName(app.DisplayName);
+
             var knownByStoreId = managedGamesSnapshot.FirstOrDefault(x =>
                 !string.IsNullOrWhiteSpace(x.StoreId) &&
                 string.Equals(x.StoreId, app.Id.StoreAppId, System.StringComparison.OrdinalIgnoreCase));
@@ -407,7 +409,20 @@ public sealed class MainWindowViewModel : NotifyBase
             }
 
             return managedGamesSnapshot.FirstOrDefault(x =>
-                string.Equals(x.Name, app.DisplayName, System.StringComparison.OrdinalIgnoreCase));
+                string.Equals(NormalizeGameName(x.Name), normalizedDisplayName, System.StringComparison.OrdinalIgnoreCase));
+        }
+
+        static string NormalizeGameName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return string.Empty;
+            }
+
+            const string pcSuffix = " (PC)";
+            return name.EndsWith(pcSuffix, StringComparison.OrdinalIgnoreCase)
+                ? name[..^pcSuffix.Length].TrimEnd()
+                : name.Trim();
         }
 
         static string ToStoreLabel(string storeKey) => storeKey.ToLowerInvariant() switch
@@ -452,14 +467,22 @@ internal sealed class GameSetupRepository
     {
         using var connection = _database.OpenConnection();
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT Name, COALESCE(Executable, '') FROM Game ORDER BY Name";
-
-        var storeIds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["Starfield"] = "1716740",
-            ["Fallout 4"] = "377160",
-            ["Skyrim Special Edition"] = "489830"
-        };
+        command.CommandText = """
+            SELECT g.Name,
+                   COALESCE(g.Executable, ''),
+                   COALESCE((
+                       SELECT gsa.StoreAppId
+                       FROM GameStoreApp gsa
+                       JOIN GameSource gs ON gs.id = gsa.GameSourceId
+                       WHERE gsa.GameId = g.id
+                         AND gs.Name = 'Steam'
+                       ORDER BY gsa.id
+                       LIMIT 1
+                   ), '')
+            FROM Game g
+            WHERE g.IsDlc = 0
+            ORDER BY g.Name
+            """;
 
         var games = new List<ManagedGame>();
         using var reader = command.ExecuteReader();
@@ -470,11 +493,38 @@ internal sealed class GameSetupRepository
             {
                 Name = name,
                 Executable = reader.GetString(1),
-                StoreId = storeIds.GetValueOrDefault(name, string.Empty)
+                StoreId = reader.GetString(2)
             });
         }
 
         return games;
+    }
+
+    public IReadOnlyList<KnownPluginRecord> LoadKnownPluginsForGame(string gameName)
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT kp.DisplayName, kp.PluginName, kp.IsBaseGame, kp.IsDlc
+            FROM GameKnownPlugin kp
+            JOIN Game g ON g.id = kp.GameId
+            WHERE g.Name = $gameName
+            ORDER BY kp.PluginName
+            """;
+        command.Parameters.AddWithValue("$gameName", gameName);
+
+        var plugins = new List<KnownPluginRecord>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            plugins.Add(new KnownPluginRecord(
+                reader.GetString(0),
+                reader.GetString(1),
+                reader.GetInt64(2) == 1,
+                reader.GetInt64(3) == 1));
+        }
+
+        return plugins;
     }
 
     public IReadOnlyList<GameInstallRecord> LoadManagedInstalls(IEnumerable<ManagedGame> managedGames)
@@ -763,6 +813,8 @@ internal sealed class GameSetupRepository
     }
 }
 
+internal sealed record KnownPluginRecord(string DisplayName, string PluginName, bool IsBaseGame, bool IsDlc);
+
 public sealed class ModListItem
 {
     public ModListItem(string name, string primaryPlugin, string currentStage, string bethesdaId, string nexusId, IBrush rowBackground)
@@ -781,64 +833,4 @@ public sealed class ModListItem
     public string BethesdaId { get; }
     public string NexusId { get; }
     public IBrush RowBackground { get; }
-}
-
-internal static class BuiltInBethesdaMods
-{
-    private static readonly BuiltInMod[] StarfieldBaseMods =
-    [
-        new("Trackers Alliance support", "SFBGS003.esm"),
-        new("Vehicle / REV-8", "SFBGS004.esm"),
-        new("Ship Decoration", "SFBGS006.esm"),
-        new("Gameplay Options", "SFBGS007.esm"),
-        new("City Maps Data", "SFBGS008.esm")
-    ];
-
-    private static readonly BuiltInMod[] Fallout4BaseMods =
-    [
-        new("Makeshift Weapon Pack - When Pigs Fly", "ccSBJFO4003-Grenade.esl"),
-        new("Halloween Workshop Pack - All Hallows' Eve", "ccFSVFO4007-Halloween.esl"),
-        new("Enclave Remnants - Echoes of the Past", "ccOTMFO4001-Remnants.esl"),
-        new("Tesla Cannon - Best of Three", "ccBGSFO4046-TesCan.esl"),
-        new("Hellfire Power Armor - Pyromaniac", "ccBGSFO4044-HellfirePowerArmor.esl"),
-        new("X-02 Power Armor - Speak of the Devil", "ccBGSFO4115-X02.esl"),
-        new("Heavy Incinerator - Crucible", "ccBGSFO4116-HeavyFlamer.esl"),
-        new("Enclave Armor Skins", "ccBGSFO4096-AS_Enclave.esl"),
-        new("Enclave Weapon Skins", "ccBGSFO4110-WS_Enclave.esl")
-    ];
-
-    private static readonly BuiltInMod[] SkyrimSeBaseMods =
-    [
-        new("Dawnguard", "Dawnguard.esm"),
-        new("Hearthfire", "HearthFires.esm"),
-        new("Dragonborn", "Dragonborn.esm"),
-        new("Saints & Seducers", "ccBGSSSE025-AdvDSGS.esm"),
-        new("Rare Curios", "ccBGSSSE037-Curios.esl"),
-        new("Survival Mode", "ccQDRSSE001-SurvivalMode.esl"),
-        new("Fishing", "ccBGSSSE001-Fish.esm"),
-        new("Resource Pack", "_ResourcePack.esl")
-    ];
-
-    public static IReadOnlyList<BuiltInMod> ForGame(string gameName)
-    {
-        if (gameName.Contains("Starfield", StringComparison.OrdinalIgnoreCase))
-        {
-            return StarfieldBaseMods;
-        }
-
-        if (gameName.Contains("Fallout 4", StringComparison.OrdinalIgnoreCase) ||
-            gameName.Contains("Fallout4", StringComparison.OrdinalIgnoreCase))
-        {
-            return Fallout4BaseMods;
-        }
-
-        if (gameName.Contains("Skyrim", StringComparison.OrdinalIgnoreCase))
-        {
-            return SkyrimSeBaseMods;
-        }
-
-        return Array.Empty<BuiltInMod>();
-    }
-
-    internal readonly record struct BuiltInMod(string DisplayName, string Plugin);
 }
