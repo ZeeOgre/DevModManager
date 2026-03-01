@@ -322,16 +322,22 @@ public sealed class MainWindowViewModel : NotifyBase
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var discovered = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(path =>
+            .Select(path => Path.GetFileName(path))
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Where(name => !knownPluginNames.Contains(name))
+            .Where(name =>
             {
-                var ext = Path.GetExtension(path);
+                var ext = Path.GetExtension(name);
                 return string.Equals(ext, ".esm", StringComparison.OrdinalIgnoreCase) ||
                        string.Equals(ext, ".esp", StringComparison.OrdinalIgnoreCase) ||
                        string.Equals(ext, ".esl", StringComparison.OrdinalIgnoreCase);
             })
-            .Select(path => Path.GetFileName(path))
-            .Where(name => !knownPluginNames.Contains(name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .GroupBy(name => Path.GetFileNameWithoutExtension(name), StringComparer.OrdinalIgnoreCase)
+            .Select(group => group
+                .OrderBy(name => GetPluginExtensionPriority(Path.GetExtension(name)))
+                .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .First())
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
@@ -365,6 +371,26 @@ public sealed class MainWindowViewModel : NotifyBase
         StatusMessage = selections.Count == 0
             ? "Scan apply complete. All discovered candidates were ignored."
             : $"Scan apply complete. Added {selections.Count} mod(s). Stage setup, dependency copy, and hardlink sync are pending implementation.";
+    }
+
+    private static int GetPluginExtensionPriority(string extension)
+    {
+        if (string.Equals(extension, ".esp", StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        if (string.Equals(extension, ".esm", StringComparison.OrdinalIgnoreCase))
+        {
+            return 1;
+        }
+
+        if (string.Equals(extension, ".esl", StringComparison.OrdinalIgnoreCase))
+        {
+            return 2;
+        }
+
+        return 3;
     }
 
     private void RebuildMods()
