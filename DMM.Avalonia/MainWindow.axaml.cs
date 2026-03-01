@@ -54,8 +54,31 @@ public partial class MainWindow : Window
             : "First-run setup closed without selecting game installs.";
     }
 
-    private void ScanGameFolder_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.ScanSelectedGameFolderForMods();
+    private async void ScanGameFolder_Click(object? sender, RoutedEventArgs e)
+    {
+        var scan = _viewModel.ScanSelectedGameFolderForMods();
+        if (!scan.Success)
+        {
+            return;
+        }
+
+        if (scan.DiscoveredCandidates.Count == 0)
+        {
+            _viewModel.StatusMessage = "Scan complete. No non-base plugin candidates were found in the selected game data folder.";
+            return;
+        }
+
+        var window = new GameFolderScanWindow(scan.DiscoveredCandidates, _viewModel.StageOptions);
+        var result = await window.ShowDialog<GameFolderScanApplyResult?>(this);
+        if (result is null)
+        {
+            _viewModel.StatusMessage =
+                $"Scan complete. Found {scan.DiscoveredCandidates.Count} non-base plugin candidate(s). No import actions were applied.";
+            return;
+        }
+
+        _viewModel.ApplyScanSelections(result.SelectedMods);
+    }
 
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
     {
@@ -267,12 +290,12 @@ public sealed class MainWindowViewModel : NotifyBase
         RebuildMods();
     }
 
-    public void ScanSelectedGameFolderForMods()
+    public GameFolderScanResult ScanSelectedGameFolderForMods()
     {
         if (string.IsNullOrWhiteSpace(SelectedGameFolder))
         {
             StatusMessage = "Scan failed: no game folder selected.";
-            return;
+            return GameFolderScanResult.Failed();
         }
 
         var install = GameInstalls.FirstOrDefault(x =>
@@ -283,7 +306,7 @@ public sealed class MainWindowViewModel : NotifyBase
         if (install?.ManagedGame is null)
         {
             StatusMessage = "Scan failed: selected game folder is not mapped to a managed base game install.";
-            return;
+            return GameFolderScanResult.Failed();
         }
 
         var dataFolder = Path.Combine(SelectedGameFolder, "Data");
@@ -291,7 +314,7 @@ public sealed class MainWindowViewModel : NotifyBase
         if (!Directory.Exists(scanRoot))
         {
             StatusMessage = $"Scan failed: game data folder not found at '{scanRoot}'.";
-            return;
+            return GameFolderScanResult.Failed();
         }
 
         var knownPluginNames = _repository.LoadKnownPluginsForGameIncludingDlc(install.ManagedGame.Name)
@@ -312,22 +335,36 @@ public sealed class MainWindowViewModel : NotifyBase
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
+        StatusMessage = discovered.Count == 0
+            ? "Scan complete. No non-base plugin candidates were found in the selected game data folder."
+            : $"Scan complete. Found {discovered.Count} non-base plugin candidate(s). Choose stage actions in the scan wizard.";
+
+        var candidates = discovered
+            .Select(plugin => new GameFolderScanCandidate(Path.GetFileNameWithoutExtension(plugin), plugin))
+            .ToList();
+
+        return GameFolderScanResult.Succeeded(candidates);
+    }
+
+    public void ApplyScanSelections(IReadOnlyList<GameFolderStageSelection> selections)
+    {
         Mods.Clear();
+
         var row = 0;
-        foreach (var file in discovered)
+        foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
         {
             Mods.Add(new ModListItem(
-                Path.GetFileNameWithoutExtension(file),
-                file,
-                "DISCOVERED",
+                selection.ModName,
+                selection.PluginName,
+                selection.Stage,
                 string.Empty,
                 string.Empty,
                 new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
         }
 
-        StatusMessage = discovered.Count == 0
-            ? "Scan complete. No non-base plugin candidates were found in the selected game data folder."
-            : $"Scan complete. Found {discovered.Count} non-base plugin candidate(s).";
+        StatusMessage = selections.Count == 0
+            ? "Scan apply complete. All discovered candidates were ignored."
+            : $"Scan apply complete. Added {selections.Count} mod(s). Stage setup, dependency copy, and hardlink sync are pending implementation.";
     }
 
     private void RebuildMods()
