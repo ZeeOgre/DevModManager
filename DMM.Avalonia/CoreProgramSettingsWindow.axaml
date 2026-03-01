@@ -1,8 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="DMM.Avalonia.CoreProgramSettingsWindow"
-        Width="520"
-        Height="260"
+        Width="760"
+        Height="380"
         Title="Core Program Settings"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
@@ -11,8 +11,20 @@
             <TextBlock Text="Core Program Settings" FontSize="24" FontWeight="Bold" />
             <TextBlock Text="Configure core behavior and game-install management workflows." TextWrapping="Wrap" />
 
+            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10" Margin="0,6,0,0">
+                <TextBlock Text="Mod Repo Root:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <TextBox Grid.Column="1" Text="{Binding RepoRootPath}" Watermark="Folder used for managed mod repositories" />
+                <Button Grid.Column="2" Content="Browse" Click="BrowseRepoRoot_Click" MinWidth="90" />
+
+                <TextBlock Grid.Row="1" Text="Repo Layout:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding RepoOrganizationChoices}" SelectedItem="{Binding RepoOrganization}" />
+            </Grid>
+
+            <TextBlock Text="Recommended: Game repo with per-mod folders (single remote, independent stage folders/branches inside each mod workflow)." TextWrapping="Wrap" />
+
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Left" Margin="0,8,0,0">
                 <Button Content="Manage Game Installs" Click="ManageGameInstalls_Click" MinWidth="170" />
+                <Button Content="Save" Click="Save_Click" MinWidth="110" />
                 <Button Content="Close" Click="Close_Click" MinWidth="100" />
             </StackPanel>
         </StackPanel>

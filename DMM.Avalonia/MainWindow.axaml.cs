@@ -54,8 +54,31 @@ public partial class MainWindow : Window
             : "First-run setup closed without selecting game installs.";
     }
 
-    private void ScanGameFolder_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.ScanSelectedGameFolderForMods();
+    private async void ScanGameFolder_Click(object? sender, RoutedEventArgs e)
+    {
+        var scan = _viewModel.ScanSelectedGameFolderForMods();
+        if (!scan.Success)
+        {
+            return;
+        }
+
+        if (scan.DiscoveredCandidates.Count == 0)
+        {
+            _viewModel.StatusMessage = "Scan complete. No non-base plugin candidates were found in the selected game data folder.";
+            return;
+        }
+
+        var window = new GameFolderScanWindow(scan.DiscoveredCandidates, _viewModel.StageOptions);
+        var result = await window.ShowDialog<GameFolderScanApplyResult?>(this);
+        if (result is null)
+        {
+            _viewModel.StatusMessage =
+                $"Scan complete. Found {scan.DiscoveredCandidates.Count} non-base plugin candidate(s). No import actions were applied.";
+            return;
+        }
+
+        _viewModel.ApplyScanSelections(result.SelectedMods);
+    }
 
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
     {
@@ -180,12 +203,20 @@ public partial class MainWindow : Window
 public sealed class MainWindowViewModel : NotifyBase
 {
     private readonly GameSetupRepository _repository = new();
+    private readonly ProgramWideSettingsStore _settingsStore = new();
 
     public ObservableCollection<string> GameFolders { get; } = new();
     public ObservableCollection<string> StageOptions { get; } = new();
     public ObservableCollection<ModListItem> Mods { get; } = new();
     public ObservableCollection<ManagedGame> ManagedGames { get; } = new();
     public ObservableCollection<GameInstallRecord> GameInstalls { get; } = new();
+
+    private static readonly HashSet<string> StarfieldOfficialPluginBaseNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "starfield",
+        "constellation",
+        "blueprintshipsstarfield"
+    };
 
     private string? _selectedGameFolder;
     public string? SelectedGameFolder
@@ -267,12 +298,12 @@ public sealed class MainWindowViewModel : NotifyBase
         RebuildMods();
     }
 
-    public void ScanSelectedGameFolderForMods()
+    public GameFolderScanResult ScanSelectedGameFolderForMods()
     {
         if (string.IsNullOrWhiteSpace(SelectedGameFolder))
         {
             StatusMessage = "Scan failed: no game folder selected.";
-            return;
+            return GameFolderScanResult.Failed();
         }
 
         var install = GameInstalls.FirstOrDefault(x =>
@@ -283,7 +314,7 @@ public sealed class MainWindowViewModel : NotifyBase
         if (install?.ManagedGame is null)
         {
             StatusMessage = "Scan failed: selected game folder is not mapped to a managed base game install.";
-            return;
+            return GameFolderScanResult.Failed();
         }
 
         var dataFolder = Path.Combine(SelectedGameFolder, "Data");
@@ -291,43 +322,221 @@ public sealed class MainWindowViewModel : NotifyBase
         if (!Directory.Exists(scanRoot))
         {
             StatusMessage = $"Scan failed: game data folder not found at '{scanRoot}'.";
-            return;
+            return GameFolderScanResult.Failed();
         }
 
         var knownPluginNames = _repository.LoadKnownPluginsForGameIncludingDlc(install.ManagedGame.Name)
             .Select(x => x.PluginName)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var knownPluginBaseNames = knownPluginNames
+            .Select(Path.GetFileNameWithoutExtension)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var discovered = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(path =>
+            .Select(path => Path.GetFileName(path))
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Where(name =>
             {
-                var ext = Path.GetExtension(path);
+                var ext = Path.GetExtension(name);
                 return string.Equals(ext, ".esm", StringComparison.OrdinalIgnoreCase) ||
                        string.Equals(ext, ".esp", StringComparison.OrdinalIgnoreCase) ||
                        string.Equals(ext, ".esl", StringComparison.OrdinalIgnoreCase);
             })
-            .Select(path => Path.GetFileName(path))
             .Where(name => !knownPluginNames.Contains(name))
+            .Where(name => !knownPluginBaseNames.Contains(Path.GetFileNameWithoutExtension(name)))
+            .Where(name => !IsOfficialPluginName(install.ManagedGame.Name, name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .GroupBy(name => Path.GetFileNameWithoutExtension(name), StringComparer.OrdinalIgnoreCase)
+            .Select(group => group
+                .OrderBy(name => GetPluginExtensionPriority(Path.GetExtension(name)))
+                .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .First())
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        Mods.Clear();
-        var row = 0;
-        foreach (var file in discovered)
-        {
-            Mods.Add(new ModListItem(
-                Path.GetFileNameWithoutExtension(file),
-                file,
-                "DISCOVERED",
-                string.Empty,
-                string.Empty,
-                new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
-        }
-
         StatusMessage = discovered.Count == 0
             ? "Scan complete. No non-base plugin candidates were found in the selected game data folder."
-            : $"Scan complete. Found {discovered.Count} non-base plugin candidate(s).";
+            : $"Scan complete. Found {discovered.Count} non-base plugin candidate(s). Choose stage actions in the scan wizard.";
+
+        var candidates = discovered
+            .Select(plugin => new GameFolderScanCandidate(Path.GetFileNameWithoutExtension(plugin), plugin))
+            .ToList();
+
+        return GameFolderScanResult.Succeeded(candidates);
+    }
+
+    public void ApplyScanSelections(IReadOnlyList<GameFolderStageSelection> selections)
+    {
+        Mods.Clear();
+
+        if (string.IsNullOrWhiteSpace(SelectedGameFolder))
+        {
+            StatusMessage = "Scan apply failed: no game folder selected.";
+            return;
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            StatusMessage = "Scan apply failed: selected game folder is not mapped to a managed base game install.";
+            return;
+        }
+
+        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
+        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
+        if (!Directory.Exists(scanRoot))
+        {
+            StatusMessage = $"Scan apply failed: game data folder not found at '{scanRoot}'.";
+            return;
+        }
+
+        var settings = _settingsStore.Load();
+        var repoRoot = string.IsNullOrWhiteSpace(settings.RepoRootPath)
+            ? ProgramWideSettings.GetDefaultRepoRoot()
+            : settings.RepoRootPath;
+
+        var created = 0;
+        var linked = 0;
+        var skipped = 0;
+        var failed = 0;
+        var row = 0;
+
+        foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
+        {
+            var sourcePath = Path.Combine(scanRoot, selection.PluginName);
+            if (!File.Exists(sourcePath))
+            {
+                skipped++;
+                continue;
+            }
+
+            try
+            {
+                var modRepoRoot = BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization);
+                var stageFolder = Path.Combine(modRepoRoot, "stages", selection.Stage, "Data");
+                Directory.CreateDirectory(stageFolder);
+
+                var stagePluginPath = Path.Combine(stageFolder, selection.PluginName);
+                File.Copy(sourcePath, stagePluginPath, overwrite: true);
+
+                File.Delete(sourcePath);
+                if (TryCreateHardLink(sourcePath, stagePluginPath))
+                {
+                    linked++;
+                }
+                else
+                {
+                    File.Copy(stagePluginPath, sourcePath, overwrite: true);
+                }
+
+                Mods.Add(new ModListItem(
+                    selection.ModName,
+                    selection.PluginName,
+                    selection.Stage,
+                    string.Empty,
+                    string.Empty,
+                    new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
+                created++;
+            }
+            catch
+            {
+                failed++;
+            }
+        }
+
+        if (selections.Count == 0)
+        {
+            StatusMessage = "Scan apply complete. All discovered candidates were ignored.";
+            return;
+        }
+
+        StatusMessage =
+            $"Scan apply complete. Added {created} mod(s); linked {linked}; skipped {skipped}; failed {failed}. Repo root: {repoRoot}";
+    }
+
+    private static int GetPluginExtensionPriority(string extension)
+    {
+        if (string.Equals(extension, ".esp", StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        if (string.Equals(extension, ".esm", StringComparison.OrdinalIgnoreCase))
+        {
+            return 1;
+        }
+
+        if (string.Equals(extension, ".esl", StringComparison.OrdinalIgnoreCase))
+        {
+            return 2;
+        }
+
+        return 3;
+    }
+
+    private static bool IsOfficialPluginName(string gameName, string pluginName)
+    {
+        if (!string.Equals(gameName, "Starfield", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var baseName = NormalizePluginBaseName(Path.GetFileNameWithoutExtension(pluginName));
+        return StarfieldOfficialPluginBaseNames.Contains(baseName);
+    }
+
+    private static string NormalizePluginBaseName(string? baseName)
+    {
+        if (string.IsNullOrWhiteSpace(baseName))
+        {
+            return string.Empty;
+        }
+
+        var chars = baseName.Where(char.IsLetterOrDigit).ToArray();
+        return new string(chars).ToLowerInvariant();
+    }
+
+    private static string BuildModRepoRoot(string repoRoot, string gameName, string modName, RepoOrganizationStrategy strategy)
+    {
+        var safeGameName = SanitizePathSegment(gameName);
+        var safeModName = SanitizePathSegment(modName);
+        var gameRoot = Path.Combine(repoRoot, safeGameName);
+
+        return strategy switch
+        {
+            RepoOrganizationStrategy.RepoPerMod => Path.Combine(gameRoot, "mods", safeModName),
+            _ => Path.Combine(gameRoot, safeModName)
+        };
+    }
+
+    private static string SanitizePathSegment(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "Unnamed";
+        }
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var cleaned = new string(value.Where(c => !invalid.Contains(c)).ToArray()).Trim();
+        return string.IsNullOrWhiteSpace(cleaned) ? "Unnamed" : cleaned;
+    }
+
+    private static bool TryCreateHardLink(string linkPath, string existingFilePath)
+    {
+        try
+        {
+            File.CreateHardLink(linkPath, existingFilePath);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void RebuildMods()
