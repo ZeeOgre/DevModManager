@@ -31,6 +31,49 @@ FROM Game g
 WHERE g.Name = 'Starfield'
   AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield - Constellation');
 
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Automatron', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Automatron');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Contraptions Workshop', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Contraptions Workshop');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Far Harbor', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Far Harbor');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: High Resolution Texture Pack', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: High Resolution Texture Pack');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Nuka-World', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Nuka-World');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Vault-Tec Workshop', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Vault-Tec Workshop');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Wasteland Workshop', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Wasteland Workshop');
+
 INSERT OR IGNORE INTO GameSource (Name, SourceGameId, URL, URI) VALUES
 ('Steam', NULL, 'https://store.steampowered.com/', 'steam://'),
 ('GamePass', NULL, 'https://www.xbox.com/xbox-game-pass', 'ms-xbox-gamepass://'),
@@ -47,6 +90,14 @@ FROM (
     UNION ALL SELECT 'Starfield - Shattered Space', 'GamePass', 'BethesdaSoftworks.ShatteredSpace'
     UNION ALL SELECT 'Starfield - Old Mars', 'GamePass', 'BethesdaSoftworks.PGPreorderContentwPkg'
     UNION ALL SELECT 'Starfield - Constellation', 'GamePass', 'BethesdaSoftworks.PGDeluxeContentwPkg'
+    UNION ALL SELECT 'Fallout 4', 'GamePass', 'BethesdaSoftworks.Fallout4-CoreGame'
+    UNION ALL SELECT 'Fallout 4: Automatron', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC1Automatron'
+    UNION ALL SELECT 'Fallout 4: Contraptions Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC4ContraptionsWorksho'
+    UNION ALL SELECT 'Fallout 4: Far Harbor', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC3FarHarbor'
+    UNION ALL SELECT 'Fallout 4: High Resolution Texture Pack', 'GamePass', 'BethesdaSoftworks.Fallout4HighResolutionTexturePac'
+    UNION ALL SELECT 'Fallout 4: Nuka-World', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC6Nuka-World'
+    UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC5Vault-TecWorkshop'
+    UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC2WastelandWorkshop'
 ) app
 JOIN Game g ON g.Name = app.GameName
 JOIN GameSource s ON s.Name = app.SourceName;
@@ -77,6 +128,12 @@ FROM (
     UNION ALL SELECT 'Skyrim Special Edition', 'Fishing', 'ccBGSSSE001-Fish.esm', 1, 0
     UNION ALL SELECT 'Skyrim Special Edition', 'Resource Pack', '_ResourcePack.esl', 1, 0
     UNION ALL SELECT 'Starfield - Shattered Space', 'Shattered Space', 'ShatteredSpace.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Automatron', 'Automatron', 'DLCRobot.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Contraptions Workshop', 'Contraptions Workshop', 'DLCworkshop02.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Far Harbor', 'Far Harbor', 'DLCCoast.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Nuka-World', 'Nuka-World', 'DLCNukaWorld.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'Vault-Tec Workshop', 'DLCworkshop03.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'Wasteland Workshop', 'DLCworkshop01.esm', 0, 1
 ) p
 JOIN Game g ON g.Name = p.GameName;
 
