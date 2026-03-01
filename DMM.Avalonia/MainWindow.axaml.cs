@@ -531,12 +531,7 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         try
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return CreateHardLinkWindows(linkPath, existingFilePath, IntPtr.Zero);
-            }
-
-            return Link(existingFilePath, linkPath) == 0;
+            return CreateHardLinkWindows(linkPath, existingFilePath, IntPtr.Zero);
         }
         catch
         {
@@ -546,9 +541,6 @@ public sealed class MainWindowViewModel : NotifyBase
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern bool CreateHardLinkWindows(string lpFileName, string lpExistingFileName, IntPtr lpSecurityAttributes);
-
-    [DllImport("libc", SetLastError = true, EntryPoint = "link")]
-    private static extern int Link(string existingFilePath, string newFilePath);
 
     private void RebuildMods()
     {
