@@ -235,6 +235,11 @@ INSERT INTO FileType (FileExtension, IsArchive, isModFile)
 SELECT '.ba2', 1, 1
 WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.ba2');
 
+
+INSERT INTO FileType (FileExtension, IsArchive, isModFile)
+SELECT '.bsa', 1, 1
+WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.bsa');
+
 INSERT INTO FileType (FileExtension, isModFile)
 SELECT '.tif', 1
 WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.tif');
@@ -302,6 +307,151 @@ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.fuz');
 INSERT INTO FileType (FileExtension, isModFile)
 SELECT '.sfs', 1
 WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.sfs');
+
+
+INSERT INTO FolderType (Name)
+SELECT 'GameDataRelative'
+WHERE NOT EXISTS (SELECT 1 FROM FolderType WHERE Name = 'GameDataRelative');
+
+INSERT INTO FolderRole (Name, IncludeInBackup, IsRepoFolder, IsToolFolder)
+SELECT 'GameDataRelative', 0, 0, 0
+WHERE NOT EXISTS (SELECT 1 FROM FolderRole WHERE Name = 'GameDataRelative');
+
+INSERT INTO Folders (Path, FolderTypeId, FolderRoleId, Description)
+SELECT 'Data', ft.id, fr.id, 'Seeded relative data root for known core files.'
+FROM FolderType ft
+JOIN FolderRole fr ON fr.Name = 'GameDataRelative'
+WHERE ft.Name = 'GameDataRelative'
+  AND NOT EXISTS (SELECT 1 FROM Folders WHERE Path = 'Data');
+
+INSERT INTO FileStorageKind (Name, Description)
+SELECT 'Primary', 'Primary on-disk or canonical seeded file metadata.'
+WHERE NOT EXISTS (SELECT 1 FROM FileStorageKind WHERE Name = 'Primary');
+
+INSERT INTO FileInfo (Name, DTStamp, Size, GameId, RelativeFolderId, FileTypeId, FileStorageKindId)
+SELECT DISTINCT
+    files.FileName,
+    '1970-01-01T00:00:00.0000000Z',
+    0,
+    g.id,
+    dataFolder.id,
+    ft.id,
+    fsk.id
+FROM (
+    SELECT gk.GameId, gk.PluginName AS FileName
+    FROM GameKnownPlugin gk
+
+    UNION ALL
+
+    SELECT g.id AS GameId, a.FileName
+    FROM (
+        SELECT 'Skyrim Special Edition' AS GameName, 'Skyrim - Misc.bsa' AS FileName
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Shaders.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Interface.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Animations.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Meshes0.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Meshes1.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Sounds.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Voices_en0.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures0.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures1.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures2.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures3.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures4.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures5.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures6.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures7.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures8.bsa'
+        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Patch.bsa'
+
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Startup.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Shaders.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Interface.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Voices.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Meshes.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - MeshesExtra.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Misc.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Sounds.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Materials.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Animations.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures1.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures2.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures3.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures4.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures5.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures6.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures7.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures8.ba2'
+        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures9.ba2'
+
+        UNION ALL SELECT 'Starfield', 'Starfield - Animations.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - DensityMaps.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimation01.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimation02.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimation03.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimation04.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimationPatch.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - FaceMeshes.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - GeneratedTextures.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - LODMeshes.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - LODMeshesPatch.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Materials.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Meshes01.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Meshes02.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - MeshesPatch.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Misc.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Particles.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - PlanetData.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Terrain01.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Terrain02.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Terrain03.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Terrain04.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - TerrainPatch.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - LODTextures01.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - LODTextures02.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures01.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures02.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures03.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures04.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures05.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures06.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures07.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures08.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures09.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures10.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Textures11.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - TexturesPatch01.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - TexturesPatch02.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Interface.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Localization.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Shaders.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - ShadersBeta.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds01.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds02.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds03.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds04.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds05.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSoundsPatch.ba2'
+        UNION ALL SELECT 'Starfield', 'BlueprintShips-Starfield - Localization.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Voices01.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - Voices02.ba2'
+        UNION ALL SELECT 'Starfield', 'Starfield - VoicesPatch.ba2'
+    ) a
+    JOIN Game g ON g.Name = a.GameName
+) files
+JOIN Game g ON g.id = files.GameId
+JOIN Folders dataFolder ON dataFolder.Path = 'Data'
+JOIN FileStorageKind fsk ON fsk.Name = 'Primary'
+LEFT JOIN FileType ft ON LOWER(ft.FileExtension) = LOWER(SUBSTR(files.FileName, INSTR(files.FileName, '.' )))
+WHERE g.Name IN ('Starfield', 'Fallout 4', 'Skyrim Special Edition')
+  AND ft.id IS NOT NULL
+  AND NOT EXISTS (
+      SELECT 1
+      FROM FileInfo fi
+      WHERE fi.Name = files.FileName
+        AND IFNULL(fi.GameId, 0) = g.id
+        AND IFNULL(fi.RelativeFolderId, 0) = dataFolder.id
+  );
 
 INSERT OR IGNORE INTO UrlRule (Name, URLRule) VALUES
 ('Steam-App', 'https://store.steampowered.com/app/{id}'),

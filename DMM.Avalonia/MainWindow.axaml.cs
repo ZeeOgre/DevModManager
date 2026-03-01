@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -322,6 +323,15 @@ public sealed class MainWindowViewModel : NotifyBase
         }
 
         var managedGamesSnapshot = ManagedGames.ToList();
+        var knownCatalog = _repository.LoadKnownGameCatalog();
+        var knownByStoreAppId = knownCatalog
+            .Where(x => !string.IsNullOrWhiteSpace(x.StoreAppId))
+            .GroupBy(x => x.StoreAppId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+        var knownByName = knownCatalog
+            .GroupBy(x => NormalizeGameName(x.GameName), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
         var lightweightContext = new StoreScanContext
         {
             IncludeVisualAssets = false
@@ -367,14 +377,17 @@ public sealed class MainWindowViewModel : NotifyBase
                         continue;
                     }
 
-                    var managedGame = MatchManagedGame(app);
+                    var (managedGame, isDlc) = MatchManagedGame(app);
+                    app.StoreMetadata.TryGetValue("BaseGameManifestPath", out var manifestPath);
                     discovered.Add(new GameInstallRecord
                     {
                         Manage = managedGame is not null,
                         GameStore = ToStoreLabel(app.Id.StoreKey),
                         StoreAppId = app.Id.StoreAppId,
                         ManagedGame = managedGame,
-                        InstallPath = installPath
+                        InstallPath = installPath,
+                        IsDlc = isDlc,
+                        BaseGameManifestPath = manifestPath ?? string.Empty
                     });
                 }
             }
@@ -388,16 +401,47 @@ public sealed class MainWindowViewModel : NotifyBase
                 .ToList();
         }, ct);
 
-        ManagedGame? MatchManagedGame(AppInstallSnapshot app)
+        (ManagedGame? Game, bool IsDlc) MatchManagedGame(AppInstallSnapshot app)
         {
+            if (!string.IsNullOrWhiteSpace(app.Id.StoreAppId) && knownByStoreAppId.TryGetValue(app.Id.StoreAppId, out var byAppId))
+            {
+                if (byAppId.IsDlc)
+                {
+                    var parent = managedGamesSnapshot.FirstOrDefault(x =>
+                        string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byAppId.ParentGameName), StringComparison.OrdinalIgnoreCase));
+                    if (parent is not null)
+                    {
+                        return (parent, true);
+                    }
+                }
+                else
+                {
+                    var game = managedGamesSnapshot.FirstOrDefault(x =>
+                        string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byAppId.GameName), StringComparison.OrdinalIgnoreCase));
+                    if (game is not null)
+                    {
+                        return (game, false);
+                    }
+                }
+            }
+
             var normalizedDisplayName = NormalizeGameName(app.DisplayName);
+            if (knownByName.TryGetValue(normalizedDisplayName, out var byName) && byName.IsDlc)
+            {
+                var parent = managedGamesSnapshot.FirstOrDefault(x =>
+                    string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byName.ParentGameName), StringComparison.OrdinalIgnoreCase));
+                if (parent is not null)
+                {
+                    return (parent, true);
+                }
+            }
 
             var knownByStoreId = managedGamesSnapshot.FirstOrDefault(x =>
                 !string.IsNullOrWhiteSpace(x.StoreId) &&
                 string.Equals(x.StoreId, app.Id.StoreAppId, System.StringComparison.OrdinalIgnoreCase));
             if (knownByStoreId is not null)
             {
-                return knownByStoreId;
+                return (knownByStoreId, false);
             }
 
             var knownByExe = managedGamesSnapshot.FirstOrDefault(x =>
@@ -405,11 +449,12 @@ public sealed class MainWindowViewModel : NotifyBase
                 string.Equals(x.Executable, app.ExecutableName, System.StringComparison.OrdinalIgnoreCase));
             if (knownByExe is not null)
             {
-                return knownByExe;
+                return (knownByExe, false);
             }
 
-            return managedGamesSnapshot.FirstOrDefault(x =>
+            var knownByDisplay = managedGamesSnapshot.FirstOrDefault(x =>
                 string.Equals(NormalizeGameName(x.Name), normalizedDisplayName, System.StringComparison.OrdinalIgnoreCase));
+            return (knownByDisplay, false);
         }
 
         static string NormalizeGameName(string? name)
@@ -498,6 +543,34 @@ internal sealed class GameSetupRepository
         }
 
         return games;
+    }
+
+    public IReadOnlyList<KnownGameCatalogRecord> LoadKnownGameCatalog()
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT g.Name,
+                   g.IsDlc,
+                   parent.Name,
+                   COALESCE(gsa.StoreAppId, '')
+            FROM Game g
+            LEFT JOIN Game parent ON parent.id = g.ParentGameId
+            LEFT JOIN GameStoreApp gsa ON gsa.GameId = g.id
+            """;
+
+        var records = new List<KnownGameCatalogRecord>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            records.Add(new KnownGameCatalogRecord(
+                reader.GetString(0),
+                reader.GetInt64(1) == 1,
+                reader.IsDBNull(2) ? null : reader.GetString(2),
+                reader.GetString(3)));
+        }
+
+        return records;
     }
 
     public IReadOnlyList<KnownPluginRecord> LoadKnownPluginsForGame(string gameName)
@@ -611,6 +684,7 @@ internal sealed class GameSetupRepository
 
         var folderTypeId = EnsureFolderType(connection, tx, "GameInstall");
         var folderRoleId = EnsureFolderRole(connection, tx, "GameInstall");
+        var fileStorageKindId = EnsureFileStorageKind(connection, tx, "Primary", "Game/discovered file on disk");
 
         foreach (var install in installs)
         {
@@ -645,6 +719,8 @@ internal sealed class GameSetupRepository
             cmd.ExecuteNonQuery();
 
             var childInstallId = ReadLastInsertRowId(connection, tx);
+            PersistInstallManifestFiles(connection, tx, childInstallId, gameId, fileStorageKindId, folderTypeId, folderRoleId, install);
+
             if (install.IsDlc && !string.IsNullOrWhiteSpace(install.ManagedGame?.StoreId))
             {
                 using var link = connection.CreateCommand();
@@ -662,6 +738,201 @@ internal sealed class GameSetupRepository
         }
 
         tx.Commit();
+    }
+
+    private static long EnsureFileStorageKind(SqliteConnection connection, SqliteTransaction tx, string name, string description)
+    {
+        using var select = connection.CreateCommand();
+        select.Transaction = tx;
+        select.CommandText = "SELECT id FROM FileStorageKind WHERE Name = $name LIMIT 1";
+        select.Parameters.AddWithValue("$name", name);
+        var existing = select.ExecuteScalar();
+        if (existing is long id)
+        {
+            return id;
+        }
+
+        using var insert = connection.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = "INSERT INTO FileStorageKind (Name, Description) VALUES ($name, $description)";
+        insert.Parameters.AddWithValue("$name", name);
+        insert.Parameters.AddWithValue("$description", description);
+        insert.ExecuteNonQuery();
+        return ReadLastInsertRowId(connection, tx);
+    }
+
+    private static void PersistInstallManifestFiles(
+        SqliteConnection connection,
+        SqliteTransaction tx,
+        long installId,
+        long? gameId,
+        long fileStorageKindId,
+        long folderTypeId,
+        long folderRoleId,
+        GameInstallRecord install)
+    {
+        if (string.IsNullOrWhiteSpace(install.BaseGameManifestPath) || !File.Exists(install.BaseGameManifestPath))
+        {
+            return;
+        }
+
+        using var stream = File.OpenRead(install.BaseGameManifestPath);
+        using var doc = JsonDocument.Parse(stream);
+        if (!doc.RootElement.TryGetProperty("Files", out var files) || files.ValueKind != JsonValueKind.Array)
+        {
+            return;
+        }
+
+        foreach (var fileEntry in files.EnumerateArray())
+        {
+            if (!fileEntry.TryGetProperty("RelativePath", out var relativePathElement))
+            {
+                continue;
+            }
+
+            var relativePath = relativePathElement.GetString();
+            if (string.IsNullOrWhiteSpace(relativePath))
+            {
+                continue;
+            }
+
+            var extension = Path.GetExtension(relativePath);
+            if (!IsKnownGameDataExtension(extension))
+            {
+                continue;
+            }
+
+            var fileName = Path.GetFileName(relativePath);
+            var size = fileEntry.TryGetProperty("SizeBytes", out var sizeElement) ? sizeElement.GetInt64() : 0L;
+            var dtStamp = fileEntry.TryGetProperty("LastWriteUtc", out var lastWriteElement) &&
+                          lastWriteElement.ValueKind == JsonValueKind.String &&
+                          DateTimeOffset.TryParse(lastWriteElement.GetString(), out var parsed)
+                ? parsed
+                : DateTimeOffset.UtcNow;
+
+            var relativeFolderPath = Path.GetDirectoryName(relativePath)?.Replace('\\', '/');
+            var relativeFolderId = EnsureRelativeFolderId(connection, tx, relativeFolderPath, folderTypeId, folderRoleId);
+            var fileTypeId = TryFindFileTypeId(connection, tx, extension);
+            var fileInfoId = EnsureManifestFileInfo(connection, tx, fileName, size, dtStamp, gameId, fileTypeId, relativeFolderId, fileStorageKindId);
+
+            using var insertLink = connection.CreateCommand();
+            insertLink.Transaction = tx;
+            insertLink.CommandText = """
+                INSERT OR IGNORE INTO GameStoreInstallFile (
+                    InstallId, FileInfoId, RelativePath, FileRole, IsPresentOnDisk, LastValidatedDT)
+                VALUES ($installId, $fileInfoId, $relativePath, 'Reference', 1, $lastValidated)
+                """;
+            insertLink.Parameters.AddWithValue("$installId", installId);
+            insertLink.Parameters.AddWithValue("$fileInfoId", fileInfoId);
+            insertLink.Parameters.AddWithValue("$relativePath", relativePath.Replace('\\', '/'));
+            insertLink.Parameters.AddWithValue("$lastValidated", dtStamp.ToString("O"));
+            insertLink.ExecuteNonQuery();
+        }
+    }
+
+    private static long? EnsureRelativeFolderId(
+        SqliteConnection connection,
+        SqliteTransaction tx,
+        string? relativeFolderPath,
+        long folderTypeId,
+        long folderRoleId)
+    {
+        if (string.IsNullOrWhiteSpace(relativeFolderPath) || relativeFolderPath == ".")
+        {
+            return null;
+        }
+
+        using var select = connection.CreateCommand();
+        select.Transaction = tx;
+        select.CommandText = "SELECT id FROM Folders WHERE Path = $path LIMIT 1";
+        select.Parameters.AddWithValue("$path", relativeFolderPath);
+        var existing = select.ExecuteScalar();
+        if (existing is long id)
+        {
+            return id;
+        }
+
+        using var insert = connection.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = "INSERT INTO Folders (Path, FolderTypeId, FolderRoleId) VALUES ($path, $folderTypeId, $folderRoleId)";
+        insert.Parameters.AddWithValue("$path", relativeFolderPath);
+        insert.Parameters.AddWithValue("$folderTypeId", folderTypeId);
+        insert.Parameters.AddWithValue("$folderRoleId", folderRoleId);
+        insert.ExecuteNonQuery();
+        return ReadLastInsertRowId(connection, tx);
+    }
+
+    private static bool IsKnownGameDataExtension(string? extension)
+        => extension is not null && (
+            extension.Equals(".esm", StringComparison.OrdinalIgnoreCase) ||
+            extension.Equals(".esl", StringComparison.OrdinalIgnoreCase) ||
+            extension.Equals(".esp", StringComparison.OrdinalIgnoreCase) ||
+            extension.Equals(".ba2", StringComparison.OrdinalIgnoreCase) ||
+            extension.Equals(".bsa", StringComparison.OrdinalIgnoreCase));
+
+    private static long? TryFindFileTypeId(SqliteConnection connection, SqliteTransaction tx, string? extension)
+    {
+        if (string.IsNullOrWhiteSpace(extension))
+        {
+            return null;
+        }
+
+        using var cmd = connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "SELECT id FROM FileType WHERE LOWER(FileExtension) = $ext LIMIT 1";
+        cmd.Parameters.AddWithValue("$ext", extension.ToLowerInvariant());
+        var result = cmd.ExecuteScalar();
+        return result is long id ? id : null;
+    }
+
+    private static long EnsureManifestFileInfo(
+        SqliteConnection connection,
+        SqliteTransaction tx,
+        string name,
+        long size,
+        DateTimeOffset dtStamp,
+        long? gameId,
+        long? fileTypeId,
+        long? relativeFolderId,
+        long fileStorageKindId)
+    {
+        using var select = connection.CreateCommand();
+        select.Transaction = tx;
+        select.CommandText = """
+            SELECT id FROM FileInfo
+            WHERE Name = $name
+              AND Size = $size
+              AND IFNULL(GameId, 0) = IFNULL($gameId, 0)
+              AND IFNULL(FileTypeId, 0) = IFNULL($fileTypeId, 0)
+              AND IFNULL(RelativeFolderId, 0) = IFNULL($relativeFolderId, 0)
+            LIMIT 1
+            """;
+        select.Parameters.AddWithValue("$name", name);
+        select.Parameters.AddWithValue("$size", size);
+        select.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
+        select.Parameters.AddWithValue("$fileTypeId", fileTypeId.HasValue ? fileTypeId.Value : DBNull.Value);
+        select.Parameters.AddWithValue("$relativeFolderId", relativeFolderId.HasValue ? relativeFolderId.Value : DBNull.Value);
+        var existing = select.ExecuteScalar();
+        if (existing is long id)
+        {
+            return id;
+        }
+
+        using var insert = connection.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = """
+            INSERT INTO FileInfo (Name, DTStamp, Size, GameId, FileTypeId, RelativeFolderId, FileStorageKindId)
+            VALUES ($name, $dtStamp, $size, $gameId, $fileTypeId, $relativeFolderId, $fileStorageKindId)
+            """;
+        insert.Parameters.AddWithValue("$name", name);
+        insert.Parameters.AddWithValue("$dtStamp", dtStamp.ToString("O"));
+        insert.Parameters.AddWithValue("$size", size);
+        insert.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
+        insert.Parameters.AddWithValue("$fileTypeId", fileTypeId.HasValue ? fileTypeId.Value : DBNull.Value);
+        insert.Parameters.AddWithValue("$relativeFolderId", relativeFolderId.HasValue ? relativeFolderId.Value : DBNull.Value);
+        insert.Parameters.AddWithValue("$fileStorageKindId", fileStorageKindId);
+        insert.ExecuteNonQuery();
+        return ReadLastInsertRowId(connection, tx);
     }
 
     private static long? EnsureGameId(
@@ -814,6 +1085,7 @@ internal sealed class GameSetupRepository
 }
 
 internal sealed record KnownPluginRecord(string DisplayName, string PluginName, bool IsBaseGame, bool IsDlc);
+internal sealed record KnownGameCatalogRecord(string GameName, bool IsDlc, string? ParentGameName, string StoreAppId);
 
 public sealed class ModListItem
 {
