@@ -11,3 +11,6 @@
 - Archive and icon operations include platform-specific options.
 - Use **Open Stage Folder** (right-click) to open a stage-specific folder.
 - Use **Git Control** for mod-level push/sync/pull.
+
+## Planning Notes
+- See `docs/mod-onboarding-stage-workflow.md` for the proposed onboarding, stage-branch, deployment, and submodule workflow model.
