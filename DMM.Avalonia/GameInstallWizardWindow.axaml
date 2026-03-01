@@ -42,14 +42,14 @@
             <ScrollViewer Grid.Row="1">
                 <ItemsControl ItemsSource="{Binding CurrentPageItems}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="local:GameInstallRecord">
+                        <DataTemplate x:DataType="{x:Null}">
                             <Border Background="#323232" BorderBrush="#4D4D4D" BorderThickness="1" Padding="8">
                                 <Grid ColumnDefinitions="90,140,220,*,90" ColumnSpacing="8">
                                     <CheckBox IsChecked="{Binding Manage}" HorizontalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Text="{Binding GameStore}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="2" Text="{Binding GameName}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="3" Text="{Binding InstallPath}" VerticalAlignment="Center" />
-                                    <Button Grid.Column="4" Content="Open" IsEnabled="{ReflectionBinding $parent[Window].DataContext.CanEditInstalls}" CommandParameter="{Binding}" Click="OpenInstall_Click" />
+                                    <Button Grid.Column="4" Content="Open" IsEnabled="{Binding DataContext.CanEditInstalls, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Click="OpenInstall_Click" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
