@@ -192,6 +192,66 @@ DMM should provide:
 - “Add to master repo as submodule” action during onboarding.
 - “Full sync submodules” action for routine maintenance.
 
+
+## Git Control Libraries / Tooling Recommendation
+
+DMM can implement git control in two viable ways. Recommend a hybrid with CLI-first fallback safety:
+
+### Option A: Embedded library (`LibGit2Sharp`)
+
+Pros:
+- Full in-process control (clone/branch/commit/fetch/push/worktree-related repository ops).
+- Structured exceptions and API-level progress callbacks.
+- Easier to unit test than shelling out for every operation.
+
+Cons:
+- Native dependency footprint (`libgit2`), version compatibility, and platform packaging concerns.
+- Some advanced workflows can lag behind latest git CLI behavior.
+
+### Option B: Git CLI orchestration (`git` process execution)
+
+Pros:
+- Matches user expectations exactly (same semantics as command-line git).
+- Immediate access to newer git features.
+- Simplifies troubleshooting by reproducing commands directly.
+
+Cons:
+- Requires robust process execution, stderr parsing, and credential handling.
+- More brittle if command output formats change.
+
+### Recommended implementation strategy
+
+1. **Primary path**: use `LibGit2Sharp` for core repo lifecycle actions:
+   - init/clone
+   - branch create/checkout
+   - commit/status/diff
+   - fetch/pull/push
+2. **Fallback/advanced path**: call git CLI for operations that are easier or more reliable via command line (initially `git worktree` flows and submodule edge cases).
+3. Wrap both behind a DMM abstraction such as `IGitService` so the UI layer remains tool-agnostic.
+
+### Supporting libraries/services to consider
+
+- **Credential + secrets**:
+  - system credential manager integration (Windows Credential Manager first)
+  - optional PAT storage through secure OS-backed secrets
+- **GitHub API** (optional but useful):
+  - `Octokit` for repo bootstrap, remote existence checks, and submodule onboarding helpers
+- **Process runner**:
+  - hardened command runner with timeout, cancellation, structured logs, and redacted sensitive output
+
+### Minimum capability matrix to implement first
+
+1. `InitRepo`
+2. `SetRemote`
+3. `CreateStageBranches`
+4. `CheckoutStage`
+5. `CommitAll(message)`
+6. `Fetch/Pull/Push`
+7. `WorktreeAdd/WorktreeRemove`
+8. `SubmoduleAdd/SubmoduleUpdate`
+
+This gives enough surface area for onboarding + deployment while keeping the git subsystem intentionally narrow.
+
 ## DMM Feature Backlog (Programmatic Capabilities)
 
 1. Create mod repository (+ optional remote bootstrap).
@@ -244,6 +304,6 @@ DMM should provide:
 
 - **Yes**: Create stage branches during repo creation.
 - **Yes**: Use one consistent folder structure and keep stage isolation in branches (not duplicate `stages/*` trees).
-- **Yes**: Keep git orchestration fully inside DMM.
+- **Yes**: Keep git orchestration fully inside DMM, with a `LibGit2Sharp`-first abstraction and CLI fallback for worktrees/submodule edge cases.
 - **Yes**: Start with copy deployment, then add links once validated.
 - **Yes**: Use safe-switch logic to handle link teardown/rebuild around branch changes.
