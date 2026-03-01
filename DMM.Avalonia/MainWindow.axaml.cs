@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System;
 using System.IO;
@@ -54,8 +55,7 @@ public partial class MainWindow : Window
     }
 
     private void ScanGameFolder_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.StatusMessage =
-            "Scan requested: discovering mods from game folder and inferring default branch initialization rules.";
+        _viewModel.ScanSelectedGameFolderForMods();
 
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
     {
@@ -66,10 +66,18 @@ public partial class MainWindow : Window
 
     private async void OpenSettings_Click(object? sender, RoutedEventArgs e)
     {
+        var settingsWindow = new CoreProgramSettingsWindow();
+        var manageInstalls = await settingsWindow.ShowDialog<bool>(this);
+        if (!manageInstalls)
+        {
+            _viewModel.StatusMessage = "Settings closed.";
+            return;
+        }
+
         var wizard = new GameInstallWizardWindow(_viewModel, isFirstRun: false);
         await wizard.ShowDialog(this);
         _viewModel.SyncGameFoldersFromInstalls();
-        _viewModel.StatusMessage = "Settings: scan for new games completed.";
+        _viewModel.StatusMessage = "Settings: game install management completed.";
     }
 
     private void OpenBackups_Click(object? sender, RoutedEventArgs e)
@@ -104,8 +112,29 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OpenGameFolder_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.StatusMessage = $"Open game folder requested: {_viewModel.SelectedGameFolder}.";
+    private void OpenGameFolder_Click(object? sender, RoutedEventArgs e)
+    {
+        var folder = _viewModel.SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+        {
+            _viewModel.StatusMessage = "Open game folder failed: selected folder is missing.";
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = folder,
+                UseShellExecute = true
+            });
+            _viewModel.StatusMessage = $"Opened game folder: {folder}";
+        }
+        catch (Exception ex)
+        {
+            _viewModel.StatusMessage = $"Open game folder failed: {ex.Message}";
+        }
+    }
 
     private void LaunchCreationKit_Click(object? sender, RoutedEventArgs e) =>
         _viewModel.StatusMessage =
@@ -236,6 +265,69 @@ public sealed class MainWindowViewModel : NotifyBase
 
         SyncGameFoldersFromInstalls();
         RebuildMods();
+    }
+
+    public void ScanSelectedGameFolderForMods()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedGameFolder))
+        {
+            StatusMessage = "Scan failed: no game folder selected.";
+            return;
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            StatusMessage = "Scan failed: selected game folder is not mapped to a managed base game install.";
+            return;
+        }
+
+        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
+        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
+        if (!Directory.Exists(scanRoot))
+        {
+            StatusMessage = $"Scan failed: game data folder not found at '{scanRoot}'.";
+            return;
+        }
+
+        var knownPluginNames = _repository.LoadKnownPluginsForGameIncludingDlc(install.ManagedGame.Name)
+            .Select(x => x.PluginName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var discovered = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
+            .Where(path =>
+            {
+                var ext = Path.GetExtension(path);
+                return string.Equals(ext, ".esm", StringComparison.OrdinalIgnoreCase) ||
+                       string.Equals(ext, ".esp", StringComparison.OrdinalIgnoreCase) ||
+                       string.Equals(ext, ".esl", StringComparison.OrdinalIgnoreCase);
+            })
+            .Select(path => Path.GetFileName(path))
+            .Where(name => !knownPluginNames.Contains(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        Mods.Clear();
+        var row = 0;
+        foreach (var file in discovered)
+        {
+            Mods.Add(new ModListItem(
+                Path.GetFileNameWithoutExtension(file),
+                file,
+                "DISCOVERED",
+                string.Empty,
+                string.Empty,
+                new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
+        }
+
+        StatusMessage = discovered.Count == 0
+            ? "Scan complete. No non-base plugin candidates were found in the selected game data folder."
+            : $"Scan complete. Found {discovered.Count} non-base plugin candidate(s).";
     }
 
     private void RebuildMods()
@@ -582,6 +674,34 @@ internal sealed class GameSetupRepository
             FROM GameKnownPlugin kp
             JOIN Game g ON g.id = kp.GameId
             WHERE g.Name = $gameName
+            ORDER BY kp.PluginName
+            """;
+        command.Parameters.AddWithValue("$gameName", gameName);
+
+        var plugins = new List<KnownPluginRecord>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            plugins.Add(new KnownPluginRecord(
+                reader.GetString(0),
+                reader.GetString(1),
+                reader.GetInt64(2) == 1,
+                reader.GetInt64(3) == 1));
+        }
+
+        return plugins;
+    }
+
+    public IReadOnlyList<KnownPluginRecord> LoadKnownPluginsForGameIncludingDlc(string gameName)
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT kp.DisplayName, kp.PluginName, kp.IsBaseGame, kp.IsDlc
+            FROM GameKnownPlugin kp
+            JOIN Game g ON g.id = kp.GameId
+            LEFT JOIN Game parent ON parent.id = g.ParentGameId
+            WHERE g.Name = $gameName OR parent.Name = $gameName
             ORDER BY kp.PluginName
             """;
         command.Parameters.AddWithValue("$gameName", gameName);
