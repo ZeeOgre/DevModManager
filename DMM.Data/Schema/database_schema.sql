@@ -418,7 +418,63 @@ CREATE TABLE IF NOT EXISTS Game (
                                                                     ON UPDATE CASCADE,
     CreationKitCustomSettingsIniId INTEGER NULL
                                            REFERENCES FileInfo (id) ON DELETE SET NULL
-                                                                    ON UPDATE CASCADE
+                                                                    ON UPDATE CASCADE,
+    ParentGameId                   INTEGER NULL
+                                           REFERENCES Game (id) ON DELETE SET NULL
+                                                             ON UPDATE CASCADE,
+    IsBaseGame                     INTEGER NOT NULL
+                                           DEFAULT (1)
+                                           CHECK (IsBaseGame IN (0, 1) ),
+    IsDlc                          INTEGER NOT NULL
+                                           DEFAULT (0)
+                                           CHECK (IsDlc IN (0, 1) )
+);
+
+
+-- Table: GameKnownPlugin
+DROP TABLE IF EXISTS GameKnownPlugin;
+
+CREATE TABLE IF NOT EXISTS GameKnownPlugin (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    GameId      INTEGER NOT NULL
+                        REFERENCES Game (id) ON DELETE CASCADE
+                                             ON UPDATE CASCADE,
+    DisplayName TEXT    NOT NULL,
+    PluginName  TEXT    NOT NULL,
+    IsBaseGame  INTEGER NOT NULL
+                        DEFAULT (0)
+                        CHECK (IsBaseGame IN (0, 1) ),
+    IsDlc       INTEGER NOT NULL
+                        DEFAULT (0)
+                        CHECK (IsDlc IN (0, 1) ),
+    UNIQUE (
+        GameId,
+        PluginName
+    )
+);
+
+
+-- Table: GameStoreApp
+DROP TABLE IF EXISTS GameStoreApp;
+
+CREATE TABLE IF NOT EXISTS GameStoreApp (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    GameId       INTEGER NOT NULL
+                         REFERENCES Game (id) ON DELETE CASCADE
+                                              ON UPDATE CASCADE,
+    GameSourceId INTEGER NOT NULL
+                         REFERENCES GameSource (id) ON DELETE CASCADE
+                                                    ON UPDATE CASCADE,
+    StoreAppId   TEXT    NOT NULL,
+    UNIQUE (
+        GameSourceId,
+        StoreAppId
+    ),
+    UNIQUE (
+        GameId,
+        GameSourceId,
+        StoreAppId
+    )
 );
 
 

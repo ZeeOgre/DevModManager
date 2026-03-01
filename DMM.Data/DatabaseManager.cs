@@ -36,7 +36,7 @@ public sealed class DatabaseManager
         using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
-        if (isNewDatabase)
+        if (isNewDatabase || !TableExists(connection, "Game"))
         {
             ExecuteSqlScript(connection, LoadSqlScript("database_schema.sql"));
         }
@@ -50,6 +50,15 @@ public sealed class DatabaseManager
         var connection = new SqliteConnection(ConnectionString);
         connection.Open();
         return connection;
+    }
+
+
+    private static bool TableExists(SqliteConnection connection, string tableName)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = $name LIMIT 1";
+        cmd.Parameters.AddWithValue("$name", tableName);
+        return cmd.ExecuteScalar() is not null;
     }
 
     private static void EnsureSeedTable(SqliteConnection connection)

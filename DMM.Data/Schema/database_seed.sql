@@ -13,11 +13,129 @@ INSERT INTO Game (Name, Executable)
 SELECT 'Skyrim Special Edition', 'SkyrimSE.exe'
 WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Skyrim Special Edition');
 
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Starfield - Shattered Space', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Starfield'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield - Shattered Space');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Starfield - Old Mars', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Starfield'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield - Old Mars');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Starfield - Constellation', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Starfield'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield - Constellation');
+
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Automatron', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Automatron');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Contraptions Workshop', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Contraptions Workshop');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Far Harbor', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Far Harbor');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: High Resolution Texture Pack', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: High Resolution Texture Pack');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Nuka-World', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Nuka-World');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Vault-Tec Workshop', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Vault-Tec Workshop');
+
+INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
+SELECT 'Fallout 4: Wasteland Workshop', '', g.id, 0, 1
+FROM Game g
+WHERE g.Name = 'Fallout 4'
+  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Wasteland Workshop');
+
 INSERT OR IGNORE INTO GameSource (Name, SourceGameId, URL, URI) VALUES
 ('Steam', NULL, 'https://store.steampowered.com/', 'steam://'),
 ('GamePass', NULL, 'https://www.xbox.com/xbox-game-pass', 'ms-xbox-gamepass://'),
 ('Epic', NULL, 'https://store.epicgames.com/', 'com.epicgames.launcher://'),
 ('GoG', NULL, 'https://www.gog.com/', 'goggalaxy://');
+
+INSERT OR IGNORE INTO GameStoreApp (GameId, GameSourceId, StoreAppId)
+SELECT g.id, s.id, app.StoreAppId
+FROM (
+    SELECT 'Starfield' AS GameName, 'Steam' AS SourceName, '1716740' AS StoreAppId
+    UNION ALL SELECT 'Fallout 4', 'Steam', '377160'
+    UNION ALL SELECT 'Skyrim Special Edition', 'Steam', '489830'
+    UNION ALL SELECT 'Starfield', 'GamePass', 'BethesdaSoftworks.ProjectGold'
+    UNION ALL SELECT 'Starfield - Shattered Space', 'GamePass', 'BethesdaSoftworks.ShatteredSpace'
+    UNION ALL SELECT 'Starfield - Old Mars', 'GamePass', 'BethesdaSoftworks.PGPreorderContentwPkg'
+    UNION ALL SELECT 'Starfield - Constellation', 'GamePass', 'BethesdaSoftworks.PGDeluxeContentwPkg'
+    UNION ALL SELECT 'Fallout 4', 'GamePass', 'BethesdaSoftworks.Fallout4-CoreGame'
+    UNION ALL SELECT 'Fallout 4: Automatron', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC1Automatron'
+    UNION ALL SELECT 'Fallout 4: Contraptions Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC4ContraptionsWorksho'
+    UNION ALL SELECT 'Fallout 4: Far Harbor', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC3FarHarbor'
+    UNION ALL SELECT 'Fallout 4: High Resolution Texture Pack', 'GamePass', 'BethesdaSoftworks.Fallout4HighResolutionTexturePac'
+    UNION ALL SELECT 'Fallout 4: Nuka-World', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC6Nuka-World'
+    UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC5Vault-TecWorkshop'
+    UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC2WastelandWorkshop'
+) app
+JOIN Game g ON g.Name = app.GameName
+JOIN GameSource s ON s.Name = app.SourceName;
+
+INSERT OR IGNORE INTO GameKnownPlugin (GameId, DisplayName, PluginName, IsBaseGame, IsDlc)
+SELECT g.id, p.DisplayName, p.PluginName, p.IsBaseGame, p.IsDlc
+FROM (
+    SELECT 'Starfield' AS GameName, 'Trackers Alliance support' AS DisplayName, 'SFBGS003.esm' AS PluginName, 1 AS IsBaseGame, 0 AS IsDlc
+    UNION ALL SELECT 'Starfield', 'Vehicle / REV-8', 'SFBGS004.esm', 1, 0
+    UNION ALL SELECT 'Starfield', 'Ship Decoration', 'SFBGS006.esm', 1, 0
+    UNION ALL SELECT 'Starfield', 'Gameplay Options', 'SFBGS007.esm', 1, 0
+    UNION ALL SELECT 'Starfield', 'City Maps Data', 'SFBGS008.esm', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'Makeshift Weapon Pack - When Pigs Fly', 'ccSBJFO4003-Grenade.esl', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'Halloween Workshop Pack - All Hallows'' Eve', 'ccFSVFO4007-Halloween.esl', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'Enclave Remnants - Echoes of the Past', 'ccOTMFO4001-Remnants.esl', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'Tesla Cannon - Best of Three', 'ccBGSFO4046-TesCan.esl', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'Hellfire Power Armor - Pyromaniac', 'ccBGSFO4044-HellfirePowerArmor.esl', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'X-02 Power Armor - Speak of the Devil', 'ccBGSFO4115-X02.esl', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'Heavy Incinerator - Crucible', 'ccBGSFO4116-HeavyFlamer.esl', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'Enclave Armor Skins', 'ccBGSFO4096-AS_Enclave.esl', 1, 0
+    UNION ALL SELECT 'Fallout 4', 'Enclave Weapon Skins', 'ccBGSFO4110-WS_Enclave.esl', 1, 0
+    UNION ALL SELECT 'Skyrim Special Edition', 'Dawnguard', 'Dawnguard.esm', 1, 0
+    UNION ALL SELECT 'Skyrim Special Edition', 'Hearthfire', 'HearthFires.esm', 1, 0
+    UNION ALL SELECT 'Skyrim Special Edition', 'Dragonborn', 'Dragonborn.esm', 1, 0
+    UNION ALL SELECT 'Skyrim Special Edition', 'Saints & Seducers', 'ccBGSSSE025-AdvDSGS.esm', 1, 0
+    UNION ALL SELECT 'Skyrim Special Edition', 'Rare Curios', 'ccBGSSSE037-Curios.esl', 1, 0
+    UNION ALL SELECT 'Skyrim Special Edition', 'Survival Mode', 'ccQDRSSE001-SurvivalMode.esl', 1, 0
+    UNION ALL SELECT 'Skyrim Special Edition', 'Fishing', 'ccBGSSSE001-Fish.esm', 1, 0
+    UNION ALL SELECT 'Skyrim Special Edition', 'Resource Pack', '_ResourcePack.esl', 1, 0
+    UNION ALL SELECT 'Starfield - Shattered Space', 'Shattered Space', 'ShatteredSpace.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Automatron', 'Automatron', 'DLCRobot.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Contraptions Workshop', 'Contraptions Workshop', 'DLCworkshop02.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Far Harbor', 'Far Harbor', 'DLCCoast.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Nuka-World', 'Nuka-World', 'DLCNukaWorld.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'Vault-Tec Workshop', 'DLCworkshop03.esm', 0, 1
+    UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'Wasteland Workshop', 'DLCworkshop01.esm', 0, 1
+) p
+JOIN Game g ON g.Name = p.GameName;
 
 INSERT OR IGNORE INTO GameSource (Name, SourceGameId, URL, URI) VALUES
 ('Starfield-Steam', '1716740', 'https://store.steampowered.com/app/1716740', 'steam://run/1716740'),
