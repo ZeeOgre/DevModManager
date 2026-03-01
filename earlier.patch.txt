@@ -1,0 +1,1854 @@
+diff --git a/DMM.Avalonia/CoreProgramSettingsWindow.axaml b/DMM.Avalonia/CoreProgramSettingsWindow.axaml
+new file mode 100644
+index 0000000000000000000000000000000000000000..5bb4a19a8402a72a5c20424b3d207097e65f1770
+--- /dev/null
++++ b/DMM.Avalonia/CoreProgramSettingsWindow.axaml
+@@ -0,0 +1,20 @@
++<Window xmlns="https://github.com/avaloniaui"
++        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++        x:Class="DMM.Avalonia.CoreProgramSettingsWindow"
++        Width="520"
++        Height="260"
++        Title="Core Program Settings"
++        WindowStartupLocation="CenterOwner"
++        CanResize="False">
++    <Border Margin="16" Padding="16" Background="#2A2A2A" CornerRadius="8">
++        <StackPanel Spacing="12">
++            <TextBlock Text="Core Program Settings" FontSize="24" FontWeight="Bold" />
++            <TextBlock Text="Configure core behavior and game-install management workflows." TextWrapping="Wrap" />
++
++            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Left" Margin="0,8,0,0">
++                <Button Content="Manage Game Installs" Click="ManageGameInstalls_Click" MinWidth="170" />
++                <Button Content="Close" Click="Close_Click" MinWidth="100" />
++            </StackPanel>
++        </StackPanel>
++    </Border>
++</Window>
+diff --git a/DMM.Avalonia/CoreProgramSettingsWindow.axaml.cs b/DMM.Avalonia/CoreProgramSettingsWindow.axaml.cs
+new file mode 100644
+index 0000000000000000000000000000000000000000..54ecf04a6a97b4eb4f1512a2e54a8d814156c827
+--- /dev/null
++++ b/DMM.Avalonia/CoreProgramSettingsWindow.axaml.cs
+@@ -0,0 +1,16 @@
++using Avalonia.Controls;
++using Avalonia.Interactivity;
++
++namespace DMM.Avalonia;
++
++public partial class CoreProgramSettingsWindow : Window
++{
++    public CoreProgramSettingsWindow()
++    {
++        InitializeComponent();
++    }
++
++    private void ManageGameInstalls_Click(object? sender, RoutedEventArgs e) => Close(true);
++
++    private void Close_Click(object? sender, RoutedEventArgs e) => Close(false);
++}
+diff --git a/DMM.Avalonia/GameSetupModels.cs b/DMM.Avalonia/GameSetupModels.cs
+index c3d682ee9ad674abd764a357776ae62870d51804..6b93da7b65f3d3a82aacf4a0a411da8b665ff898 100644
+--- a/DMM.Avalonia/GameSetupModels.cs
++++ b/DMM.Avalonia/GameSetupModels.cs
+@@ -19,104 +19,112 @@ public sealed class ManagedGame : NotifyBase
+         set => SetField(ref _name, value);
+     }
+ 
+     public string Executable
+     {
+         get => _executable;
+         set => SetField(ref _executable, value);
+     }
+ 
+     public string StoreId
+     {
+         get => _storeId;
+         set => SetField(ref _storeId, value);
+     }
+ 
+     public override string ToString() => Name;
+ }
+ 
+ public sealed class GameInstallRecord : NotifyBase
+ {
+     private bool _manage;
+     private string _gameStore = string.Empty;
+     private string _installPath = string.Empty;
+     private string _storeAppId = string.Empty;
+     private bool _isDlc;
++    private string _baseGameManifestPath = string.Empty;
+     private ManagedGame? _managedGame;
+ 
+     public bool Manage
+     {
+         get => _manage;
+         set => SetField(ref _manage, value);
+     }
+ 
+     public string GameStore
+     {
+         get => _gameStore;
+         set => SetField(ref _gameStore, value);
+     }
+ 
+     public string InstallPath
+     {
+         get => _installPath;
+         set => SetField(ref _installPath, value);
+     }
+ 
+     public string StoreAppId
+     {
+         get => _storeAppId;
+         set => SetField(ref _storeAppId, value);
+     }
+ 
+     public bool IsDlc
+     {
+         get => _isDlc;
+         set => SetField(ref _isDlc, value);
+     }
+ 
++    public string BaseGameManifestPath
++    {
++        get => _baseGameManifestPath;
++        set => SetField(ref _baseGameManifestPath, value);
++    }
++
+     public ManagedGame? ManagedGame
+     {
+         get => _managedGame;
+         set
+         {
+             if (SetField(ref _managedGame, value))
+             {
+                 StoreAppId = value?.StoreId ?? string.Empty;
+                 OnPropertyChanged(nameof(GameName));
+             }
+         }
+     }
+ 
+     public string GameName => ManagedGame?.Name ?? "(Unmapped)";
+ 
+     public GameInstallRecord Clone() => new()
+     {
+         Manage = Manage,
+         GameStore = GameStore,
+         InstallPath = InstallPath,
+         StoreAppId = StoreAppId,
+         IsDlc = IsDlc,
++        BaseGameManifestPath = BaseGameManifestPath,
+         ManagedGame = ManagedGame
+     };
+ }
+ 
+ public sealed class GameInstallWizardViewModel : NotifyBase
+ {
+     private const int PageSize = 10;
+     private int _currentPageIndex;
+     private bool _isScanning;
+     private string _scanStatus = "Ready to scan.";
+ 
+     public ObservableCollection<GameInstallRecord> DiscoveredInstalls { get; }
+     public ObservableCollection<ManagedGame> ManagedGames { get; }
+ 
+     public bool IsFirstRun { get; }
+ 
+     public GameInstallWizardViewModel(IEnumerable<GameInstallRecord> discoveredInstalls, ObservableCollection<ManagedGame> managedGames, bool isFirstRun)
+     {
+         DiscoveredInstalls = new ObservableCollection<GameInstallRecord>(discoveredInstalls);
+         ManagedGames = managedGames;
+         IsFirstRun = isFirstRun;
+     }
+ 
+     public IEnumerable<GameInstallRecord> CurrentPageItems =>
+         DiscoveredInstalls.Skip(_currentPageIndex * PageSize).Take(PageSize);
+diff --git a/DMM.Avalonia/MainWindow.axaml.cs b/DMM.Avalonia/MainWindow.axaml.cs
+index 131cd0b037b4c17d9a909204045cf9c4ea9ac15a..c4397deb6709ff3e1148713268aa8ced1ee6e049 100644
+--- a/DMM.Avalonia/MainWindow.axaml.cs
++++ b/DMM.Avalonia/MainWindow.axaml.cs
+@@ -1,132 +1,162 @@
+ using System.Collections.ObjectModel;
++using System.Diagnostics;
+ using System.Collections.Generic;
+ using System;
+ using System.IO;
+ using System.Linq;
++using System.Text.Json;
+ using System.Threading;
+ using System.Threading.Tasks;
+ using Avalonia.Controls;
+ using Avalonia.Interactivity;
+ using Avalonia.Media;
+ using DMM.AssetManagers.GameStores.BattleNet;
+ using DMM.AssetManagers.GameStores.Common;
+ using DMM.AssetManagers.GameStores.Common.Models;
+ using DMM.AssetManagers.GameStores.EA;
+ using DMM.AssetManagers.GameStores.Epic;
+ using DMM.AssetManagers.GameStores.Gog;
+ using DMM.AssetManagers.GameStores.Minecraft;
+ using DMM.AssetManagers.GameStores.Origin;
+ using DMM.AssetManagers.GameStores.PSN;
+ using DMM.AssetManagers.GameStores.Rockstar;
+ using DMM.AssetManagers.GameStores.Steam;
+ using DMM.AssetManagers.GameStores.XBox;
+ using DMM.Data;
+ using Microsoft.Data.Sqlite;
+ 
+ namespace DMM.Avalonia;
+ 
+ public partial class MainWindow : Window
+ {
+     private readonly MainWindowViewModel _viewModel;
+ 
+     public MainWindow()
+     {
+         InitializeComponent();
+         _viewModel = MainWindowViewModel.CreateSample();
+         DataContext = _viewModel;
+         Opened += MainWindow_Opened;
+     }
+ 
+     private async void MainWindow_Opened(object? sender, System.EventArgs e)
+     {
+         if (_viewModel.GameInstalls.Count > 0)
+         {
+             return;
+         }
+ 
+         var wizard = new GameInstallWizardWindow(_viewModel, isFirstRun: true);
+         await wizard.ShowDialog(this);
+         _viewModel.SyncGameFoldersFromInstalls();
+         _viewModel.StatusMessage = _viewModel.GameInstalls.Count > 0
+             ? $"First-run game setup completed. Added {_viewModel.GameInstalls.Count} game install(s)."
+             : "First-run setup closed without selecting game installs.";
+     }
+ 
+     private void ScanGameFolder_Click(object? sender, RoutedEventArgs e) =>
+-        _viewModel.StatusMessage =
+-            "Scan requested: discovering mods from game folder and inferring default branch initialization rules.";
++        _viewModel.ScanSelectedGameFolderForMods();
+ 
+     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
+     {
+         var helpWindow = HelpWindow.ForSection("Main");
+         await helpWindow.ShowDialog(this);
+         _viewModel.StatusMessage = "Help viewed.";
+     }
+ 
+     private async void OpenSettings_Click(object? sender, RoutedEventArgs e)
+     {
++        var settingsWindow = new CoreProgramSettingsWindow();
++        var manageInstalls = await settingsWindow.ShowDialog<bool>(this);
++        if (!manageInstalls)
++        {
++            _viewModel.StatusMessage = "Settings closed.";
++            return;
++        }
++
+         var wizard = new GameInstallWizardWindow(_viewModel, isFirstRun: false);
+         await wizard.ShowDialog(this);
+         _viewModel.SyncGameFoldersFromInstalls();
+-        _viewModel.StatusMessage = "Settings: scan for new games completed.";
++        _viewModel.StatusMessage = "Settings: game install management completed.";
+     }
+ 
+     private void OpenBackups_Click(object? sender, RoutedEventArgs e)
+     {
+         if (sender is Button { CommandParameter: string modName })
+         {
+             _viewModel.StatusMessage = $"Open backup archive requested for {modName}.";
+         }
+     }
+ 
+     private void OpenBethesda_Click(object? sender, RoutedEventArgs e)
+     {
+         if (sender is Button { CommandParameter: string modName })
+         {
+             _viewModel.StatusMessage = $"Open Bethesda link requested for {modName}.";
+         }
+     }
+ 
+     private void OpenNexus_Click(object? sender, RoutedEventArgs e)
+     {
+         if (sender is Button { CommandParameter: string modName })
+         {
+             _viewModel.StatusMessage = $"Open Nexus link requested for {modName}.";
+         }
+     }
+ 
+     private void DeployToGameFolder_Click(object? sender, RoutedEventArgs e)
+     {
+         if (sender is Button { CommandParameter: string modName })
+         {
+             _viewModel.StatusMessage = $"Deploy requested for {modName} to {_viewModel.SelectedGameFolder}.";
+         }
+     }
+ 
+-    private void OpenGameFolder_Click(object? sender, RoutedEventArgs e) =>
+-        _viewModel.StatusMessage = $"Open game folder requested: {_viewModel.SelectedGameFolder}.";
++    private void OpenGameFolder_Click(object? sender, RoutedEventArgs e)
++    {
++        var folder = _viewModel.SelectedGameFolder;
++        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
++        {
++            _viewModel.StatusMessage = "Open game folder failed: selected folder is missing.";
++            return;
++        }
++
++        try
++        {
++            Process.Start(new ProcessStartInfo
++            {
++                FileName = folder,
++                UseShellExecute = true
++            });
++            _viewModel.StatusMessage = $"Opened game folder: {folder}";
++        }
++        catch (Exception ex)
++        {
++            _viewModel.StatusMessage = $"Open game folder failed: {ex.Message}";
++        }
++    }
+ 
+     private void LaunchCreationKit_Click(object? sender, RoutedEventArgs e) =>
+         _viewModel.StatusMessage =
+             $"Launch Creation Kit requested for {_viewModel.SelectedGameFolder}; if missing, prompt install.";
+ 
+     private void LaunchXEdit_Click(object? sender, RoutedEventArgs e) =>
+         _viewModel.StatusMessage = "Launch xEdit requested from central tools folder.";
+ 
+     private void LaunchNifSkope_Click(object? sender, RoutedEventArgs e) =>
+         _viewModel.StatusMessage = "Launch NifSkope requested from central tools folder.";
+ 
+     private void LaunchAssetWatcher_Click(object? sender, RoutedEventArgs e) =>
+         _viewModel.StatusMessage =
+             $"Launch AssetWatcher requested from per-game tool folder for {_viewModel.SelectedGameFolder}.";
+ 
+     private void LaunchIde_Click(object? sender, RoutedEventArgs e) =>
+         _viewModel.StatusMessage = "Launch preferred IDE requested (typically VS Code).";
+ 
+     private void OpenLoadOrderManager_Click(object? sender, RoutedEventArgs e) =>
+         _viewModel.StatusMessage = "Open Load Order manager requested.";
+ 
+ 
+     private void GitUp_Click(object? sender, RoutedEventArgs e) =>
+         _viewModel.StatusMessage = "Git control: push/up requested.";
+ 
+@@ -215,73 +245,136 @@ public sealed class MainWindowViewModel : NotifyBase
+     {
+         foreach (var install in _repository.LoadManagedInstalls(ManagedGames))
+         {
+             GameInstalls.Add(install);
+         }
+ 
+         SyncGameFoldersFromInstalls();
+         RebuildMods();
+     }
+ 
+     public void PersistManagedGame(ManagedGame game) => _repository.UpsertManagedGame(game);
+ 
+     public void PersistSelectedInstalls(IReadOnlyList<GameInstallRecord> selectedInstalls)
+     {
+         _repository.ReplaceManagedInstalls(selectedInstalls, ManagedGames);
+         GameInstalls.Clear();
+         foreach (var install in selectedInstalls)
+         {
+             GameInstalls.Add(install.Clone());
+         }
+ 
+         SyncGameFoldersFromInstalls();
+         RebuildMods();
+     }
+ 
++    public void ScanSelectedGameFolderForMods()
++    {
++        if (string.IsNullOrWhiteSpace(SelectedGameFolder))
++        {
++            StatusMessage = "Scan failed: no game folder selected.";
++            return;
++        }
++
++        var install = GameInstalls.FirstOrDefault(x =>
++            !x.IsDlc &&
++            x.ManagedGame is not null &&
++            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
++
++        if (install?.ManagedGame is null)
++        {
++            StatusMessage = "Scan failed: selected game folder is not mapped to a managed base game install.";
++            return;
++        }
++
++        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
++        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
++        if (!Directory.Exists(scanRoot))
++        {
++            StatusMessage = $"Scan failed: game data folder not found at '{scanRoot}'.";
++            return;
++        }
++
++        var knownPluginNames = _repository.LoadKnownPluginsForGameIncludingDlc(install.ManagedGame.Name)
++            .Select(x => x.PluginName)
++            .ToHashSet(StringComparer.OrdinalIgnoreCase);
++
++        var discovered = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
++            .Where(path =>
++            {
++                var ext = Path.GetExtension(path);
++                return string.Equals(ext, ".esm", StringComparison.OrdinalIgnoreCase) ||
++                       string.Equals(ext, ".esp", StringComparison.OrdinalIgnoreCase) ||
++                       string.Equals(ext, ".esl", StringComparison.OrdinalIgnoreCase);
++            })
++            .Select(path => Path.GetFileName(path))
++            .Where(name => !knownPluginNames.Contains(name))
++            .Distinct(StringComparer.OrdinalIgnoreCase)
++            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
++            .ToList();
++
++        Mods.Clear();
++        var row = 0;
++        foreach (var file in discovered)
++        {
++            Mods.Add(new ModListItem(
++                Path.GetFileNameWithoutExtension(file),
++                file,
++                "DISCOVERED",
++                string.Empty,
++                string.Empty,
++                new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
++        }
++
++        StatusMessage = discovered.Count == 0
++            ? "Scan complete. No non-base plugin candidates were found in the selected game data folder."
++            : $"Scan complete. Found {discovered.Count} non-base plugin candidate(s).";
++    }
++
+     private void RebuildMods()
+     {
+         Mods.Clear();
+ 
+         var baseInstalls = GameInstalls
+             .Where(x => !x.IsDlc)
+             .Where(x => x.ManagedGame is not null)
+             .Where(x => string.IsNullOrWhiteSpace(SelectedGameFolder) || string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase))
+             .ToList();
+ 
+         var row = 0;
+         foreach (var install in baseInstalls)
+         {
+-            foreach (var builtin in BuiltInBethesdaMods.ForGame(install.ManagedGame!.Name))
++            foreach (var builtin in _repository.LoadKnownPluginsForGame(install.ManagedGame!.Name))
+             {
+-                if (!PluginExists(install.InstallPath, builtin.Plugin))
++                if (!PluginExists(install.InstallPath, builtin.PluginName))
+                 {
+                     continue;
+                 }
+ 
+                 Mods.Add(new ModListItem(
+                     builtin.DisplayName,
+-                    builtin.Plugin,
++                    builtin.PluginName,
+                     "BASE",
+                     string.Empty,
+                     string.Empty,
+                     new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
+             }
+         }
+ 
+         if (Mods.Count > 0)
+         {
+             StatusMessage = $"Loaded {Mods.Count} built-in Bethesda mod entries from managed installs.";
+             return;
+         }
+ 
+         Mods.Add(new ModListItem("ZO_AIOGamePlayTweaks", "ZO_AIOGamePlayTweaks.esp", "DEV", "f7dc7ac6...", "345221", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+         Mods.Add(new ModListItem("ZO_DenserOutposts", "ZO_DenserOutposts.esm", "RELEASE", "c5bbdd20...", "817744", new SolidColorBrush(Color.Parse("#343434"))));
+         Mods.Add(new ModListItem("ZO_HandScannerTweaks", "ZO_HandScannerTweaks.esl", "TEST", "3f102ab3...", "593188", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+         Mods.Add(new ModListItem("WT_SmartDoc", "WT_SmartDoc.esp", "DEV", "2120ee1a...", "772843", new SolidColorBrush(Color.Parse("#343434"))));
+         Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+     }
+ 
+     private static bool PluginExists(string installPath, string pluginFileName)
+     {
+         var inRoot = Path.Combine(installPath, pluginFileName);
+         if (File.Exists(inRoot))
+         {
+@@ -300,205 +393,355 @@ public sealed class MainWindowViewModel : NotifyBase
+                      .Where(x => !x.IsDlc)
+                      .Select(x => x.InstallPath)
+                      .Distinct())
+         {
+             GameFolders.Add(path);
+         }
+ 
+         SelectedGameFolder = selected is not null && GameFolders.Contains(selected)
+             ? selected
+             : GameFolders.FirstOrDefault();
+     }
+ 
+     public IReadOnlyList<GameInstallRecord> DiscoverInstallCandidates() =>
+         DiscoverInstallCandidatesAsync().GetAwaiter().GetResult();
+ 
+     public async Task<IReadOnlyList<GameInstallRecord>> DiscoverInstallCandidatesAsync(IProgress<string>? progress = null, CancellationToken ct = default)
+     {
+         var scanners = CreateAvailableScanners();
+         if (scanners.Count == 0)
+         {
+             progress?.Report("Store scanners are only available on Windows.");
+             return Array.Empty<GameInstallRecord>();
+         }
+ 
+         var managedGamesSnapshot = ManagedGames.ToList();
++        var knownCatalog = _repository.LoadKnownGameCatalog();
++        var knownByStoreAppId = knownCatalog
++            .Where(x => !string.IsNullOrWhiteSpace(x.StoreAppId))
++            .GroupBy(x => x.StoreAppId, StringComparer.OrdinalIgnoreCase)
++            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
++        var knownByName = knownCatalog
++            .GroupBy(x => NormalizeGameName(x.GameName), StringComparer.OrdinalIgnoreCase)
++            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
++
+         var lightweightContext = new StoreScanContext
+         {
+             IncludeVisualAssets = false
+         };
+ 
+         return await Task.Run(async () =>
+         {
+             var discovered = new List<GameInstallRecord>();
+             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+             var storesByKey = scanners.ToDictionary(x => x.StoreKey, x => x, StringComparer.OrdinalIgnoreCase);
+ 
+             progress?.Report($"Scanning {scanners.Count} game stores for installs...");
+ 
+             foreach (var scanner in scanners)
+             {
+                 ct.ThrowIfCancellationRequested();
+                 progress?.Report($"Scanning {ToStoreLabel(scanner.StoreKey)}...");
+ 
+                 StoreScanResult result;
+                 try
+                 {
+                     result = await scanner.ScanAsync(lightweightContext, ct).ConfigureAwait(false);
+                 }
+                 catch
+                 {
+                     continue;
+                 }
+ 
+                 foreach (var app in result.Apps)
+                 {
+                     var installPath = app.InstallFolders.InstallFolder?.Path
+                         ?? app.InstallFolders.ContentFolder?.Path
+                         ?? app.InstallFolders.DataFolder?.Path;
+ 
+                     if (string.IsNullOrWhiteSpace(installPath))
+                     {
+                         continue;
+                     }
+ 
+                     var key = $"{ToStoreLabel(app.Id.StoreKey)}|{installPath}";
+                     if (!seen.Add(key))
+                     {
+                         continue;
+                     }
+ 
+-                    var managedGame = MatchManagedGame(app);
++                    var (managedGame, isDlc) = MatchManagedGame(app);
++                    app.StoreMetadata.TryGetValue("BaseGameManifestPath", out var manifestPath);
+                     discovered.Add(new GameInstallRecord
+                     {
+                         Manage = managedGame is not null,
+                         GameStore = ToStoreLabel(app.Id.StoreKey),
+                         StoreAppId = app.Id.StoreAppId,
+                         ManagedGame = managedGame,
+-                        InstallPath = installPath
++                        InstallPath = installPath,
++                        IsDlc = isDlc,
++                        BaseGameManifestPath = manifestPath ?? string.Empty
+                     });
+                 }
+             }
+ 
+             progress?.Report($"Scan complete. Found {discovered.Count} installs across {storesByKey.Count} stores.");
+ 
+             return (IReadOnlyList<GameInstallRecord>)discovered
+                 .OrderByDescending(x => x.Manage)
+                 .ThenBy(x => x.ManagedGame?.Name ?? x.InstallPath)
+                 .ThenBy(x => x.GameStore)
+                 .ToList();
+         }, ct);
+ 
+-        ManagedGame? MatchManagedGame(AppInstallSnapshot app)
++        (ManagedGame? Game, bool IsDlc) MatchManagedGame(AppInstallSnapshot app)
+         {
++            if (!string.IsNullOrWhiteSpace(app.Id.StoreAppId) && knownByStoreAppId.TryGetValue(app.Id.StoreAppId, out var byAppId))
++            {
++                if (byAppId.IsDlc)
++                {
++                    var parent = managedGamesSnapshot.FirstOrDefault(x =>
++                        string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byAppId.ParentGameName), StringComparison.OrdinalIgnoreCase));
++                    if (parent is not null)
++                    {
++                        return (parent, true);
++                    }
++                }
++                else
++                {
++                    var game = managedGamesSnapshot.FirstOrDefault(x =>
++                        string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byAppId.GameName), StringComparison.OrdinalIgnoreCase));
++                    if (game is not null)
++                    {
++                        return (game, false);
++                    }
++                }
++            }
++
++            var normalizedDisplayName = NormalizeGameName(app.DisplayName);
++            if (knownByName.TryGetValue(normalizedDisplayName, out var byName) && byName.IsDlc)
++            {
++                var parent = managedGamesSnapshot.FirstOrDefault(x =>
++                    string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byName.ParentGameName), StringComparison.OrdinalIgnoreCase));
++                if (parent is not null)
++                {
++                    return (parent, true);
++                }
++            }
++
+             var knownByStoreId = managedGamesSnapshot.FirstOrDefault(x =>
+                 !string.IsNullOrWhiteSpace(x.StoreId) &&
+                 string.Equals(x.StoreId, app.Id.StoreAppId, System.StringComparison.OrdinalIgnoreCase));
+             if (knownByStoreId is not null)
+             {
+-                return knownByStoreId;
++                return (knownByStoreId, false);
+             }
+ 
+             var knownByExe = managedGamesSnapshot.FirstOrDefault(x =>
+                 !string.IsNullOrWhiteSpace(x.Executable) &&
+                 string.Equals(x.Executable, app.ExecutableName, System.StringComparison.OrdinalIgnoreCase));
+             if (knownByExe is not null)
+             {
+-                return knownByExe;
++                return (knownByExe, false);
++            }
++
++            var knownByDisplay = managedGamesSnapshot.FirstOrDefault(x =>
++                string.Equals(NormalizeGameName(x.Name), normalizedDisplayName, System.StringComparison.OrdinalIgnoreCase));
++            return (knownByDisplay, false);
++        }
++
++        static string NormalizeGameName(string? name)
++        {
++            if (string.IsNullOrWhiteSpace(name))
++            {
++                return string.Empty;
+             }
+ 
+-            return managedGamesSnapshot.FirstOrDefault(x =>
+-                string.Equals(x.Name, app.DisplayName, System.StringComparison.OrdinalIgnoreCase));
++            const string pcSuffix = " (PC)";
++            return name.EndsWith(pcSuffix, StringComparison.OrdinalIgnoreCase)
++                ? name[..^pcSuffix.Length].TrimEnd()
++                : name.Trim();
+         }
+ 
+         static string ToStoreLabel(string storeKey) => storeKey.ToLowerInvariant() switch
+         {
+             StoreKeys.BattleNet => "Battle.net",
+             StoreKeys.Ea => "EA",
+             StoreKeys.Gog => "GOG",
+             StoreKeys.Psn => "PSN",
+             StoreKeys.Xbox => "Game Pass",
+             _ => string.IsNullOrWhiteSpace(storeKey) ? "Unknown" : char.ToUpperInvariant(storeKey[0]) + storeKey[1..]
+         };
+     }
+ 
+     private static IReadOnlyList<IStoreInstallScanner> CreateAvailableScanners()
+     {
+         if (!OperatingSystem.IsWindows())
+         {
+             return Array.Empty<IStoreInstallScanner>();
+         }
+ 
+         return
+         [
+             new XboxInstallScanner(),
+             new SteamInstallScanner(),
+             new EpicInstallScanner(),
+             new GogInstallScanner(),
+             new PsnInstallScanner(),
+             new BattleNetInstallScanner(),
+             new MinecraftInstallScanner(),
+             new EaInstallScanner(),
+             new OriginInstallScanner(),
+             new RockstarInstallScanner()
+         ];
+     }
+ }
+ 
+ internal sealed class GameSetupRepository
+ {
+     private readonly DatabaseManager _database = new();
+ 
+     public IReadOnlyList<ManagedGame> LoadManagedGames()
+     {
+         using var connection = _database.OpenConnection();
+         using var command = connection.CreateCommand();
+-        command.CommandText = "SELECT Name, COALESCE(Executable, '') FROM Game ORDER BY Name";
+-
+-        var storeIds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+-        {
+-            ["Starfield"] = "1716740",
+-            ["Fallout 4"] = "377160",
+-            ["Skyrim Special Edition"] = "489830"
+-        };
++        command.CommandText = """
++            SELECT g.Name,
++                   COALESCE(g.Executable, ''),
++                   COALESCE((
++                       SELECT gsa.StoreAppId
++                       FROM GameStoreApp gsa
++                       JOIN GameSource gs ON gs.id = gsa.GameSourceId
++                       WHERE gsa.GameId = g.id
++                         AND gs.Name = 'Steam'
++                       ORDER BY gsa.id
++                       LIMIT 1
++                   ), '')
++            FROM Game g
++            WHERE g.IsDlc = 0
++            ORDER BY g.Name
++            """;
+ 
+         var games = new List<ManagedGame>();
+         using var reader = command.ExecuteReader();
+         while (reader.Read())
+         {
+             var name = reader.GetString(0);
+             games.Add(new ManagedGame
+             {
+                 Name = name,
+                 Executable = reader.GetString(1),
+-                StoreId = storeIds.GetValueOrDefault(name, string.Empty)
++                StoreId = reader.GetString(2)
+             });
+         }
+ 
+         return games;
+     }
+ 
++    public IReadOnlyList<KnownGameCatalogRecord> LoadKnownGameCatalog()
++    {
++        using var connection = _database.OpenConnection();
++        using var command = connection.CreateCommand();
++        command.CommandText = """
++            SELECT g.Name,
++                   g.IsDlc,
++                   parent.Name,
++                   COALESCE(gsa.StoreAppId, '')
++            FROM Game g
++            LEFT JOIN Game parent ON parent.id = g.ParentGameId
++            LEFT JOIN GameStoreApp gsa ON gsa.GameId = g.id
++            """;
++
++        var records = new List<KnownGameCatalogRecord>();
++        using var reader = command.ExecuteReader();
++        while (reader.Read())
++        {
++            records.Add(new KnownGameCatalogRecord(
++                reader.GetString(0),
++                reader.GetInt64(1) == 1,
++                reader.IsDBNull(2) ? null : reader.GetString(2),
++                reader.GetString(3)));
++        }
++
++        return records;
++    }
++
++    public IReadOnlyList<KnownPluginRecord> LoadKnownPluginsForGame(string gameName)
++    {
++        using var connection = _database.OpenConnection();
++        using var command = connection.CreateCommand();
++        command.CommandText = """
++            SELECT kp.DisplayName, kp.PluginName, kp.IsBaseGame, kp.IsDlc
++            FROM GameKnownPlugin kp
++            JOIN Game g ON g.id = kp.GameId
++            WHERE g.Name = $gameName
++            ORDER BY kp.PluginName
++            """;
++        command.Parameters.AddWithValue("$gameName", gameName);
++
++        var plugins = new List<KnownPluginRecord>();
++        using var reader = command.ExecuteReader();
++        while (reader.Read())
++        {
++            plugins.Add(new KnownPluginRecord(
++                reader.GetString(0),
++                reader.GetString(1),
++                reader.GetInt64(2) == 1,
++                reader.GetInt64(3) == 1));
++        }
++
++        return plugins;
++    }
++
++    public IReadOnlyList<KnownPluginRecord> LoadKnownPluginsForGameIncludingDlc(string gameName)
++    {
++        using var connection = _database.OpenConnection();
++        using var command = connection.CreateCommand();
++        command.CommandText = """
++            SELECT kp.DisplayName, kp.PluginName, kp.IsBaseGame, kp.IsDlc
++            FROM GameKnownPlugin kp
++            JOIN Game g ON g.id = kp.GameId
++            LEFT JOIN Game parent ON parent.id = g.ParentGameId
++            WHERE g.Name = $gameName OR parent.Name = $gameName
++            ORDER BY kp.PluginName
++            """;
++        command.Parameters.AddWithValue("$gameName", gameName);
++
++        var plugins = new List<KnownPluginRecord>();
++        using var reader = command.ExecuteReader();
++        while (reader.Read())
++        {
++            plugins.Add(new KnownPluginRecord(
++                reader.GetString(0),
++                reader.GetString(1),
++                reader.GetInt64(2) == 1,
++                reader.GetInt64(3) == 1));
++        }
++
++        return plugins;
++    }
++
+     public IReadOnlyList<GameInstallRecord> LoadManagedInstalls(IEnumerable<ManagedGame> managedGames)
+     {
+         using var connection = _database.OpenConnection();
+         using var command = connection.CreateCommand();
+         command.CommandText = """
+             SELECT COALESCE(gs.Name, ''), COALESCE(g.Name, ''), COALESCE(gsi.StoreAppId, ''), COALESCE(f.Path, ''),
+                    CASE WHEN EXISTS (
+                        SELECT 1 FROM GameStoreProductLink l
+                        WHERE l.ChildInstallId = gsi.id AND l.LinkType = 'DLC'
+                    ) THEN 1 ELSE 0 END AS IsDlc
+             FROM GameStoreInstall gsi
+             LEFT JOIN GameStoreRoot gsr ON gsr.id = gsi.GameStoreRootId
+             LEFT JOIN GameSource gs ON gs.id = gsr.GameSourceId
+             LEFT JOIN Game g ON g.id = gsi.GameId
+             LEFT JOIN Folders f ON f.id = gsi.InstallFolderId
+             ORDER BY gsi.LastSeenDT DESC
+             """;
+ 
+         var managedByName = managedGames.ToDictionary(x => x.Name, x => x, StringComparer.OrdinalIgnoreCase);
+         var installs = new List<GameInstallRecord>();
+         using var reader = command.ExecuteReader();
+         while (reader.Read())
+         {
+             var gameName = reader.GetString(1);
+             managedByName.TryGetValue(gameName, out var game);
+@@ -539,103 +782,301 @@ internal sealed class GameSetupRepository
+         command.Parameters.AddWithValue("$name", game.Name);
+         command.Parameters.AddWithValue("$exe", game.Executable);
+         command.ExecuteNonQuery();
+     }
+ 
+     public void ReplaceManagedInstalls(IReadOnlyList<GameInstallRecord> installs, IReadOnlyCollection<ManagedGame> managedGames)
+     {
+         using var connection = _database.OpenConnection();
+         using var tx = connection.BeginTransaction();
+ 
+         using (var clear = connection.CreateCommand())
+         {
+             clear.Transaction = tx;
+             clear.CommandText = "DELETE FROM GameStoreInstall";
+             clear.ExecuteNonQuery();
+         }
+ 
+         var gameIdLookup = LoadGameIdLookup(connection, tx);
+         foreach (var game in managedGames)
+         {
+             EnsureGameId(connection, tx, gameIdLookup, game);
+         }
+ 
+         var folderTypeId = EnsureFolderType(connection, tx, "GameInstall");
+         var folderRoleId = EnsureFolderRole(connection, tx, "GameInstall");
++        var fileStorageKindId = EnsureFileStorageKind(connection, tx, "Primary", "Game/discovered file on disk");
+ 
+         foreach (var install in installs)
+         {
+             var installFolderId = EnsureFolder(connection, tx, install.InstallPath, folderTypeId, folderRoleId);
+             var rootPath = Path.GetPathRoot(install.InstallPath) ?? install.InstallPath;
+             var rootFolderId = EnsureFolder(connection, tx, rootPath, folderTypeId, folderRoleId);
+             var sourceId = EnsureGameSource(connection, tx, install.GameStore);
+             var rootId = EnsureStoreRoot(connection, tx, sourceId, rootFolderId);
+ 
+             var storeAppId = !string.IsNullOrWhiteSpace(install.StoreAppId)
+                 ? install.StoreAppId
+                 : !string.IsNullOrWhiteSpace(install.ManagedGame?.StoreId)
+                     ? install.ManagedGame.StoreId
+                     : $"custom:{install.InstallPath}";
+ 
+             long? gameId = EnsureGameId(connection, tx, gameIdLookup, install.ManagedGame);
+ 
+             using var cmd = connection.CreateCommand();
+             cmd.Transaction = tx;
+             cmd.CommandText = """
+                 INSERT INTO GameStoreInstall (
+                     GameStoreRootId, InstallFolderId, GameId, StoreAppId, DisplayName, ExecutableName, LastSeenDT)
+                 VALUES ($rootId, $installFolderId, $gameId, $storeAppId, $displayName, $exe, $now)
+                 """;
+             cmd.Parameters.AddWithValue("$rootId", rootId);
+             cmd.Parameters.AddWithValue("$installFolderId", installFolderId);
+             cmd.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
+             cmd.Parameters.AddWithValue("$storeAppId", storeAppId);
+             cmd.Parameters.AddWithValue("$displayName", install.ManagedGame?.Name ?? "Unknown");
+             cmd.Parameters.AddWithValue("$exe", install.ManagedGame?.Executable ?? string.Empty);
+             cmd.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
+             cmd.ExecuteNonQuery();
+ 
+             var childInstallId = ReadLastInsertRowId(connection, tx);
++            PersistInstallManifestFiles(connection, tx, childInstallId, gameId, fileStorageKindId, folderTypeId, folderRoleId, install);
++
+             if (install.IsDlc && !string.IsNullOrWhiteSpace(install.ManagedGame?.StoreId))
+             {
+                 using var link = connection.CreateCommand();
+                 link.Transaction = tx;
+                 link.CommandText = """
+                     INSERT OR IGNORE INTO GameStoreProductLink (
+                         ChildInstallId, ParentGameSourceId, ParentStoreAppId, LinkType)
+                     VALUES ($childInstallId, $parentGameSourceId, $parentStoreAppId, 'DLC')
+                     """;
+                 link.Parameters.AddWithValue("$childInstallId", childInstallId);
+                 link.Parameters.AddWithValue("$parentGameSourceId", sourceId);
+                 link.Parameters.AddWithValue("$parentStoreAppId", install.ManagedGame.StoreId);
+                 link.ExecuteNonQuery();
+             }
+         }
+ 
+         tx.Commit();
+     }
+ 
++    private static long EnsureFileStorageKind(SqliteConnection connection, SqliteTransaction tx, string name, string description)
++    {
++        using var select = connection.CreateCommand();
++        select.Transaction = tx;
++        select.CommandText = "SELECT id FROM FileStorageKind WHERE Name = $name LIMIT 1";
++        select.Parameters.AddWithValue("$name", name);
++        var existing = select.ExecuteScalar();
++        if (existing is long id)
++        {
++            return id;
++        }
++
++        using var insert = connection.CreateCommand();
++        insert.Transaction = tx;
++        insert.CommandText = "INSERT INTO FileStorageKind (Name, Description) VALUES ($name, $description)";
++        insert.Parameters.AddWithValue("$name", name);
++        insert.Parameters.AddWithValue("$description", description);
++        insert.ExecuteNonQuery();
++        return ReadLastInsertRowId(connection, tx);
++    }
++
++    private static void PersistInstallManifestFiles(
++        SqliteConnection connection,
++        SqliteTransaction tx,
++        long installId,
++        long? gameId,
++        long fileStorageKindId,
++        long folderTypeId,
++        long folderRoleId,
++        GameInstallRecord install)
++    {
++        if (string.IsNullOrWhiteSpace(install.BaseGameManifestPath) || !File.Exists(install.BaseGameManifestPath))
++        {
++            return;
++        }
++
++        using var stream = File.OpenRead(install.BaseGameManifestPath);
++        using var doc = JsonDocument.Parse(stream);
++        if (!doc.RootElement.TryGetProperty("Files", out var files) || files.ValueKind != JsonValueKind.Array)
++        {
++            return;
++        }
++
++        foreach (var fileEntry in files.EnumerateArray())
++        {
++            if (!fileEntry.TryGetProperty("RelativePath", out var relativePathElement))
++            {
++                continue;
++            }
++
++            var relativePath = relativePathElement.GetString();
++            if (string.IsNullOrWhiteSpace(relativePath))
++            {
++                continue;
++            }
++
++            var extension = Path.GetExtension(relativePath);
++            if (!IsKnownGameDataExtension(extension))
++            {
++                continue;
++            }
++
++            var fileName = Path.GetFileName(relativePath);
++            var size = fileEntry.TryGetProperty("SizeBytes", out var sizeElement) ? sizeElement.GetInt64() : 0L;
++            var dtStamp = fileEntry.TryGetProperty("LastWriteUtc", out var lastWriteElement) &&
++                          lastWriteElement.ValueKind == JsonValueKind.String &&
++                          DateTimeOffset.TryParse(lastWriteElement.GetString(), out var parsed)
++                ? parsed
++                : DateTimeOffset.UtcNow;
++
++            var relativeFolderPath = Path.GetDirectoryName(relativePath)?.Replace('\\', '/');
++            var relativeFolderId = EnsureRelativeFolderId(connection, tx, relativeFolderPath, folderTypeId, folderRoleId);
++            var fileTypeId = TryFindFileTypeId(connection, tx, extension);
++            var fileInfoId = EnsureManifestFileInfo(connection, tx, fileName, size, dtStamp, gameId, fileTypeId, relativeFolderId, fileStorageKindId);
++
++            using var insertLink = connection.CreateCommand();
++            insertLink.Transaction = tx;
++            insertLink.CommandText = """
++                INSERT OR IGNORE INTO GameStoreInstallFile (
++                    InstallId, FileInfoId, RelativePath, FileRole, IsPresentOnDisk, LastValidatedDT)
++                VALUES ($installId, $fileInfoId, $relativePath, 'Reference', 1, $lastValidated)
++                """;
++            insertLink.Parameters.AddWithValue("$installId", installId);
++            insertLink.Parameters.AddWithValue("$fileInfoId", fileInfoId);
++            insertLink.Parameters.AddWithValue("$relativePath", relativePath.Replace('\\', '/'));
++            insertLink.Parameters.AddWithValue("$lastValidated", dtStamp.ToString("O"));
++            insertLink.ExecuteNonQuery();
++        }
++    }
++
++    private static long? EnsureRelativeFolderId(
++        SqliteConnection connection,
++        SqliteTransaction tx,
++        string? relativeFolderPath,
++        long folderTypeId,
++        long folderRoleId)
++    {
++        if (string.IsNullOrWhiteSpace(relativeFolderPath) || relativeFolderPath == ".")
++        {
++            return null;
++        }
++
++        using var select = connection.CreateCommand();
++        select.Transaction = tx;
++        select.CommandText = "SELECT id FROM Folders WHERE Path = $path LIMIT 1";
++        select.Parameters.AddWithValue("$path", relativeFolderPath);
++        var existing = select.ExecuteScalar();
++        if (existing is long id)
++        {
++            return id;
++        }
++
++        using var insert = connection.CreateCommand();
++        insert.Transaction = tx;
++        insert.CommandText = "INSERT INTO Folders (Path, FolderTypeId, FolderRoleId) VALUES ($path, $folderTypeId, $folderRoleId)";
++        insert.Parameters.AddWithValue("$path", relativeFolderPath);
++        insert.Parameters.AddWithValue("$folderTypeId", folderTypeId);
++        insert.Parameters.AddWithValue("$folderRoleId", folderRoleId);
++        insert.ExecuteNonQuery();
++        return ReadLastInsertRowId(connection, tx);
++    }
++
++    private static bool IsKnownGameDataExtension(string? extension)
++        => extension is not null && (
++            extension.Equals(".esm", StringComparison.OrdinalIgnoreCase) ||
++            extension.Equals(".esl", StringComparison.OrdinalIgnoreCase) ||
++            extension.Equals(".esp", StringComparison.OrdinalIgnoreCase) ||
++            extension.Equals(".ba2", StringComparison.OrdinalIgnoreCase) ||
++            extension.Equals(".bsa", StringComparison.OrdinalIgnoreCase));
++
++    private static long? TryFindFileTypeId(SqliteConnection connection, SqliteTransaction tx, string? extension)
++    {
++        if (string.IsNullOrWhiteSpace(extension))
++        {
++            return null;
++        }
++
++        using var cmd = connection.CreateCommand();
++        cmd.Transaction = tx;
++        cmd.CommandText = "SELECT id FROM FileType WHERE LOWER(FileExtension) = $ext LIMIT 1";
++        cmd.Parameters.AddWithValue("$ext", extension.ToLowerInvariant());
++        var result = cmd.ExecuteScalar();
++        return result is long id ? id : null;
++    }
++
++    private static long EnsureManifestFileInfo(
++        SqliteConnection connection,
++        SqliteTransaction tx,
++        string name,
++        long size,
++        DateTimeOffset dtStamp,
++        long? gameId,
++        long? fileTypeId,
++        long? relativeFolderId,
++        long fileStorageKindId)
++    {
++        using var select = connection.CreateCommand();
++        select.Transaction = tx;
++        select.CommandText = """
++            SELECT id FROM FileInfo
++            WHERE Name = $name
++              AND Size = $size
++              AND IFNULL(GameId, 0) = IFNULL($gameId, 0)
++              AND IFNULL(FileTypeId, 0) = IFNULL($fileTypeId, 0)
++              AND IFNULL(RelativeFolderId, 0) = IFNULL($relativeFolderId, 0)
++            LIMIT 1
++            """;
++        select.Parameters.AddWithValue("$name", name);
++        select.Parameters.AddWithValue("$size", size);
++        select.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
++        select.Parameters.AddWithValue("$fileTypeId", fileTypeId.HasValue ? fileTypeId.Value : DBNull.Value);
++        select.Parameters.AddWithValue("$relativeFolderId", relativeFolderId.HasValue ? relativeFolderId.Value : DBNull.Value);
++        var existing = select.ExecuteScalar();
++        if (existing is long id)
++        {
++            return id;
++        }
++
++        using var insert = connection.CreateCommand();
++        insert.Transaction = tx;
++        insert.CommandText = """
++            INSERT INTO FileInfo (Name, DTStamp, Size, GameId, FileTypeId, RelativeFolderId, FileStorageKindId)
++            VALUES ($name, $dtStamp, $size, $gameId, $fileTypeId, $relativeFolderId, $fileStorageKindId)
++            """;
++        insert.Parameters.AddWithValue("$name", name);
++        insert.Parameters.AddWithValue("$dtStamp", dtStamp.ToString("O"));
++        insert.Parameters.AddWithValue("$size", size);
++        insert.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
++        insert.Parameters.AddWithValue("$fileTypeId", fileTypeId.HasValue ? fileTypeId.Value : DBNull.Value);
++        insert.Parameters.AddWithValue("$relativeFolderId", relativeFolderId.HasValue ? relativeFolderId.Value : DBNull.Value);
++        insert.Parameters.AddWithValue("$fileStorageKindId", fileStorageKindId);
++        insert.ExecuteNonQuery();
++        return ReadLastInsertRowId(connection, tx);
++    }
++
+     private static long? EnsureGameId(
+         SqliteConnection connection,
+         SqliteTransaction tx,
+         IDictionary<string, long> gameIdLookup,
+         ManagedGame? game)
+     {
+         if (game is null || string.IsNullOrWhiteSpace(game.Name))
+         {
+             return null;
+         }
+ 
+         if (gameIdLookup.TryGetValue(game.Name, out var existingId))
+         {
+             return existingId;
+         }
+ 
+         using var insert = connection.CreateCommand();
+         insert.Transaction = tx;
+         insert.CommandText = "INSERT INTO Game (Name, Executable) VALUES ($name, $exe)";
+         insert.Parameters.AddWithValue("$name", game.Name);
+         insert.Parameters.AddWithValue("$exe", game.Executable ?? string.Empty);
+         insert.ExecuteNonQuery();
+ 
+         var createdId = ReadLastInsertRowId(connection, tx);
+         gameIdLookup[game.Name] = createdId;
+@@ -741,104 +1182,47 @@ internal sealed class GameSetupRepository
+         var existing = select.ExecuteScalar();
+         if (existing is long id)
+         {
+             return id;
+         }
+ 
+         using var insert = connection.CreateCommand();
+         insert.Transaction = tx;
+         insert.CommandText = "INSERT INTO GameStoreRoot (GameSourceId, RootFolderId, RootType, LastSeenDT) VALUES ($sourceId, $folderId, 'Library', $now)";
+         insert.Parameters.AddWithValue("$sourceId", gameSourceId);
+         insert.Parameters.AddWithValue("$folderId", rootFolderId);
+         insert.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
+         insert.ExecuteNonQuery();
+         return ReadLastInsertRowId(connection, tx);
+     }
+ 
+     private static long ReadLastInsertRowId(SqliteConnection connection, SqliteTransaction tx)
+     {
+         using var cmd = connection.CreateCommand();
+         cmd.Transaction = tx;
+         cmd.CommandText = "SELECT last_insert_rowid();";
+         return Convert.ToInt64(cmd.ExecuteScalar());
+     }
+ }
+ 
++internal sealed record KnownPluginRecord(string DisplayName, string PluginName, bool IsBaseGame, bool IsDlc);
++internal sealed record KnownGameCatalogRecord(string GameName, bool IsDlc, string? ParentGameName, string StoreAppId);
++
+ public sealed class ModListItem
+ {
+     public ModListItem(string name, string primaryPlugin, string currentStage, string bethesdaId, string nexusId, IBrush rowBackground)
+     {
+         Name = name;
+         PrimaryPlugin = primaryPlugin;
+         CurrentStage = currentStage;
+         BethesdaId = bethesdaId;
+         NexusId = nexusId;
+         RowBackground = rowBackground;
+     }
+ 
+     public string Name { get; }
+     public string PrimaryPlugin { get; }
+     public string CurrentStage { get; }
+     public string BethesdaId { get; }
+     public string NexusId { get; }
+     public IBrush RowBackground { get; }
+ }
+-
+-internal static class BuiltInBethesdaMods
+-{
+-    private static readonly BuiltInMod[] StarfieldBaseMods =
+-    [
+-        new("Trackers Alliance support", "SFBGS003.esm"),
+-        new("Vehicle / REV-8", "SFBGS004.esm"),
+-        new("Ship Decoration", "SFBGS006.esm"),
+-        new("Gameplay Options", "SFBGS007.esm"),
+-        new("City Maps Data", "SFBGS008.esm")
+-    ];
+-
+-    private static readonly BuiltInMod[] Fallout4BaseMods =
+-    [
+-        new("Makeshift Weapon Pack - When Pigs Fly", "ccSBJFO4003-Grenade.esl"),
+-        new("Halloween Workshop Pack - All Hallows' Eve", "ccFSVFO4007-Halloween.esl"),
+-        new("Enclave Remnants - Echoes of the Past", "ccOTMFO4001-Remnants.esl"),
+-        new("Tesla Cannon - Best of Three", "ccBGSFO4046-TesCan.esl"),
+-        new("Hellfire Power Armor - Pyromaniac", "ccBGSFO4044-HellfirePowerArmor.esl"),
+-        new("X-02 Power Armor - Speak of the Devil", "ccBGSFO4115-X02.esl"),
+-        new("Heavy Incinerator - Crucible", "ccBGSFO4116-HeavyFlamer.esl"),
+-        new("Enclave Armor Skins", "ccBGSFO4096-AS_Enclave.esl"),
+-        new("Enclave Weapon Skins", "ccBGSFO4110-WS_Enclave.esl")
+-    ];
+-
+-    private static readonly BuiltInMod[] SkyrimSeBaseMods =
+-    [
+-        new("Dawnguard", "Dawnguard.esm"),
+-        new("Hearthfire", "HearthFires.esm"),
+-        new("Dragonborn", "Dragonborn.esm"),
+-        new("Saints & Seducers", "ccBGSSSE025-AdvDSGS.esm"),
+-        new("Rare Curios", "ccBGSSSE037-Curios.esl"),
+-        new("Survival Mode", "ccQDRSSE001-SurvivalMode.esl"),
+-        new("Fishing", "ccBGSSSE001-Fish.esm"),
+-        new("Resource Pack", "_ResourcePack.esl")
+-    ];
+-
+-    public static IReadOnlyList<BuiltInMod> ForGame(string gameName)
+-    {
+-        if (gameName.Contains("Starfield", StringComparison.OrdinalIgnoreCase))
+-        {
+-            return StarfieldBaseMods;
+-        }
+-
+-        if (gameName.Contains("Fallout 4", StringComparison.OrdinalIgnoreCase) ||
+-            gameName.Contains("Fallout4", StringComparison.OrdinalIgnoreCase))
+-        {
+-            return Fallout4BaseMods;
+-        }
+-
+-        if (gameName.Contains("Skyrim", StringComparison.OrdinalIgnoreCase))
+-        {
+-            return SkyrimSeBaseMods;
+-        }
+-
+-        return Array.Empty<BuiltInMod>();
+-    }
+-
+-    internal readonly record struct BuiltInMod(string DisplayName, string Plugin);
+-}
+diff --git a/DMM.Data/DatabaseManager.cs b/DMM.Data/DatabaseManager.cs
+index 1e38f8f7d7a8f18f88db06b03de9ad537e9905d9..ecfc635264dd08f79cce38bf14b1f0a1119de290 100644
+--- a/DMM.Data/DatabaseManager.cs
++++ b/DMM.Data/DatabaseManager.cs
+@@ -14,66 +14,75 @@ public sealed class DatabaseManager
+     }
+ 
+     public string DatabasePath => _databasePath;
+ 
+     public string ConnectionString => new SqliteConnectionStringBuilder
+     {
+         DataSource = _databasePath,
+         Mode = SqliteOpenMode.ReadWriteCreate,
+         Pooling = true,
+         Cache = SqliteCacheMode.Default
+     }.ToString();
+ 
+     public void EnsureCreated()
+     {
+         var directory = Path.GetDirectoryName(_databasePath);
+         if (!string.IsNullOrWhiteSpace(directory))
+         {
+             Directory.CreateDirectory(directory);
+         }
+ 
+         var isNewDatabase = !File.Exists(_databasePath);
+ 
+         using var connection = new SqliteConnection(ConnectionString);
+         connection.Open();
+ 
+-        if (isNewDatabase)
++        if (isNewDatabase || !TableExists(connection, "Game"))
+         {
+             ExecuteSqlScript(connection, LoadSqlScript("database_schema.sql"));
+         }
+ 
+         EnsureSeedTable(connection);
+         EnsureBaselineSeedApplied(connection);
+     }
+ 
+     public SqliteConnection OpenConnection()
+     {
+         var connection = new SqliteConnection(ConnectionString);
+         connection.Open();
+         return connection;
+     }
+ 
++
++    private static bool TableExists(SqliteConnection connection, string tableName)
++    {
++        using var cmd = connection.CreateCommand();
++        cmd.CommandText = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = $name LIMIT 1";
++        cmd.Parameters.AddWithValue("$name", tableName);
++        return cmd.ExecuteScalar() is not null;
++    }
++
+     private static void EnsureSeedTable(SqliteConnection connection)
+     {
+         ExecuteSqlScript(connection, """
+ CREATE TABLE IF NOT EXISTS SeedHistory (
+     Version   TEXT PRIMARY KEY,
+     AppliedAt TEXT NOT NULL
+ );
+ """);
+     }
+ 
+     private static void EnsureBaselineSeedApplied(SqliteConnection connection)
+     {
+         using var existsCommand = connection.CreateCommand();
+         existsCommand.CommandText = "SELECT 1 FROM SeedHistory WHERE Version = $version LIMIT 1";
+         existsCommand.Parameters.AddWithValue("$version", BaselineSeedVersion);
+ 
+         var alreadyApplied = existsCommand.ExecuteScalar() is not null;
+         if (alreadyApplied)
+         {
+             return;
+         }
+ 
+         using var transaction = connection.BeginTransaction();
+ 
+         ExecuteSqlScript(connection, LoadSqlScript("database_seed.sql"), transaction);
+diff --git a/DMM.Data/Schema/database_schema.sql b/DMM.Data/Schema/database_schema.sql
+index c06abf0381dab73d63dbe8f560115f5d5d0cee61..3e57bd35d2f3ccb1b949e709d5f775bdb4580fe7 100644
+--- a/DMM.Data/Schema/database_schema.sql
++++ b/DMM.Data/Schema/database_schema.sql
+@@ -396,51 +396,107 @@ CREATE TABLE IF NOT EXISTS Game (
+     NexusKeyword                   TEXT,
+     BethesdaKeyword                TEXT,
+     GameSettingsFolderId           INTEGER NULL
+                                            REFERENCES Folders (id) ON DELETE SET NULL
+                                                                    ON UPDATE CASCADE,
+     GameSaveFolderId               INTEGER NULL
+                                            REFERENCES Folders (id) ON DELETE SET NULL
+                                                                    ON UPDATE CASCADE,
+     GameLocalSettingsFolderId      INTEGER NULL
+                                            REFERENCES Folders (id) ON DELETE SET NULL
+                                                                    ON UPDATE CASCADE,
+     GamePluginsTxtId               INTEGER NULL
+                                            REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                                     ON UPDATE CASCADE,
+     GameSettingsIniId              INTEGER NULL
+                                            REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                                     ON UPDATE CASCADE,
+     GameCustomSettingsIniId        INTEGER NULL
+                                            REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                                     ON UPDATE CASCADE,
+     CreationKitSettingsIniId       INTEGER NULL
+                                            REFERENCES FileInfo (id) ON DELETE SET NULL
+                                                                     ON UPDATE CASCADE,
+     CreationKitCustomSettingsIniId INTEGER NULL
+                                            REFERENCES FileInfo (id) ON DELETE SET NULL
+-                                                                    ON UPDATE CASCADE
++                                                                    ON UPDATE CASCADE,
++    ParentGameId                   INTEGER NULL
++                                           REFERENCES Game (id) ON DELETE SET NULL
++                                                             ON UPDATE CASCADE,
++    IsBaseGame                     INTEGER NOT NULL
++                                           DEFAULT (1)
++                                           CHECK (IsBaseGame IN (0, 1) ),
++    IsDlc                          INTEGER NOT NULL
++                                           DEFAULT (0)
++                                           CHECK (IsDlc IN (0, 1) )
++);
++
++
++-- Table: GameKnownPlugin
++DROP TABLE IF EXISTS GameKnownPlugin;
++
++CREATE TABLE IF NOT EXISTS GameKnownPlugin (
++    id          INTEGER PRIMARY KEY AUTOINCREMENT,
++    GameId      INTEGER NOT NULL
++                        REFERENCES Game (id) ON DELETE CASCADE
++                                             ON UPDATE CASCADE,
++    DisplayName TEXT    NOT NULL,
++    PluginName  TEXT    NOT NULL,
++    IsBaseGame  INTEGER NOT NULL
++                        DEFAULT (0)
++                        CHECK (IsBaseGame IN (0, 1) ),
++    IsDlc       INTEGER NOT NULL
++                        DEFAULT (0)
++                        CHECK (IsDlc IN (0, 1) ),
++    UNIQUE (
++        GameId,
++        PluginName
++    )
++);
++
++
++-- Table: GameStoreApp
++DROP TABLE IF EXISTS GameStoreApp;
++
++CREATE TABLE IF NOT EXISTS GameStoreApp (
++    id           INTEGER PRIMARY KEY AUTOINCREMENT,
++    GameId       INTEGER NOT NULL
++                         REFERENCES Game (id) ON DELETE CASCADE
++                                              ON UPDATE CASCADE,
++    GameSourceId INTEGER NOT NULL
++                         REFERENCES GameSource (id) ON DELETE CASCADE
++                                                    ON UPDATE CASCADE,
++    StoreAppId   TEXT    NOT NULL,
++    UNIQUE (
++        GameSourceId,
++        StoreAppId
++    ),
++    UNIQUE (
++        GameId,
++        GameSourceId,
++        StoreAppId
++    )
+ );
+ 
+ 
+ -- Table: GameProfile
+ DROP TABLE IF EXISTS GameProfile;
+ 
+ CREATE TABLE IF NOT EXISTS GameProfile (
+     id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+     Name                    TEXT    NOT NULL,
+     GameId                  INTEGER NOT NULL
+                                     REFERENCES Game (id) ON DELETE CASCADE
+                                                          ON UPDATE CASCADE,
+     GameFolderId            INTEGER NOT NULL
+                                     REFERENCES Folders (id) ON DELETE CASCADE
+                                                             ON UPDATE CASCADE,
+     GameVersionId           INTEGER REFERENCES GameVersion (id) ON DELETE RESTRICT
+                                                                 ON UPDATE CASCADE,
+     GameDataFolderId        INTEGER NULL
+                                     REFERENCES Folders (id) ON DELETE SET NULL
+                                                             ON UPDATE CASCADE,
+     GameXboxFolderId        INTEGER NULL
+                                     REFERENCES Folders (id) ON DELETE SET NULL
+                                                             ON UPDATE CASCADE,
+     GamePlaystationFolderId INTEGER REFERENCES Folders (id) ON DELETE RESTRICT
+                                                             ON UPDATE CASCADE,
+diff --git a/DMM.Data/Schema/database_seed.sql b/DMM.Data/Schema/database_seed.sql
+index ea83f5c92529dd8f1b83be3d870baf6e04b136ea..7ab6357470e5dc563406b466307922f02fd627a4 100644
+--- a/DMM.Data/Schema/database_seed.sql
++++ b/DMM.Data/Schema/database_seed.sql
+@@ -1,46 +1,164 @@
+ -- Idempotent baseline seed data for DevModManager.
+ -- Safe to run repeatedly on existing databases.
+ 
+ INSERT INTO Game (Name, Executable)
+ SELECT 'Starfield', 'Starfield.exe'
+ WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield');
+ 
+ INSERT INTO Game (Name, Executable)
+ SELECT 'Fallout 4', 'Fallout4.exe'
+ WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4');
+ 
+ INSERT INTO Game (Name, Executable)
+ SELECT 'Skyrim Special Edition', 'SkyrimSE.exe'
+ WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Skyrim Special Edition');
+ 
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Starfield - Shattered Space', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Starfield'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield - Shattered Space');
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Starfield - Old Mars', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Starfield'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield - Old Mars');
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Starfield - Constellation', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Starfield'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Starfield - Constellation');
++
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Fallout 4: Automatron', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Fallout 4'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Automatron');
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Fallout 4: Contraptions Workshop', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Fallout 4'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Contraptions Workshop');
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Fallout 4: Far Harbor', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Fallout 4'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Far Harbor');
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Fallout 4: High Resolution Texture Pack', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Fallout 4'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: High Resolution Texture Pack');
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Fallout 4: Nuka-World', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Fallout 4'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Nuka-World');
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Fallout 4: Vault-Tec Workshop', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Fallout 4'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Vault-Tec Workshop');
++
++INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
++SELECT 'Fallout 4: Wasteland Workshop', '', g.id, 0, 1
++FROM Game g
++WHERE g.Name = 'Fallout 4'
++  AND NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Fallout 4: Wasteland Workshop');
++
+ INSERT OR IGNORE INTO GameSource (Name, SourceGameId, URL, URI) VALUES
+ ('Steam', NULL, 'https://store.steampowered.com/', 'steam://'),
+ ('GamePass', NULL, 'https://www.xbox.com/xbox-game-pass', 'ms-xbox-gamepass://'),
+ ('Epic', NULL, 'https://store.epicgames.com/', 'com.epicgames.launcher://'),
+ ('GoG', NULL, 'https://www.gog.com/', 'goggalaxy://');
+ 
++INSERT OR IGNORE INTO GameStoreApp (GameId, GameSourceId, StoreAppId)
++SELECT g.id, s.id, app.StoreAppId
++FROM (
++    SELECT 'Starfield' AS GameName, 'Steam' AS SourceName, '1716740' AS StoreAppId
++    UNION ALL SELECT 'Fallout 4', 'Steam', '377160'
++    UNION ALL SELECT 'Skyrim Special Edition', 'Steam', '489830'
++    UNION ALL SELECT 'Starfield', 'GamePass', 'BethesdaSoftworks.ProjectGold'
++    UNION ALL SELECT 'Starfield - Shattered Space', 'GamePass', 'BethesdaSoftworks.ShatteredSpace'
++    UNION ALL SELECT 'Starfield - Old Mars', 'GamePass', 'BethesdaSoftworks.PGPreorderContentwPkg'
++    UNION ALL SELECT 'Starfield - Constellation', 'GamePass', 'BethesdaSoftworks.PGDeluxeContentwPkg'
++    UNION ALL SELECT 'Fallout 4', 'GamePass', 'BethesdaSoftworks.Fallout4-CoreGame'
++    UNION ALL SELECT 'Fallout 4: Automatron', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC1Automatron'
++    UNION ALL SELECT 'Fallout 4: Contraptions Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC4ContraptionsWorksho'
++    UNION ALL SELECT 'Fallout 4: Far Harbor', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC3FarHarbor'
++    UNION ALL SELECT 'Fallout 4: High Resolution Texture Pack', 'GamePass', 'BethesdaSoftworks.Fallout4HighResolutionTexturePac'
++    UNION ALL SELECT 'Fallout 4: Nuka-World', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC6Nuka-World'
++    UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC5Vault-TecWorkshop'
++    UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC2WastelandWorkshop'
++) app
++JOIN Game g ON g.Name = app.GameName
++JOIN GameSource s ON s.Name = app.SourceName;
++
++INSERT OR IGNORE INTO GameKnownPlugin (GameId, DisplayName, PluginName, IsBaseGame, IsDlc)
++SELECT g.id, p.DisplayName, p.PluginName, p.IsBaseGame, p.IsDlc
++FROM (
++    SELECT 'Starfield' AS GameName, 'Trackers Alliance support' AS DisplayName, 'SFBGS003.esm' AS PluginName, 1 AS IsBaseGame, 0 AS IsDlc
++    UNION ALL SELECT 'Starfield', 'Vehicle / REV-8', 'SFBGS004.esm', 1, 0
++    UNION ALL SELECT 'Starfield', 'Ship Decoration', 'SFBGS006.esm', 1, 0
++    UNION ALL SELECT 'Starfield', 'Gameplay Options', 'SFBGS007.esm', 1, 0
++    UNION ALL SELECT 'Starfield', 'City Maps Data', 'SFBGS008.esm', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'Makeshift Weapon Pack - When Pigs Fly', 'ccSBJFO4003-Grenade.esl', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'Halloween Workshop Pack - All Hallows'' Eve', 'ccFSVFO4007-Halloween.esl', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'Enclave Remnants - Echoes of the Past', 'ccOTMFO4001-Remnants.esl', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'Tesla Cannon - Best of Three', 'ccBGSFO4046-TesCan.esl', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'Hellfire Power Armor - Pyromaniac', 'ccBGSFO4044-HellfirePowerArmor.esl', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'X-02 Power Armor - Speak of the Devil', 'ccBGSFO4115-X02.esl', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'Heavy Incinerator - Crucible', 'ccBGSFO4116-HeavyFlamer.esl', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'Enclave Armor Skins', 'ccBGSFO4096-AS_Enclave.esl', 1, 0
++    UNION ALL SELECT 'Fallout 4', 'Enclave Weapon Skins', 'ccBGSFO4110-WS_Enclave.esl', 1, 0
++    UNION ALL SELECT 'Skyrim Special Edition', 'Dawnguard', 'Dawnguard.esm', 1, 0
++    UNION ALL SELECT 'Skyrim Special Edition', 'Hearthfire', 'HearthFires.esm', 1, 0
++    UNION ALL SELECT 'Skyrim Special Edition', 'Dragonborn', 'Dragonborn.esm', 1, 0
++    UNION ALL SELECT 'Skyrim Special Edition', 'Saints & Seducers', 'ccBGSSSE025-AdvDSGS.esm', 1, 0
++    UNION ALL SELECT 'Skyrim Special Edition', 'Rare Curios', 'ccBGSSSE037-Curios.esl', 1, 0
++    UNION ALL SELECT 'Skyrim Special Edition', 'Survival Mode', 'ccQDRSSE001-SurvivalMode.esl', 1, 0
++    UNION ALL SELECT 'Skyrim Special Edition', 'Fishing', 'ccBGSSSE001-Fish.esm', 1, 0
++    UNION ALL SELECT 'Skyrim Special Edition', 'Resource Pack', '_ResourcePack.esl', 1, 0
++    UNION ALL SELECT 'Starfield - Shattered Space', 'Shattered Space', 'ShatteredSpace.esm', 0, 1
++    UNION ALL SELECT 'Fallout 4: Automatron', 'Automatron', 'DLCRobot.esm', 0, 1
++    UNION ALL SELECT 'Fallout 4: Contraptions Workshop', 'Contraptions Workshop', 'DLCworkshop02.esm', 0, 1
++    UNION ALL SELECT 'Fallout 4: Far Harbor', 'Far Harbor', 'DLCCoast.esm', 0, 1
++    UNION ALL SELECT 'Fallout 4: Nuka-World', 'Nuka-World', 'DLCNukaWorld.esm', 0, 1
++    UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'Vault-Tec Workshop', 'DLCworkshop03.esm', 0, 1
++    UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'Wasteland Workshop', 'DLCworkshop01.esm', 0, 1
++) p
++JOIN Game g ON g.Name = p.GameName;
++
+ INSERT OR IGNORE INTO GameSource (Name, SourceGameId, URL, URI) VALUES
+ ('Starfield-Steam', '1716740', 'https://store.steampowered.com/app/1716740', 'steam://run/1716740'),
+ ('Fallout4-Steam', '377160', 'https://store.steampowered.com/app/377160', 'steam://run/377160'),
+ ('Skyrim-Steam', '489830', 'https://store.steampowered.com/app/489830', 'steam://run/489830');
+ 
+ INSERT OR IGNORE INTO Platform (Name) VALUES
+ ('PC-Steam'),
+ ('PC-Gamepass'),
+ ('PC-Epic'),
+ ('PC-GoG'),
+ ('XBox'),
+ ('PSN'),
+ ('Switch');
+ 
+ INSERT INTO Stages (StageName, IsSource, IsReserved)
+ SELECT 'DEV', 1, 1
+ WHERE NOT EXISTS (SELECT 1 FROM Stages WHERE StageName = 'DEV');
+ 
+ INSERT INTO Stages (StageName, IsSource, IsReserved)
+ SELECT 'TEST', 0, 1
+ WHERE NOT EXISTS (SELECT 1 FROM Stages WHERE StageName = 'TEST');
+ 
+ INSERT INTO Stages (StageName, IsSource, IsReserved)
+ SELECT 'PREFLIGHT', 0, 1
+ WHERE NOT EXISTS (SELECT 1 FROM Stages WHERE StageName = 'PREFLIGHT');
+@@ -95,50 +213,55 @@ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.nif');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.mat', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.mat');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.psc', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.psc');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.pex', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.pex');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.ini', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.ini');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.exe', 0
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.exe');
+ 
+ INSERT INTO FileType (FileExtension, IsArchive, isModFile)
+ SELECT '.ba2', 1, 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.ba2');
+ 
++
++INSERT INTO FileType (FileExtension, IsArchive, isModFile)
++SELECT '.bsa', 1, 1
++WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.bsa');
++
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.tif', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.tif');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.dds', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.dds');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.btd', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.btd');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.btc', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.btc');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.biom', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.biom');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.bk2', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.bk2');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+@@ -163,30 +286,175 @@ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.mesh');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.esm', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.esm');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.esp', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.esp');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.esl', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.esl');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.lip', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.lip');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.fuz', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.fuz');
+ 
+ INSERT INTO FileType (FileExtension, isModFile)
+ SELECT '.sfs', 1
+ WHERE NOT EXISTS (SELECT 1 FROM FileType WHERE LOWER(FileExtension) = '.sfs');
+ 
++
++INSERT INTO FolderType (Name)
++SELECT 'GameDataRelative'
++WHERE NOT EXISTS (SELECT 1 FROM FolderType WHERE Name = 'GameDataRelative');
++
++INSERT INTO FolderRole (Name, IncludeInBackup, IsRepoFolder, IsToolFolder)
++SELECT 'GameDataRelative', 0, 0, 0
++WHERE NOT EXISTS (SELECT 1 FROM FolderRole WHERE Name = 'GameDataRelative');
++
++INSERT INTO Folders (Path, FolderTypeId, FolderRoleId, Description)
++SELECT 'Data', ft.id, fr.id, 'Seeded relative data root for known core files.'
++FROM FolderType ft
++JOIN FolderRole fr ON fr.Name = 'GameDataRelative'
++WHERE ft.Name = 'GameDataRelative'
++  AND NOT EXISTS (SELECT 1 FROM Folders WHERE Path = 'Data');
++
++INSERT INTO FileStorageKind (Name, Description)
++SELECT 'Primary', 'Primary on-disk or canonical seeded file metadata.'
++WHERE NOT EXISTS (SELECT 1 FROM FileStorageKind WHERE Name = 'Primary');
++
++INSERT INTO FileInfo (Name, DTStamp, Size, GameId, RelativeFolderId, FileTypeId, FileStorageKindId)
++SELECT DISTINCT
++    files.FileName,
++    '1970-01-01T00:00:00.0000000Z',
++    0,
++    g.id,
++    dataFolder.id,
++    ft.id,
++    fsk.id
++FROM (
++    SELECT gk.GameId, gk.PluginName AS FileName
++    FROM GameKnownPlugin gk
++
++    UNION ALL
++
++    SELECT g.id AS GameId, a.FileName
++    FROM (
++        SELECT 'Skyrim Special Edition' AS GameName, 'Skyrim - Misc.bsa' AS FileName
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Shaders.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Interface.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Animations.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Meshes0.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Meshes1.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Sounds.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Voices_en0.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures0.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures1.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures2.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures3.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures4.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures5.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures6.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures7.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Textures8.bsa'
++        UNION ALL SELECT 'Skyrim Special Edition', 'Skyrim - Patch.bsa'
++
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Startup.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Shaders.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Interface.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Voices.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Meshes.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - MeshesExtra.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Misc.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Sounds.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Materials.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Animations.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures1.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures2.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures3.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures4.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures5.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures6.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures7.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures8.ba2'
++        UNION ALL SELECT 'Fallout 4', 'Fallout4 - Textures9.ba2'
++
++        UNION ALL SELECT 'Starfield', 'Starfield - Animations.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - DensityMaps.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimation01.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimation02.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimation03.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimation04.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - FaceAnimationPatch.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - FaceMeshes.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - GeneratedTextures.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - LODMeshes.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - LODMeshesPatch.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Materials.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Meshes01.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Meshes02.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - MeshesPatch.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Misc.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Particles.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - PlanetData.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Terrain01.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Terrain02.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Terrain03.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Terrain04.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - TerrainPatch.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - LODTextures01.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - LODTextures02.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures01.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures02.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures03.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures04.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures05.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures06.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures07.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures08.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures09.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures10.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Textures11.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - TexturesPatch01.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - TexturesPatch02.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Interface.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Localization.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Shaders.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - ShadersBeta.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds01.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds02.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds03.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds04.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSounds05.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - WwiseSoundsPatch.ba2'
++        UNION ALL SELECT 'Starfield', 'BlueprintShips-Starfield - Localization.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Voices01.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - Voices02.ba2'
++        UNION ALL SELECT 'Starfield', 'Starfield - VoicesPatch.ba2'
++    ) a
++    JOIN Game g ON g.Name = a.GameName
++) files
++JOIN Game g ON g.id = files.GameId
++JOIN Folders dataFolder ON dataFolder.Path = 'Data'
++JOIN FileStorageKind fsk ON fsk.Name = 'Primary'
++LEFT JOIN FileType ft ON LOWER(ft.FileExtension) = LOWER(SUBSTR(files.FileName, INSTR(files.FileName, '.' )))
++WHERE g.Name IN ('Starfield', 'Fallout 4', 'Skyrim Special Edition')
++  AND ft.id IS NOT NULL
++  AND NOT EXISTS (
++      SELECT 1
++      FROM FileInfo fi
++      WHERE fi.Name = files.FileName
++        AND IFNULL(fi.GameId, 0) = g.id
++        AND IFNULL(fi.RelativeFolderId, 0) = dataFolder.id
++  );
++
+ INSERT OR IGNORE INTO UrlRule (Name, URLRule) VALUES
+ ('Steam-App', 'https://store.steampowered.com/app/{id}'),
+ ('GamePass-Product', 'https://www.xbox.com/games/store/{slug}'),
+ ('Epic-Product', 'https://store.epicgames.com/p/{slug}'),
+ ('GoG-Product', 'https://www.gog.com/en/game/{slug}');
