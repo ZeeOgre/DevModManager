@@ -52,11 +52,10 @@ public partial class CoreProgramSettingsWindow : Window
 
     private void SaveCurrentSettings()
     {
-        _settingsStore.Save(new ProgramWideSettings
-        {
-            RepoRootPath = _viewModel.RepoRootPath,
-            RepoOrganization = _viewModel.RepoOrganization
-        });
+        var existing = _settingsStore.Load();
+        existing.RepoRootPath = _viewModel.RepoRootPath;
+        existing.RepoOrganization = _viewModel.RepoOrganization;
+        _settingsStore.Save(existing);
     }
 }
 

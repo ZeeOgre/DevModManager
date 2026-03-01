@@ -9,6 +9,7 @@ public sealed class ProgramWideSettings
 {
     public string RepoRootPath { get; set; } = GetDefaultRepoRoot();
     public RepoOrganizationStrategy RepoOrganization { get; set; } = RepoOrganizationStrategy.GameRepoWithPerModFolders;
+    public string LastSelectedGameFolder { get; set; } = string.Empty;
 
     public static string GetDefaultRepoRoot()
     {

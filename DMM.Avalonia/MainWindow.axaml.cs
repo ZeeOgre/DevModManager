@@ -194,7 +194,7 @@ public partial class MainWindow : Window
     {
         if (sender is Button { CommandParameter: ModListItem mod })
         {
-            var modWindow = new ModWindow(mod, _viewModel.GameFolders, _viewModel.StageOptions);
+            var modWindow = new ModWindow(mod, _viewModel.GameFolders, _viewModel.StageOptions, _viewModel.SelectedGameFolder);
             await modWindow.ShowDialog(this);
             _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
         }
@@ -227,6 +227,7 @@ public sealed class MainWindowViewModel : NotifyBase
         {
             if (SetField(ref _selectedGameFolder, value))
             {
+                PersistLastSelectedGameFolder(value);
                 RebuildMods();
             }
         }
@@ -402,7 +403,7 @@ public sealed class MainWindowViewModel : NotifyBase
             : settings.RepoRootPath;
 
         var created = 0;
-        var linked = 0;
+        var copiedFiles = 0;
         var skipped = 0;
         var failed = 0;
         var row = 0;
@@ -422,17 +423,23 @@ public sealed class MainWindowViewModel : NotifyBase
                 var stageFolder = Path.Combine(modRepoRoot, "stages", selection.Stage, "Data");
                 Directory.CreateDirectory(stageFolder);
 
-                var stagePluginPath = Path.Combine(stageFolder, selection.PluginName);
-                File.Copy(sourcePath, stagePluginPath, overwrite: true);
+                var initialFiles = CollectInitialModFiles(scanRoot, selection.ModName, selection.PluginName)
+                    .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
-                File.Delete(sourcePath);
-                if (TryCreateHardLink(sourcePath, stagePluginPath))
+                if (initialFiles.Count == 0)
                 {
-                    linked++;
+                    skipped++;
+                    continue;
                 }
-                else
+
+                foreach (var file in initialFiles)
                 {
-                    File.Copy(stagePluginPath, sourcePath, overwrite: true);
+                    var target = Path.Combine(stageFolder, Path.GetFileName(file));
+                    File.Copy(file, target, overwrite: true);
+                    copiedFiles++;
+
+                    // Intentionally copy-only for now; link-back is reserved for a later validation milestone.
                 }
 
                 Mods.Add(new ModListItem(
@@ -457,7 +464,46 @@ public sealed class MainWindowViewModel : NotifyBase
         }
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); linked {linked}; skipped {skipped}; failed {failed}. Repo root: {repoRoot}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped}; failed {failed}. Repo root: {repoRoot}";
+    }
+
+    private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
+    {
+        var normalizedModName = NormalizePluginBaseName(modName);
+        var primaryPath = Path.Combine(scanRoot, primaryPlugin);
+
+        var pluginFiles = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
+            .Where(path =>
+            {
+                var ext = Path.GetExtension(path);
+                return string.Equals(ext, ".esm", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(ext, ".esp", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(ext, ".esl", StringComparison.OrdinalIgnoreCase);
+            })
+            .Where(path => NormalizePluginBaseName(Path.GetFileNameWithoutExtension(path)).Contains(normalizedModName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (File.Exists(primaryPath) && !pluginFiles.Contains(primaryPath, StringComparer.OrdinalIgnoreCase))
+        {
+            pluginFiles.Add(primaryPath);
+        }
+
+        var archiveCandidates = new[]
+        {
+            $"{modName} - Main.ba2",
+            $"{modName} - Main_xbox.ba2",
+            $"{modName} - Textures.ba2",
+            $"{modName} - Textures_xbox.ba2"
+        };
+
+        var archiveFiles = archiveCandidates
+            .Select(name => Path.Combine(scanRoot, name))
+            .Where(File.Exists)
+            .ToList();
+
+        return pluginFiles
+            .Concat(archiveFiles)
+            .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
     private static int GetPluginExtensionPriority(string extension)
@@ -546,43 +592,9 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         Mods.Clear();
 
-        var baseInstalls = GameInstalls
-            .Where(x => !x.IsDlc)
-            .Where(x => x.ManagedGame is not null)
-            .Where(x => string.IsNullOrWhiteSpace(SelectedGameFolder) || string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        var row = 0;
-        foreach (var install in baseInstalls)
-        {
-            foreach (var builtin in _repository.LoadKnownPluginsForGame(install.ManagedGame!.Name))
-            {
-                if (!PluginExists(install.InstallPath, builtin.PluginName))
-                {
-                    continue;
-                }
-
-                Mods.Add(new ModListItem(
-                    builtin.DisplayName,
-                    builtin.PluginName,
-                    "BASE",
-                    string.Empty,
-                    string.Empty,
-                    new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
-            }
-        }
-
-        if (Mods.Count > 0)
-        {
-            StatusMessage = $"Loaded {Mods.Count} built-in Bethesda mod entries from managed installs.";
-            return;
-        }
-
-        Mods.Add(new ModListItem("ZO_AIOGamePlayTweaks", "ZO_AIOGamePlayTweaks.esp", "DEV", "f7dc7ac6...", "345221", new SolidColorBrush(Color.Parse("#2B2B2B"))));
-        Mods.Add(new ModListItem("ZO_DenserOutposts", "ZO_DenserOutposts.esm", "RELEASE", "c5bbdd20...", "817744", new SolidColorBrush(Color.Parse("#343434"))));
-        Mods.Add(new ModListItem("ZO_HandScannerTweaks", "ZO_HandScannerTweaks.esl", "TEST", "3f102ab3...", "593188", new SolidColorBrush(Color.Parse("#2B2B2B"))));
-        Mods.Add(new ModListItem("WT_SmartDoc", "WT_SmartDoc.esp", "DEV", "2120ee1a...", "772843", new SolidColorBrush(Color.Parse("#343434"))));
-        Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194", new SolidColorBrush(Color.Parse("#2B2B2B"))));
+        StatusMessage = string.IsNullOrWhiteSpace(SelectedGameFolder)
+            ? "Ready. Select a game folder, scan for mods, and onboard only the mods you edit."
+            : "Ready. Scan the selected game folder to onboard mods under management.";
     }
 
     private static bool PluginExists(string installPath, string pluginFileName)
@@ -600,18 +612,40 @@ public sealed class MainWindowViewModel : NotifyBase
     public void SyncGameFoldersFromInstalls()
     {
         var selected = SelectedGameFolder;
+        var settings = _settingsStore.Load();
+        var preferred = string.IsNullOrWhiteSpace(settings.LastSelectedGameFolder) ? null : settings.LastSelectedGameFolder;
+
         GameFolders.Clear();
         foreach (var path in GameInstalls
                      .Where(x => !x.IsDlc)
                      .Select(x => x.InstallPath)
-                     .Distinct())
+                     .Distinct(StringComparer.OrdinalIgnoreCase))
         {
             GameFolders.Add(path);
         }
 
         SelectedGameFolder = selected is not null && GameFolders.Contains(selected)
             ? selected
-            : GameFolders.FirstOrDefault();
+            : preferred is not null && GameFolders.Contains(preferred)
+                ? preferred
+                : GameFolders.FirstOrDefault();
+    }
+
+    private void PersistLastSelectedGameFolder(string? selectedFolder)
+    {
+        if (string.IsNullOrWhiteSpace(selectedFolder))
+        {
+            return;
+        }
+
+        var settings = _settingsStore.Load();
+        if (string.Equals(settings.LastSelectedGameFolder, selectedFolder, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        settings.LastSelectedGameFolder = selectedFolder;
+        _settingsStore.Save(settings);
     }
 
     public IReadOnlyList<GameInstallRecord> DiscoverInstallCandidates() =>
