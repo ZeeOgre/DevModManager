@@ -282,9 +282,14 @@ public partial class MainWindow : Window
 
     private async void RescanGameFolder_Click(object? sender, RoutedEventArgs e)
     {
-        _viewModel.StatusMessage = "Rescan requested for selected game folder.";
-        await Task.Yield();
-        ScanGameFolder_Click(sender, e);
+        var selections = _viewModel.GetCurrentManagedSelectionsForRescan();
+        if (selections.Count == 0)
+        {
+            _viewModel.StatusMessage = "Rescan skipped: no managed mods are currently listed for the selected folder.";
+            return;
+        }
+
+        await RunScanApplyWithProgressDialogAsync(selections);
     }
 
     private async void ScanGameFolder_Click(object? sender, RoutedEventArgs e)
@@ -657,6 +662,30 @@ public sealed class MainWindowViewModel : NotifyBase
         var existingCount = Mods.Count;
         RebuildMods();
         StatusMessage = $"Refreshed folder data for {selectedGameFolder}. Loaded {Mods.Count} managed mod(s) (previously {existingCount}).";
+    }
+
+    public IReadOnlyList<GameFolderStageSelection> GetCurrentManagedSelectionsForRescan()
+    {
+        var selectedGameFolder = SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selectedGameFolder))
+        {
+            return Array.Empty<GameFolderStageSelection>();
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            return Array.Empty<GameFolderStageSelection>();
+        }
+
+        return _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name)
+            .Select(x => new GameFolderStageSelection(x.ModName, x.PrimaryPlugin, x.Stage))
+            .OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     public GameFolderScanResult ScanSelectedGameFolderForMods()
