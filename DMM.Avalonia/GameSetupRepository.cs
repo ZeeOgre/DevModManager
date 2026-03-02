@@ -708,22 +708,6 @@ internal sealed class GameSetupRepository
     }
 }
 
-internal sealed class SharedCatalogDocument
-{
-    public int Version { get; set; } = 1;
-    public string GeneratedUtc { get; set; } = DateTimeOffset.UtcNow.ToString("O");
-    public List<SharedCatalogEntry> Mods { get; set; } = new();
-}
-
-internal sealed record SharedCatalogEntry(
-    string GameId,
-    string ModName,
-    string PrimaryPlugin,
-    string RepoId,
-    string SubmodulePath,
-    string RepoUrl,
-    string StageBranch);
-
 internal sealed record ManagedModRecord(string GameName, string InstallPath, string ModName, string PrimaryPlugin, string Stage, string ModRepoPath);
 internal sealed record KnownPluginRecord(string DisplayName, string PluginName, bool IsBaseGame, bool IsDlc);
 internal sealed record KnownGameCatalogRecord(string GameName, bool IsDlc, string? ParentGameName, string StoreAppId);

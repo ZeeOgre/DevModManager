@@ -307,6 +307,18 @@ internal sealed class ModOnboardingGitService
         return false;
     }
 
+    private static string SanitizePathSegment(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "Unnamed";
+        }
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var cleaned = new string(value.Where(c => !invalid.Contains(c)).ToArray()).Trim();
+        return string.IsNullOrWhiteSpace(cleaned) ? "Unnamed" : cleaned;
+    }
+
     public string ToSlug(string value)
     {
         var chars = value

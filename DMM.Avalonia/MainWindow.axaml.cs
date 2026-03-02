@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -27,7 +23,6 @@ using DMM.AssetManagers.GameStores.Rockstar;
 using DMM.AssetManagers.GameStores.Steam;
 using DMM.AssetManagers.GameStores.XBox;
 using DMM.Data;
-using Microsoft.Data.Sqlite;
 
 namespace DMM.Avalonia;
 
@@ -254,6 +249,7 @@ public sealed class MainWindowViewModel : NotifyBase
     private readonly GameSetupRepository _repository = new();
     private readonly ProgramWideSettingsStore _settingsStore = new();
     private readonly ModOnboardingGitService _gitService = new();
+    private readonly SharedCatalogService _catalogService = new();
 
     public ObservableCollection<string> GameFolders { get; } = new();
     public ObservableCollection<string> StageOptions { get; } = new();
@@ -501,25 +497,6 @@ public sealed class MainWindowViewModel : NotifyBase
                 var targetStageBranch = _gitService.ToStageBranch(selection.Stage);
                 if (!_gitService.EnsureBranchCheckedOut(modRepoRoot, targetStageBranch, out var branchError))
                 {
-                    var bootstrapped = TryBootstrapModRepository(
-                        settings,
-                        repoRoot,
-                        install.ManagedGame.Name,
-                        selection.ModName,
-                        modRepoRoot,
-                        out var bootstrapError);
-                    if (!bootstrapped)
-                    {
-                        bootstrapRequired++;
-                        bootstrapPaths.Add($"{modRepoRoot} ({bootstrapError})");
-                        skipped++;
-                        continue;
-                    }
-                }
-
-                var targetStageBranch = ToStageBranch(selection.Stage);
-                if (!EnsureBranchCheckedOut(modRepoRoot, targetStageBranch, out var branchError))
-                {
                     bootstrapRequired++;
                     bootstrapPaths.Add($"{modRepoRoot} ({branchError})");
                     skipped++;
@@ -569,7 +546,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 var modRepoName = $"{_gitService.ToSlug(install.ManagedGame.Name)}-{_gitService.ToSlug(selection.ModName)}";
                 var submodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
                     .Replace('\\', '/');
-                UpsertSharedCatalogEntry(repoRoot, new SharedCatalogEntry(
+                _catalogService.UpsertEntry(repoRoot, new SharedCatalogEntry(
                     install.ManagedGame.Name,
                     selection.ModName,
                     selection.PluginName,
@@ -606,294 +583,6 @@ public sealed class MainWindowViewModel : NotifyBase
 
         StatusMessage =
             $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
-    }
-
-    private static bool TryBootstrapModRepository(
-        ProgramWideSettings settings,
-        string repoRoot,
-        string gameName,
-        string modName,
-        string modRepoRoot,
-        out string error)
-    {
-        error = string.Empty;
-
-        var masterRepoPath = repoRoot;
-        if (!EnsureMasterRepositoryPresent(masterRepoPath, settings.GitHubModRootRepo, out error))
-        {
-            return false;
-        }
-
-        var gameSlug = ToSlug(gameName);
-        var modSlug = ToSlug(modName);
-        var modRepoName = $"{gameSlug}-{modSlug}";
-        var remoteModUrl = $"https://github.com/{settings.GitHubAccount}/{modRepoName}.git";
-
-        if (!EnsureGitHubRepository(settings.GitHubAccount, settings.GitHubToken, modRepoName, out error))
-        {
-            return false;
-        }
-
-        var relativeSubmodulePath = Path.Combine(SanitizePathSegment(gameName), SanitizePathSegment(modName))
-            .Replace('\\', '/');
-        var fullSubmodulePath = Path.Combine(masterRepoPath, SanitizePathSegment(gameName), SanitizePathSegment(modName));
-        Directory.CreateDirectory(Path.GetDirectoryName(fullSubmodulePath) ?? masterRepoPath);
-
-        if (!IsGitWorkingTree(fullSubmodulePath))
-        {
-            if (!RunGit(masterRepoPath, $"submodule add \"{remoteModUrl}\" \"{relativeSubmodulePath}\"", out error))
-            {
-                return false;
-            }
-
-            if (!RunGit(masterRepoPath, "add .gitmodules", out error))
-            {
-                return false;
-            }
-
-            _ = RunGit(masterRepoPath, $"add \"{relativeSubmodulePath}\"", out _);
-            _ = RunGit(masterRepoPath, $"commit -m \"Add submodule {relativeSubmodulePath}\"", out _);
-            _ = RunGit(masterRepoPath, "push", out _);
-        }
-
-        if (!RunGit(masterRepoPath, "submodule sync --recursive", out error) ||
-            !RunGit(masterRepoPath, "submodule update --init --recursive", out error))
-        {
-            return false;
-        }
-
-        if (!EnsureCanonicalStageBranches(fullSubmodulePath, out error))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static bool EnsureMasterRepositoryPresent(string masterRepoPath, string remoteUrl, out string error)
-    {
-        error = string.Empty;
-        if (IsGitWorkingTree(masterRepoPath))
-        {
-            return true;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(masterRepoPath) ?? masterRepoPath);
-        return RunGit(Path.GetDirectoryName(masterRepoPath) ?? masterRepoPath, $"clone \"{remoteUrl}\" \"{Path.GetFileName(masterRepoPath)}\"", out error);
-    }
-
-    private static bool EnsureGitHubRepository(string account, string token, string repoName, out string error)
-    {
-        error = string.Empty;
-        using var client = new HttpClient();
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("DevModManager/1.0");
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-
-        var getResponse = client.GetAsync($"https://api.github.com/repos/{account}/{repoName}").GetAwaiter().GetResult();
-        if (getResponse.StatusCode == HttpStatusCode.OK)
-        {
-            return true;
-        }
-
-        if (getResponse.StatusCode != HttpStatusCode.NotFound)
-        {
-            error = $"GitHub check failed ({(int)getResponse.StatusCode})";
-            return false;
-        }
-
-        var payload = JsonSerializer.Serialize(new { name = repoName, @private = false, auto_init = true });
-        var createResponse = client.PostAsync(
-            "https://api.github.com/user/repos",
-            new StringContent(payload, System.Text.Encoding.UTF8, "application/json")).GetAwaiter().GetResult();
-
-        if (createResponse.StatusCode is HttpStatusCode.Created or HttpStatusCode.OK)
-        {
-            return true;
-        }
-
-        error = $"GitHub create repo failed ({(int)createResponse.StatusCode})";
-        return false;
-    }
-
-    private static bool EnsureCanonicalStageBranches(string repoPath, out string error)
-    {
-        error = string.Empty;
-        if (!IsGitWorkingTree(repoPath))
-        {
-            error = "submodule repo missing after sync";
-            return false;
-        }
-
-        var branches = new[] { "stage/dev", "stage/test", "stage/preflight", "stage/creations", "stage/nexus", "stage/prod" };
-        foreach (var branch in branches)
-        {
-            if (RunGit(repoPath, $"show-ref --verify --quiet refs/heads/{branch}", out _))
-            {
-                continue;
-            }
-
-            if (!RunGit(repoPath, $"branch {branch}", out error))
-            {
-                return false;
-            }
-
-            _ = RunGit(repoPath, $"push -u origin {branch}", out _);
-        }
-
-        _ = RunGit(repoPath, "checkout stage/dev", out _);
-        return true;
-    }
-
-    private static bool EnsureBranchCheckedOut(string repoPath, string branch, out string error)
-    {
-        error = string.Empty;
-
-        if (RunGit(repoPath, $"show-ref --verify --quiet refs/heads/{branch}", out _))
-        {
-            return RunGit(repoPath, $"checkout {branch}", out error);
-        }
-
-        if (RunGit(repoPath, $"ls-remote --exit-code --heads origin {branch}", out _))
-        {
-            return RunGit(repoPath, $"checkout -b {branch} --track origin/{branch}", out error);
-        }
-
-        if (!RunGit(repoPath, $"checkout -b {branch}", out error))
-        {
-            return false;
-        }
-
-        _ = RunGit(repoPath, $"push -u origin {branch}", out _);
-        return true;
-    }
-
-    private static bool CommitAndPushOnboardingChanges(
-        string masterRepoPath,
-        string modRepoPath,
-        string relativeSubmodulePath,
-        string stageBranch,
-        string modName,
-        out string error)
-    {
-        error = string.Empty;
-
-        if (!HasPendingChanges(modRepoPath))
-        {
-            return true;
-        }
-
-        if (!RunGit(modRepoPath, "add .", out error) ||
-            !RunGit(modRepoPath, $"commit -m \"Onboard {modName} into {stageBranch}\"", out error) ||
-            !RunGit(modRepoPath, $"push -u origin {stageBranch}", out error))
-        {
-            return false;
-        }
-
-        if (!RunGit(masterRepoPath, $"add \"{relativeSubmodulePath}\"", out error))
-        {
-            return false;
-        }
-
-        if (HasPendingChanges(masterRepoPath))
-        {
-            if (!RunGit(masterRepoPath, $"commit -m \"Update submodule {relativeSubmodulePath}\"", out error) ||
-                !RunGit(masterRepoPath, "push", out error))
-            {
-                return false;
-            }
-        }
-
-        // Keep local parent/submodule metadata aligned after pointer updates.
-        if (!RunGit(masterRepoPath, "submodule sync --recursive", out error) ||
-            !RunGit(masterRepoPath, "submodule update --init --recursive", out error))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static bool HasPendingChanges(string repoPath)
-    {
-        var psi = new ProcessStartInfo
-        {
-            FileName = "git",
-            Arguments = "status --porcelain",
-            WorkingDirectory = repoPath,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = Process.Start(psi);
-        if (process is null)
-        {
-            return false;
-        }
-
-        var stdout = process.StandardOutput.ReadToEnd();
-        process.WaitForExit();
-        return process.ExitCode == 0 && !string.IsNullOrWhiteSpace(stdout);
-    }
-
-    private static string ToStageBranch(string stage)
-    {
-        if (string.IsNullOrWhiteSpace(stage))
-        {
-            return "stage/dev";
-        }
-
-        return $"stage/{ToSlug(stage)}";
-    }
-
-    private static bool RunGit(string workingDirectory, string arguments, out string error)
-    {
-        var psi = new ProcessStartInfo
-        {
-            FileName = "git",
-            Arguments = arguments,
-            WorkingDirectory = workingDirectory,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = Process.Start(psi);
-        if (process is null)
-        {
-            error = "failed to launch git";
-            return false;
-        }
-
-        var stdout = process.StandardOutput.ReadToEnd().Trim();
-        var stderr = process.StandardError.ReadToEnd().Trim();
-        process.WaitForExit();
-        if (process.ExitCode == 0)
-        {
-            error = string.Empty;
-            return true;
-        }
-
-        error = string.IsNullOrWhiteSpace(stderr) ? stdout : stderr;
-        return false;
-    }
-
-    private static string ToSlug(string value)
-    {
-        var chars = value
-            .ToLowerInvariant()
-            .Select(c => char.IsLetterOrDigit(c) ? c : '-')
-            .ToArray();
-        var slug = new string(chars);
-        while (slug.Contains("--", StringComparison.Ordinal))
-        {
-            slug = slug.Replace("--", "-", StringComparison.Ordinal);
-        }
-
-        return slug.Trim('-');
     }
 
     private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
@@ -1059,7 +748,7 @@ public sealed class MainWindowViewModel : NotifyBase
 
     private int ImportManagedModsFromSharedCatalog(string repoRoot, string installPath, string gameName)
     {
-        var catalog = LoadSharedCatalog(repoRoot);
+        var catalog = _catalogService.Load(repoRoot);
         if (catalog.Mods.Count == 0)
         {
             return 0;
@@ -1080,75 +769,12 @@ public sealed class MainWindowViewModel : NotifyBase
                 installPath,
                 entry.ModName,
                 entry.PrimaryPlugin,
-                ToStageDisplayName(entry.StageBranch),
+                SharedCatalogService.ToStageDisplayName(entry.StageBranch),
                 modRepoPath);
             imported++;
         }
 
         return imported;
-    }
-
-    private static SharedCatalogDocument LoadSharedCatalog(string repoRoot)
-    {
-        var path = GetSharedCatalogPath(repoRoot);
-        if (!File.Exists(path))
-        {
-            return new SharedCatalogDocument();
-        }
-
-        try
-        {
-            var json = File.ReadAllText(path);
-            var document = JsonSerializer.Deserialize<SharedCatalogDocument>(json);
-            return document ?? new SharedCatalogDocument();
-        }
-        catch
-        {
-            return new SharedCatalogDocument();
-        }
-    }
-
-    private static void UpsertSharedCatalogEntry(string repoRoot, SharedCatalogEntry entry)
-    {
-        var document = LoadSharedCatalog(repoRoot);
-        var existingIndex = document.Mods.FindIndex(x =>
-            string.Equals(x.GameId, entry.GameId, StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(x.ModName, entry.ModName, StringComparison.OrdinalIgnoreCase));
-
-        if (existingIndex >= 0)
-        {
-            document.Mods[existingIndex] = entry;
-        }
-        else
-        {
-            document.Mods.Add(entry);
-        }
-
-        document.GeneratedUtc = DateTimeOffset.UtcNow.ToString("O");
-        document.Mods = document.Mods
-            .OrderBy(x => x.GameId, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        var path = GetSharedCatalogPath(repoRoot);
-        Directory.CreateDirectory(Path.GetDirectoryName(path) ?? repoRoot);
-        var json = JsonSerializer.Serialize(document, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(path, json);
-    }
-
-    private static string GetSharedCatalogPath(string repoRoot) => Path.Combine(repoRoot, ".dmm", "catalog.json");
-
-    private static string ToStageDisplayName(string stageBranch)
-    {
-        if (string.IsNullOrWhiteSpace(stageBranch))
-        {
-            return "DEV";
-        }
-
-        var stage = stageBranch.StartsWith("stage/", StringComparison.OrdinalIgnoreCase)
-            ? stageBranch["stage/".Length..]
-            : stageBranch;
-        return stage.ToUpperInvariant();
     }
 
     public void SyncGameFoldersFromInstalls()
