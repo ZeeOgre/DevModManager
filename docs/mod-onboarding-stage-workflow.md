@@ -440,7 +440,27 @@ For each selected mod:
 7. Commit/push master repo submodule pointer update.
 8. Create/check out active stage branch.
 
+
+### Base-game `.mat` inventory strategy (for dmmdeps filtering)
+
+Goal: avoid copying Creation Kit/base-game material files that already exist in base-game content.
+
+Recommended approach:
+1. **Fast catalog pass first**: at game-scan time, read file-path catalogs from:
+   - `GAMEFOLDER\Tools\ContentResources.zip`
+   - base archive index/catalog for `* - Materials.ba2` (and optional other base archives if needed)
+2. Build an in-memory `HashSet<string>` of normalized base `.mat` paths (case-insensitive, `/` + `\` normalized).
+3. When `dmmdeps` returns candidate material dependencies, include only paths **not** in that base set.
+4. Persist discovered base `.mat` paths in DB (cache table keyed by game + source + signature/timestamp) so subsequent runs do not re-extract unless source changed.
+
+Cache invalidation guidance:
+- Rebuild cache only when `ContentResources.zip` or `* - Materials.ba2` signature changes (size + write-time or hash).
+- In preproduction we can add this table directly to schema/seed baseline (no migration track required yet).
+
+Fallback:
+- If catalog extraction is slow/unavailable, use the DB cache as authoritative for that run and queue background refresh.
+
 ### Implementation state vs your checklist
 
 - **Mostly in place now**: install scan, candidate scan, base-plugin exclusion, copy-first import path, settings scaffolding.
-- **Pending/next**: automatic repo creation, submodule add/sync orchestration, dmmdeps execution pipeline, branch automation, favorites/clustered game dropdown UX.
+- **Pending/next**: automatic repo creation, submodule add/sync orchestration, dmmdeps execution pipeline (including base-game `.mat` filtering/cache), branch automation, favorites/clustered game dropdown UX.
