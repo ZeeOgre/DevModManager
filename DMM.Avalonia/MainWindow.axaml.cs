@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -353,10 +356,11 @@ public sealed class MainWindowViewModel : NotifyBase
             return GameFolderScanResult.Failed();
         }
 
+        var selectedGameFolder = SelectedGameFolder!;
         var install = GameInstalls.FirstOrDefault(x =>
             !x.IsDlc &&
             x.ManagedGame is not null &&
-            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
 
         if (install?.ManagedGame is null)
         {
@@ -364,8 +368,8 @@ public sealed class MainWindowViewModel : NotifyBase
             return GameFolderScanResult.Failed();
         }
 
-        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
-        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
+        var dataFolder = Path.Combine(selectedGameFolder, "Data");
+        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : selectedGameFolder;
         if (!Directory.Exists(scanRoot))
         {
             StatusMessage = $"Scan failed: game data folder not found at '{scanRoot}'.";
@@ -423,10 +427,12 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
+        var selectedGameFolder = SelectedGameFolder!;
+
         var install = GameInstalls.FirstOrDefault(x =>
             !x.IsDlc &&
             x.ManagedGame is not null &&
-            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
 
         if (install?.ManagedGame is null)
         {
@@ -434,8 +440,8 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
-        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
-        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
+        var dataFolder = Path.Combine(selectedGameFolder, "Data");
+        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : selectedGameFolder;
         if (!Directory.Exists(scanRoot))
         {
             StatusMessage = $"Scan apply failed: game data folder not found at '{scanRoot}'.";
@@ -475,8 +481,27 @@ public sealed class MainWindowViewModel : NotifyBase
                 var modRepoRoot = BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization);
                 if (!IsGitWorkingTree(modRepoRoot))
                 {
+                    var bootstrapped = TryBootstrapModRepository(
+                        settings,
+                        repoRoot,
+                        install.ManagedGame.Name,
+                        selection.ModName,
+                        modRepoRoot,
+                        out var bootstrapError);
+                    if (!bootstrapped)
+                    {
+                        bootstrapRequired++;
+                        bootstrapPaths.Add($"{modRepoRoot} ({bootstrapError})");
+                        skipped++;
+                        continue;
+                    }
+                }
+
+                var targetStageBranch = ToStageBranch(selection.Stage);
+                if (!EnsureBranchCheckedOut(modRepoRoot, targetStageBranch, out var branchError))
+                {
                     bootstrapRequired++;
-                    bootstrapPaths.Add(modRepoRoot);
+                    bootstrapPaths.Add($"{modRepoRoot} ({branchError})");
                     skipped++;
                     continue;
                 }
@@ -502,6 +527,24 @@ public sealed class MainWindowViewModel : NotifyBase
 
                     // Intentionally copy-only for now; link-back is reserved for a later validation milestone.
                 }
+
+                var relativeSubmodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
+                    .Replace('\\', '/');
+                if (!CommitAndPushOnboardingChanges(repoRoot, modRepoRoot, relativeSubmodulePath, targetStageBranch, selection.ModName, out var commitError))
+                {
+                    bootstrapRequired++;
+                    bootstrapPaths.Add($"{modRepoRoot} ({commitError})");
+                    skipped++;
+                    continue;
+                }
+
+                _repository.UpsertManagedModForInstall(
+                    install.ManagedGame.Name,
+                    selectedGameFolder,
+                    selection.ModName,
+                    selection.PluginName,
+                    selection.Stage,
+                    modRepoRoot);
 
                 Mods.Add(new ModListItem(
                     selection.ModName,
@@ -530,7 +573,7 @@ public sealed class MainWindowViewModel : NotifyBase
             : $" First missing repo: {bootstrapPaths.First()}";
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}.{bootstrapPreview}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
     }
 
     private static bool HasRequiredGitHubSettings(ProgramWideSettings settings, out string missing)
@@ -553,6 +596,294 @@ public sealed class MainWindowViewModel : NotifyBase
 
         var dotGit = Path.Combine(repoPath, ".git");
         return Directory.Exists(dotGit) || File.Exists(dotGit);
+    }
+
+    private static bool TryBootstrapModRepository(
+        ProgramWideSettings settings,
+        string repoRoot,
+        string gameName,
+        string modName,
+        string modRepoRoot,
+        out string error)
+    {
+        error = string.Empty;
+
+        var masterRepoPath = repoRoot;
+        if (!EnsureMasterRepositoryPresent(masterRepoPath, settings.GitHubModRootRepo, out error))
+        {
+            return false;
+        }
+
+        var gameSlug = ToSlug(gameName);
+        var modSlug = ToSlug(modName);
+        var modRepoName = $"{gameSlug}-{modSlug}";
+        var remoteModUrl = $"https://github.com/{settings.GitHubAccount}/{modRepoName}.git";
+
+        if (!EnsureGitHubRepository(settings.GitHubAccount, settings.GitHubToken, modRepoName, out error))
+        {
+            return false;
+        }
+
+        var relativeSubmodulePath = Path.Combine(SanitizePathSegment(gameName), SanitizePathSegment(modName))
+            .Replace('\\', '/');
+        var fullSubmodulePath = Path.Combine(masterRepoPath, SanitizePathSegment(gameName), SanitizePathSegment(modName));
+        Directory.CreateDirectory(Path.GetDirectoryName(fullSubmodulePath) ?? masterRepoPath);
+
+        if (!IsGitWorkingTree(fullSubmodulePath))
+        {
+            if (!RunGit(masterRepoPath, $"submodule add \"{remoteModUrl}\" \"{relativeSubmodulePath}\"", out error))
+            {
+                return false;
+            }
+
+            if (!RunGit(masterRepoPath, "add .gitmodules", out error))
+            {
+                return false;
+            }
+
+            _ = RunGit(masterRepoPath, $"add \"{relativeSubmodulePath}\"", out _);
+            _ = RunGit(masterRepoPath, $"commit -m \"Add submodule {relativeSubmodulePath}\"", out _);
+            _ = RunGit(masterRepoPath, "push", out _);
+        }
+
+        if (!RunGit(masterRepoPath, "submodule sync --recursive", out error) ||
+            !RunGit(masterRepoPath, "submodule update --init --recursive", out error))
+        {
+            return false;
+        }
+
+        if (!EnsureCanonicalStageBranches(fullSubmodulePath, out error))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool EnsureMasterRepositoryPresent(string masterRepoPath, string remoteUrl, out string error)
+    {
+        error = string.Empty;
+        if (IsGitWorkingTree(masterRepoPath))
+        {
+            return true;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(masterRepoPath) ?? masterRepoPath);
+        return RunGit(Path.GetDirectoryName(masterRepoPath) ?? masterRepoPath, $"clone \"{remoteUrl}\" \"{Path.GetFileName(masterRepoPath)}\"", out error);
+    }
+
+    private static bool EnsureGitHubRepository(string account, string token, string repoName, out string error)
+    {
+        error = string.Empty;
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("DevModManager/1.0");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+
+        var getResponse = client.GetAsync($"https://api.github.com/repos/{account}/{repoName}").GetAwaiter().GetResult();
+        if (getResponse.StatusCode == HttpStatusCode.OK)
+        {
+            return true;
+        }
+
+        if (getResponse.StatusCode != HttpStatusCode.NotFound)
+        {
+            error = $"GitHub check failed ({(int)getResponse.StatusCode})";
+            return false;
+        }
+
+        var payload = JsonSerializer.Serialize(new { name = repoName, @private = false, auto_init = true });
+        var createResponse = client.PostAsync(
+            "https://api.github.com/user/repos",
+            new StringContent(payload, System.Text.Encoding.UTF8, "application/json")).GetAwaiter().GetResult();
+
+        if (createResponse.StatusCode is HttpStatusCode.Created or HttpStatusCode.OK)
+        {
+            return true;
+        }
+
+        error = $"GitHub create repo failed ({(int)createResponse.StatusCode})";
+        return false;
+    }
+
+    private static bool EnsureCanonicalStageBranches(string repoPath, out string error)
+    {
+        error = string.Empty;
+        if (!IsGitWorkingTree(repoPath))
+        {
+            error = "submodule repo missing after sync";
+            return false;
+        }
+
+        var branches = new[] { "stage/dev", "stage/test", "stage/preflight", "stage/creations", "stage/nexus", "stage/prod" };
+        foreach (var branch in branches)
+        {
+            if (RunGit(repoPath, $"show-ref --verify --quiet refs/heads/{branch}", out _))
+            {
+                continue;
+            }
+
+            if (!RunGit(repoPath, $"branch {branch}", out error))
+            {
+                return false;
+            }
+
+            _ = RunGit(repoPath, $"push -u origin {branch}", out _);
+        }
+
+        _ = RunGit(repoPath, "checkout stage/dev", out _);
+        return true;
+    }
+
+    private static bool EnsureBranchCheckedOut(string repoPath, string branch, out string error)
+    {
+        error = string.Empty;
+
+        if (RunGit(repoPath, $"show-ref --verify --quiet refs/heads/{branch}", out _))
+        {
+            return RunGit(repoPath, $"checkout {branch}", out error);
+        }
+
+        if (RunGit(repoPath, $"ls-remote --exit-code --heads origin {branch}", out _))
+        {
+            return RunGit(repoPath, $"checkout -b {branch} --track origin/{branch}", out error);
+        }
+
+        if (!RunGit(repoPath, $"checkout -b {branch}", out error))
+        {
+            return false;
+        }
+
+        _ = RunGit(repoPath, $"push -u origin {branch}", out _);
+        return true;
+    }
+
+    private static bool CommitAndPushOnboardingChanges(
+        string masterRepoPath,
+        string modRepoPath,
+        string relativeSubmodulePath,
+        string stageBranch,
+        string modName,
+        out string error)
+    {
+        error = string.Empty;
+
+        if (!HasPendingChanges(modRepoPath))
+        {
+            return true;
+        }
+
+        if (!RunGit(modRepoPath, "add .", out error) ||
+            !RunGit(modRepoPath, $"commit -m \"Onboard {modName} into {stageBranch}\"", out error) ||
+            !RunGit(modRepoPath, $"push -u origin {stageBranch}", out error))
+        {
+            return false;
+        }
+
+        if (!RunGit(masterRepoPath, $"add \"{relativeSubmodulePath}\"", out error))
+        {
+            return false;
+        }
+
+        if (HasPendingChanges(masterRepoPath))
+        {
+            if (!RunGit(masterRepoPath, $"commit -m \"Update submodule {relativeSubmodulePath}\"", out error) ||
+                !RunGit(masterRepoPath, "push", out error))
+            {
+                return false;
+            }
+        }
+
+        // Keep local parent/submodule metadata aligned after pointer updates.
+        if (!RunGit(masterRepoPath, "submodule sync --recursive", out error) ||
+            !RunGit(masterRepoPath, "submodule update --init --recursive", out error))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool HasPendingChanges(string repoPath)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "git",
+            Arguments = "status --porcelain",
+            WorkingDirectory = repoPath,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+        if (process is null)
+        {
+            return false;
+        }
+
+        var stdout = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+        return process.ExitCode == 0 && !string.IsNullOrWhiteSpace(stdout);
+    }
+
+    private static string ToStageBranch(string stage)
+    {
+        if (string.IsNullOrWhiteSpace(stage))
+        {
+            return "stage/dev";
+        }
+
+        return $"stage/{ToSlug(stage)}";
+    }
+
+    private static bool RunGit(string workingDirectory, string arguments, out string error)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "git",
+            Arguments = arguments,
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+        if (process is null)
+        {
+            error = "failed to launch git";
+            return false;
+        }
+
+        var stdout = process.StandardOutput.ReadToEnd().Trim();
+        var stderr = process.StandardError.ReadToEnd().Trim();
+        process.WaitForExit();
+        if (process.ExitCode == 0)
+        {
+            error = string.Empty;
+            return true;
+        }
+
+        error = string.IsNullOrWhiteSpace(stderr) ? stdout : stderr;
+        return false;
+    }
+
+    private static string ToSlug(string value)
+    {
+        var chars = value
+            .ToLowerInvariant()
+            .Select(c => char.IsLetterOrDigit(c) ? c : '-')
+            .ToArray();
+        var slug = new string(chars);
+        while (slug.Contains("--", StringComparison.Ordinal))
+        {
+            slug = slug.Replace("--", "-", StringComparison.Ordinal);
+        }
+
+        return slug.Trim('-');
     }
 
     private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
@@ -666,9 +997,41 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         Mods.Clear();
 
-        StatusMessage = string.IsNullOrWhiteSpace(SelectedGameFolder)
-            ? "Ready. Select a game folder, scan for mods, and onboard only the mods you edit."
-            : "Ready. Scan the selected game folder to onboard mods under management.";
+        var selectedGameFolder = SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selectedGameFolder))
+        {
+            StatusMessage = "Ready. Select a game folder, scan for mods, and onboard only the mods you edit.";
+            return;
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            StatusMessage = "Ready. Scan the selected game folder to onboard mods under management.";
+            return;
+        }
+
+        var persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name);
+        var row = 0;
+        foreach (var mod in persistedMods)
+        {
+            Mods.Add(new ModListItem(
+                mod.ModName,
+                mod.PrimaryPlugin,
+                mod.Stage,
+                mod.GameName,
+                string.Empty,
+                string.Empty,
+                new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
+        }
+
+        StatusMessage = persistedMods.Count == 0
+            ? "Ready. Scan the selected game folder to onboard mods under management."
+            : $"Loaded {persistedMods.Count} managed mod(s) for this game install.";
     }
 
     public void SyncGameFoldersFromInstalls()
@@ -945,6 +1308,11 @@ internal sealed class GameSetupRepository
 {
     private readonly DatabaseManager _database = new();
 
+    public GameSetupRepository()
+    {
+        EnsureManagedModCatalogTable();
+    }
+
     public IReadOnlyList<ManagedGame> LoadManagedGames()
     {
         using var connection = _database.OpenConnection();
@@ -1102,6 +1470,91 @@ internal sealed class GameSetupRepository
         }
 
         return installs;
+    }
+
+    public IReadOnlyList<ManagedModRecord> LoadManagedModsForInstall(string installPath, string gameName)
+    {
+        if (string.IsNullOrWhiteSpace(installPath) || string.IsNullOrWhiteSpace(gameName))
+        {
+            return Array.Empty<ManagedModRecord>();
+        }
+
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT GameName, InstallPath, ModName, PrimaryPlugin, StageName, ModRepoPath
+            FROM ManagedModCatalog
+            WHERE InstallPath = $installPath
+              AND GameName = $gameName
+            ORDER BY ModName
+            """;
+        command.Parameters.AddWithValue("$installPath", installPath);
+        command.Parameters.AddWithValue("$gameName", gameName);
+
+        var records = new List<ManagedModRecord>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            records.Add(new ManagedModRecord(
+                reader.GetString(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetString(3),
+                reader.GetString(4),
+                reader.GetString(5)));
+        }
+
+        return records;
+    }
+
+    public void UpsertManagedModForInstall(
+        string gameName,
+        string installPath,
+        string modName,
+        string primaryPlugin,
+        string stage,
+        string modRepoPath)
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO ManagedModCatalog (GameName, InstallPath, ModName, PrimaryPlugin, StageName, ModRepoPath, LastSeenUtc)
+            VALUES ($gameName, $installPath, $modName, $primaryPlugin, $stageName, $modRepoPath, $lastSeenUtc)
+            ON CONFLICT(InstallPath, ModName) DO UPDATE SET
+                GameName = excluded.GameName,
+                PrimaryPlugin = excluded.PrimaryPlugin,
+                StageName = excluded.StageName,
+                ModRepoPath = excluded.ModRepoPath,
+                LastSeenUtc = excluded.LastSeenUtc
+            """;
+        command.Parameters.AddWithValue("$gameName", gameName);
+        command.Parameters.AddWithValue("$installPath", installPath);
+        command.Parameters.AddWithValue("$modName", modName);
+        command.Parameters.AddWithValue("$primaryPlugin", primaryPlugin);
+        command.Parameters.AddWithValue("$stageName", stage);
+        command.Parameters.AddWithValue("$modRepoPath", modRepoPath);
+        command.Parameters.AddWithValue("$lastSeenUtc", DateTimeOffset.UtcNow.ToString("O"));
+        command.ExecuteNonQuery();
+    }
+
+    private void EnsureManagedModCatalogTable()
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS ManagedModCatalog (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                GameName      TEXT NOT NULL,
+                InstallPath   TEXT NOT NULL,
+                ModName       TEXT NOT NULL,
+                PrimaryPlugin TEXT NOT NULL,
+                StageName     TEXT NOT NULL,
+                ModRepoPath   TEXT NOT NULL,
+                LastSeenUtc   TEXT NOT NULL,
+                UNIQUE (InstallPath, ModName)
+            );
+            """;
+        command.ExecuteNonQuery();
     }
 
     public void UpsertManagedGame(ManagedGame game)
@@ -1551,6 +2004,7 @@ internal sealed class GameSetupRepository
     }
 }
 
+internal sealed record ManagedModRecord(string GameName, string InstallPath, string ModName, string PrimaryPlugin, string Stage, string ModRepoPath);
 internal sealed record KnownPluginRecord(string DisplayName, string PluginName, bool IsBaseGame, bool IsDlc);
 internal sealed record KnownGameCatalogRecord(string GameName, bool IsDlc, string? ParentGameName, string StoreAppId);
 
