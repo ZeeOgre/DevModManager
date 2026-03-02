@@ -356,10 +356,11 @@ public sealed class MainWindowViewModel : NotifyBase
             return GameFolderScanResult.Failed();
         }
 
+        var selectedGameFolder = SelectedGameFolder!;
         var install = GameInstalls.FirstOrDefault(x =>
             !x.IsDlc &&
             x.ManagedGame is not null &&
-            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
 
         if (install?.ManagedGame is null)
         {
@@ -367,8 +368,8 @@ public sealed class MainWindowViewModel : NotifyBase
             return GameFolderScanResult.Failed();
         }
 
-        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
-        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
+        var dataFolder = Path.Combine(selectedGameFolder, "Data");
+        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : selectedGameFolder;
         if (!Directory.Exists(scanRoot))
         {
             StatusMessage = $"Scan failed: game data folder not found at '{scanRoot}'.";
@@ -426,10 +427,12 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
+        var selectedGameFolder = SelectedGameFolder!;
+
         var install = GameInstalls.FirstOrDefault(x =>
             !x.IsDlc &&
             x.ManagedGame is not null &&
-            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
 
         if (install?.ManagedGame is null)
         {
@@ -437,8 +440,8 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
-        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
-        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
+        var dataFolder = Path.Combine(selectedGameFolder, "Data");
+        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : selectedGameFolder;
         if (!Directory.Exists(scanRoot))
         {
             StatusMessage = $"Scan apply failed: game data folder not found at '{scanRoot}'.";
@@ -534,6 +537,14 @@ public sealed class MainWindowViewModel : NotifyBase
                     skipped++;
                     continue;
                 }
+
+                _repository.UpsertManagedModForInstall(
+                    install.ManagedGame.Name,
+                    selectedGameFolder,
+                    selection.ModName,
+                    selection.PluginName,
+                    selection.Stage,
+                    modRepoRoot);
 
                 Mods.Add(new ModListItem(
                     selection.ModName,
@@ -986,9 +997,41 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         Mods.Clear();
 
-        StatusMessage = string.IsNullOrWhiteSpace(SelectedGameFolder)
-            ? "Ready. Select a game folder, scan for mods, and onboard only the mods you edit."
-            : "Ready. Scan the selected game folder to onboard mods under management.";
+        var selectedGameFolder = SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selectedGameFolder))
+        {
+            StatusMessage = "Ready. Select a game folder, scan for mods, and onboard only the mods you edit.";
+            return;
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            StatusMessage = "Ready. Scan the selected game folder to onboard mods under management.";
+            return;
+        }
+
+        var persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name);
+        var row = 0;
+        foreach (var mod in persistedMods)
+        {
+            Mods.Add(new ModListItem(
+                mod.ModName,
+                mod.PrimaryPlugin,
+                mod.Stage,
+                mod.GameName,
+                string.Empty,
+                string.Empty,
+                new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
+        }
+
+        StatusMessage = persistedMods.Count == 0
+            ? "Ready. Scan the selected game folder to onboard mods under management."
+            : $"Loaded {persistedMods.Count} managed mod(s) for this game install.";
     }
 
     public void SyncGameFoldersFromInstalls()
@@ -1265,6 +1308,11 @@ internal sealed class GameSetupRepository
 {
     private readonly DatabaseManager _database = new();
 
+    public GameSetupRepository()
+    {
+        EnsureManagedModCatalogTable();
+    }
+
     public IReadOnlyList<ManagedGame> LoadManagedGames()
     {
         using var connection = _database.OpenConnection();
@@ -1422,6 +1470,91 @@ internal sealed class GameSetupRepository
         }
 
         return installs;
+    }
+
+    public IReadOnlyList<ManagedModRecord> LoadManagedModsForInstall(string installPath, string gameName)
+    {
+        if (string.IsNullOrWhiteSpace(installPath) || string.IsNullOrWhiteSpace(gameName))
+        {
+            return Array.Empty<ManagedModRecord>();
+        }
+
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT GameName, InstallPath, ModName, PrimaryPlugin, StageName, ModRepoPath
+            FROM ManagedModCatalog
+            WHERE InstallPath = $installPath
+              AND GameName = $gameName
+            ORDER BY ModName
+            """;
+        command.Parameters.AddWithValue("$installPath", installPath);
+        command.Parameters.AddWithValue("$gameName", gameName);
+
+        var records = new List<ManagedModRecord>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            records.Add(new ManagedModRecord(
+                reader.GetString(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetString(3),
+                reader.GetString(4),
+                reader.GetString(5)));
+        }
+
+        return records;
+    }
+
+    public void UpsertManagedModForInstall(
+        string gameName,
+        string installPath,
+        string modName,
+        string primaryPlugin,
+        string stage,
+        string modRepoPath)
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO ManagedModCatalog (GameName, InstallPath, ModName, PrimaryPlugin, StageName, ModRepoPath, LastSeenUtc)
+            VALUES ($gameName, $installPath, $modName, $primaryPlugin, $stageName, $modRepoPath, $lastSeenUtc)
+            ON CONFLICT(InstallPath, ModName) DO UPDATE SET
+                GameName = excluded.GameName,
+                PrimaryPlugin = excluded.PrimaryPlugin,
+                StageName = excluded.StageName,
+                ModRepoPath = excluded.ModRepoPath,
+                LastSeenUtc = excluded.LastSeenUtc
+            """;
+        command.Parameters.AddWithValue("$gameName", gameName);
+        command.Parameters.AddWithValue("$installPath", installPath);
+        command.Parameters.AddWithValue("$modName", modName);
+        command.Parameters.AddWithValue("$primaryPlugin", primaryPlugin);
+        command.Parameters.AddWithValue("$stageName", stage);
+        command.Parameters.AddWithValue("$modRepoPath", modRepoPath);
+        command.Parameters.AddWithValue("$lastSeenUtc", DateTimeOffset.UtcNow.ToString("O"));
+        command.ExecuteNonQuery();
+    }
+
+    private void EnsureManagedModCatalogTable()
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS ManagedModCatalog (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                GameName      TEXT NOT NULL,
+                InstallPath   TEXT NOT NULL,
+                ModName       TEXT NOT NULL,
+                PrimaryPlugin TEXT NOT NULL,
+                StageName     TEXT NOT NULL,
+                ModRepoPath   TEXT NOT NULL,
+                LastSeenUtc   TEXT NOT NULL,
+                UNIQUE (InstallPath, ModName)
+            );
+            """;
+        command.ExecuteNonQuery();
     }
 
     public void UpsertManagedGame(ManagedGame game)
@@ -1871,6 +2004,7 @@ internal sealed class GameSetupRepository
     }
 }
 
+internal sealed record ManagedModRecord(string GameName, string InstallPath, string ModName, string PrimaryPlugin, string Stage, string ModRepoPath);
 internal sealed record KnownPluginRecord(string DisplayName, string PluginName, bool IsBaseGame, bool IsDlc);
 internal sealed record KnownGameCatalogRecord(string GameName, bool IsDlc, string? ParentGameName, string StoreAppId);
 
