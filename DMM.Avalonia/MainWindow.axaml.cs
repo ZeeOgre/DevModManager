@@ -76,7 +76,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        _viewModel.ApplyScanSelections(result.SelectedMods);
+        await RunScanApplyWithProgressDialogAsync(result.SelectedMods);
 
         if (_viewModel.StatusMessage.StartsWith("Scan apply blocked:", StringComparison.OrdinalIgnoreCase))
         {
@@ -89,6 +89,58 @@ public partial class MainWindow : Window
                 "Local Repo Bootstrap Needed",
                 "PAT is configured, but onboarding still needs local per-mod git repos to exist under your Mod Repo Root. " +
                 "Please create/bootstrap those repos (or use the upcoming automated bootstrap flow), then run Scan Apply again.");
+        }
+    }
+
+    private async Task RunScanApplyWithProgressDialogAsync(IReadOnlyList<GameFolderStageSelection> selections)
+    {
+        var progressWindow = new Window
+        {
+            Title = "Applying Scan Selection",
+            Width = 520,
+            Height = 200,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border
+            {
+                Margin = new Thickness(12),
+                Padding = new Thickness(12),
+                Child = new StackPanel
+                {
+                    Spacing = 10,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = "Applying selected mods. This can take a moment while DMM bootstraps repositories, syncs submodules, and commits onboarding files.",
+                            TextWrapping = TextWrapping.Wrap
+                        },
+                        new ProgressBar
+                        {
+                            IsIndeterminate = true,
+                            Height = 12,
+                            MinWidth = 420
+                        },
+                        new TextBlock
+                        {
+                            Text = "Working... please wait.",
+                            FontStyle = FontStyle.Italic
+                        }
+                    }
+                }
+            }
+        };
+
+        _ = progressWindow.ShowDialog(this);
+        await Task.Delay(50);
+
+        try
+        {
+            _viewModel.ApplyScanSelections(selections);
+        }
+        finally
+        {
+            progressWindow.Close();
         }
     }
 
@@ -587,24 +639,22 @@ public sealed class MainWindowViewModel : NotifyBase
 
     private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
     {
-        var normalizedModName = NormalizePluginBaseName(modName);
-        var primaryPath = Path.Combine(scanRoot, primaryPlugin);
+        var pluginExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".esm", ".esp", ".esl" };
+        var expectedPluginName = $"{modName}{Path.GetExtension(primaryPlugin)}";
 
-        var pluginFiles = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(path =>
-            {
-                var ext = Path.GetExtension(path);
-                return string.Equals(ext, ".esm", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(ext, ".esp", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(ext, ".esl", StringComparison.OrdinalIgnoreCase);
-            })
-            .Where(path => NormalizePluginBaseName(Path.GetFileNameWithoutExtension(path)).Contains(normalizedModName, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        if (File.Exists(primaryPath) && !pluginFiles.Contains(primaryPath, StringComparer.OrdinalIgnoreCase))
+        var pluginCandidates = new[]
         {
-            pluginFiles.Add(primaryPath);
-        }
+            Path.Combine(scanRoot, expectedPluginName),
+            Path.Combine(scanRoot, $"{modName}.esm"),
+            Path.Combine(scanRoot, $"{modName}.esp"),
+            Path.Combine(scanRoot, $"{modName}.esl")
+        };
+
+        var pluginFiles = pluginCandidates
+            .Where(File.Exists)
+            .Where(path => pluginExtensions.Contains(Path.GetExtension(path)))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
         var archiveCandidates = new[]
         {
