@@ -178,6 +178,16 @@ Yes, a final re-sync of `GameMods` remains useful on other machines/working dire
 
 Within the same local clone, DMM can also run a local `submodule sync --recursive` + `submodule update --init --recursive` after parent push so parent/submodule metadata stays clean in UI tools.
 
+### Cross-machine state handoff (`.dmm/catalog.json`)
+
+To speed onboarding on a new machine, DMM can maintain a shared catalog file inside the master repo:
+
+- Path: `<GameMods>/.dmm/catalog.json`
+- Purpose: machine-portable list of managed mod repos/submodules
+- Suggested fields: `GameId`, `ModName`, `PrimaryPlugin`, `RepoId`, `SubmodulePath`, `RepoUrl`, `StageBranch`
+
+This allows a fresh machine to clone/pull `GameMods`, pick a local game install path, and let DMM hydrate local management records without manual re-registration of each mod.
+
 ## End-to-End Onboarding Workflow
 
 1. **Create mod repo from DMM**

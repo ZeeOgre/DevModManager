@@ -546,6 +546,18 @@ public sealed class MainWindowViewModel : NotifyBase
                     selection.Stage,
                     modRepoRoot);
 
+                var modRepoName = $"{ToSlug(install.ManagedGame.Name)}-{ToSlug(selection.ModName)}";
+                var submodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
+                    .Replace('\\', '/');
+                UpsertSharedCatalogEntry(repoRoot, new SharedCatalogEntry(
+                    install.ManagedGame.Name,
+                    selection.ModName,
+                    selection.PluginName,
+                    modRepoName,
+                    submodulePath,
+                    $"https://github.com/{settings.GitHubAccount}/{modRepoName}.git",
+                    targetStageBranch));
+
                 Mods.Add(new ModListItem(
                     selection.ModName,
                     selection.PluginName,
@@ -1015,7 +1027,20 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
-        var persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name);
+        var persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name).ToList();
+        if (persistedMods.Count == 0)
+        {
+            var settings = _settingsStore.Load();
+            var repoRoot = string.IsNullOrWhiteSpace(settings.RepoRootPath)
+                ? ProgramWideSettings.GetDefaultRepoRoot()
+                : settings.RepoRootPath;
+            var imported = ImportManagedModsFromSharedCatalog(repoRoot, selectedGameFolder, install.ManagedGame.Name);
+            if (imported > 0)
+            {
+                persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name).ToList();
+            }
+        }
+
         var row = 0;
         foreach (var mod in persistedMods)
         {
@@ -1032,6 +1057,100 @@ public sealed class MainWindowViewModel : NotifyBase
         StatusMessage = persistedMods.Count == 0
             ? "Ready. Scan the selected game folder to onboard mods under management."
             : $"Loaded {persistedMods.Count} managed mod(s) for this game install.";
+    }
+
+    private int ImportManagedModsFromSharedCatalog(string repoRoot, string installPath, string gameName)
+    {
+        var catalog = LoadSharedCatalog(repoRoot);
+        if (catalog.Mods.Count == 0)
+        {
+            return 0;
+        }
+
+        var imported = 0;
+        foreach (var entry in catalog.Mods
+                     .Where(x => string.Equals(x.GameId, gameName, StringComparison.OrdinalIgnoreCase)))
+        {
+            var modRepoPath = Path.Combine(repoRoot, entry.SubmodulePath.Replace('/', Path.DirectorySeparatorChar));
+            if (!IsGitWorkingTree(modRepoPath))
+            {
+                continue;
+            }
+
+            _repository.UpsertManagedModForInstall(
+                gameName,
+                installPath,
+                entry.ModName,
+                entry.PrimaryPlugin,
+                ToStageDisplayName(entry.StageBranch),
+                modRepoPath);
+            imported++;
+        }
+
+        return imported;
+    }
+
+    private static SharedCatalogDocument LoadSharedCatalog(string repoRoot)
+    {
+        var path = GetSharedCatalogPath(repoRoot);
+        if (!File.Exists(path))
+        {
+            return new SharedCatalogDocument();
+        }
+
+        try
+        {
+            var json = File.ReadAllText(path);
+            var document = JsonSerializer.Deserialize<SharedCatalogDocument>(json);
+            return document ?? new SharedCatalogDocument();
+        }
+        catch
+        {
+            return new SharedCatalogDocument();
+        }
+    }
+
+    private static void UpsertSharedCatalogEntry(string repoRoot, SharedCatalogEntry entry)
+    {
+        var document = LoadSharedCatalog(repoRoot);
+        var existingIndex = document.Mods.FindIndex(x =>
+            string.Equals(x.GameId, entry.GameId, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(x.ModName, entry.ModName, StringComparison.OrdinalIgnoreCase));
+
+        if (existingIndex >= 0)
+        {
+            document.Mods[existingIndex] = entry;
+        }
+        else
+        {
+            document.Mods.Add(entry);
+        }
+
+        document.GeneratedUtc = DateTimeOffset.UtcNow.ToString("O");
+        document.Mods = document.Mods
+            .OrderBy(x => x.GameId, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var path = GetSharedCatalogPath(repoRoot);
+        Directory.CreateDirectory(Path.GetDirectoryName(path) ?? repoRoot);
+        var json = JsonSerializer.Serialize(document, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(path, json);
+    }
+
+    private static string GetSharedCatalogPath(string repoRoot) => Path.Combine(repoRoot, ".dmm", "catalog.json");
+
+    private static string ToStageDisplayName(string stageBranch)
+    {
+        if (string.IsNullOrWhiteSpace(stageBranch))
+        {
+            return "DEV";
+        }
+
+        var stage = stageBranch.StartsWith("stage/", StringComparison.OrdinalIgnoreCase)
+            ? stageBranch["stage/".Length..]
+            : stageBranch;
+        return stage.ToUpperInvariant();
     }
 
     public void SyncGameFoldersFromInstalls()
@@ -2003,6 +2122,22 @@ internal sealed class GameSetupRepository
         return Convert.ToInt64(cmd.ExecuteScalar());
     }
 }
+
+internal sealed class SharedCatalogDocument
+{
+    public int Version { get; set; } = 1;
+    public string GeneratedUtc { get; set; } = DateTimeOffset.UtcNow.ToString("O");
+    public List<SharedCatalogEntry> Mods { get; set; } = new();
+}
+
+internal sealed record SharedCatalogEntry(
+    string GameId,
+    string ModName,
+    string PrimaryPlugin,
+    string RepoId,
+    string SubmodulePath,
+    string RepoUrl,
+    string StageBranch);
 
 internal sealed record ManagedModRecord(string GameName, string InstallPath, string ModName, string PrimaryPlugin, string Stage, string ModRepoPath);
 internal sealed record KnownPluginRecord(string DisplayName, string PluginName, bool IsBaseGame, bool IsDlc);
