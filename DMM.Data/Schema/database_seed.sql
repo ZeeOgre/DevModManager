@@ -13,6 +13,57 @@ INSERT INTO Game (Name, Executable)
 SELECT 'Skyrim Special Edition', 'SkyrimSE.exe'
 WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Skyrim Special Edition');
 
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'Cyberpunk 2077', 'redprelauncher.exe', 'CP2077'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Cyberpunk 2077');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'The Last of Us Part I', '', 'TLOU1'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'The Last of Us Part I');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'The Last of Us Part II', '', 'TLOU2'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'The Last of Us Part II');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'No Man''s Sky', 'Binaries\\NMS.exe', 'NMS'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'No Man''s Sky');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'Control', 'Control_DX11.exe', 'CONTROL'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Control');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'Minecraft', '', 'MC'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Minecraft');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'Grand Theft Auto V', 'GTA5.exe', 'GTA5'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Grand Theft Auto V');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'The Outer Worlds', '', 'OUTERWORLDS'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'The Outer Worlds');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'The Outer Worlds 2', 'Arkansas/Binaries/WinGDK/TheOuterWorlds2-WinGDK-Shipping.exe', 'OUTERWORLDS2'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'The Outer Worlds 2');
+
+-- Normalize/seed preferred game abbreviations.
+UPDATE Game SET BaseGameKeyword = 'STARFIELD' WHERE Name = 'Starfield';
+UPDATE Game SET BaseGameKeyword = 'FO4' WHERE Name = 'Fallout 4';
+UPDATE Game SET BaseGameKeyword = 'SKYRIM' WHERE Name = 'Skyrim Special Edition';
+UPDATE Game SET BaseGameKeyword = 'CP2077' WHERE Name = 'Cyberpunk 2077';
+UPDATE Game SET BaseGameKeyword = 'TLOU1' WHERE Name = 'The Last of Us Part I';
+UPDATE Game SET BaseGameKeyword = 'TLOU2' WHERE Name = 'The Last of Us Part II';
+UPDATE Game SET BaseGameKeyword = 'NMS' WHERE Name = 'No Man''s Sky';
+UPDATE Game SET BaseGameKeyword = 'CONTROL' WHERE Name = 'Control';
+UPDATE Game SET BaseGameKeyword = 'MINECRAFT' WHERE Name = 'Minecraft';
+UPDATE Game SET BaseGameKeyword = 'GTA5' WHERE Name = 'Grand Theft Auto V';
+UPDATE Game SET BaseGameKeyword = 'OUTERWORLDS' WHERE Name = 'The Outer Worlds';
+UPDATE Game SET BaseGameKeyword = 'OUTERWORLDS2' WHERE Name = 'The Outer Worlds 2';
+
 INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
 SELECT 'Starfield - Shattered Space', '', g.id, 0, 1
 FROM Game g
@@ -80,12 +131,19 @@ INSERT OR IGNORE INTO GameSource (Name, SourceGameId, URL, URI) VALUES
 ('Epic', NULL, 'https://store.epicgames.com/', 'com.epicgames.launcher://'),
 ('GoG', NULL, 'https://www.gog.com/', 'goggalaxy://');
 
+-- Control store mapping intentionally deferred until scanner validation is complete.
 INSERT OR IGNORE INTO GameStoreApp (GameId, GameSourceId, StoreAppId)
 SELECT g.id, s.id, app.StoreAppId
 FROM (
     SELECT 'Starfield' AS GameName, 'Steam' AS SourceName, '1716740' AS StoreAppId
     UNION ALL SELECT 'Fallout 4', 'Steam', '377160'
     UNION ALL SELECT 'Skyrim Special Edition', 'Steam', '489830'
+    UNION ALL SELECT 'Cyberpunk 2077', 'Steam', '1091500'
+    UNION ALL SELECT 'No Man''s Sky', 'Steam', '275850'
+    UNION ALL SELECT 'The Last of Us Part I', 'Steam', '1888930'
+    UNION ALL SELECT 'The Last of Us Part II', 'Steam', '2531310'
+    UNION ALL SELECT 'No Man''s Sky', 'GamePass', 'HelloGames.NoMansSky'
+    UNION ALL SELECT 'Cyberpunk 2077', 'Epic', 'ginger'
     UNION ALL SELECT 'Starfield', 'GamePass', 'BethesdaSoftworks.ProjectGold'
     UNION ALL SELECT 'Starfield - Shattered Space', 'GamePass', 'BethesdaSoftworks.ShatteredSpace'
     UNION ALL SELECT 'Starfield - Old Mars', 'GamePass', 'BethesdaSoftworks.PGPreorderContentwPkg'
@@ -98,6 +156,7 @@ FROM (
     UNION ALL SELECT 'Fallout 4: Nuka-World', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC6Nuka-World'
     UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC5Vault-TecWorkshop'
     UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC2WastelandWorkshop'
+    UNION ALL SELECT 'The Outer Worlds 2', 'GamePass', 'Microsoft.OE-Arkansas'
 ) app
 JOIN Game g ON g.Name = app.GameName
 JOIN GameSource s ON s.Name = app.SourceName;
