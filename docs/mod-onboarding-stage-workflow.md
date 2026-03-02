@@ -359,6 +359,7 @@ This gives enough surface area for onboarding + deployment while keeping the git
 - **Yes**: Keep git orchestration fully inside DMM, with a `LibGit2Sharp`-first abstraction and CLI fallback for worktrees/submodule edge cases.
 - **Yes**: Start with copy deployment, then add links once validated.
 - **Yes**: Use safe-switch logic to handle link teardown/rebuild around branch changes.
+<<<<<<< codex/create-core-mod-repository-structure-zkcvsu
 
 
 
@@ -439,3 +440,5 @@ For each selected mod:
 
 - **Mostly in place now**: install scan, candidate scan, base-plugin exclusion, copy-first import path, settings scaffolding.
 - **Pending/next**: automatic repo creation, submodule add/sync orchestration, dmmdeps execution pipeline, branch automation, favorites/clustered game dropdown UX.
+=======
+>>>>>>> main
