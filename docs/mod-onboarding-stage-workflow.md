@@ -450,6 +450,7 @@ Recommended approach:
    - `GAMEFOLDER\Tools\ContentResources.zip`
    - base archive index/catalog for `* - Materials.ba2` (and optional other base archives if needed)
    - **Fallout 4 nuance**: treat both `Fallout4 - Materials.ba2` and `* - Main.ba2` archives as potential sources of base `BGSM` material paths.
+   - **Skyrim nuance**: no intermediate `.mat`/`BGSM` layer is expected; treat mesh/texture dependencies normally and skip `.mat` filtering for Skyrim profiles.
 2. Build an in-memory `HashSet<string>` of normalized base `.mat` paths (case-insensitive, `/` + `\` normalized).
 3. When `dmmdeps` returns candidate material dependencies (`.mat`/`BGSM`), include only paths **not** in that base set.
 4. Persist discovered base `.mat` paths in DB (cache table keyed by game + source + signature/timestamp) so subsequent runs do not re-extract unless source changed.
@@ -460,6 +461,7 @@ Cache invalidation guidance:
 
 Fallback:
 - If catalog extraction is slow/unavailable, use the DB cache as authoritative for that run and queue background refresh.
+- If a game has no material-layer concept (e.g., Skyrim), disable material-catalog extraction and proceed with non-material dependency handling only.
 
 ### Implementation state vs your checklist
 
