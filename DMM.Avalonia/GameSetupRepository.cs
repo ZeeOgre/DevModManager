@@ -211,6 +211,31 @@ internal sealed class GameSetupRepository
         return records;
     }
 
+    public IReadOnlyList<string> LoadAllManagedModRepoPaths()
+    {
+        using var connection = _database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT DISTINCT ModRepoPath
+            FROM ManagedModCatalog
+            WHERE ModRepoPath <> ""
+            ORDER BY ModRepoPath
+            """;
+
+        var paths = new List<string>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var path = reader.GetString(0);
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                paths.Add(path);
+            }
+        }
+
+        return paths;
+    }
+
     public void UpsertManagedModForInstall(
         string gameName,
         string installPath,

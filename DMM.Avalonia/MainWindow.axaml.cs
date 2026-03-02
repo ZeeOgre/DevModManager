@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System;
@@ -10,6 +11,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Threading;
 using DMM.AssetManagers.GameStores.BattleNet;
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
@@ -29,6 +31,9 @@ namespace DMM.Avalonia;
 public partial class MainWindow : Window
 {
     private readonly MainWindowViewModel _viewModel;
+    private readonly ProgramWideSettingsStore _settingsStore = new();
+    private readonly DispatcherTimer _timedAutoSyncTimer = new();
+    private bool _allowClose;
 
     public MainWindow()
     {
@@ -36,12 +41,232 @@ public partial class MainWindow : Window
         _viewModel = MainWindowViewModel.CreateSample();
         DataContext = _viewModel;
         Opened += MainWindow_Opened;
+        Closing += MainWindow_Closing;
+        _timedAutoSyncTimer.Tick += TimedAutoSyncTimer_Tick;
+    }
+
+
+    private void ConfigureTimedAutoSync()
+    {
+        var settings = _settingsStore.Load();
+        _timedAutoSyncTimer.Stop();
+
+        if (!settings.TimedAutoSyncEnabled)
+        {
+            return;
+        }
+
+        _timedAutoSyncTimer.Interval = TimeSpan.FromMinutes(Math.Max(1, settings.TimedAutoSyncIntervalMinutes));
+        _timedAutoSyncTimer.Start();
+    }
+
+    private void TimedAutoSyncTimer_Tick(object? sender, EventArgs e)
+    {
+        var stamp = DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        _viewModel.StatusMessage = _viewModel.TryAutoSyncAllManagedMods(out var message)
+            ? $"autocommit : {stamp} :: {message}"
+            : $"autocommit : {stamp} :: sync failed ({message})";
+    }
+
+    private async Task HandleModFocusCloseSyncAsync(ModListItem mod)
+    {
+        var settings = _settingsStore.Load();
+        if (settings.ModFocusSyncPreference == ModFocusSyncPreference.Never)
+        {
+            return;
+        }
+
+        ModFocusSyncPreference? chosen = settings.ModFocusSyncPreference;
+        if (chosen == ModFocusSyncPreference.Prompt)
+        {
+            chosen = await PromptModFocusSyncPreferenceAsync(mod).ConfigureAwait(true);
+            if (chosen is null)
+            {
+                return;
+            }
+        }
+
+        if (chosen == ModFocusSyncPreference.Always)
+        {
+            var stamp = DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            _viewModel.StatusMessage = _viewModel.TryAutoSyncManagedMod(mod, out var syncMessage)
+                ? $"autocommit : {stamp} :: {syncMessage}"
+                : $"autocommit : {stamp} :: sync failed ({syncMessage})";
+        }
+    }
+
+    private async Task<ModFocusSyncPreference?> PromptModFocusSyncPreferenceAsync(ModListItem mod)
+    {
+        var remember = new CheckBox { Content = "Remember my choice", IsChecked = false };
+        var syncNow = new Button { Content = "Sync this mod", MinWidth = 120 };
+        var skipSync = new Button { Content = "Close without Sync", MinWidth = 140 };
+        var cancel = new Button { Content = "Cancel", MinWidth = 88 };
+        ModFocusSyncPreference? chosenPreference = null;
+
+        var dialog = new Window
+        {
+            Title = "Focus Window Sync",
+            Width = 560,
+            Height = 220,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border
+            {
+                Margin = new Thickness(12),
+                Padding = new Thickness(12),
+                Child = new StackPanel
+                {
+                    Spacing = 12,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = $"Sync '{mod.Name}' before leaving Focus?",
+                            TextWrapping = TextWrapping.Wrap
+                        },
+                        remember,
+                        new StackPanel
+                        {
+                            Orientation = Avalonia.Layout.Orientation.Horizontal,
+                            Spacing = 8,
+                            Children = { syncNow, skipSync, cancel }
+                        }
+                    }
+                }
+            }
+        };
+
+        syncNow.Click += (_, _) =>
+        {
+            chosenPreference = ModFocusSyncPreference.Always;
+            dialog.Close();
+        };
+        skipSync.Click += (_, _) =>
+        {
+            chosenPreference = ModFocusSyncPreference.Never;
+            dialog.Close();
+        };
+        cancel.Click += (_, _) => dialog.Close();
+
+        await dialog.ShowDialog(this);
+
+        if (chosenPreference is null)
+        {
+            return null;
+        }
+
+        if (remember.IsChecked == true)
+        {
+            var updatedSettings = _settingsStore.Load();
+            updatedSettings.ModFocusSyncPreference = chosenPreference.Value;
+            _settingsStore.Save(updatedSettings);
+            ConfigureTimedAutoSync();
+        }
+
+        return chosenPreference;
+    }
+
+    private async void MainWindow_Closing(object? sender, CancelEventArgs e)
+    {
+        if (_allowClose)
+        {
+            return;
+        }
+
+        var settings = _settingsStore.Load();
+        if (settings.ExitSyncPreference == ExitSyncPreference.Never)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+
+        if (settings.ExitSyncPreference == ExitSyncPreference.Always)
+        {
+            _viewModel.TrySyncManagedRepoRoot(out _);
+            _allowClose = true;
+            Close();
+            return;
+        }
+
+        var remember = new CheckBox { Content = "Remember my choice", IsChecked = false };
+        var syncAndExit = new Button { Content = "Sync and Exit", MinWidth = 120 };
+        var exitNoSync = new Button { Content = "Exit without Sync", MinWidth = 120 };
+        var cancel = new Button { Content = "Cancel", MinWidth = 88 };
+        ExitSyncPreference? chosenPreference = null;
+
+        var dialog = new Window
+        {
+            Title = "Exit Sync",
+            Width = 620,
+            Height = 220,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border
+            {
+                Margin = new Thickness(12),
+                Padding = new Thickness(12),
+                Child = new StackPanel
+                {
+                    Spacing = 12,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = "Sync all repos before exiting? This will run pull/submodule sync on your Mod Repo Root.",
+                            TextWrapping = TextWrapping.Wrap
+                        },
+                        remember,
+                        new StackPanel
+                        {
+                            Orientation = Avalonia.Layout.Orientation.Horizontal,
+                            Spacing = 8,
+                            Children = { syncAndExit, exitNoSync, cancel }
+                        }
+                    }
+                }
+            }
+        };
+
+        syncAndExit.Click += (_, _) =>
+        {
+            chosenPreference = ExitSyncPreference.Always;
+            dialog.Close();
+        };
+        exitNoSync.Click += (_, _) =>
+        {
+            chosenPreference = ExitSyncPreference.Never;
+            dialog.Close();
+        };
+        cancel.Click += (_, _) => dialog.Close();
+
+        await dialog.ShowDialog(this);
+
+        if (chosenPreference is null)
+        {
+            return;
+        }
+
+        if (remember.IsChecked == true)
+        {
+            settings.ExitSyncPreference = chosenPreference.Value;
+            _settingsStore.Save(settings);
+        }
+
+        if (chosenPreference == ExitSyncPreference.Always)
+        {
+            _viewModel.TrySyncManagedRepoRoot(out _);
+        }
+
+        _allowClose = true;
+        Close();
     }
 
     private async void MainWindow_Opened(object? sender, System.EventArgs e)
     {
         if (_viewModel.GameInstalls.Count > 0)
         {
+            ConfigureTimedAutoSync();
             return;
         }
 
@@ -51,6 +276,8 @@ public partial class MainWindow : Window
         _viewModel.StatusMessage = _viewModel.GameInstalls.Count > 0
             ? $"First-run game setup completed. Added {_viewModel.GameInstalls.Count} game install(s)."
             : "First-run setup closed without selecting game installs.";
+
+        ConfigureTimedAutoSync();
     }
 
     private async void ScanGameFolder_Click(object? sender, RoutedEventArgs e)
@@ -187,6 +414,7 @@ public partial class MainWindow : Window
         var manageInstalls = await settingsWindow.ShowDialog<bool>(this);
         if (!manageInstalls)
         {
+            ConfigureTimedAutoSync();
             _viewModel.StatusMessage = "Settings closed.";
             return;
         }
@@ -194,6 +422,7 @@ public partial class MainWindow : Window
         var wizard = new GameInstallWizardWindow(_viewModel, isFirstRun: false);
         await wizard.ShowDialog(this);
         _viewModel.SyncGameFoldersFromInstalls();
+        ConfigureTimedAutoSync();
         _viewModel.StatusMessage = "Settings: game install management completed.";
     }
 
@@ -278,7 +507,9 @@ public partial class MainWindow : Window
         _viewModel.StatusMessage = "Git control: push/up requested.";
 
     private void GitSync_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.StatusMessage = "Git control: sync requested.";
+        _viewModel.StatusMessage = _viewModel.TrySyncManagedRepoRoot(out var syncMessage)
+            ? $"Git control: sync completed. {syncMessage}"
+            : $"Git control: sync failed. {syncMessage}";
 
     private void GitDown_Click(object? sender, RoutedEventArgs e) =>
         _viewModel.StatusMessage = "Git control: pull/down requested.";
@@ -291,7 +522,11 @@ public partial class MainWindow : Window
             var activeStages = _viewModel.GetAvailableStagesForMod(mod);
             var modWindow = new ModWindow(mod, matchingFolders, activeStages, _viewModel.SelectedGameFolder);
             await modWindow.ShowDialog(this);
-            _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
+            await HandleModFocusCloseSyncAsync(mod);
+            if (!_viewModel.StatusMessage.StartsWith("autocommit :", StringComparison.OrdinalIgnoreCase))
+            {
+                _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
+            }
         }
     }
 }
@@ -647,6 +882,8 @@ public sealed class MainWindowViewModel : NotifyBase
 
         StatusMessage =
             $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
+
+        RebuildMods();
     }
 
     private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
@@ -876,6 +1113,98 @@ public sealed class MainWindowViewModel : NotifyBase
 
         settings.LastSelectedGameFolder = selectedFolder;
         _settingsStore.Save(settings);
+    }
+
+
+    public bool TryAutoSyncManagedMod(ModListItem mod, out string message)
+    {
+        if (mod is null)
+        {
+            message = "no mod selected";
+            return false;
+        }
+
+        var selectedGameFolder = SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selectedGameFolder))
+        {
+            message = "no game folder selected";
+            return false;
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            message = "selected game folder is not mapped to a managed install";
+            return false;
+        }
+
+        var record = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name)
+            .FirstOrDefault(x =>
+                string.Equals(x.ModName, mod.Name, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(x.PrimaryPlugin, mod.PrimaryPlugin, StringComparison.OrdinalIgnoreCase));
+
+        if (record is null)
+        {
+            message = $"managed record not found for {mod.Name}";
+            return false;
+        }
+
+        var stamp = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+        var commitMessage = $"autocommit : {stamp}";
+        if (!_gitService.TryAutoCommitAndSyncRepository(record.ModRepoPath, commitMessage, out var error))
+        {
+            message = error;
+            return false;
+        }
+
+        message = $"synced {mod.Name}";
+        return true;
+    }
+
+    public bool TryAutoSyncAllManagedMods(out string message)
+    {
+        var repoPaths = _repository.LoadAllManagedModRepoPaths();
+        if (repoPaths.Count == 0)
+        {
+            message = "no managed mod repos to sync";
+            return true;
+        }
+
+        var stamp = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+        var commitMessage = $"autocommit : {stamp}";
+        var synced = 0;
+        foreach (var repoPath in repoPaths.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            if (_gitService.TryAutoCommitAndSyncRepository(repoPath, commitMessage, out _))
+            {
+                synced++;
+            }
+        }
+
+        message = $"synced {synced}/{repoPaths.Count} managed mod repo(s)";
+        return synced == repoPaths.Count;
+    }
+
+    public bool TrySyncManagedRepoRoot(out string message)
+    {
+        var settings = _settingsStore.Load();
+        var repoRoot = string.IsNullOrWhiteSpace(settings.RepoRootPath)
+            ? ProgramWideSettings.GetDefaultRepoRoot()
+            : settings.RepoRootPath;
+
+        if (!_gitService.TrySyncRepoRoot(repoRoot, out var error))
+        {
+            message = error;
+            return false;
+        }
+
+        RebuildMods();
+        message = $"Repo root synced: {repoRoot}";
+        return true;
     }
 
     public IReadOnlyList<string> GetGameFoldersForGame(string gameName)

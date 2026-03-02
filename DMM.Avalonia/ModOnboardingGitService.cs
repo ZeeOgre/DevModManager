@@ -301,6 +301,63 @@ internal sealed class ModOnboardingGitService
         return $"stage/{ToSlug(stage)}";
     }
 
+
+    public bool TryAutoCommitAndSyncRepository(string repoPath, string commitMessage, out string error)
+    {
+        error = string.Empty;
+
+        if (!IsGitWorkingTree(repoPath))
+        {
+            error = "repo path is not a git working tree";
+            return false;
+        }
+
+        if (HasPendingChanges(repoPath))
+        {
+            if (!RunGit(repoPath, "add -A", out error) ||
+                !RunGit(repoPath, $"commit -m \"{EscapeCommitMessage(commitMessage)}\"", out error))
+            {
+                return false;
+            }
+        }
+
+        if (!RunGit(repoPath, "pull --rebase --autostash", out error))
+        {
+            return false;
+        }
+
+        if (!RunGit(repoPath, "push", out error))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool TrySyncRepoRoot(string repoRoot, out string error)
+    {
+        error = string.Empty;
+
+        if (!IsGitWorkingTree(repoRoot))
+        {
+            error = "repo root is not a git working tree";
+            return false;
+        }
+
+        if (!RunGit(repoRoot, "pull --recurse-submodules", out error))
+        {
+            return false;
+        }
+
+        if (!RunGit(repoRoot, "submodule sync --recursive", out error) ||
+            !RunGit(repoRoot, "submodule update --init --recursive", out error))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private bool RunGit(string workingDirectory, string arguments, out string error)
     {
         var psi = new ProcessStartInfo
@@ -360,5 +417,11 @@ internal sealed class ModOnboardingGitService
 
         return slug.Trim('-');
     }
+
+    private static string EscapeCommitMessage(string value)
+    {
+        return (value ?? string.Empty).Replace("\\", "\\\\").Replace("\"", "\\\"");
+    }
+
 
 }
