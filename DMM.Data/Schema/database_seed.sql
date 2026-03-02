@@ -46,6 +46,10 @@ INSERT INTO Game (Name, Executable, BaseGameKeyword)
 SELECT 'The Outer Worlds', '', 'OUTERWORLDS'
 WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'The Outer Worlds');
 
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'The Outer Worlds 2', 'Arkansas/Binaries/WinGDK/TheOuterWorlds2-WinGDK-Shipping.exe', 'OUTERWORLDS2'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'The Outer Worlds 2');
+
 -- Normalize/seed preferred game abbreviations.
 UPDATE Game SET BaseGameKeyword = 'STARFIELD' WHERE Name = 'Starfield';
 UPDATE Game SET BaseGameKeyword = 'FO4' WHERE Name = 'Fallout 4';
@@ -58,6 +62,7 @@ UPDATE Game SET BaseGameKeyword = 'CONTROL' WHERE Name = 'Control';
 UPDATE Game SET BaseGameKeyword = 'MINECRAFT' WHERE Name = 'Minecraft';
 UPDATE Game SET BaseGameKeyword = 'GTA5' WHERE Name = 'Grand Theft Auto V';
 UPDATE Game SET BaseGameKeyword = 'OUTERWORLDS' WHERE Name = 'The Outer Worlds';
+UPDATE Game SET BaseGameKeyword = 'OUTERWORLDS2' WHERE Name = 'The Outer Worlds 2';
 
 INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
 SELECT 'Starfield - Shattered Space', '', g.id, 0, 1
@@ -151,6 +156,7 @@ FROM (
     UNION ALL SELECT 'Fallout 4: Nuka-World', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC6Nuka-World'
     UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC5Vault-TecWorkshop'
     UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC2WastelandWorkshop'
+    UNION ALL SELECT 'The Outer Worlds 2', 'GamePass', 'Microsoft.OE-Arkansas'
 ) app
 JOIN Game g ON g.Name = app.GameName
 JOIN GameSource s ON s.Name = app.SourceName;

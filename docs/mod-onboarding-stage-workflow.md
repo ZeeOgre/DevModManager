@@ -392,6 +392,7 @@ This section captures the expected end-to-end bootstrap sequence for a new machi
 - `CONTROL` → Control
 - `MINECRAFT` → Minecraft
 - `GTA5` → Grand Theft Auto V
+- `OUTERWORLDS2` → The Outer Worlds 2
 
 ### 2) First-run settings prompt (required)
 
