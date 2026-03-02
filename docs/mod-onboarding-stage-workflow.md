@@ -106,6 +106,37 @@ There is no built-in `git sync` command. In DMM, “sync” should be an orchest
 
 So yes to the workflow, but it is a DMM command that combines multiple git + filesystem operations.
 
+
+## Program-Wide Git/GitHub Settings
+
+Recommended settings to add:
+
+- `RepoRootPath` (existing): local mod-root working folder.
+- `GitHubAccount`: owner/user namespace (example: `ZeeOgre`).
+- `GitHubToken`: PAT used for authenticated repo operations.
+- `GitHubModRootRepo`: canonical master repo remote URL/path (example: `https://github.com/ZeeOgre/GameMods`).
+
+### Can base repo be derived from account?
+
+Usually yes (`https://github.com/<account>/GameMods`), but keep `GitHubModRootRepo` as explicit override for non-standard names/org layouts.
+
+## Onboard Transaction Sequence (Per Mod)
+
+For each new mod `{gameAbbrev}-{modName}`:
+
+1. Ensure/create remote mod repo under the configured account.
+2. Ensure local mod repo exists under local mod root.
+3. Seed folder structure in mod repo (`loosefiles/`, `inventory/`, `distribution/`, etc.).
+4. Create stage branches (`stage/dev`, `stage/test`, ...).
+5. Add mod repo to master `GameMods` as submodule and commit pointer update in master repo.
+6. Sync/pull master repo so submodule folder is present locally.
+7. Perform initial file import (copy-first) into mod repo.
+8. Run `dmmdeps` for primary plugin; place outputs in `inventory/`.
+9. Commit/push mod repo stage branch updates.
+10. Commit/push master repo submodule pointer update.
+
+This confirms your understanding is correct; the only key addition is explicit commit/push ordering for **both** repos (mod first, then master pointer update).
+
 ## End-to-End Onboarding Workflow
 
 1. **Create mod repo from DMM**
