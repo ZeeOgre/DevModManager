@@ -33,3 +33,5 @@
 - Scan/Apply onboarding expects GitHub settings to be configured (`GitHubAccount`, `GitHubToken`, `GitHubModRootRepo`).
 - For each mod, DMM should establish repo/submodule bootstrap before importing files.
 - Import target path is local mod repo `loosefiles/Data` (copy-first).
+
+- Program-wide operational settings are persisted in the local DMM database; `program-settings.json` is reserved for database bootstrap metadata only.

@@ -394,7 +394,7 @@ CREATE TABLE IF NOT EXISTS Game (
     Name                           TEXT    NOT NULL,
     Executable                     TEXT,
     NexusKeyword                   TEXT,
-    BethesdaKeyword                TEXT,
+    BaseGameKeyword                TEXT,
     GameSettingsFolderId           INTEGER NULL
                                            REFERENCES Folders (id) ON DELETE SET NULL
                                                                    ON UPDATE CASCADE,
