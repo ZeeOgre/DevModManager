@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -79,6 +79,49 @@ public partial class MainWindow : Window
         }
 
         _viewModel.ApplyScanSelections(result.SelectedMods);
+
+        if (_viewModel.StatusMessage.StartsWith("Scan apply blocked:", StringComparison.OrdinalIgnoreCase))
+        {
+            await ShowInfoDialogAsync("Scan Apply Blocked", _viewModel.StatusMessage);
+        }
+        else if (_viewModel.StatusMessage.Contains("bootstrap needed:", StringComparison.OrdinalIgnoreCase)
+                 && !_viewModel.StatusMessage.Contains("bootstrap needed: 0", StringComparison.OrdinalIgnoreCase))
+        {
+            await ShowInfoDialogAsync(
+                "Local Repo Bootstrap Needed",
+                "PAT is configured, but onboarding still needs local per-mod git repos to exist under your Mod Repo Root. " +
+                "Please create/bootstrap those repos (or use the upcoming automated bootstrap flow), then run Scan Apply again.");
+        }
+    }
+
+    private async Task ShowInfoDialogAsync(string title, string message)
+    {
+        var ok = new Button { Content = "OK", MinWidth = 88 };
+        var dialog = new Window
+        {
+            Title = title,
+            Width = 560,
+            Height = 220,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border
+            {
+                Margin = new Thickness(12),
+                Padding = new Thickness(12),
+                Child = new StackPanel
+                {
+                    Spacing = 12,
+                    Children =
+                    {
+                        new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
+                        ok
+                    }
+                }
+            }
+        };
+
+        ok.Click += (_, _) => dialog.Close();
+        await dialog.ShowDialog(this);
     }
 
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
@@ -416,6 +459,7 @@ public sealed class MainWindowViewModel : NotifyBase
         var bootstrapRequired = 0;
         var failed = 0;
         var row = 0;
+        var bootstrapPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
         {
@@ -432,6 +476,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 if (!IsGitWorkingTree(modRepoRoot))
                 {
                     bootstrapRequired++;
+                    bootstrapPaths.Add(modRepoRoot);
                     skipped++;
                     continue;
                 }
@@ -480,8 +525,12 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
+        var bootstrapPreview = bootstrapPaths.Count == 0
+            ? string.Empty
+            : $" First missing repo: {bootstrapPaths.First()}";
+
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}.{bootstrapPreview}";
     }
 
     private static bool HasRequiredGitHubSettings(ProgramWideSettings settings, out string missing)

@@ -118,6 +118,7 @@ INSERT OR IGNORE INTO GameSource (Name, SourceGameId, URL, URI) VALUES
 ('Epic', NULL, 'https://store.epicgames.com/', 'com.epicgames.launcher://'),
 ('GoG', NULL, 'https://www.gog.com/', 'goggalaxy://');
 
+-- Control store mapping intentionally deferred until scanner validation is complete.
 INSERT OR IGNORE INTO GameStoreApp (GameId, GameSourceId, StoreAppId)
 SELECT g.id, s.id, app.StoreAppId
 FROM (
@@ -142,6 +143,7 @@ FROM (
     UNION ALL SELECT 'Fallout 4: Nuka-World', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC6Nuka-World'
     UNION ALL SELECT 'Fallout 4: Vault-Tec Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC5Vault-TecWorkshop'
     UNION ALL SELECT 'Fallout 4: Wasteland Workshop', 'GamePass', 'BethesdaSoftworks.Fallout4-DLC2WastelandWorkshop'
+    UNION ALL SELECT 'The Outer Worlds 2', 'GamePass', 'Microsoft.OE-Arkansas'
 ) app
 JOIN Game g ON g.Name = app.GameName
 JOIN GameSource s ON s.Name = app.SourceName;
