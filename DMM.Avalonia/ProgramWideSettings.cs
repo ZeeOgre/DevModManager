@@ -16,6 +16,10 @@ public sealed class ProgramWideSettings
     public string GitHubAccount { get; set; } = string.Empty;
     public string GitHubToken { get; set; } = string.Empty;
     public string GitHubModRootRepo { get; set; } = string.Empty;
+    public ExitSyncPreference ExitSyncPreference { get; set; } = ExitSyncPreference.Prompt;
+    public ModFocusSyncPreference ModFocusSyncPreference { get; set; } = ModFocusSyncPreference.Prompt;
+    public bool TimedAutoSyncEnabled { get; set; } = false;
+    public int TimedAutoSyncIntervalMinutes { get; set; } = 10;
 
     public static string GetDefaultRepoRoot()
     {
@@ -28,6 +32,20 @@ public enum RepoOrganizationStrategy
 {
     GameRepoWithPerModFolders = 0,
     RepoPerMod = 1
+}
+
+public enum ExitSyncPreference
+{
+    Prompt = 0,
+    Always = 1,
+    Never = 2
+}
+
+public enum ModFocusSyncPreference
+{
+    Prompt = 0,
+    Always = 1,
+    Never = 2
 }
 
 internal sealed class ProgramBootstrapSettings
@@ -68,7 +86,11 @@ public sealed class ProgramWideSettingsStore
             LastSelectedGameFolder = ReadValue(connection, nameof(ProgramWideSettings.LastSelectedGameFolder)) ?? string.Empty,
             GitHubAccount = ReadValue(connection, nameof(ProgramWideSettings.GitHubAccount)) ?? string.Empty,
             GitHubToken = ReadValue(connection, nameof(ProgramWideSettings.GitHubToken)) ?? string.Empty,
-            GitHubModRootRepo = ReadValue(connection, nameof(ProgramWideSettings.GitHubModRootRepo)) ?? string.Empty
+            GitHubModRootRepo = ReadValue(connection, nameof(ProgramWideSettings.GitHubModRootRepo)) ?? string.Empty,
+            ExitSyncPreference = ParseEnum(ReadValue(connection, nameof(ProgramWideSettings.ExitSyncPreference)), ExitSyncPreference.Prompt),
+            ModFocusSyncPreference = ParseEnum(ReadValue(connection, nameof(ProgramWideSettings.ModFocusSyncPreference)), ModFocusSyncPreference.Prompt),
+            TimedAutoSyncEnabled = ParseBool(ReadValue(connection, nameof(ProgramWideSettings.TimedAutoSyncEnabled)), false),
+            TimedAutoSyncIntervalMinutes = ParseInt(ReadValue(connection, nameof(ProgramWideSettings.TimedAutoSyncIntervalMinutes)), 10, 1)
         };
     }
 
@@ -85,6 +107,10 @@ public sealed class ProgramWideSettingsStore
         UpsertValue(connection, nameof(ProgramWideSettings.GitHubAccount), settings.GitHubAccount);
         UpsertValue(connection, nameof(ProgramWideSettings.GitHubToken), settings.GitHubToken);
         UpsertValue(connection, nameof(ProgramWideSettings.GitHubModRootRepo), settings.GitHubModRootRepo);
+        UpsertValue(connection, nameof(ProgramWideSettings.ExitSyncPreference), settings.ExitSyncPreference.ToString());
+        UpsertValue(connection, nameof(ProgramWideSettings.ModFocusSyncPreference), settings.ModFocusSyncPreference.ToString());
+        UpsertValue(connection, nameof(ProgramWideSettings.TimedAutoSyncEnabled), settings.TimedAutoSyncEnabled ? "1" : "0");
+        UpsertValue(connection, nameof(ProgramWideSettings.TimedAutoSyncIntervalMinutes), Math.Max(1, settings.TimedAutoSyncIntervalMinutes).ToString());
 
         SaveBootstrapSettings(new ProgramBootstrapSettings
         {
@@ -127,6 +153,36 @@ public sealed class ProgramWideSettingsStore
 
     private static TEnum ParseEnum<TEnum>(string? value, TEnum fallback) where TEnum : struct
         => Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed) ? parsed : fallback;
+
+    private static bool ParseBool(string? value, bool fallback)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return fallback;
+        }
+
+        if (bool.TryParse(value, out var boolResult))
+        {
+            return boolResult;
+        }
+
+        if (int.TryParse(value, out var intResult))
+        {
+            return intResult != 0;
+        }
+
+        return fallback;
+    }
+
+    private static int ParseInt(string? value, int fallback, int minValue)
+    {
+        if (!int.TryParse(value, out var result))
+        {
+            return fallback;
+        }
+
+        return Math.Max(minValue, result);
+    }
 
     private static ProgramBootstrapSettings LoadBootstrapSettings()
     {

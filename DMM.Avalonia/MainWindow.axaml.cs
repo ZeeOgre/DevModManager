@@ -1,16 +1,18 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Threading;
 using DMM.AssetManagers.GameStores.BattleNet;
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
@@ -24,13 +26,15 @@ using DMM.AssetManagers.GameStores.Rockstar;
 using DMM.AssetManagers.GameStores.Steam;
 using DMM.AssetManagers.GameStores.XBox;
 using DMM.Data;
-using Microsoft.Data.Sqlite;
 
 namespace DMM.Avalonia;
 
 public partial class MainWindow : Window
 {
     private readonly MainWindowViewModel _viewModel;
+    private readonly ProgramWideSettingsStore _settingsStore = new();
+    private readonly DispatcherTimer _timedAutoSyncTimer = new();
+    private bool _allowClose;
 
     public MainWindow()
     {
@@ -38,12 +42,232 @@ public partial class MainWindow : Window
         _viewModel = MainWindowViewModel.CreateSample();
         DataContext = _viewModel;
         Opened += MainWindow_Opened;
+        Closing += MainWindow_Closing;
+        _timedAutoSyncTimer.Tick += TimedAutoSyncTimer_Tick;
+    }
+
+
+    private void ConfigureTimedAutoSync()
+    {
+        var settings = _settingsStore.Load();
+        _timedAutoSyncTimer.Stop();
+
+        if (!settings.TimedAutoSyncEnabled)
+        {
+            return;
+        }
+
+        _timedAutoSyncTimer.Interval = TimeSpan.FromMinutes(Math.Max(1, settings.TimedAutoSyncIntervalMinutes));
+        _timedAutoSyncTimer.Start();
+    }
+
+    private void TimedAutoSyncTimer_Tick(object? sender, EventArgs e)
+    {
+        var stamp = DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        _viewModel.StatusMessage = _viewModel.TryAutoSyncAllManagedMods(out var message)
+            ? $"autocommit : {stamp} :: {message}"
+            : $"autocommit : {stamp} :: sync failed ({message})";
+    }
+
+    private async Task HandleModFocusCloseSyncAsync(ModListItem mod)
+    {
+        var settings = _settingsStore.Load();
+        if (settings.ModFocusSyncPreference == ModFocusSyncPreference.Never)
+        {
+            return;
+        }
+
+        ModFocusSyncPreference? chosen = settings.ModFocusSyncPreference;
+        if (chosen == ModFocusSyncPreference.Prompt)
+        {
+            chosen = await PromptModFocusSyncPreferenceAsync(mod).ConfigureAwait(true);
+            if (chosen is null)
+            {
+                return;
+            }
+        }
+
+        if (chosen == ModFocusSyncPreference.Always)
+        {
+            var stamp = DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            _viewModel.StatusMessage = _viewModel.TryAutoSyncManagedMod(mod, out var syncMessage)
+                ? $"autocommit : {stamp} :: {syncMessage}"
+                : $"autocommit : {stamp} :: sync failed ({syncMessage})";
+        }
+    }
+
+    private async Task<ModFocusSyncPreference?> PromptModFocusSyncPreferenceAsync(ModListItem mod)
+    {
+        var remember = new CheckBox { Content = "Remember my choice", IsChecked = false };
+        var syncNow = new Button { Content = "Sync this mod", MinWidth = 120 };
+        var skipSync = new Button { Content = "Close without Sync", MinWidth = 140 };
+        var cancel = new Button { Content = "Cancel", MinWidth = 88 };
+        ModFocusSyncPreference? chosenPreference = null;
+
+        var dialog = new Window
+        {
+            Title = "Focus Window Sync",
+            Width = 560,
+            Height = 220,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border
+            {
+                Margin = new Thickness(12),
+                Padding = new Thickness(12),
+                Child = new StackPanel
+                {
+                    Spacing = 12,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = $"Sync '{mod.Name}' before leaving Focus?",
+                            TextWrapping = TextWrapping.Wrap
+                        },
+                        remember,
+                        new StackPanel
+                        {
+                            Orientation = global::Avalonia.Layout.Orientation.Horizontal,
+                            Spacing = 8,
+                            Children = { syncNow, skipSync, cancel }
+                        }
+                    }
+                }
+            }
+        };
+
+        syncNow.Click += (_, _) =>
+        {
+            chosenPreference = ModFocusSyncPreference.Always;
+            dialog.Close();
+        };
+        skipSync.Click += (_, _) =>
+        {
+            chosenPreference = ModFocusSyncPreference.Never;
+            dialog.Close();
+        };
+        cancel.Click += (_, _) => dialog.Close();
+
+        await dialog.ShowDialog(this);
+
+        if (chosenPreference is null)
+        {
+            return null;
+        }
+
+        if (remember.IsChecked == true)
+        {
+            var updatedSettings = _settingsStore.Load();
+            updatedSettings.ModFocusSyncPreference = chosenPreference.Value;
+            _settingsStore.Save(updatedSettings);
+            ConfigureTimedAutoSync();
+        }
+
+        return chosenPreference;
+    }
+
+    private async void MainWindow_Closing(object? sender, CancelEventArgs e)
+    {
+        if (_allowClose)
+        {
+            return;
+        }
+
+        var settings = _settingsStore.Load();
+        if (settings.ExitSyncPreference == ExitSyncPreference.Never)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+
+        if (settings.ExitSyncPreference == ExitSyncPreference.Always)
+        {
+            _viewModel.TrySyncManagedRepoRoot(out _);
+            _allowClose = true;
+            Close();
+            return;
+        }
+
+        var remember = new CheckBox { Content = "Remember my choice", IsChecked = false };
+        var syncAndExit = new Button { Content = "Sync and Exit", MinWidth = 120 };
+        var exitNoSync = new Button { Content = "Exit without Sync", MinWidth = 120 };
+        var cancel = new Button { Content = "Cancel", MinWidth = 88 };
+        ExitSyncPreference? chosenPreference = null;
+
+        var dialog = new Window
+        {
+            Title = "Exit Sync",
+            Width = 620,
+            Height = 220,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border
+            {
+                Margin = new Thickness(12),
+                Padding = new Thickness(12),
+                Child = new StackPanel
+                {
+                    Spacing = 12,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = "Sync all repos before exiting? This will run pull/submodule sync on your Mod Repo Root.",
+                            TextWrapping = TextWrapping.Wrap
+                        },
+                        remember,
+                        new StackPanel
+                        {
+                            Orientation = global::Avalonia.Layout.Orientation.Horizontal,
+                            Spacing = 8,
+                            Children = { syncAndExit, exitNoSync, cancel }
+                        }
+                    }
+                }
+            }
+        };
+
+        syncAndExit.Click += (_, _) =>
+        {
+            chosenPreference = ExitSyncPreference.Always;
+            dialog.Close();
+        };
+        exitNoSync.Click += (_, _) =>
+        {
+            chosenPreference = ExitSyncPreference.Never;
+            dialog.Close();
+        };
+        cancel.Click += (_, _) => dialog.Close();
+
+        await dialog.ShowDialog(this);
+
+        if (chosenPreference is null)
+        {
+            return;
+        }
+
+        if (remember.IsChecked == true)
+        {
+            settings.ExitSyncPreference = chosenPreference.Value;
+            _settingsStore.Save(settings);
+        }
+
+        if (chosenPreference == ExitSyncPreference.Always)
+        {
+            _viewModel.TrySyncManagedRepoRoot(out _);
+        }
+
+        _allowClose = true;
+        Close();
     }
 
     private async void MainWindow_Opened(object? sender, System.EventArgs e)
     {
         if (_viewModel.GameInstalls.Count > 0)
         {
+            ConfigureTimedAutoSync();
             return;
         }
 
@@ -53,6 +277,20 @@ public partial class MainWindow : Window
         _viewModel.StatusMessage = _viewModel.GameInstalls.Count > 0
             ? $"First-run game setup completed. Added {_viewModel.GameInstalls.Count} game install(s)."
             : "First-run setup closed without selecting game installs.";
+
+        ConfigureTimedAutoSync();
+    }
+
+    private async void RescanGameFolder_Click(object? sender, RoutedEventArgs e)
+    {
+        var selections = _viewModel.GetCurrentManagedSelectionsForRescan();
+        if (selections.Count == 0)
+        {
+            _viewModel.StatusMessage = "Rescan skipped: no managed mods are currently listed for the selected folder.";
+            return;
+        }
+
+        await RunScanApplyWithProgressDialogAsync(selections);
     }
 
     private async void ScanGameFolder_Click(object? sender, RoutedEventArgs e)
@@ -78,7 +316,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        _viewModel.ApplyScanSelections(result.SelectedMods);
+        await RunScanApplyWithProgressDialogAsync(result.SelectedMods);
 
         if (_viewModel.StatusMessage.StartsWith("Scan apply blocked:", StringComparison.OrdinalIgnoreCase))
         {
@@ -91,6 +329,58 @@ public partial class MainWindow : Window
                 "Local Repo Bootstrap Needed",
                 "PAT is configured, but onboarding still needs local per-mod git repos to exist under your Mod Repo Root. " +
                 "Please create/bootstrap those repos (or use the upcoming automated bootstrap flow), then run Scan Apply again.");
+        }
+    }
+
+    private async Task RunScanApplyWithProgressDialogAsync(IReadOnlyList<GameFolderStageSelection> selections)
+    {
+        var progressWindow = new Window
+        {
+            Title = "Applying Scan Selection",
+            Width = 520,
+            Height = 200,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border
+            {
+                Margin = new Thickness(12),
+                Padding = new Thickness(12),
+                Child = new StackPanel
+                {
+                    Spacing = 10,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = "Applying selected mods. This can take a moment while DMM bootstraps repositories, syncs submodules, and commits onboarding files.",
+                            TextWrapping = TextWrapping.Wrap
+                        },
+                        new ProgressBar
+                        {
+                            IsIndeterminate = true,
+                            Height = 12,
+                            MinWidth = 420
+                        },
+                        new TextBlock
+                        {
+                            Text = "Working... please wait.",
+                            FontStyle = FontStyle.Italic
+                        }
+                    }
+                }
+            }
+        };
+
+        _ = progressWindow.ShowDialog(this);
+        await Task.Delay(50);
+
+        try
+        {
+            _viewModel.ApplyScanSelections(selections);
+        }
+        finally
+        {
+            progressWindow.Close();
         }
     }
 
@@ -124,6 +414,7 @@ public partial class MainWindow : Window
         await dialog.ShowDialog(this);
     }
 
+
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
     {
         var helpWindow = HelpWindow.ForSection("Main");
@@ -137,6 +428,7 @@ public partial class MainWindow : Window
         var manageInstalls = await settingsWindow.ShowDialog<bool>(this);
         if (!manageInstalls)
         {
+            ConfigureTimedAutoSync();
             _viewModel.StatusMessage = "Settings closed.";
             return;
         }
@@ -144,6 +436,7 @@ public partial class MainWindow : Window
         var wizard = new GameInstallWizardWindow(_viewModel, isFirstRun: false);
         await wizard.ShowDialog(this);
         _viewModel.SyncGameFoldersFromInstalls();
+        ConfigureTimedAutoSync();
         _viewModel.StatusMessage = "Settings: game install management completed.";
     }
 
@@ -228,7 +521,9 @@ public partial class MainWindow : Window
         _viewModel.StatusMessage = "Git control: push/up requested.";
 
     private void GitSync_Click(object? sender, RoutedEventArgs e) =>
-        _viewModel.StatusMessage = "Git control: sync requested.";
+        _viewModel.StatusMessage = _viewModel.TrySyncManagedRepoRoot(out var syncMessage)
+            ? $"Git control: sync completed. {syncMessage}"
+            : $"Git control: sync failed. {syncMessage}";
 
     private void GitDown_Click(object? sender, RoutedEventArgs e) =>
         _viewModel.StatusMessage = "Git control: pull/down requested.";
@@ -241,7 +536,11 @@ public partial class MainWindow : Window
             var activeStages = _viewModel.GetAvailableStagesForMod(mod);
             var modWindow = new ModWindow(mod, matchingFolders, activeStages, _viewModel.SelectedGameFolder);
             await modWindow.ShowDialog(this);
-            _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
+            await HandleModFocusCloseSyncAsync(mod);
+            if (!_viewModel.StatusMessage.StartsWith("autocommit :", StringComparison.OrdinalIgnoreCase))
+            {
+                _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
+            }
         }
     }
 }
@@ -250,6 +549,9 @@ public sealed class MainWindowViewModel : NotifyBase
 {
     private readonly GameSetupRepository _repository = new();
     private readonly ProgramWideSettingsStore _settingsStore = new();
+    private readonly ModOnboardingGitService _gitService = new();
+    private readonly SharedCatalogService _catalogService = new();
+    private readonly ModDependencyDiscoveryService _dependencyDiscoveryService = new();
 
     public ObservableCollection<string> GameFolders { get; } = new();
     public ObservableCollection<string> StageOptions { get; } = new();
@@ -345,6 +647,30 @@ public sealed class MainWindowViewModel : NotifyBase
         RebuildMods();
     }
 
+    public IReadOnlyList<GameFolderStageSelection> GetCurrentManagedSelectionsForRescan()
+    {
+        var selectedGameFolder = SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selectedGameFolder))
+        {
+            return Array.Empty<GameFolderStageSelection>();
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            return Array.Empty<GameFolderStageSelection>();
+        }
+
+        return _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name)
+            .Select(x => new GameFolderStageSelection(x.ModName, x.PrimaryPlugin, x.Stage))
+            .OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
     public GameFolderScanResult ScanSelectedGameFolderForMods()
     {
         if (string.IsNullOrWhiteSpace(SelectedGameFolder))
@@ -353,10 +679,11 @@ public sealed class MainWindowViewModel : NotifyBase
             return GameFolderScanResult.Failed();
         }
 
+        var selectedGameFolder = SelectedGameFolder!;
         var install = GameInstalls.FirstOrDefault(x =>
             !x.IsDlc &&
             x.ManagedGame is not null &&
-            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
 
         if (install?.ManagedGame is null)
         {
@@ -364,11 +691,9 @@ public sealed class MainWindowViewModel : NotifyBase
             return GameFolderScanResult.Failed();
         }
 
-        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
-        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
-        if (!Directory.Exists(scanRoot))
+        if (!TryResolveGameDataRoot(selectedGameFolder, out var scanRoot, out _))
         {
-            StatusMessage = $"Scan failed: game data folder not found at '{scanRoot}'.";
+            StatusMessage = $"Scan failed: game data folder not found under '{selectedGameFolder}'.";
             return GameFolderScanResult.Failed();
         }
 
@@ -376,6 +701,16 @@ public sealed class MainWindowViewModel : NotifyBase
             .Select(x => x.PluginName)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var knownPluginBaseNames = knownPluginNames
+            .Select(Path.GetFileNameWithoutExtension)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var existingManagedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name);
+        var managedPluginNames = existingManagedMods
+            .Select(x => x.PrimaryPlugin)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var managedPluginBaseNames = managedPluginNames
             .Select(Path.GetFileNameWithoutExtension)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -392,6 +727,8 @@ public sealed class MainWindowViewModel : NotifyBase
             })
             .Where(name => !knownPluginNames.Contains(name))
             .Where(name => !knownPluginBaseNames.Contains(Path.GetFileNameWithoutExtension(name)))
+            .Where(name => !managedPluginNames.Contains(name))
+            .Where(name => !managedPluginBaseNames.Contains(Path.GetFileNameWithoutExtension(name)))
             .Where(name => !IsOfficialPluginName(install.ManagedGame.Name, name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .GroupBy(name => Path.GetFileNameWithoutExtension(name), StringComparer.OrdinalIgnoreCase)
@@ -423,10 +760,12 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
+        var selectedGameFolder = SelectedGameFolder!;
+
         var install = GameInstalls.FirstOrDefault(x =>
             !x.IsDlc &&
             x.ManagedGame is not null &&
-            string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase));
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
 
         if (install?.ManagedGame is null)
         {
@@ -434,11 +773,9 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
-        var dataFolder = Path.Combine(SelectedGameFolder, "Data");
-        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : SelectedGameFolder;
-        if (!Directory.Exists(scanRoot))
+        if (!TryResolveGameDataRoot(selectedGameFolder, out var scanRoot, out var resolvedGameRoot))
         {
-            StatusMessage = $"Scan apply failed: game data folder not found at '{scanRoot}'.";
+            StatusMessage = $"Scan apply failed: game data folder not found under '{selectedGameFolder}'.";
             return;
         }
 
@@ -447,7 +784,7 @@ public sealed class MainWindowViewModel : NotifyBase
             ? ProgramWideSettings.GetDefaultRepoRoot()
             : settings.RepoRootPath;
 
-        if (!HasRequiredGitHubSettings(settings, out var missingSettings))
+        if (!_gitService.HasRequiredGitHubSettings(settings, out var missingSettings))
         {
             StatusMessage = $"Scan apply blocked: configure GitHub settings first ({missingSettings}) in Program Settings.";
             return;
@@ -460,6 +797,9 @@ public sealed class MainWindowViewModel : NotifyBase
         var failed = 0;
         var row = 0;
         var bootstrapPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var dependencyFilesIncluded = 0;
+        var dependencyCollisionCount = 0;
+        long dependencyScanMsTotal = 0;
 
         foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
         {
@@ -473,10 +813,29 @@ public sealed class MainWindowViewModel : NotifyBase
             try
             {
                 var modRepoRoot = BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization);
-                if (!IsGitWorkingTree(modRepoRoot))
+                if (!_gitService.IsGitWorkingTree(modRepoRoot))
+                {
+                    var bootstrapped = _gitService.TryBootstrapModRepository(
+                        settings,
+                        repoRoot,
+                        install.ManagedGame.Name,
+                        selection.ModName,
+                        modRepoRoot,
+                        out var bootstrapError);
+                    if (!bootstrapped)
+                    {
+                        bootstrapRequired++;
+                        bootstrapPaths.Add($"{modRepoRoot} ({bootstrapError})");
+                        skipped++;
+                        continue;
+                    }
+                }
+
+                var targetStageBranch = _gitService.ToStageBranch(selection.Stage);
+                if (!_gitService.EnsureBranchCheckedOut(modRepoRoot, targetStageBranch, out var branchError))
                 {
                     bootstrapRequired++;
-                    bootstrapPaths.Add(modRepoRoot);
+                    bootstrapPaths.Add($"{modRepoRoot} ({branchError})");
                     skipped++;
                     continue;
                 }
@@ -484,24 +843,85 @@ public sealed class MainWindowViewModel : NotifyBase
                 var stageFolder = Path.Combine(modRepoRoot, "loosefiles", "Data");
                 Directory.CreateDirectory(stageFolder);
 
-                var initialFiles = CollectInitialModFiles(scanRoot, selection.ModName, selection.PluginName)
-                    .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+                var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
+                var initialEntries = discovery.Entries
+                    .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
-                if (initialFiles.Count == 0)
+                dependencyFilesIncluded += initialEntries.Count;
+                dependencyCollisionCount += discovery.CollisionCount;
+                dependencyScanMsTotal += discovery.ScanMs;
+
+                if (initialEntries.Count == 0)
                 {
                     skipped++;
                     continue;
                 }
 
-                foreach (var file in initialFiles)
+                foreach (var entry in initialEntries)
                 {
-                    var target = Path.Combine(stageFolder, Path.GetFileName(file));
-                    File.Copy(file, target, overwrite: true);
+                    var relUnderData = entry.RelativeDataPath.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                        ? entry.RelativeDataPath["Data\\".Length..]
+                        : entry.RelativeDataPath;
+                    var target = Path.Combine(stageFolder, relUnderData);
+                    Directory.CreateDirectory(Path.GetDirectoryName(target) ?? stageFolder);
+                    File.Copy(entry.SourcePath, target, overwrite: true);
                     copiedFiles++;
 
-                    // Intentionally copy-only for now; link-back is reserved for a later validation milestone.
+                    if (!string.IsNullOrWhiteSpace(entry.XboxRelativePath) && !string.IsNullOrWhiteSpace(entry.XboxSourcePath))
+                    {
+                        var xboxRel = entry.XboxRelativePath!.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                            ? entry.XboxRelativePath["Data\\".Length..]
+                            : entry.XboxRelativePath;
+                        var xboxFolder = Path.Combine(modRepoRoot, "loosefiles", "XBOX", "Data");
+                        var xboxTarget = Path.Combine(xboxFolder, xboxRel);
+                        Directory.CreateDirectory(Path.GetDirectoryName(xboxTarget) ?? xboxFolder);
+                        File.Copy(entry.XboxSourcePath!, xboxTarget, overwrite: true);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(entry.TifRelativePath) && !string.IsNullOrWhiteSpace(entry.TifSourcePath))
+                    {
+                        var tifRel = entry.TifRelativePath!.StartsWith("TGATextures\\", StringComparison.OrdinalIgnoreCase)
+                            ? entry.TifRelativePath["TGATextures\\".Length..]
+                            : entry.TifRelativePath;
+                        var tifFolder = Path.Combine(modRepoRoot, "loosefiles", "TGATextures");
+                        var tifTarget = Path.Combine(tifFolder, tifRel);
+                        Directory.CreateDirectory(Path.GetDirectoryName(tifTarget) ?? tifFolder);
+                        File.Copy(entry.TifSourcePath!, tifTarget, overwrite: true);
+                    }
                 }
+
+                WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries);
+
+                var relativeSubmodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
+                    .Replace('\\', '/');
+                if (!_gitService.CommitAndPushOnboardingChanges(repoRoot, modRepoRoot, relativeSubmodulePath, targetStageBranch, selection.ModName, out var commitError))
+                {
+                    bootstrapRequired++;
+                    bootstrapPaths.Add($"{modRepoRoot} ({commitError})");
+                    skipped++;
+                    continue;
+                }
+
+                _repository.UpsertManagedModForInstall(
+                    install.ManagedGame.Name,
+                    selectedGameFolder,
+                    selection.ModName,
+                    selection.PluginName,
+                    selection.Stage,
+                    modRepoRoot);
+
+                var modRepoName = $"{_gitService.ToSlug(install.ManagedGame.Name)}-{_gitService.ToSlug(selection.ModName)}";
+                var submodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
+                    .Replace('\\', '/');
+                _catalogService.UpsertEntry(repoRoot, new SharedCatalogEntry(
+                    install.ManagedGame.Name,
+                    selection.ModName,
+                    selection.PluginName,
+                    modRepoName,
+                    submodulePath,
+                    $"https://github.com/{settings.GitHubAccount}/{modRepoName}.git",
+                    targetStageBranch));
 
                 Mods.Add(new ModListItem(
                     selection.ModName,
@@ -530,110 +950,76 @@ public sealed class MainWindowViewModel : NotifyBase
             : $" First missing repo: {bootstrapPaths.First()}";
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}.{bootstrapPreview}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
+
+        RebuildMods();
     }
 
-    private static bool HasRequiredGitHubSettings(ProgramWideSettings settings, out string missing)
+    private static void WriteMetadataFiles(
+        string modRepoRoot,
+        string modName,
+        string pluginName,
+        IReadOnlyList<ModDependencyEntry> entries)
     {
-        var missingItems = new List<string>();
-        if (string.IsNullOrWhiteSpace(settings.GitHubAccount)) missingItems.Add(nameof(settings.GitHubAccount));
-        if (string.IsNullOrWhiteSpace(settings.GitHubToken)) missingItems.Add(nameof(settings.GitHubToken));
-        if (string.IsNullOrWhiteSpace(settings.GitHubModRootRepo)) missingItems.Add(nameof(settings.GitHubModRootRepo));
+        var metadataFolder = Path.Combine(modRepoRoot, "metadata");
+        Directory.CreateDirectory(metadataFolder);
 
-        missing = string.Join(", ", missingItems);
-        return missingItems.Count == 0;
-    }
-
-    private static bool IsGitWorkingTree(string repoPath)
-    {
-        if (!Directory.Exists(repoPath))
-        {
-            return false;
-        }
-
-        var dotGit = Path.Combine(repoPath, ".git");
-        return Directory.Exists(dotGit) || File.Exists(dotGit);
-    }
-
-    private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
-    {
-        var normalizedModName = NormalizePluginBaseName(modName);
-        var primaryPath = Path.Combine(scanRoot, primaryPlugin);
-
-        var pluginFiles = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(path =>
-            {
-                var ext = Path.GetExtension(path);
-                return string.Equals(ext, ".esm", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(ext, ".esp", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(ext, ".esl", StringComparison.OrdinalIgnoreCase);
-            })
-            .Where(path => NormalizePluginBaseName(Path.GetFileNameWithoutExtension(path)).Contains(normalizedModName, StringComparison.OrdinalIgnoreCase))
+        var achlistPath = Path.Combine(metadataFolder, $"{modName}.achlist");
+        var achlist = entries
+            .Select(x => x.RelativeDataPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
             .ToList();
+        var achlistJson = JsonSerializer.Serialize(achlist, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(achlistPath, achlistJson);
 
-        if (File.Exists(primaryPath) && !pluginFiles.Contains(primaryPath, StringComparer.OrdinalIgnoreCase))
+        var catalogPath = Path.Combine(metadataFolder, "catalog.json");
+        var catalogPayload = new
         {
-            pluginFiles.Add(primaryPath);
-        }
-
-        var archiveCandidates = new[]
-        {
-            $"{modName} - Main.ba2",
-            $"{modName} - Main_xbox.ba2",
-            $"{modName} - Textures.ba2",
-            $"{modName} - Textures_xbox.ba2"
+            mod = modName,
+            plugin = pluginName,
+            generatedUtc = DateTimeOffset.UtcNow,
+            files = entries
+                .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
+                .Select(x => new
+                {
+                    pcPath = x.RelativeDataPath,
+                    xboxPath = x.XboxRelativePath,
+                    tifPath = x.TifRelativePath
+                })
+                .ToList()
         };
-
-        var archiveFiles = archiveCandidates
-            .Select(name => Path.Combine(scanRoot, name))
-            .Where(File.Exists)
-            .ToList();
-
-        return pluginFiles
-            .Concat(archiveFiles)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
+        var catalogJson = JsonSerializer.Serialize(catalogPayload, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(catalogPath, catalogJson);
     }
 
-    private static int GetPluginExtensionPriority(string extension)
+    private static bool TryResolveGameDataRoot(string selectedGameFolder, out string dataRoot, out string gameRoot)
     {
-        if (string.Equals(extension, ".esp", StringComparison.OrdinalIgnoreCase))
+        dataRoot = string.Empty;
+        gameRoot = selectedGameFolder;
+
+        var directData = Path.Combine(selectedGameFolder, "Data");
+        if (Directory.Exists(directData))
         {
-            return 0;
+            dataRoot = directData;
+            return true;
         }
 
-        if (string.Equals(extension, ".esm", StringComparison.OrdinalIgnoreCase))
+        var contentData = Path.Combine(selectedGameFolder, "Content", "Data");
+        if (Directory.Exists(contentData))
         {
-            return 1;
+            dataRoot = contentData;
+            gameRoot = Path.Combine(selectedGameFolder, "Content");
+            return true;
         }
 
-        if (string.Equals(extension, ".esl", StringComparison.OrdinalIgnoreCase))
+        if (Directory.Exists(selectedGameFolder))
         {
-            return 2;
+            dataRoot = selectedGameFolder;
+            return true;
         }
 
-        return 3;
-    }
-
-    private static bool IsOfficialPluginName(string gameName, string pluginName)
-    {
-        if (!string.Equals(gameName, "Starfield", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var baseName = NormalizePluginBaseName(Path.GetFileNameWithoutExtension(pluginName));
-        return StarfieldOfficialPluginBaseNames.Contains(baseName);
-    }
-
-    private static string NormalizePluginBaseName(string? baseName)
-    {
-        if (string.IsNullOrWhiteSpace(baseName))
-        {
-            return string.Empty;
-        }
-
-        var chars = baseName.Where(char.IsLetterOrDigit).ToArray();
-        return new string(chars).ToLowerInvariant();
+        return false;
     }
 
     private static string BuildModRepoRoot(string repoRoot, string gameName, string modName, RepoOrganizationStrategy strategy)
@@ -666,9 +1052,85 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         Mods.Clear();
 
-        StatusMessage = string.IsNullOrWhiteSpace(SelectedGameFolder)
-            ? "Ready. Select a game folder, scan for mods, and onboard only the mods you edit."
-            : "Ready. Scan the selected game folder to onboard mods under management.";
+        var selectedGameFolder = SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selectedGameFolder))
+        {
+            StatusMessage = "Ready. Select a game folder, scan for mods, and onboard only the mods you edit.";
+            return;
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            StatusMessage = "Ready. Scan the selected game folder to onboard mods under management.";
+            return;
+        }
+
+        var persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name).ToList();
+        if (persistedMods.Count == 0)
+        {
+            var settings = _settingsStore.Load();
+            var repoRoot = string.IsNullOrWhiteSpace(settings.RepoRootPath)
+                ? ProgramWideSettings.GetDefaultRepoRoot()
+                : settings.RepoRootPath;
+            var imported = ImportManagedModsFromSharedCatalog(repoRoot, selectedGameFolder, install.ManagedGame.Name);
+            if (imported > 0)
+            {
+                persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name).ToList();
+            }
+        }
+
+        var row = 0;
+        foreach (var mod in persistedMods)
+        {
+            Mods.Add(new ModListItem(
+                mod.ModName,
+                mod.PrimaryPlugin,
+                mod.Stage,
+                mod.GameName,
+                string.Empty,
+                string.Empty,
+                new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
+        }
+
+        StatusMessage = persistedMods.Count == 0
+            ? "Ready. Scan the selected game folder to onboard mods under management."
+            : $"Loaded {persistedMods.Count} managed mod(s) for this game install.";
+    }
+
+    private int ImportManagedModsFromSharedCatalog(string repoRoot, string installPath, string gameName)
+    {
+        var catalog = _catalogService.Load(repoRoot);
+        if (catalog.Mods.Count == 0)
+        {
+            return 0;
+        }
+
+        var imported = 0;
+        foreach (var entry in catalog.Mods
+                     .Where(x => string.Equals(x.GameId, gameName, StringComparison.OrdinalIgnoreCase)))
+        {
+            var modRepoPath = Path.Combine(repoRoot, entry.SubmodulePath.Replace('/', Path.DirectorySeparatorChar));
+            if (!_gitService.IsGitWorkingTree(modRepoPath))
+            {
+                continue;
+            }
+
+            _repository.UpsertManagedModForInstall(
+                gameName,
+                installPath,
+                entry.ModName,
+                entry.PrimaryPlugin,
+                SharedCatalogService.ToStageDisplayName(entry.StageBranch),
+                modRepoPath);
+            imported++;
+        }
+
+        return imported;
     }
 
     public void SyncGameFoldersFromInstalls()
@@ -708,6 +1170,98 @@ public sealed class MainWindowViewModel : NotifyBase
 
         settings.LastSelectedGameFolder = selectedFolder;
         _settingsStore.Save(settings);
+    }
+
+
+    public bool TryAutoSyncManagedMod(ModListItem mod, out string message)
+    {
+        if (mod is null)
+        {
+            message = "no mod selected";
+            return false;
+        }
+
+        var selectedGameFolder = SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selectedGameFolder))
+        {
+            message = "no game folder selected";
+            return false;
+        }
+
+        var install = GameInstalls.FirstOrDefault(x =>
+            !x.IsDlc &&
+            x.ManagedGame is not null &&
+            string.Equals(x.InstallPath, selectedGameFolder, StringComparison.OrdinalIgnoreCase));
+
+        if (install?.ManagedGame is null)
+        {
+            message = "selected game folder is not mapped to a managed install";
+            return false;
+        }
+
+        var record = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name)
+            .FirstOrDefault(x =>
+                string.Equals(x.ModName, mod.Name, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(x.PrimaryPlugin, mod.PrimaryPlugin, StringComparison.OrdinalIgnoreCase));
+
+        if (record is null)
+        {
+            message = $"managed record not found for {mod.Name}";
+            return false;
+        }
+
+        var stamp = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+        var commitMessage = $"autocommit : {stamp}";
+        if (!_gitService.TryAutoCommitAndSyncRepository(record.ModRepoPath, commitMessage, out var error))
+        {
+            message = error;
+            return false;
+        }
+
+        message = $"synced {mod.Name}";
+        return true;
+    }
+
+    public bool TryAutoSyncAllManagedMods(out string message)
+    {
+        var repoPaths = _repository.LoadAllManagedModRepoPaths();
+        if (repoPaths.Count == 0)
+        {
+            message = "no managed mod repos to sync";
+            return true;
+        }
+
+        var stamp = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+        var commitMessage = $"autocommit : {stamp}";
+        var synced = 0;
+        foreach (var repoPath in repoPaths.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            if (_gitService.TryAutoCommitAndSyncRepository(repoPath, commitMessage, out _))
+            {
+                synced++;
+            }
+        }
+
+        message = $"synced {synced}/{repoPaths.Count} managed mod repo(s)";
+        return synced == repoPaths.Count;
+    }
+
+    public bool TrySyncManagedRepoRoot(out string message)
+    {
+        var settings = _settingsStore.Load();
+        var repoRoot = string.IsNullOrWhiteSpace(settings.RepoRootPath)
+            ? ProgramWideSettings.GetDefaultRepoRoot()
+            : settings.RepoRootPath;
+
+        if (!_gitService.TrySyncRepoRoot(repoRoot, out var error))
+        {
+            message = error;
+            return false;
+        }
+
+        RebuildMods();
+        message = $"Repo root synced: {repoRoot}";
+        return true;
     }
 
     public IReadOnlyList<string> GetGameFoldersForGame(string gameName)
@@ -940,619 +1494,6 @@ public sealed class MainWindowViewModel : NotifyBase
         ];
     }
 }
-
-internal sealed class GameSetupRepository
-{
-    private readonly DatabaseManager _database = new();
-
-    public IReadOnlyList<ManagedGame> LoadManagedGames()
-    {
-        using var connection = _database.OpenConnection();
-        using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT g.Name,
-                   COALESCE(g.Executable, ''),
-                   COALESCE((
-                       SELECT gsa.StoreAppId
-                       FROM GameStoreApp gsa
-                       JOIN GameSource gs ON gs.id = gsa.GameSourceId
-                       WHERE gsa.GameId = g.id
-                         AND gs.Name = 'Steam'
-                       ORDER BY gsa.id
-                       LIMIT 1
-                   ), '')
-            FROM Game g
-            WHERE g.IsDlc = 0
-            ORDER BY g.Name
-            """;
-
-        var games = new List<ManagedGame>();
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            var name = reader.GetString(0);
-            games.Add(new ManagedGame
-            {
-                Name = name,
-                Executable = reader.GetString(1),
-                StoreId = reader.GetString(2)
-            });
-        }
-
-        return games;
-    }
-
-    public IReadOnlyList<KnownGameCatalogRecord> LoadKnownGameCatalog()
-    {
-        using var connection = _database.OpenConnection();
-        using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT g.Name,
-                   g.IsDlc,
-                   parent.Name,
-                   COALESCE(gsa.StoreAppId, '')
-            FROM Game g
-            LEFT JOIN Game parent ON parent.id = g.ParentGameId
-            LEFT JOIN GameStoreApp gsa ON gsa.GameId = g.id
-            """;
-
-        var records = new List<KnownGameCatalogRecord>();
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            records.Add(new KnownGameCatalogRecord(
-                reader.GetString(0),
-                reader.GetInt64(1) == 1,
-                reader.IsDBNull(2) ? null : reader.GetString(2),
-                reader.GetString(3)));
-        }
-
-        return records;
-    }
-
-    public IReadOnlyList<KnownPluginRecord> LoadKnownPluginsForGame(string gameName)
-    {
-        using var connection = _database.OpenConnection();
-        using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT kp.DisplayName, kp.PluginName, kp.IsBaseGame, kp.IsDlc
-            FROM GameKnownPlugin kp
-            JOIN Game g ON g.id = kp.GameId
-            WHERE g.Name = $gameName
-            ORDER BY kp.PluginName
-            """;
-        command.Parameters.AddWithValue("$gameName", gameName);
-
-        var plugins = new List<KnownPluginRecord>();
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            plugins.Add(new KnownPluginRecord(
-                reader.GetString(0),
-                reader.GetString(1),
-                reader.GetInt64(2) == 1,
-                reader.GetInt64(3) == 1));
-        }
-
-        return plugins;
-    }
-
-    public IReadOnlyList<KnownPluginRecord> LoadKnownPluginsForGameIncludingDlc(string gameName)
-    {
-        using var connection = _database.OpenConnection();
-        using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT kp.DisplayName, kp.PluginName, kp.IsBaseGame, kp.IsDlc
-            FROM GameKnownPlugin kp
-            JOIN Game g ON g.id = kp.GameId
-            LEFT JOIN Game parent ON parent.id = g.ParentGameId
-            WHERE g.Name = $gameName OR parent.Name = $gameName
-            ORDER BY kp.PluginName
-            """;
-        command.Parameters.AddWithValue("$gameName", gameName);
-
-        var plugins = new List<KnownPluginRecord>();
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            plugins.Add(new KnownPluginRecord(
-                reader.GetString(0),
-                reader.GetString(1),
-                reader.GetInt64(2) == 1,
-                reader.GetInt64(3) == 1));
-        }
-
-        return plugins;
-    }
-
-    public IReadOnlyList<GameInstallRecord> LoadManagedInstalls(IEnumerable<ManagedGame> managedGames)
-    {
-        using var connection = _database.OpenConnection();
-        using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT COALESCE(gs.Name, ''), COALESCE(g.Name, ''), COALESCE(gsi.StoreAppId, ''), COALESCE(f.Path, ''),
-                   CASE WHEN EXISTS (
-                       SELECT 1 FROM GameStoreProductLink l
-                       WHERE l.ChildInstallId = gsi.id AND l.LinkType = 'DLC'
-                   ) THEN 1 ELSE 0 END AS IsDlc
-            FROM GameStoreInstall gsi
-            LEFT JOIN GameStoreRoot gsr ON gsr.id = gsi.GameStoreRootId
-            LEFT JOIN GameSource gs ON gs.id = gsr.GameSourceId
-            LEFT JOIN Game g ON g.id = gsi.GameId
-            LEFT JOIN Folders f ON f.id = gsi.InstallFolderId
-            ORDER BY gsi.LastSeenDT DESC
-            """;
-
-        var managedByName = managedGames.ToDictionary(x => x.Name, x => x, StringComparer.OrdinalIgnoreCase);
-        var installs = new List<GameInstallRecord>();
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            var gameName = reader.GetString(1);
-            managedByName.TryGetValue(gameName, out var game);
-            installs.Add(new GameInstallRecord
-            {
-                Manage = true,
-                GameStore = reader.GetString(0),
-                ManagedGame = game,
-                StoreAppId = reader.GetString(2),
-                InstallPath = reader.GetString(3),
-                IsDlc = reader.GetInt64(4) == 1
-            });
-        }
-
-        return installs;
-    }
-
-    public void UpsertManagedGame(ManagedGame game)
-    {
-        using var connection = _database.OpenConnection();
-
-        using var exists = connection.CreateCommand();
-        exists.CommandText = "SELECT id FROM Game WHERE Name = $name LIMIT 1";
-        exists.Parameters.AddWithValue("$name", game.Name);
-        var existingId = exists.ExecuteScalar();
-
-        using var command = connection.CreateCommand();
-        if (existingId is null)
-        {
-            command.CommandText = "INSERT INTO Game (Name, Executable) VALUES ($name, $exe)";
-        }
-        else
-        {
-            command.CommandText = "UPDATE Game SET Executable = $exe WHERE id = $id";
-            command.Parameters.AddWithValue("$id", (long)existingId);
-        }
-
-        command.Parameters.AddWithValue("$name", game.Name);
-        command.Parameters.AddWithValue("$exe", game.Executable);
-        command.ExecuteNonQuery();
-    }
-
-    public void ReplaceManagedInstalls(IReadOnlyList<GameInstallRecord> installs, IReadOnlyCollection<ManagedGame> managedGames)
-    {
-        using var connection = _database.OpenConnection();
-        using var tx = connection.BeginTransaction();
-
-        using (var clear = connection.CreateCommand())
-        {
-            clear.Transaction = tx;
-            clear.CommandText = "DELETE FROM GameStoreInstall";
-            clear.ExecuteNonQuery();
-        }
-
-        var gameIdLookup = LoadGameIdLookup(connection, tx);
-        foreach (var game in managedGames)
-        {
-            EnsureGameId(connection, tx, gameIdLookup, game);
-        }
-
-        var folderTypeId = EnsureFolderType(connection, tx, "GameInstall");
-        var folderRoleId = EnsureFolderRole(connection, tx, "GameInstall");
-        var fileStorageKindId = EnsureFileStorageKind(connection, tx, "Primary", "Game/discovered file on disk");
-
-        foreach (var install in installs)
-        {
-            var installFolderId = EnsureFolder(connection, tx, install.InstallPath, folderTypeId, folderRoleId);
-            var rootPath = Path.GetPathRoot(install.InstallPath) ?? install.InstallPath;
-            var rootFolderId = EnsureFolder(connection, tx, rootPath, folderTypeId, folderRoleId);
-            var sourceId = EnsureGameSource(connection, tx, install.GameStore);
-            var rootId = EnsureStoreRoot(connection, tx, sourceId, rootFolderId);
-
-            var storeAppId = !string.IsNullOrWhiteSpace(install.StoreAppId)
-                ? install.StoreAppId
-                : !string.IsNullOrWhiteSpace(install.ManagedGame?.StoreId)
-                    ? install.ManagedGame.StoreId
-                    : $"custom:{install.InstallPath}";
-
-            long? gameId = EnsureGameId(connection, tx, gameIdLookup, install.ManagedGame);
-
-            using var cmd = connection.CreateCommand();
-            cmd.Transaction = tx;
-            cmd.CommandText = """
-                INSERT INTO GameStoreInstall (
-                    GameStoreRootId, InstallFolderId, GameId, StoreAppId, DisplayName, ExecutableName, LastSeenDT)
-                VALUES ($rootId, $installFolderId, $gameId, $storeAppId, $displayName, $exe, $now)
-                """;
-            cmd.Parameters.AddWithValue("$rootId", rootId);
-            cmd.Parameters.AddWithValue("$installFolderId", installFolderId);
-            cmd.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
-            cmd.Parameters.AddWithValue("$storeAppId", storeAppId);
-            cmd.Parameters.AddWithValue("$displayName", install.ManagedGame?.Name ?? "Unknown");
-            cmd.Parameters.AddWithValue("$exe", install.ManagedGame?.Executable ?? string.Empty);
-            cmd.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
-            cmd.ExecuteNonQuery();
-
-            var childInstallId = ReadLastInsertRowId(connection, tx);
-            PersistInstallManifestFiles(connection, tx, childInstallId, gameId, fileStorageKindId, folderTypeId, folderRoleId, install);
-
-            if (install.IsDlc && !string.IsNullOrWhiteSpace(install.ManagedGame?.StoreId))
-            {
-                using var link = connection.CreateCommand();
-                link.Transaction = tx;
-                link.CommandText = """
-                    INSERT OR IGNORE INTO GameStoreProductLink (
-                        ChildInstallId, ParentGameSourceId, ParentStoreAppId, LinkType)
-                    VALUES ($childInstallId, $parentGameSourceId, $parentStoreAppId, 'DLC')
-                    """;
-                link.Parameters.AddWithValue("$childInstallId", childInstallId);
-                link.Parameters.AddWithValue("$parentGameSourceId", sourceId);
-                link.Parameters.AddWithValue("$parentStoreAppId", install.ManagedGame.StoreId);
-                link.ExecuteNonQuery();
-            }
-        }
-
-        tx.Commit();
-    }
-
-    private static long EnsureFileStorageKind(SqliteConnection connection, SqliteTransaction tx, string name, string description)
-    {
-        using var select = connection.CreateCommand();
-        select.Transaction = tx;
-        select.CommandText = "SELECT id FROM FileStorageKind WHERE Name = $name LIMIT 1";
-        select.Parameters.AddWithValue("$name", name);
-        var existing = select.ExecuteScalar();
-        if (existing is long id)
-        {
-            return id;
-        }
-
-        using var insert = connection.CreateCommand();
-        insert.Transaction = tx;
-        insert.CommandText = "INSERT INTO FileStorageKind (Name, Description) VALUES ($name, $description)";
-        insert.Parameters.AddWithValue("$name", name);
-        insert.Parameters.AddWithValue("$description", description);
-        insert.ExecuteNonQuery();
-        return ReadLastInsertRowId(connection, tx);
-    }
-
-    private static void PersistInstallManifestFiles(
-        SqliteConnection connection,
-        SqliteTransaction tx,
-        long installId,
-        long? gameId,
-        long fileStorageKindId,
-        long folderTypeId,
-        long folderRoleId,
-        GameInstallRecord install)
-    {
-        if (string.IsNullOrWhiteSpace(install.BaseGameManifestPath) || !File.Exists(install.BaseGameManifestPath))
-        {
-            return;
-        }
-
-        using var stream = File.OpenRead(install.BaseGameManifestPath);
-        using var doc = JsonDocument.Parse(stream);
-        if (!doc.RootElement.TryGetProperty("Files", out var files) || files.ValueKind != JsonValueKind.Array)
-        {
-            return;
-        }
-
-        foreach (var fileEntry in files.EnumerateArray())
-        {
-            if (!fileEntry.TryGetProperty("RelativePath", out var relativePathElement))
-            {
-                continue;
-            }
-
-            var relativePath = relativePathElement.GetString();
-            if (string.IsNullOrWhiteSpace(relativePath))
-            {
-                continue;
-            }
-
-            var extension = Path.GetExtension(relativePath);
-            if (!IsKnownGameDataExtension(extension))
-            {
-                continue;
-            }
-
-            var fileName = Path.GetFileName(relativePath);
-            var size = fileEntry.TryGetProperty("SizeBytes", out var sizeElement) ? sizeElement.GetInt64() : 0L;
-            var dtStamp = fileEntry.TryGetProperty("LastWriteUtc", out var lastWriteElement) &&
-                          lastWriteElement.ValueKind == JsonValueKind.String &&
-                          DateTimeOffset.TryParse(lastWriteElement.GetString(), out var parsed)
-                ? parsed
-                : DateTimeOffset.UtcNow;
-
-            var relativeFolderPath = Path.GetDirectoryName(relativePath)?.Replace('\\', '/');
-            var relativeFolderId = EnsureRelativeFolderId(connection, tx, relativeFolderPath, folderTypeId, folderRoleId);
-            var fileTypeId = TryFindFileTypeId(connection, tx, extension);
-            var fileInfoId = EnsureManifestFileInfo(connection, tx, fileName, size, dtStamp, gameId, fileTypeId, relativeFolderId, fileStorageKindId);
-
-            using var insertLink = connection.CreateCommand();
-            insertLink.Transaction = tx;
-            insertLink.CommandText = """
-                INSERT OR IGNORE INTO GameStoreInstallFile (
-                    InstallId, FileInfoId, RelativePath, FileRole, IsPresentOnDisk, LastValidatedDT)
-                VALUES ($installId, $fileInfoId, $relativePath, 'Reference', 1, $lastValidated)
-                """;
-            insertLink.Parameters.AddWithValue("$installId", installId);
-            insertLink.Parameters.AddWithValue("$fileInfoId", fileInfoId);
-            insertLink.Parameters.AddWithValue("$relativePath", relativePath.Replace('\\', '/'));
-            insertLink.Parameters.AddWithValue("$lastValidated", dtStamp.ToString("O"));
-            insertLink.ExecuteNonQuery();
-        }
-    }
-
-    private static long? EnsureRelativeFolderId(
-        SqliteConnection connection,
-        SqliteTransaction tx,
-        string? relativeFolderPath,
-        long folderTypeId,
-        long folderRoleId)
-    {
-        if (string.IsNullOrWhiteSpace(relativeFolderPath) || relativeFolderPath == ".")
-        {
-            return null;
-        }
-
-        using var select = connection.CreateCommand();
-        select.Transaction = tx;
-        select.CommandText = "SELECT id FROM Folders WHERE Path = $path LIMIT 1";
-        select.Parameters.AddWithValue("$path", relativeFolderPath);
-        var existing = select.ExecuteScalar();
-        if (existing is long id)
-        {
-            return id;
-        }
-
-        using var insert = connection.CreateCommand();
-        insert.Transaction = tx;
-        insert.CommandText = "INSERT INTO Folders (Path, FolderTypeId, FolderRoleId) VALUES ($path, $folderTypeId, $folderRoleId)";
-        insert.Parameters.AddWithValue("$path", relativeFolderPath);
-        insert.Parameters.AddWithValue("$folderTypeId", folderTypeId);
-        insert.Parameters.AddWithValue("$folderRoleId", folderRoleId);
-        insert.ExecuteNonQuery();
-        return ReadLastInsertRowId(connection, tx);
-    }
-
-    private static bool IsKnownGameDataExtension(string? extension)
-        => extension is not null && (
-            extension.Equals(".esm", StringComparison.OrdinalIgnoreCase) ||
-            extension.Equals(".esl", StringComparison.OrdinalIgnoreCase) ||
-            extension.Equals(".esp", StringComparison.OrdinalIgnoreCase) ||
-            extension.Equals(".ba2", StringComparison.OrdinalIgnoreCase) ||
-            extension.Equals(".bsa", StringComparison.OrdinalIgnoreCase));
-
-    private static long? TryFindFileTypeId(SqliteConnection connection, SqliteTransaction tx, string? extension)
-    {
-        if (string.IsNullOrWhiteSpace(extension))
-        {
-            return null;
-        }
-
-        using var cmd = connection.CreateCommand();
-        cmd.Transaction = tx;
-        cmd.CommandText = "SELECT id FROM FileType WHERE LOWER(FileExtension) = $ext LIMIT 1";
-        cmd.Parameters.AddWithValue("$ext", extension.ToLowerInvariant());
-        var result = cmd.ExecuteScalar();
-        return result is long id ? id : null;
-    }
-
-    private static long EnsureManifestFileInfo(
-        SqliteConnection connection,
-        SqliteTransaction tx,
-        string name,
-        long size,
-        DateTimeOffset dtStamp,
-        long? gameId,
-        long? fileTypeId,
-        long? relativeFolderId,
-        long fileStorageKindId)
-    {
-        using var select = connection.CreateCommand();
-        select.Transaction = tx;
-        select.CommandText = """
-            SELECT id FROM FileInfo
-            WHERE Name = $name
-              AND Size = $size
-              AND IFNULL(GameId, 0) = IFNULL($gameId, 0)
-              AND IFNULL(FileTypeId, 0) = IFNULL($fileTypeId, 0)
-              AND IFNULL(RelativeFolderId, 0) = IFNULL($relativeFolderId, 0)
-            LIMIT 1
-            """;
-        select.Parameters.AddWithValue("$name", name);
-        select.Parameters.AddWithValue("$size", size);
-        select.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
-        select.Parameters.AddWithValue("$fileTypeId", fileTypeId.HasValue ? fileTypeId.Value : DBNull.Value);
-        select.Parameters.AddWithValue("$relativeFolderId", relativeFolderId.HasValue ? relativeFolderId.Value : DBNull.Value);
-        var existing = select.ExecuteScalar();
-        if (existing is long id)
-        {
-            return id;
-        }
-
-        using var insert = connection.CreateCommand();
-        insert.Transaction = tx;
-        insert.CommandText = """
-            INSERT INTO FileInfo (Name, DTStamp, Size, GameId, FileTypeId, RelativeFolderId, FileStorageKindId)
-            VALUES ($name, $dtStamp, $size, $gameId, $fileTypeId, $relativeFolderId, $fileStorageKindId)
-            """;
-        insert.Parameters.AddWithValue("$name", name);
-        insert.Parameters.AddWithValue("$dtStamp", dtStamp.ToString("O"));
-        insert.Parameters.AddWithValue("$size", size);
-        insert.Parameters.AddWithValue("$gameId", gameId.HasValue ? gameId.Value : DBNull.Value);
-        insert.Parameters.AddWithValue("$fileTypeId", fileTypeId.HasValue ? fileTypeId.Value : DBNull.Value);
-        insert.Parameters.AddWithValue("$relativeFolderId", relativeFolderId.HasValue ? relativeFolderId.Value : DBNull.Value);
-        insert.Parameters.AddWithValue("$fileStorageKindId", fileStorageKindId);
-        insert.ExecuteNonQuery();
-        return ReadLastInsertRowId(connection, tx);
-    }
-
-    private static long? EnsureGameId(
-        SqliteConnection connection,
-        SqliteTransaction tx,
-        IDictionary<string, long> gameIdLookup,
-        ManagedGame? game)
-    {
-        if (game is null || string.IsNullOrWhiteSpace(game.Name))
-        {
-            return null;
-        }
-
-        if (gameIdLookup.TryGetValue(game.Name, out var existingId))
-        {
-            return existingId;
-        }
-
-        using var insert = connection.CreateCommand();
-        insert.Transaction = tx;
-        insert.CommandText = "INSERT INTO Game (Name, Executable) VALUES ($name, $exe)";
-        insert.Parameters.AddWithValue("$name", game.Name);
-        insert.Parameters.AddWithValue("$exe", game.Executable ?? string.Empty);
-        insert.ExecuteNonQuery();
-
-        var createdId = ReadLastInsertRowId(connection, tx);
-        gameIdLookup[game.Name] = createdId;
-        return createdId;
-    }
-
-    private static Dictionary<string, long> LoadGameIdLookup(SqliteConnection connection, SqliteTransaction tx)
-    {
-        using var cmd = connection.CreateCommand();
-        cmd.Transaction = tx;
-        cmd.CommandText = "SELECT id, Name FROM Game";
-        var result = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
-        using var reader = cmd.ExecuteReader();
-        while (reader.Read())
-        {
-            result[reader.GetString(1)] = reader.GetInt64(0);
-        }
-        return result;
-    }
-
-    private static long EnsureFolderType(SqliteConnection connection, SqliteTransaction tx, string name)
-        => EnsureByName(connection, tx, "FolderType", name);
-
-    private static long EnsureFolderRole(SqliteConnection connection, SqliteTransaction tx, string name)
-        => EnsureByName(connection, tx, "FolderRole", name);
-
-    private static long EnsureByName(SqliteConnection connection, SqliteTransaction tx, string tableName, string name)
-    {
-        using var select = connection.CreateCommand();
-        select.Transaction = tx;
-        select.CommandText = $"SELECT id FROM {tableName} WHERE Name = $name LIMIT 1";
-        select.Parameters.AddWithValue("$name", name);
-        var existing = select.ExecuteScalar();
-        if (existing is long id)
-        {
-            return id;
-        }
-
-        using var insert = connection.CreateCommand();
-        insert.Transaction = tx;
-        insert.CommandText = $"INSERT INTO {tableName} (Name) VALUES ($name)";
-        insert.Parameters.AddWithValue("$name", name);
-        insert.ExecuteNonQuery();
-        return ReadLastInsertRowId(connection, tx);
-    }
-
-    private static long EnsureFolder(SqliteConnection connection, SqliteTransaction tx, string path, long folderTypeId, long folderRoleId)
-    {
-        using var select = connection.CreateCommand();
-        select.Transaction = tx;
-        select.CommandText = "SELECT id FROM Folders WHERE Path = $path LIMIT 1";
-        select.Parameters.AddWithValue("$path", path);
-        var existing = select.ExecuteScalar();
-        if (existing is long id)
-        {
-            return id;
-        }
-
-        using var insert = connection.CreateCommand();
-        insert.Transaction = tx;
-        insert.CommandText = "INSERT INTO Folders (Path, FolderTypeId, FolderRoleId) VALUES ($path, $typeId, $roleId)";
-        insert.Parameters.AddWithValue("$path", path);
-        insert.Parameters.AddWithValue("$typeId", folderTypeId);
-        insert.Parameters.AddWithValue("$roleId", folderRoleId);
-        insert.ExecuteNonQuery();
-        return ReadLastInsertRowId(connection, tx);
-    }
-
-    private static long EnsureGameSource(SqliteConnection connection, SqliteTransaction tx, string store)
-    {
-        var normalizedStore = string.IsNullOrWhiteSpace(store) ? "Custom" : store.Trim();
-
-        var sourceName = normalizedStore switch
-        {
-            "Game Pass" => "GamePass",
-            "GOG" => "GoG",
-            _ => normalizedStore
-        };
-
-        using var select = connection.CreateCommand();
-        select.Transaction = tx;
-        select.CommandText = "SELECT id FROM GameSource WHERE Name = $name LIMIT 1";
-        select.Parameters.AddWithValue("$name", sourceName);
-        var existing = select.ExecuteScalar();
-        if (existing is long id)
-        {
-            return id;
-        }
-
-        using var insert = connection.CreateCommand();
-        insert.Transaction = tx;
-        insert.CommandText = "INSERT INTO GameSource (Name) VALUES ($name)";
-        insert.Parameters.AddWithValue("$name", sourceName);
-        insert.ExecuteNonQuery();
-        return ReadLastInsertRowId(connection, tx);
-    }
-
-    private static long EnsureStoreRoot(SqliteConnection connection, SqliteTransaction tx, long gameSourceId, long rootFolderId)
-    {
-        using var select = connection.CreateCommand();
-        select.Transaction = tx;
-        select.CommandText = "SELECT id FROM GameStoreRoot WHERE GameSourceId = $sourceId AND RootFolderId = $folderId AND RootType = 'Library' LIMIT 1";
-        select.Parameters.AddWithValue("$sourceId", gameSourceId);
-        select.Parameters.AddWithValue("$folderId", rootFolderId);
-        var existing = select.ExecuteScalar();
-        if (existing is long id)
-        {
-            return id;
-        }
-
-        using var insert = connection.CreateCommand();
-        insert.Transaction = tx;
-        insert.CommandText = "INSERT INTO GameStoreRoot (GameSourceId, RootFolderId, RootType, LastSeenDT) VALUES ($sourceId, $folderId, 'Library', $now)";
-        insert.Parameters.AddWithValue("$sourceId", gameSourceId);
-        insert.Parameters.AddWithValue("$folderId", rootFolderId);
-        insert.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
-        insert.ExecuteNonQuery();
-        return ReadLastInsertRowId(connection, tx);
-    }
-
-    private static long ReadLastInsertRowId(SqliteConnection connection, SqliteTransaction tx)
-    {
-        using var cmd = connection.CreateCommand();
-        cmd.Transaction = tx;
-        cmd.CommandText = "SELECT last_insert_rowid();";
-        return Convert.ToInt64(cmd.ExecuteScalar());
-    }
-}
-
-internal sealed record KnownPluginRecord(string DisplayName, string PluginName, bool IsBaseGame, bool IsDlc);
-internal sealed record KnownGameCatalogRecord(string GameName, bool IsDlc, string? ParentGameName, string StoreAppId);
 
 public sealed class ModListItem
 {
