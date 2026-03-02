@@ -120,6 +120,27 @@ Recommended settings to add:
 
 Usually yes (`https://github.com/<account>/GameMods`), but keep `GitHubModRootRepo` as explicit override for non-standard names/org layouts.
 
+
+## Local Folder Strategy and Submodule Timing
+
+Desired local working layout is supported:
+
+```text
+<ModRoot>/Starfield/<modName>/
+```
+
+(Equivalent for other games using their game folder key.)
+
+### Important guardrail
+
+Do **not** import mod files into a folder that has not yet been bootstrapped as a git repo/submodule working tree.
+
+Recommended order:
+1. Create remote per-mod repo (`{gameAbbrev}-{modName}`).
+2. Add repo as submodule in master `GameMods`.
+3. Sync master repo/submodules locally so `<ModRoot>/<Game>/<modName>` is a real git working tree.
+4. Only then run copy-first onboarding import into `loosefiles/Data`.
+
 ## Onboard Transaction Sequence (Per Mod)
 
 For each new mod `{gameAbbrev}-{modName}`:

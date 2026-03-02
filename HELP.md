@@ -27,3 +27,9 @@
   3. Set expiration and restrict repository access to needed repos.
 - Store token in DMM program settings for git operations.
 - Security note: avoid broad scopes and rotate token periodically.
+
+
+## Onboarding Guardrails
+- Scan/Apply onboarding expects GitHub settings to be configured (`GitHubAccount`, `GitHubToken`, `GitHubModRootRepo`).
+- For each mod, DMM should establish repo/submodule bootstrap before importing files.
+- Import target path is local mod repo `loosefiles/Data` (copy-first).

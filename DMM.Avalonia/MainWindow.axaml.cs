@@ -403,9 +403,16 @@ public sealed class MainWindowViewModel : NotifyBase
             ? ProgramWideSettings.GetDefaultRepoRoot()
             : settings.RepoRootPath;
 
+        if (!HasRequiredGitHubSettings(settings, out var missingSettings))
+        {
+            StatusMessage = $"Scan apply blocked: configure GitHub settings first ({missingSettings}) in Program Settings.";
+            return;
+        }
+
         var created = 0;
         var copiedFiles = 0;
         var skipped = 0;
+        var bootstrapRequired = 0;
         var failed = 0;
         var row = 0;
 
@@ -421,6 +428,13 @@ public sealed class MainWindowViewModel : NotifyBase
             try
             {
                 var modRepoRoot = BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization);
+                if (!IsGitWorkingTree(modRepoRoot))
+                {
+                    bootstrapRequired++;
+                    skipped++;
+                    continue;
+                }
+
                 var stageFolder = Path.Combine(modRepoRoot, "loosefiles", "Data");
                 Directory.CreateDirectory(stageFolder);
 
@@ -466,7 +480,29 @@ public sealed class MainWindowViewModel : NotifyBase
         }
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped}; failed {failed}. Repo root: {repoRoot}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}";
+    }
+
+    private static bool HasRequiredGitHubSettings(ProgramWideSettings settings, out string missing)
+    {
+        var missingItems = new List<string>();
+        if (string.IsNullOrWhiteSpace(settings.GitHubAccount)) missingItems.Add(nameof(settings.GitHubAccount));
+        if (string.IsNullOrWhiteSpace(settings.GitHubToken)) missingItems.Add(nameof(settings.GitHubToken));
+        if (string.IsNullOrWhiteSpace(settings.GitHubModRootRepo)) missingItems.Add(nameof(settings.GitHubModRootRepo));
+
+        missing = string.Join(", ", missingItems);
+        return missingItems.Count == 0;
+    }
+
+    private static bool IsGitWorkingTree(string repoPath)
+    {
+        if (!Directory.Exists(repoPath))
+        {
+            return false;
+        }
+
+        var dotGit = Path.Combine(repoPath, ".git");
+        return Directory.Exists(dotGit) || File.Exists(dotGit);
     }
 
     private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
