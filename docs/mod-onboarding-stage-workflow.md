@@ -172,7 +172,11 @@ This confirms your understanding is correct; the only key addition is explicit c
 8. Commit + push mod repo.
 9. Commit + push `GameMods` submodule pointer.
 
+Implementation guardrail: never commit the parent `GameMods` repo while the submodule has uncommitted changes; commit/push inside the mod repo first, then update the parent pointer.
+
 Yes, a final re-sync of `GameMods` remains useful on other machines/working directories so the updated submodule pointer is pulled everywhere.
+
+Within the same local clone, DMM can also run a local `submodule sync --recursive` + `submodule update --init --recursive` after parent push so parent/submodule metadata stays clean in UI tools.
 
 ## End-to-End Onboarding Workflow
 

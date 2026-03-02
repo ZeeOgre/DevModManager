@@ -494,6 +494,15 @@ public sealed class MainWindowViewModel : NotifyBase
                     }
                 }
 
+                var targetStageBranch = ToStageBranch(selection.Stage);
+                if (!EnsureBranchCheckedOut(modRepoRoot, targetStageBranch, out var branchError))
+                {
+                    bootstrapRequired++;
+                    bootstrapPaths.Add($"{modRepoRoot} ({branchError})");
+                    skipped++;
+                    continue;
+                }
+
                 var stageFolder = Path.Combine(modRepoRoot, "loosefiles", "Data");
                 Directory.CreateDirectory(stageFolder);
 
@@ -514,6 +523,16 @@ public sealed class MainWindowViewModel : NotifyBase
                     copiedFiles++;
 
                     // Intentionally copy-only for now; link-back is reserved for a later validation milestone.
+                }
+
+                var relativeSubmodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
+                    .Replace('\\', '/');
+                if (!CommitAndPushOnboardingChanges(repoRoot, modRepoRoot, relativeSubmodulePath, targetStageBranch, selection.ModName, out var commitError))
+                {
+                    bootstrapRequired++;
+                    bootstrapPaths.Add($"{modRepoRoot} ({commitError})");
+                    skipped++;
+                    continue;
                 }
 
                 Mods.Add(new ModListItem(
@@ -543,7 +562,7 @@ public sealed class MainWindowViewModel : NotifyBase
             : $" First missing repo: {bootstrapPaths.First()}";
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}.{bootstrapPreview}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
     }
 
     private static bool HasRequiredGitHubSettings(ProgramWideSettings settings, out string missing)
@@ -705,6 +724,109 @@ public sealed class MainWindowViewModel : NotifyBase
         return true;
     }
 
+    private static bool EnsureBranchCheckedOut(string repoPath, string branch, out string error)
+    {
+        error = string.Empty;
+
+        if (RunGit(repoPath, $"show-ref --verify --quiet refs/heads/{branch}", out _))
+        {
+            return RunGit(repoPath, $"checkout {branch}", out error);
+        }
+
+        if (RunGit(repoPath, $"ls-remote --exit-code --heads origin {branch}", out _))
+        {
+            return RunGit(repoPath, $"checkout -b {branch} --track origin/{branch}", out error);
+        }
+
+        if (!RunGit(repoPath, $"checkout -b {branch}", out error))
+        {
+            return false;
+        }
+
+        _ = RunGit(repoPath, $"push -u origin {branch}", out _);
+        return true;
+    }
+
+    private static bool CommitAndPushOnboardingChanges(
+        string masterRepoPath,
+        string modRepoPath,
+        string relativeSubmodulePath,
+        string stageBranch,
+        string modName,
+        out string error)
+    {
+        error = string.Empty;
+
+        if (!HasPendingChanges(modRepoPath))
+        {
+            return true;
+        }
+
+        if (!RunGit(modRepoPath, "add .", out error) ||
+            !RunGit(modRepoPath, $"commit -m \"Onboard {modName} into {stageBranch}\"", out error) ||
+            !RunGit(modRepoPath, $"push -u origin {stageBranch}", out error))
+        {
+            return false;
+        }
+
+        if (!RunGit(masterRepoPath, $"add \"{relativeSubmodulePath}\"", out error))
+        {
+            return false;
+        }
+
+        if (HasPendingChanges(masterRepoPath))
+        {
+            if (!RunGit(masterRepoPath, $"commit -m \"Update submodule {relativeSubmodulePath}\"", out error) ||
+                !RunGit(masterRepoPath, "push", out error))
+            {
+                return false;
+            }
+        }
+
+        // Keep local parent/submodule metadata aligned after pointer updates.
+        if (!RunGit(masterRepoPath, "submodule sync --recursive", out error) ||
+            !RunGit(masterRepoPath, "submodule update --init --recursive", out error))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool HasPendingChanges(string repoPath)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "git",
+            Arguments = "status --porcelain",
+            WorkingDirectory = repoPath,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+        if (process is null)
+        {
+            return false;
+        }
+
+        var stdout = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+        return process.ExitCode == 0 && !string.IsNullOrWhiteSpace(stdout);
+    }
+
+    private static string ToStageBranch(string stage)
+    {
+        if (string.IsNullOrWhiteSpace(stage))
+        {
+            return "stage/dev";
+        }
+
+        return $"stage/{ToSlug(stage)}";
+    }
+
     private static bool RunGit(string workingDirectory, string arguments, out string error)
     {
         var psi = new ProcessStartInfo
@@ -725,6 +847,8 @@ public sealed class MainWindowViewModel : NotifyBase
             return false;
         }
 
+        var stdout = process.StandardOutput.ReadToEnd().Trim();
+        var stderr = process.StandardError.ReadToEnd().Trim();
         process.WaitForExit();
         if (process.ExitCode == 0)
         {
@@ -732,8 +856,6 @@ public sealed class MainWindowViewModel : NotifyBase
             return true;
         }
 
-        var stderr = process.StandardError.ReadToEnd().Trim();
-        var stdout = process.StandardOutput.ReadToEnd().Trim();
         error = string.IsNullOrWhiteSpace(stderr) ? stdout : stderr;
         return false;
     }
