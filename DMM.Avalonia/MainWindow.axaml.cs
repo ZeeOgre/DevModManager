@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -78,6 +79,49 @@ public partial class MainWindow : Window
         }
 
         _viewModel.ApplyScanSelections(result.SelectedMods);
+
+        if (_viewModel.StatusMessage.StartsWith("Scan apply blocked:", StringComparison.OrdinalIgnoreCase))
+        {
+            await ShowInfoDialogAsync("Scan Apply Blocked", _viewModel.StatusMessage);
+        }
+        else if (_viewModel.StatusMessage.Contains("bootstrap needed:", StringComparison.OrdinalIgnoreCase)
+                 && !_viewModel.StatusMessage.Contains("bootstrap needed: 0", StringComparison.OrdinalIgnoreCase))
+        {
+            await ShowInfoDialogAsync(
+                "Local Repo Bootstrap Needed",
+                "PAT is configured, but onboarding still needs local per-mod git repos to exist under your Mod Repo Root. " +
+                "Please create/bootstrap those repos (or use the upcoming automated bootstrap flow), then run Scan Apply again.");
+        }
+    }
+
+    private async Task ShowInfoDialogAsync(string title, string message)
+    {
+        var ok = new Button { Content = "OK", MinWidth = 88 };
+        var dialog = new Window
+        {
+            Title = title,
+            Width = 560,
+            Height = 220,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border
+            {
+                Margin = new Thickness(12),
+                Padding = new Thickness(12),
+                Child = new StackPanel
+                {
+                    Spacing = 12,
+                    Children =
+                    {
+                        new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
+                        ok
+                    }
+                }
+            }
+        };
+
+        ok.Click += (_, _) => dialog.Close();
+        await dialog.ShowDialog(this);
     }
 
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
@@ -193,7 +237,9 @@ public partial class MainWindow : Window
     {
         if (sender is Button { CommandParameter: ModListItem mod })
         {
-            var modWindow = new ModWindow(mod, _viewModel.GameFolders, _viewModel.StageOptions);
+            var matchingFolders = _viewModel.GetGameFoldersForGame(mod.GameName);
+            var activeStages = _viewModel.GetAvailableStagesForMod(mod);
+            var modWindow = new ModWindow(mod, matchingFolders, activeStages, _viewModel.SelectedGameFolder);
             await modWindow.ShowDialog(this);
             _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
         }
@@ -226,6 +272,7 @@ public sealed class MainWindowViewModel : NotifyBase
         {
             if (SetField(ref _selectedGameFolder, value))
             {
+                PersistLastSelectedGameFolder(value);
                 RebuildMods();
             }
         }
@@ -400,11 +447,19 @@ public sealed class MainWindowViewModel : NotifyBase
             ? ProgramWideSettings.GetDefaultRepoRoot()
             : settings.RepoRootPath;
 
+        if (!HasRequiredGitHubSettings(settings, out var missingSettings))
+        {
+            StatusMessage = $"Scan apply blocked: configure GitHub settings first ({missingSettings}) in Program Settings.";
+            return;
+        }
+
         var created = 0;
-        var linked = 0;
+        var copiedFiles = 0;
         var skipped = 0;
+        var bootstrapRequired = 0;
         var failed = 0;
         var row = 0;
+        var bootstrapPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
         {
@@ -418,26 +473,41 @@ public sealed class MainWindowViewModel : NotifyBase
             try
             {
                 var modRepoRoot = BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization);
-                var stageFolder = Path.Combine(modRepoRoot, "stages", selection.Stage, "Data");
+                if (!IsGitWorkingTree(modRepoRoot))
+                {
+                    bootstrapRequired++;
+                    bootstrapPaths.Add(modRepoRoot);
+                    skipped++;
+                    continue;
+                }
+
+                var stageFolder = Path.Combine(modRepoRoot, "loosefiles", "Data");
                 Directory.CreateDirectory(stageFolder);
 
-                var stagePluginPath = Path.Combine(stageFolder, selection.PluginName);
-                File.Copy(sourcePath, stagePluginPath, overwrite: true);
+                var initialFiles = CollectInitialModFiles(scanRoot, selection.ModName, selection.PluginName)
+                    .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
 
-                File.Delete(sourcePath);
-                if (TryCreateHardLink(sourcePath, stagePluginPath))
+                if (initialFiles.Count == 0)
                 {
-                    linked++;
+                    skipped++;
+                    continue;
                 }
-                else
+
+                foreach (var file in initialFiles)
                 {
-                    File.Copy(stagePluginPath, sourcePath, overwrite: true);
+                    var target = Path.Combine(stageFolder, Path.GetFileName(file));
+                    File.Copy(file, target, overwrite: true);
+                    copiedFiles++;
+
+                    // Intentionally copy-only for now; link-back is reserved for a later validation milestone.
                 }
 
                 Mods.Add(new ModListItem(
                     selection.ModName,
                     selection.PluginName,
                     selection.Stage,
+                    install.ManagedGame.Name,
                     string.Empty,
                     string.Empty,
                     new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
@@ -455,8 +525,73 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
+        var bootstrapPreview = bootstrapPaths.Count == 0
+            ? string.Empty
+            : $" First missing repo: {bootstrapPaths.First()}";
+
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); linked {linked}; skipped {skipped}; failed {failed}. Repo root: {repoRoot}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}.{bootstrapPreview}";
+    }
+
+    private static bool HasRequiredGitHubSettings(ProgramWideSettings settings, out string missing)
+    {
+        var missingItems = new List<string>();
+        if (string.IsNullOrWhiteSpace(settings.GitHubAccount)) missingItems.Add(nameof(settings.GitHubAccount));
+        if (string.IsNullOrWhiteSpace(settings.GitHubToken)) missingItems.Add(nameof(settings.GitHubToken));
+        if (string.IsNullOrWhiteSpace(settings.GitHubModRootRepo)) missingItems.Add(nameof(settings.GitHubModRootRepo));
+
+        missing = string.Join(", ", missingItems);
+        return missingItems.Count == 0;
+    }
+
+    private static bool IsGitWorkingTree(string repoPath)
+    {
+        if (!Directory.Exists(repoPath))
+        {
+            return false;
+        }
+
+        var dotGit = Path.Combine(repoPath, ".git");
+        return Directory.Exists(dotGit) || File.Exists(dotGit);
+    }
+
+    private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
+    {
+        var normalizedModName = NormalizePluginBaseName(modName);
+        var primaryPath = Path.Combine(scanRoot, primaryPlugin);
+
+        var pluginFiles = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
+            .Where(path =>
+            {
+                var ext = Path.GetExtension(path);
+                return string.Equals(ext, ".esm", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(ext, ".esp", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(ext, ".esl", StringComparison.OrdinalIgnoreCase);
+            })
+            .Where(path => NormalizePluginBaseName(Path.GetFileNameWithoutExtension(path)).Contains(normalizedModName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (File.Exists(primaryPath) && !pluginFiles.Contains(primaryPath, StringComparer.OrdinalIgnoreCase))
+        {
+            pluginFiles.Add(primaryPath);
+        }
+
+        var archiveCandidates = new[]
+        {
+            $"{modName} - Main.ba2",
+            $"{modName} - Main_xbox.ba2",
+            $"{modName} - Textures.ba2",
+            $"{modName} - Textures_xbox.ba2"
+        };
+
+        var archiveFiles = archiveCandidates
+            .Select(name => Path.Combine(scanRoot, name))
+            .Where(File.Exists)
+            .ToList();
+
+        return pluginFiles
+            .Concat(archiveFiles)
+            .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
     private static int GetPluginExtensionPriority(string extension)
@@ -526,89 +661,90 @@ public sealed class MainWindowViewModel : NotifyBase
         return string.IsNullOrWhiteSpace(cleaned) ? "Unnamed" : cleaned;
     }
 
-    private static bool TryCreateHardLink(string linkPath, string existingFilePath)
-    {
-        try
-        {
-            File.CreateHardLink(linkPath, existingFilePath);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
 
     private void RebuildMods()
     {
         Mods.Clear();
 
-        var baseInstalls = GameInstalls
-            .Where(x => !x.IsDlc)
-            .Where(x => x.ManagedGame is not null)
-            .Where(x => string.IsNullOrWhiteSpace(SelectedGameFolder) || string.Equals(x.InstallPath, SelectedGameFolder, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        var row = 0;
-        foreach (var install in baseInstalls)
-        {
-            foreach (var builtin in _repository.LoadKnownPluginsForGame(install.ManagedGame!.Name))
-            {
-                if (!PluginExists(install.InstallPath, builtin.PluginName))
-                {
-                    continue;
-                }
-
-                Mods.Add(new ModListItem(
-                    builtin.DisplayName,
-                    builtin.PluginName,
-                    "BASE",
-                    string.Empty,
-                    string.Empty,
-                    new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
-            }
-        }
-
-        if (Mods.Count > 0)
-        {
-            StatusMessage = $"Loaded {Mods.Count} built-in Bethesda mod entries from managed installs.";
-            return;
-        }
-
-        Mods.Add(new ModListItem("ZO_AIOGamePlayTweaks", "ZO_AIOGamePlayTweaks.esp", "DEV", "f7dc7ac6...", "345221", new SolidColorBrush(Color.Parse("#2B2B2B"))));
-        Mods.Add(new ModListItem("ZO_DenserOutposts", "ZO_DenserOutposts.esm", "RELEASE", "c5bbdd20...", "817744", new SolidColorBrush(Color.Parse("#343434"))));
-        Mods.Add(new ModListItem("ZO_HandScannerTweaks", "ZO_HandScannerTweaks.esl", "TEST", "3f102ab3...", "593188", new SolidColorBrush(Color.Parse("#2B2B2B"))));
-        Mods.Add(new ModListItem("WT_SmartDoc", "WT_SmartDoc.esp", "DEV", "2120ee1a...", "772843", new SolidColorBrush(Color.Parse("#343434"))));
-        Mods.Add(new ModListItem("ZO_StarUIFix", "ZO_StarUIFix.esp", "DEV", "a220ce51...", "300194", new SolidColorBrush(Color.Parse("#2B2B2B"))));
-    }
-
-    private static bool PluginExists(string installPath, string pluginFileName)
-    {
-        var inRoot = Path.Combine(installPath, pluginFileName);
-        if (File.Exists(inRoot))
-        {
-            return true;
-        }
-
-        var inData = Path.Combine(installPath, "Data", pluginFileName);
-        return File.Exists(inData);
+        StatusMessage = string.IsNullOrWhiteSpace(SelectedGameFolder)
+            ? "Ready. Select a game folder, scan for mods, and onboard only the mods you edit."
+            : "Ready. Scan the selected game folder to onboard mods under management.";
     }
 
     public void SyncGameFoldersFromInstalls()
     {
         var selected = SelectedGameFolder;
+        var settings = _settingsStore.Load();
+        var preferred = string.IsNullOrWhiteSpace(settings.LastSelectedGameFolder) ? null : settings.LastSelectedGameFolder;
+
         GameFolders.Clear();
         foreach (var path in GameInstalls
                      .Where(x => !x.IsDlc)
                      .Select(x => x.InstallPath)
-                     .Distinct())
+                     .Distinct(StringComparer.OrdinalIgnoreCase))
         {
             GameFolders.Add(path);
         }
 
         SelectedGameFolder = selected is not null && GameFolders.Contains(selected)
             ? selected
-            : GameFolders.FirstOrDefault();
+            : preferred is not null && GameFolders.Contains(preferred)
+                ? preferred
+                : GameFolders.FirstOrDefault();
+    }
+
+    private void PersistLastSelectedGameFolder(string? selectedFolder)
+    {
+        if (string.IsNullOrWhiteSpace(selectedFolder))
+        {
+            return;
+        }
+
+        var settings = _settingsStore.Load();
+        if (string.Equals(settings.LastSelectedGameFolder, selectedFolder, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        settings.LastSelectedGameFolder = selectedFolder;
+        _settingsStore.Save(settings);
+    }
+
+    public IReadOnlyList<string> GetGameFoldersForGame(string gameName)
+    {
+        if (string.IsNullOrWhiteSpace(gameName))
+        {
+            return GameFolders.ToList();
+        }
+
+        return GameInstalls
+            .Where(x => !x.IsDlc)
+            .Where(x => x.ManagedGame is not null)
+            .Where(x => string.Equals(x.ManagedGame!.Name, gameName, StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.InstallPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    public IReadOnlyList<string> GetAvailableStagesForMod(ModListItem mod)
+    {
+        var stages = Mods
+            .Where(x => string.Equals(x.Name, mod.Name, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(x.PrimaryPlugin, mod.PrimaryPlugin, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(x.GameName, mod.GameName, StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.CurrentStage)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (stages.Count == 0)
+        {
+            stages.Add(mod.CurrentStage);
+        }
+
+        return stages;
     }
 
     public IReadOnlyList<GameInstallRecord> DiscoverInstallCandidates() =>
@@ -1418,11 +1554,12 @@ internal sealed record KnownGameCatalogRecord(string GameName, bool IsDlc, strin
 
 public sealed class ModListItem
 {
-    public ModListItem(string name, string primaryPlugin, string currentStage, string bethesdaId, string nexusId, IBrush rowBackground)
+    public ModListItem(string name, string primaryPlugin, string currentStage, string gameName, string bethesdaId, string nexusId, IBrush rowBackground)
     {
         Name = name;
         PrimaryPlugin = primaryPlugin;
         CurrentStage = currentStage;
+        GameName = gameName;
         BethesdaId = bethesdaId;
         NexusId = nexusId;
         RowBackground = rowBackground;
@@ -1431,6 +1568,7 @@ public sealed class ModListItem
     public string Name { get; }
     public string PrimaryPlugin { get; }
     public string CurrentStage { get; }
+    public string GameName { get; }
     public string BethesdaId { get; }
     public string NexusId { get; }
     public IBrush RowBackground { get; }

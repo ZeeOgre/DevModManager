@@ -10,27 +10,64 @@ namespace DMM.Avalonia;
 public partial class GameInstallWindow : Window
 {
     public ObservableCollection<ManagedGame> ManagedGames { get; }
+    public ObservableCollection<string> GameStoreOptions { get; }
     public bool ShowNavigation { get; }
     private readonly Action<ManagedGame>? _onManagedGameAdded;
 
     public GameInstallWindow()
     {
         ManagedGames = new ObservableCollection<ManagedGame>();
+        GameStoreOptions = BuildGameStoreOptions();
         ShowNavigation = false;
         _onManagedGameAdded = null;
-        DataContext = new GameInstallRecord();
+        var install = new GameInstallRecord();
+        EnsureStoreOptionExists(install.GameStore);
+        DataContext = install;
         InitializeComponent();
     }
 
     public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)
     {
         ManagedGames = managedGames;
+        GameStoreOptions = BuildGameStoreOptions();
         ShowNavigation = showNavigation;
         _onManagedGameAdded = onManagedGameAdded;
 
         install.ManagedGame = CanonicalizeManagedGame(install.ManagedGame);
+        EnsureStoreOptionExists(install.GameStore);
         DataContext = install;
         InitializeComponent();
+    }
+
+    private static ObservableCollection<string> BuildGameStoreOptions()
+    {
+        return new ObservableCollection<string>(new[]
+        {
+            "Steam",
+            "Game Pass",
+            "Epic",
+            "GOG",
+            "EA",
+            "Origin",
+            "Battle.net",
+            "Rockstar",
+            "Minecraft",
+            "PSN",
+            "Custom"
+        });
+    }
+
+    private void EnsureStoreOptionExists(string? gameStore)
+    {
+        if (string.IsNullOrWhiteSpace(gameStore))
+        {
+            return;
+        }
+
+        if (!GameStoreOptions.Any(x => string.Equals(x, gameStore, StringComparison.OrdinalIgnoreCase)))
+        {
+            GameStoreOptions.Add(gameStore);
+        }
     }
 
     private ManagedGame? CanonicalizeManagedGame(ManagedGame? candidate)
