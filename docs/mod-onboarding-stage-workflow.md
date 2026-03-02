@@ -370,6 +370,8 @@ This section captures the expected end-to-end bootstrap sequence for a new machi
 
 ### 1) First launch + database bootstrap
 
+- **Current phase assumption**: full preproduction. Schema/seed changes can be treated as baseline; migration scripts are not required yet because no fielded databases are expected.
+
 - If local DB is missing, create it in `%LOCALAPPDATA%` using:
   - `database_schema.sql`
   - `database_seed.sql`
