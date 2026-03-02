@@ -1492,11 +1492,13 @@ internal sealed class GameSetupRepository
 
     private static long EnsureGameSource(SqliteConnection connection, SqliteTransaction tx, string store)
     {
-        var sourceName = store switch
+        var normalizedStore = string.IsNullOrWhiteSpace(store) ? "Custom" : store.Trim();
+
+        var sourceName = normalizedStore switch
         {
             "Game Pass" => "GamePass",
             "GOG" => "GoG",
-            _ => store
+            _ => normalizedStore
         };
 
         using var select = connection.CreateCommand();

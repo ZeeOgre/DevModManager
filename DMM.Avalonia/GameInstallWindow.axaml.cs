@@ -142,6 +142,18 @@ public partial class GameInstallWindow : Window
     {
         if (DataContext is GameInstallRecord install)
         {
+            var selectedStore = GameStoreComboBox.SelectedItem as string;
+            if (string.IsNullOrWhiteSpace(selectedStore) && !string.IsNullOrWhiteSpace(GameStoreComboBox.Text))
+            {
+                selectedStore = GameStoreOptions.FirstOrDefault(x =>
+                    string.Equals(x, GameStoreComboBox.Text, StringComparison.OrdinalIgnoreCase))
+                    ?? GameStoreComboBox.Text.Trim();
+            }
+
+            install.GameStore = string.IsNullOrWhiteSpace(selectedStore)
+                ? "Custom"
+                : selectedStore;
+
             var selectedGame = MainGameComboBox.SelectedItem as ManagedGame;
             if (selectedGame is null && MainGameComboBox.SelectedIndex >= 0 && MainGameComboBox.SelectedIndex < ManagedGames.Count)
             {

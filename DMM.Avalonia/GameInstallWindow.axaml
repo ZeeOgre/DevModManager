@@ -25,7 +25,7 @@
             <CheckBox Grid.Column="1" IsChecked="{Binding Manage}" />
 
             <TextBlock Grid.Row="1" Text="Game Store:" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="1" Grid.Column="1"
+            <ComboBox x:Name="GameStoreComboBox" Grid.Row="1" Grid.Column="1"
                       ItemsSource="{Binding GameStoreOptions, RelativeSource={RelativeSource AncestorType=local:GameInstallWindow}}"
                       SelectedItem="{Binding GameStore, Mode=TwoWay}" />
 
