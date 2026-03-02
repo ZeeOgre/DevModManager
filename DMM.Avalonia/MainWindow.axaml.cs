@@ -194,7 +194,9 @@ public partial class MainWindow : Window
     {
         if (sender is Button { CommandParameter: ModListItem mod })
         {
-            var modWindow = new ModWindow(mod, _viewModel.GameFolders, _viewModel.StageOptions, _viewModel.SelectedGameFolder);
+            var matchingFolders = _viewModel.GetGameFoldersForGame(mod.GameName);
+            var activeStages = _viewModel.GetAvailableStagesForMod(mod);
+            var modWindow = new ModWindow(mod, matchingFolders, activeStages, _viewModel.SelectedGameFolder);
             await modWindow.ShowDialog(this);
             _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
         }
@@ -402,9 +404,16 @@ public sealed class MainWindowViewModel : NotifyBase
             ? ProgramWideSettings.GetDefaultRepoRoot()
             : settings.RepoRootPath;
 
+        if (!HasRequiredGitHubSettings(settings, out var missingSettings))
+        {
+            StatusMessage = $"Scan apply blocked: configure GitHub settings first ({missingSettings}) in Program Settings.";
+            return;
+        }
+
         var created = 0;
         var copiedFiles = 0;
         var skipped = 0;
+        var bootstrapRequired = 0;
         var failed = 0;
         var row = 0;
 
@@ -420,7 +429,14 @@ public sealed class MainWindowViewModel : NotifyBase
             try
             {
                 var modRepoRoot = BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization);
-                var stageFolder = Path.Combine(modRepoRoot, "stages", selection.Stage, "Data");
+                if (!IsGitWorkingTree(modRepoRoot))
+                {
+                    bootstrapRequired++;
+                    skipped++;
+                    continue;
+                }
+
+                var stageFolder = Path.Combine(modRepoRoot, "loosefiles", "Data");
                 Directory.CreateDirectory(stageFolder);
 
                 var initialFiles = CollectInitialModFiles(scanRoot, selection.ModName, selection.PluginName)
@@ -446,6 +462,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     selection.ModName,
                     selection.PluginName,
                     selection.Stage,
+                    install.ManagedGame.Name,
                     string.Empty,
                     string.Empty,
                     new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
@@ -464,7 +481,29 @@ public sealed class MainWindowViewModel : NotifyBase
         }
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped}; failed {failed}. Repo root: {repoRoot}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}";
+    }
+
+    private static bool HasRequiredGitHubSettings(ProgramWideSettings settings, out string missing)
+    {
+        var missingItems = new List<string>();
+        if (string.IsNullOrWhiteSpace(settings.GitHubAccount)) missingItems.Add(nameof(settings.GitHubAccount));
+        if (string.IsNullOrWhiteSpace(settings.GitHubToken)) missingItems.Add(nameof(settings.GitHubToken));
+        if (string.IsNullOrWhiteSpace(settings.GitHubModRootRepo)) missingItems.Add(nameof(settings.GitHubModRootRepo));
+
+        missing = string.Join(", ", missingItems);
+        return missingItems.Count == 0;
+    }
+
+    private static bool IsGitWorkingTree(string repoPath)
+    {
+        if (!Directory.Exists(repoPath))
+        {
+            return false;
+        }
+
+        var dotGit = Path.Combine(repoPath, ".git");
+        return Directory.Exists(dotGit) || File.Exists(dotGit);
     }
 
     private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
@@ -573,17 +612,6 @@ public sealed class MainWindowViewModel : NotifyBase
         return string.IsNullOrWhiteSpace(cleaned) ? "Unnamed" : cleaned;
     }
 
-    private static bool TryCreateHardLink(string linkPath, string existingFilePath)
-    {
-        try
-        {
-            return CreateHardLinkWindows(linkPath, existingFilePath, IntPtr.Zero);
-        }
-        catch
-        {
-            return false;
-        }
-    }
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern bool CreateHardLinkWindows(string lpFileName, string lpExistingFileName, IntPtr lpSecurityAttributes);
@@ -595,18 +623,6 @@ public sealed class MainWindowViewModel : NotifyBase
         StatusMessage = string.IsNullOrWhiteSpace(SelectedGameFolder)
             ? "Ready. Select a game folder, scan for mods, and onboard only the mods you edit."
             : "Ready. Scan the selected game folder to onboard mods under management.";
-    }
-
-    private static bool PluginExists(string installPath, string pluginFileName)
-    {
-        var inRoot = Path.Combine(installPath, pluginFileName);
-        if (File.Exists(inRoot))
-        {
-            return true;
-        }
-
-        var inData = Path.Combine(installPath, "Data", pluginFileName);
-        return File.Exists(inData);
     }
 
     public void SyncGameFoldersFromInstalls()
@@ -646,6 +662,43 @@ public sealed class MainWindowViewModel : NotifyBase
 
         settings.LastSelectedGameFolder = selectedFolder;
         _settingsStore.Save(settings);
+    }
+
+    public IReadOnlyList<string> GetGameFoldersForGame(string gameName)
+    {
+        if (string.IsNullOrWhiteSpace(gameName))
+        {
+            return GameFolders.ToList();
+        }
+
+        return GameInstalls
+            .Where(x => !x.IsDlc)
+            .Where(x => x.ManagedGame is not null)
+            .Where(x => string.Equals(x.ManagedGame!.Name, gameName, StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.InstallPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    public IReadOnlyList<string> GetAvailableStagesForMod(ModListItem mod)
+    {
+        var stages = Mods
+            .Where(x => string.Equals(x.Name, mod.Name, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(x.PrimaryPlugin, mod.PrimaryPlugin, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(x.GameName, mod.GameName, StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.CurrentStage)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (stages.Count == 0)
+        {
+            stages.Add(mod.CurrentStage);
+        }
+
+        return stages;
     }
 
     public IReadOnlyList<GameInstallRecord> DiscoverInstallCandidates() =>
@@ -1455,11 +1508,12 @@ internal sealed record KnownGameCatalogRecord(string GameName, bool IsDlc, strin
 
 public sealed class ModListItem
 {
-    public ModListItem(string name, string primaryPlugin, string currentStage, string bethesdaId, string nexusId, IBrush rowBackground)
+    public ModListItem(string name, string primaryPlugin, string currentStage, string gameName, string bethesdaId, string nexusId, IBrush rowBackground)
     {
         Name = name;
         PrimaryPlugin = primaryPlugin;
         CurrentStage = currentStage;
+        GameName = gameName;
         BethesdaId = bethesdaId;
         NexusId = nexusId;
         RowBackground = rowBackground;
@@ -1468,6 +1522,7 @@ public sealed class ModListItem
     public string Name { get; }
     public string PrimaryPlugin { get; }
     public string CurrentStage { get; }
+    public string GameName { get; }
     public string BethesdaId { get; }
     public string NexusId { get; }
     public IBrush RowBackground { get; }

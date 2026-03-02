@@ -11,6 +11,11 @@ public sealed class ProgramWideSettings
     public RepoOrganizationStrategy RepoOrganization { get; set; } = RepoOrganizationStrategy.GameRepoWithPerModFolders;
     public string LastSelectedGameFolder { get; set; } = string.Empty;
 
+    // GitHub settings for repo/bootstrap workflows.
+    public string GitHubAccount { get; set; } = string.Empty;
+    public string GitHubToken { get; set; } = string.Empty;
+    public string GitHubModRootRepo { get; set; } = string.Empty;
+
     public static string GetDefaultRepoRoot()
     {
         var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);

@@ -106,6 +106,58 @@ There is no built-in `git sync` command. In DMM, “sync” should be an orchest
 
 So yes to the workflow, but it is a DMM command that combines multiple git + filesystem operations.
 
+
+## Program-Wide Git/GitHub Settings
+
+Recommended settings to add:
+
+- `RepoRootPath` (existing): local mod-root working folder.
+- `GitHubAccount`: owner/user namespace (example: `ZeeOgre`).
+- `GitHubToken`: PAT used for authenticated repo operations.
+- `GitHubModRootRepo`: canonical master repo remote URL/path (example: `https://github.com/ZeeOgre/GameMods`).
+
+### Can base repo be derived from account?
+
+Usually yes (`https://github.com/<account>/GameMods`), but keep `GitHubModRootRepo` as explicit override for non-standard names/org layouts.
+
+
+## Local Folder Strategy and Submodule Timing
+
+Desired local working layout is supported:
+
+```text
+<ModRoot>/Starfield/<modName>/
+```
+
+(Equivalent for other games using their game folder key.)
+
+### Important guardrail
+
+Do **not** import mod files into a folder that has not yet been bootstrapped as a git repo/submodule working tree.
+
+Recommended order:
+1. Create remote per-mod repo (`{gameAbbrev}-{modName}`).
+2. Add repo as submodule in master `GameMods`.
+3. Sync master repo/submodules locally so `<ModRoot>/<Game>/<modName>` is a real git working tree.
+4. Only then run copy-first onboarding import into `loosefiles/Data`.
+
+## Onboard Transaction Sequence (Per Mod)
+
+For each new mod `{gameAbbrev}-{modName}`:
+
+1. Ensure/create remote mod repo under the configured account.
+2. Ensure local mod repo exists under local mod root.
+3. Seed folder structure in mod repo (`loosefiles/`, `inventory/`, `distribution/`, etc.).
+4. Create stage branches (`stage/dev`, `stage/test`, ...).
+5. Add mod repo to master `GameMods` as submodule and commit pointer update in master repo.
+6. Sync/pull master repo so submodule folder is present locally.
+7. Perform initial file import (copy-first) into mod repo.
+8. Run `dmmdeps` for primary plugin; place outputs in `inventory/`.
+9. Commit/push mod repo stage branch updates.
+10. Commit/push master repo submodule pointer update.
+
+This confirms your understanding is correct; the only key addition is explicit commit/push ordering for **both** repos (mod first, then master pointer update).
+
 ## End-to-End Onboarding Workflow
 
 1. **Create mod repo from DMM**

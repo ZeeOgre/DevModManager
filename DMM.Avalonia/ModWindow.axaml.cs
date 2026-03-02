@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -12,13 +13,13 @@ public partial class ModWindow : Window
     public ModWindow()
     {
         InitializeComponent();
-        var placeholderMod = new ModListItem("Mod", "", "DEV", "", "", new SolidColorBrush(Colors.Transparent));
-        _viewModel = new ModWindowViewModel(placeholderMod, new ObservableCollection<string>(), new ObservableCollection<string>(), null);
+        var placeholderMod = new ModListItem("Mod", "", "DEV", "", "", "", new SolidColorBrush(Colors.Transparent));
+        _viewModel = new ModWindowViewModel(placeholderMod, Array.Empty<string>(), Array.Empty<string>(), null);
         DataContext = _viewModel;
         BuildStageFolderContextMenu();
     }
 
-    public ModWindow(ModListItem mod, ObservableCollection<string> gameFolders, ObservableCollection<string> stages, string? selectedGameFolder)
+    public ModWindow(ModListItem mod, IReadOnlyList<string> gameFolders, IReadOnlyList<string> stages, string? selectedGameFolder)
     {
         InitializeComponent();
         _viewModel = new ModWindowViewModel(mod, gameFolders, stages, selectedGameFolder);
@@ -89,7 +90,7 @@ public partial class ModWindow : Window
 
 public sealed class ModWindowViewModel : NotifyBase
 {
-    public ModWindowViewModel(ModListItem mod, ObservableCollection<string> gameFolders, ObservableCollection<string> stages, string? selectedGameFolder)
+    public ModWindowViewModel(ModListItem mod, IReadOnlyList<string> gameFolders, IReadOnlyList<string> stages, string? selectedGameFolder)
     {
         ModName = mod.Name;
         PluginInfo = $"Primary plugin: {mod.PrimaryPlugin}";
