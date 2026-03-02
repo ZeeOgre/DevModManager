@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -12,16 +13,16 @@ public partial class ModWindow : Window
     public ModWindow()
     {
         InitializeComponent();
-        var placeholderMod = new ModListItem("Mod", "", "DEV", "", "", new SolidColorBrush(Colors.Transparent));
-        _viewModel = new ModWindowViewModel(placeholderMod, new ObservableCollection<string>(), new ObservableCollection<string>());
+        var placeholderMod = new ModListItem("Mod", "", "DEV", "", "", "", new SolidColorBrush(Colors.Transparent));
+        _viewModel = new ModWindowViewModel(placeholderMod, Array.Empty<string>(), Array.Empty<string>(), null);
         DataContext = _viewModel;
         BuildStageFolderContextMenu();
     }
 
-    public ModWindow(ModListItem mod, ObservableCollection<string> gameFolders, ObservableCollection<string> stages)
+    public ModWindow(ModListItem mod, IReadOnlyList<string> gameFolders, IReadOnlyList<string> stages, string? selectedGameFolder)
     {
         InitializeComponent();
-        _viewModel = new ModWindowViewModel(mod, gameFolders, stages);
+        _viewModel = new ModWindowViewModel(mod, gameFolders, stages, selectedGameFolder);
         DataContext = _viewModel;
         BuildStageFolderContextMenu();
     }
@@ -89,7 +90,7 @@ public partial class ModWindow : Window
 
 public sealed class ModWindowViewModel : NotifyBase
 {
-    public ModWindowViewModel(ModListItem mod, ObservableCollection<string> gameFolders, ObservableCollection<string> stages)
+    public ModWindowViewModel(ModListItem mod, IReadOnlyList<string> gameFolders, IReadOnlyList<string> stages, string? selectedGameFolder)
     {
         ModName = mod.Name;
         PluginInfo = $"Primary plugin: {mod.PrimaryPlugin}";
@@ -104,7 +105,9 @@ public sealed class ModWindowViewModel : NotifyBase
             StageOptions.Add(stage);
         }
 
-        SelectedGameFolder = GameFolders.Count > 0 ? GameFolders[0] : "Primary Game Folder";
+        SelectedGameFolder = !string.IsNullOrWhiteSpace(selectedGameFolder) && GameFolders.Contains(selectedGameFolder)
+            ? selectedGameFolder
+            : GameFolders.Count > 0 ? GameFolders[0] : "Primary Game Folder";
         SelectedStage = StageOptions.Contains(mod.CurrentStage) ? mod.CurrentStage : "DEV";
         StatusMessage = "Select an action. Right-click buttons for detailed options.";
     }

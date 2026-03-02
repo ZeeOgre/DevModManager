@@ -52,11 +52,13 @@ public partial class CoreProgramSettingsWindow : Window
 
     private void SaveCurrentSettings()
     {
-        _settingsStore.Save(new ProgramWideSettings
-        {
-            RepoRootPath = _viewModel.RepoRootPath,
-            RepoOrganization = _viewModel.RepoOrganization
-        });
+        var existing = _settingsStore.Load();
+        existing.RepoRootPath = _viewModel.RepoRootPath;
+        existing.RepoOrganization = _viewModel.RepoOrganization;
+        existing.GitHubAccount = _viewModel.GitHubAccount;
+        existing.GitHubToken = _viewModel.GitHubToken;
+        existing.GitHubModRootRepo = _viewModel.GitHubModRootRepo;
+        _settingsStore.Save(existing);
     }
 }
 
@@ -64,6 +66,9 @@ public sealed class CoreProgramSettingsViewModel : NotifyBase
 {
     private string _repoRootPath;
     private RepoOrganizationStrategy _repoOrganization;
+    private string _gitHubAccount;
+    private string _gitHubToken;
+    private string _gitHubModRootRepo;
 
     public CoreProgramSettingsViewModel(ProgramWideSettings settings)
     {
@@ -71,6 +76,9 @@ public sealed class CoreProgramSettingsViewModel : NotifyBase
             ? ProgramWideSettings.GetDefaultRepoRoot()
             : settings.RepoRootPath;
         _repoOrganization = settings.RepoOrganization;
+        _gitHubAccount = settings.GitHubAccount;
+        _gitHubToken = settings.GitHubToken;
+        _gitHubModRootRepo = settings.GitHubModRootRepo;
     }
 
     public ObservableCollection<RepoOrganizationStrategy> RepoOrganizationChoices { get; } =
@@ -89,5 +97,23 @@ public sealed class CoreProgramSettingsViewModel : NotifyBase
     {
         get => _repoOrganization;
         set => SetField(ref _repoOrganization, value);
+    }
+
+    public string GitHubAccount
+    {
+        get => _gitHubAccount;
+        set => SetField(ref _gitHubAccount, value);
+    }
+
+    public string GitHubToken
+    {
+        get => _gitHubToken;
+        set => SetField(ref _gitHubToken, value);
+    }
+
+    public string GitHubModRootRepo
+    {
+        get => _gitHubModRootRepo;
+        set => SetField(ref _gitHubModRootRepo, value);
     }
 }
