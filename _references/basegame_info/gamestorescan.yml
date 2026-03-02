@@ -1,24 +1,24 @@
 identity:
   capturedAtUtc:
-    dateTime: 2026-02-27T15:25:05.7395210
-    utcDateTime: 2026-02-27T15:25:05.7395210Z
-    localDateTime: 2026-02-27T09:25:05.7395210-06:00
-    date: 2026-02-27T00:00:00.0000000
-    day: 27
-    dayOfWeek: Friday
-    dayOfYear: 58
-    hour: 15
-    millisecond: 739
-    microsecond: 521
-    nanosecond: 0
-    minute: 25
-    month: 2
+    dateTime: 2026-03-02T12:58:23.3375377
+    utcDateTime: 2026-03-02T12:58:23.3375377Z
+    localDateTime: 2026-03-02T06:58:23.3375377-06:00
+    date: 2026-03-02T00:00:00.0000000
+    day: 2
+    dayOfWeek: Monday
+    dayOfYear: 61
+    hour: 12
+    millisecond: 337
+    microsecond: 537
+    nanosecond: 700
+    minute: 58
+    month: 3
     offset: 00:00:00
     totalOffsetMinutes: 0
-    second: 5
-    ticks: 639078027057395210
-    utcTicks: 639078027057395210
-    timeOfDay: 15:25:05.7395210
+    second: 23
+    ticks: 639080531033375377
+    utcTicks: 639080531033375377
+    timeOfDay: 12:58:23.3375377
     year: 2026
   scope: StoresAll
   machineName: 
@@ -51,9 +51,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.PGDeluxeContentwPkg_base-game-files.json
     BaseGameManifestFileCount: 12
     BaseGameManifestTotalBytes: 50875021
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4090550Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.4328027Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.4328027Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.1747995Z
+    EnrichedFirstUtc: 2026-03-02T12:57:29.2032177Z
+    EnrichedLastUtc: 2026-03-02T12:57:29.2032177Z
   issues: []
   tags: []
 - id:
@@ -83,9 +83,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.PGPreorderContentwPkg_base-game-files.json
     BaseGameManifestFileCount: 12
     BaseGameManifestTotalBytes: 14862808
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4342068Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.4352037Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.4352037Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2038216Z
+    EnrichedFirstUtc: 2026-03-02T12:57:29.2043298Z
+    EnrichedLastUtc: 2026-03-02T12:57:29.2043298Z
   issues: []
   tags: []
 - id:
@@ -115,9 +115,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.ShatteredSpace_base-game-files.json
     BaseGameManifestFileCount: 14
     BaseGameManifestTotalBytes: 10711916476
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4362230Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.4366919Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.4366919Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2058707Z
+    EnrichedFirstUtc: 2026-03-02T12:57:29.2063641Z
+    EnrichedLastUtc: 2026-03-02T12:57:29.2063641Z
   issues: []
   tags: []
 - id:
@@ -148,9 +148,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.ProjectGold_base-game-files.json
     BaseGameManifestFileCount: 558
     BaseGameManifestTotalBytes: 136093862860
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4698194Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.4708387Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.4708387Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2307135Z
+    EnrichedFirstUtc: 2026-03-02T12:57:29.2319490Z
+    EnrichedLastUtc: 2026-03-02T12:57:29.2319490Z
   issues: []
   tags: []
 - id:
@@ -181,9 +181,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.438957EDB7717_base-game-files.json
     BaseGameManifestFileCount: 263
     BaseGameManifestTotalBytes: 12617640003
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4795238Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.4807323Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.4807323Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2380305Z
+    EnrichedFirstUtc: 2026-03-02T12:57:29.2393307Z
+    EnrichedLastUtc: 2026-03-02T12:57:29.2393307Z
   issues: []
   tags: []
 - id:
@@ -214,9 +214,42 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.ProjectAltar_base-game-files.json
     BaseGameManifestFileCount: 269
     BaseGameManifestTotalBytes: 127351571432
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.5035323Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.5043106Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.5043106Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2560433Z
+    EnrichedFirstUtc: 2026-03-02T12:57:29.2567960Z
+    EnrichedLastUtc: 2026-03-02T12:57:29.2567960Z
+  issues: []
+  tags: []
+- id:
+    storeKey: xbox
+    storeAppId: MICROSOFT.MINECRAFTUWP
+    installInstanceId: 
+  displayName: Minecraft for Windows
+  installFolders:
+    installFolder:
+      folderId: 
+      path: M:\Games\7792D9CE-355A-493C-AFBD-768F4A77C3B0\
+    contentFolder:
+      folderId: 
+      path: M:\Games\7792D9CE-355A-493C-AFBD-768F4A77C3B0\Content\
+    dataFolder: 
+    additionalFolders: []
+  executableName: Minecraft.Windows.exe
+  visualAssets: 
+  version: 
+  installState: Installed
+  lastUpdatedUtc: 
+  depots: []
+  storeMetadata:
+    ConfigPath: M:\Games\7792D9CE-355A-493C-AFBD-768F4A77C3B0\Content\MicrosoftGame.config
+    StoreId: 9NBLGGH2JHXJ
+    TitleId: 35760C07
+    ContentPath: M:\Games\7792D9CE-355A-493C-AFBD-768F4A77C3B0\Content\
+    BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\MICROSOFT.MINECRAFTUWP_base-game-files.json
+    BaseGameManifestFileCount: 34428
+    BaseGameManifestTotalBytes: 1492019681
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.5445246Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.5947013Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.5947013Z
   issues: []
   tags: []
 - id:
@@ -247,9 +280,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.Avowed_base-game-files.json
     BaseGameManifestFileCount: 255
     BaseGameManifestTotalBytes: 72756833627
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.5581261Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.5588539Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.5588539Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.6455949Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.6463369Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.6463369Z
   issues: []
   tags: []
 - id:
@@ -280,9 +313,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\KeplerInteractive.Expedition33_base-game-files.json
     BaseGameManifestFileCount: 151
     BaseGameManifestTotalBytes: 46936603420
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.5923323Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.5930038Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.5930038Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.6776426Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.6784291Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.6784291Z
   issues: []
   tags: []
 - id:
@@ -313,9 +346,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.ProjectTitan_base-game-files.json
     BaseGameManifestFileCount: 243
     BaseGameManifestTotalBytes: 89364531763
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.6433727Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.6442009Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.6442009Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.7280602Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.7290639Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.7290639Z
   issues: []
   tags: []
 - id:
@@ -345,9 +378,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.TitanPreorderContent_base-game-files.json
     BaseGameManifestFileCount: 11
     BaseGameManifestTotalBytes: 4815414
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.6463498Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.6468605Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.6468605Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.7311588Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.7319616Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.7319616Z
   issues: []
   tags: []
 - id:
@@ -377,9 +410,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout2_base-game-files.json
     BaseGameManifestFileCount: 170
     BaseGameManifestTotalBytes: 1747465058
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.6743920Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.6750625Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.6750625Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.7716387Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.7727151Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.7727151Z
   issues: []
   tags: []
 - id:
@@ -410,9 +443,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-CoreGame_base-game-files.json
     BaseGameManifestFileCount: 120
     BaseGameManifestTotalBytes: 31472559548
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.6943904Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.6951162Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.6951162Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.7974160Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.7982625Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.7982625Z
   issues: []
   tags: []
 - id:
@@ -443,9 +476,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-PC_base-game-files.json
     BaseGameManifestFileCount: 336
     BaseGameManifestTotalBytes: 46835731472
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7508017Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7516151Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7516151Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8513540Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8524190Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8524190Z
   issues: []
   tags: []
 - id:
@@ -475,9 +508,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC1Automatron_base-game-files.json
     BaseGameManifestFileCount: 17
     BaseGameManifestTotalBytes: 1066623923
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7556298Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7566772Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7566772Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8556491Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8564277Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8564277Z
   issues: []
   tags: []
 - id:
@@ -507,9 +540,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4Automatron-PC_base-game-files.json
     BaseGameManifestFileCount: 15
     BaseGameManifestTotalBytes: 781943855
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7594325Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7599591Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7599591Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8593142Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8602523Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8602523Z
   issues: []
   tags: []
 - id:
@@ -539,9 +572,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC4ContraptionsWorksho_base-game-files.json
     BaseGameManifestFileCount: 12
     BaseGameManifestTotalBytes: 213840862
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7620656Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7625891Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7625891Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8634901Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8654777Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8654777Z
   issues: []
   tags: []
 - id:
@@ -571,9 +604,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4ContraptionsWorkshop-PC_base-game-files.json
     BaseGameManifestFileCount: 12
     BaseGameManifestTotalBytes: 213841177
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7652329Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7658125Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7658125Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8686559Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8695035Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8695035Z
   issues: []
   tags: []
 - id:
@@ -603,9 +636,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC3FarHarbor_base-game-files.json
     BaseGameManifestFileCount: 17
     BaseGameManifestTotalBytes: 4531183519
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7689657Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7695373Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7695373Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8730860Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8738637Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8738637Z
   issues: []
   tags: []
 - id:
@@ -635,9 +668,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4FarHarbor-PC_base-game-files.json
     BaseGameManifestFileCount: 15
     BaseGameManifestTotalBytes: 3487913063
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7726469Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7732781Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7732781Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8763487Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8771355Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8771355Z
   issues: []
   tags: []
 - id:
@@ -667,9 +700,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4HighResolutionTexturePac_base-game-files.json
     BaseGameManifestFileCount: 26
     BaseGameManifestTotalBytes: 62607562313
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7782905Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7798634Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7798634Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8807821Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8817237Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8817237Z
   issues: []
   tags: []
 - id:
@@ -699,9 +732,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC6Nuka-World_base-game-files.json
     BaseGameManifestFileCount: 17
     BaseGameManifestTotalBytes: 4379680376
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7833472Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7840044Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7840044Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8863967Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8874843Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8874843Z
   issues: []
   tags: []
 - id:
@@ -731,9 +764,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4Nuka-World-PC_base-game-files.json
     BaseGameManifestFileCount: 15
     BaseGameManifestTotalBytes: 3770225836
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7867980Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7873578Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7873578Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8906535Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8914324Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8914324Z
   issues: []
   tags: []
 - id:
@@ -763,9 +796,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC5Vault-TecWorkshop_base-game-files.json
     BaseGameManifestFileCount: 17
     BaseGameManifestTotalBytes: 511042546
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7903416Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7909005Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7909005Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8953160Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8960052Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8960052Z
   issues: []
   tags: []
 - id:
@@ -795,9 +828,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4Vault-TecWorkshop-PC_base-game-files.json
     BaseGameManifestFileCount: 15
     BaseGameManifestTotalBytes: 410151229
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7934707Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7940508Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7940508Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8988923Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.8997266Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.8997266Z
   issues: []
   tags: []
 - id:
@@ -827,9 +860,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC2WastelandWorkshop_base-game-files.json
     BaseGameManifestFileCount: 14
     BaseGameManifestTotalBytes: 82900486
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7974015Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.7980681Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.7980681Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.9027464Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.9036038Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.9036038Z
   issues: []
   tags: []
 - id:
@@ -859,9 +892,42 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4WastelandWorkshop-PC_base-game-files.json
     BaseGameManifestFileCount: 14
     BaseGameManifestTotalBytes: 82900741
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.8012396Z
-    EnrichedFirstUtc: 2026-02-27T15:24:36.8017917Z
-    EnrichedLastUtc: 2026-02-27T15:24:36.8017917Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.9071690Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.9080064Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.9080064Z
+  issues: []
+  tags: []
+- id:
+    storeKey: xbox
+    storeAppId: BethesdaSoftworks.Fallout76-PC
+    installInstanceId: 
+  displayName: Fallout 76
+  installFolders:
+    installFolder:
+      folderId: 
+      path: M:\Games\Fallout 76\
+    contentFolder:
+      folderId: 
+      path: M:\Games\Fallout 76\Content\
+    dataFolder: 
+    additionalFolders: []
+  executableName: Project76_GamePass.exe
+  visualAssets: 
+  version: 
+  installState: Installed
+  lastUpdatedUtc: 
+  depots: []
+  storeMetadata:
+    ConfigPath: M:\Games\Fallout 76\Content\MicrosoftGame.config
+    StoreId: 9NKGNMNK3K3Z
+    TitleId: 687DFD53
+    ContentPath: M:\Games\Fallout 76\Content\
+    BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout76-PC_base-game-files.json
+    BaseGameManifestFileCount: 237
+    BaseGameManifestTotalBytes: 127556807476
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.9417972Z
+    EnrichedFirstUtc: 2026-03-02T12:57:34.9430380Z
+    EnrichedLastUtc: 2026-03-02T12:57:34.9430380Z
   issues: []
   tags: []
 - id:
@@ -891,9 +957,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.FalloutNewVegas_base-game-files.json
     BaseGameManifestFileCount: 1609
     BaseGameManifestTotalBytes: 50091596702
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:37.1120699Z
-    EnrichedFirstUtc: 2026-02-27T15:24:37.1142019Z
-    EnrichedLastUtc: 2026-02-27T15:24:37.1142019Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.3251920Z
+    EnrichedFirstUtc: 2026-03-02T12:57:35.3279842Z
+    EnrichedLastUtc: 2026-03-02T12:57:35.3279842Z
   issues: []
   tags: []
 - id:
@@ -924,9 +990,75 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\4063811bitstudios.Frostpunk2ConsoleEdition_base-game-files.json
     BaseGameManifestFileCount: 935
     BaseGameManifestTotalBytes: 16362341857
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:37.3227084Z
-    EnrichedFirstUtc: 2026-02-27T15:24:37.3240098Z
-    EnrichedLastUtc: 2026-02-27T15:24:37.3240098Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.6085713Z
+    EnrichedFirstUtc: 2026-03-02T12:57:35.6102541Z
+    EnrichedLastUtc: 2026-03-02T12:57:35.6102541Z
+  issues: []
+  tags: []
+- id:
+    storeKey: xbox
+    storeAppId: Microsoft.4297127D64EC6
+    installInstanceId: 
+  displayName: Minecraft Launcher
+  installFolders:
+    installFolder:
+      folderId: 
+      path: M:\Games\Minecraft Launcher_1\
+    contentFolder:
+      folderId: 
+      path: M:\Games\Minecraft Launcher_1\Content\
+    dataFolder: 
+    additionalFolders: []
+  executableName: Minecraft.exe
+  visualAssets: 
+  version: 
+  installState: Installed
+  lastUpdatedUtc: 
+  depots: []
+  storeMetadata:
+    ConfigPath: M:\Games\Minecraft Launcher_1\Content\MicrosoftGame.config
+    StoreId: 9PGW18NPBZV5
+    TitleId: 6AF6E7CC
+    ContentPath: M:\Games\Minecraft Launcher_1\Content\
+    BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.4297127D64EC6_base-game-files.json
+    BaseGameManifestFileCount: 24
+    BaseGameManifestTotalBytes: 3595561
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.6127918Z
+    EnrichedFirstUtc: 2026-03-02T12:57:35.6131732Z
+    EnrichedLastUtc: 2026-03-02T12:57:35.6131732Z
+  issues: []
+  tags: []
+- id:
+    storeKey: xbox
+    storeAppId: Microsoft.MinecraftJavaEdition
+    installInstanceId: 
+  displayName: 'Minecraft: Java Edition'
+  installFolders:
+    installFolder:
+      folderId: 
+      path: M:\Games\Minecraft- Java Edition\
+    contentFolder:
+      folderId: 
+      path: M:\Games\Minecraft- Java Edition\Content\
+    dataFolder: 
+    additionalFolders: []
+  executableName: MCPlaceholderStub.exe
+  visualAssets: 
+  version: 
+  installState: Installed
+  lastUpdatedUtc: 
+  depots: []
+  storeMetadata:
+    ConfigPath: M:\Games\Minecraft- Java Edition\Content\MicrosoftGame.config
+    StoreId: 9PJ8266BHFWN
+    TitleId: 71A0E6A2
+    ContentPath: M:\Games\Minecraft- Java Edition\Content\
+    BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.MinecraftJavaEdition_base-game-files.json
+    BaseGameManifestFileCount: 39
+    BaseGameManifestTotalBytes: 68522014
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.6209670Z
+    EnrichedFirstUtc: 2026-03-02T12:57:35.6219736Z
+    EnrichedLastUtc: 2026-03-02T12:57:35.6219736Z
   issues: []
   tags: []
 - id:
@@ -956,10 +1088,10 @@ apps:
     ContentPath: M:\Games\No Man's Sky\Content\
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\HelloGames.NoMansSky_base-game-files.json
     BaseGameManifestFileCount: 165
-    BaseGameManifestTotalBytes: 28781075108
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:37.3516080Z
-    EnrichedFirstUtc: 2026-02-27T15:24:37.3522903Z
-    EnrichedLastUtc: 2026-02-27T15:24:37.3522903Z
+    BaseGameManifestTotalBytes: 28781497428
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.6508580Z
+    EnrichedFirstUtc: 2026-03-02T12:57:35.6517761Z
+    EnrichedLastUtc: 2026-03-02T12:57:35.6517761Z
   issues: []
   tags: []
 - id:
@@ -990,9 +1122,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.Dayton_base-game-files.json
     BaseGameManifestFileCount: 72457
     BaseGameManifestTotalBytes: 21468082164
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:45.3245160Z
-    EnrichedFirstUtc: 2026-02-27T15:24:45.4102031Z
-    EnrichedLastUtc: 2026-02-27T15:24:45.4102031Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:46.9706498Z
+    EnrichedFirstUtc: 2026-03-02T12:57:47.0609583Z
+    EnrichedLastUtc: 2026-03-02T12:57:47.0609583Z
   issues: []
   tags: []
 - id:
@@ -1023,9 +1155,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.SkyrimSE-PC_base-game-files.json
     BaseGameManifestFileCount: 78
     BaseGameManifestTotalBytes: 29764729814
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:45.4231361Z
-    EnrichedFirstUtc: 2026-02-27T15:24:45.4241988Z
-    EnrichedLastUtc: 2026-02-27T15:24:45.4241988Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:47.0715410Z
+    EnrichedFirstUtc: 2026-03-02T12:57:47.0721703Z
+    EnrichedLastUtc: 2026-03-02T12:57:47.0721703Z
   issues: []
   tags: []
 - id:
@@ -1056,9 +1188,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.OE-Arkansas_base-game-files.json
     BaseGameManifestFileCount: 226
     BaseGameManifestTotalBytes: 82531609591
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:45.4771344Z
-    EnrichedFirstUtc: 2026-02-27T15:24:45.4778366Z
-    EnrichedLastUtc: 2026-02-27T15:24:45.4778366Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:47.1200020Z
+    EnrichedFirstUtc: 2026-03-02T12:57:47.1205902Z
+    EnrichedLastUtc: 2026-03-02T12:57:47.1205902Z
   issues: []
   tags: []
 - id:
@@ -1210,9 +1342,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\228980_base-game-files.json
     BaseGameManifestFileCount: 182
     BaseGameManifestTotalBytes: 279385831
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:46.4766757Z
-    EnrichedFirstUtc: 2026-02-27T15:24:46.4784642Z
-    EnrichedLastUtc: 2026-02-27T15:24:46.4784642Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:55.2027608Z
+    EnrichedFirstUtc: 2026-03-02T12:57:55.2037948Z
+    EnrichedLastUtc: 2026-03-02T12:57:55.2037948Z
   issues: []
   tags:
   - installed
@@ -1360,15 +1492,15 @@ apps:
     SteamPublishers: Bethesda Softworks
     SteamDlcAppIds: 2721670,2401180,2561880,2792440
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1716740/header.jpg?t=1749757928
-    EnrichedFirstUtc: 2026-02-27T15:24:45.9831601Z
-    EnrichedLastUtc: 2026-02-27T15:24:49.9188445Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.0629777Z
+    EnrichedLastUtc: 2026-03-02T12:57:59.6395169Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1716740/capsule_184x69.jpg?t=1749757928
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1716740/page_bg_raw.jpg?t=1749757928
-    SteamEnrichedUtc: 2026-02-27T15:24:45.9834185Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.0633312Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1716740_base-game-files.json
-    BaseGameManifestFileCount: 98187
-    BaseGameManifestTotalBytes: 160175075098
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:49.8535867Z
+    BaseGameManifestFileCount: 98155
+    BaseGameManifestTotalBytes: 159656834325
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:59.5653328Z
   issues: []
   tags:
   - installed
@@ -1487,15 +1619,15 @@ apps:
     SteamDevelopers: Naughty Dog LLC | Iron Galaxy Studios
     SteamPublishers: PlayStation Publishing LLC
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888930/header.jpg?t=1750959031
-    EnrichedFirstUtc: 2026-02-27T15:24:46.0369819Z
-    EnrichedLastUtc: 2026-02-27T15:24:50.0019231Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.1385521Z
+    EnrichedLastUtc: 2026-03-02T12:57:59.7138159Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888930/capsule_184x69.jpg?t=1750959031
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888930/page_bg_raw.jpg?t=1750959031
-    SteamEnrichedUtc: 2026-02-27T15:24:46.0374310Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.1388779Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1888930_base-game-files.json
     BaseGameManifestFileCount: 186
     BaseGameManifestTotalBytes: 84550480476
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:49.9893376Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:59.7120969Z
   issues: []
   tags:
   - installed
@@ -1629,15 +1761,15 @@ apps:
     SteamDevelopers: Naughty Dog LLC | Nixxes Software | Iron Galaxy Studios
     SteamPublishers: PlayStation Publishing LLC
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2531310/header.jpg?t=1750959180
-    EnrichedFirstUtc: 2026-02-27T15:24:45.9578622Z
-    EnrichedLastUtc: 2026-02-27T15:24:50.0124425Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.0705866Z
+    EnrichedLastUtc: 2026-03-02T12:57:59.7265460Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2531310/29904ca69ae022479d64207cc40ce549d0a68acb/capsule_184x69.jpg?t=1750959180
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2531310/page_bg_raw.jpg?t=1750959180
-    SteamEnrichedUtc: 2026-02-27T15:24:45.9583656Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.0710433Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\2531310_base-game-files.json
     BaseGameManifestFileCount: 189
     BaseGameManifestTotalBytes: 124569421147
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:50.0117884Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:57:59.7257423Z
   issues: []
   tags:
   - installed
@@ -1738,15 +1870,15 @@ apps:
     SteamDevelopers: Bethesda Game Studios
     SteamPublishers: Bethesda Softworks
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2722710/header.jpg?t=1732144153
-    EnrichedFirstUtc: 2026-02-27T15:24:45.9582681Z
-    EnrichedLastUtc: 2026-02-27T15:24:51.3488074Z
+    EnrichedFirstUtc: 2026-03-02T12:57:55.1769632Z
+    EnrichedLastUtc: 2026-03-02T12:58:01.5824136Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2722710/capsule_184x69.jpg?t=1732144153
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2722710/page_bg_raw.jpg?t=1732144153
-    SteamEnrichedUtc: 2026-02-27T15:24:45.9600626Z
+    SteamEnrichedUtc: 2026-03-02T12:57:55.1772451Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\2722710_base-game-files.json
-    BaseGameManifestFileCount: 98187
-    BaseGameManifestTotalBytes: 160175075098
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:51.2966295Z
+    BaseGameManifestFileCount: 98155
+    BaseGameManifestTotalBytes: 159656834325
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:01.5207982Z
   issues: []
   tags:
   - installed
@@ -2044,15 +2176,15 @@ apps:
     SteamPublishers: Bethesda Softworks
     SteamDlcAppIds: 3868650,598110,540810,404090,435881,480631,480630,490650,435880,435870
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/377160/header.jpg?t=1764687456
-    EnrichedFirstUtc: 2026-02-27T15:24:46.2264258Z
-    EnrichedLastUtc: 2026-02-27T15:24:53.2681150Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.1361608Z
+    EnrichedLastUtc: 2026-03-02T12:58:03.9186979Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/377160/capsule_184x69.jpg?t=1764687456
     SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/377160?t=1764687456
-    SteamEnrichedUtc: 2026-02-27T15:24:46.2283685Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.1365509Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\377160_base-game-files.json
     BaseGameManifestFileCount: 9004
     BaseGameManifestTotalBytes: 39233771103
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:53.2629859Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:03.9117829Z
   issues: []
   tags:
   - installed
@@ -2183,15 +2315,15 @@ apps:
     SteamPublishers: Bethesda Softworks
     SteamDlcAppIds: 1746860,598120
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/489830/header.jpg?t=1753715778
-    EnrichedFirstUtc: 2026-02-27T15:24:46.0644333Z
-    EnrichedLastUtc: 2026-02-27T15:24:53.2816330Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.1759156Z
+    EnrichedLastUtc: 2026-03-02T12:58:03.9207984Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/489830/capsule_184x69.jpg?t=1753715778
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/489830/page_bg_raw.jpg?t=1753715778
-    SteamEnrichedUtc: 2026-02-27T15:24:46.0648134Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.1762880Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\489830_base-game-files.json
     BaseGameManifestFileCount: 46
     BaseGameManifestTotalBytes: 16095731388
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:53.2806453Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:03.9200230Z
   issues: []
   tags:
   - installed
@@ -2324,15 +2456,15 @@ apps:
     SteamDevelopers: Amazon Game Studios
     SteamPublishers: Amazon Game Studios
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1063730/bd98bbdc4fdf388d07afa6ec8d781cb863bccfb0/header.jpg?t=1768500124
-    EnrichedFirstUtc: 2026-02-27T15:24:46.1416036Z
-    EnrichedLastUtc: 2026-02-27T15:24:53.3665809Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.5440931Z
+    EnrichedLastUtc: 2026-03-02T12:58:03.9866315Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1063730/2fe94eba6734521fbd4f44fb23ea66cb79376067/capsule_184x69.jpg?t=1768500124
     SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/1063730?t=1768500124
-    SteamEnrichedUtc: 2026-02-27T15:24:46.1424883Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.5443319Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1063730_base-game-files.json
     BaseGameManifestFileCount: 201
     BaseGameManifestTotalBytes: 76747231899
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:53.3654896Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:03.9860457Z
   issues: []
   tags:
   - installed
@@ -2380,34 +2512,34 @@ apps:
         width: 
         height: 
         sha256: 
-  version: 21801058
+  version: 22003033
   installState: Installed
   lastUpdatedUtc:
-    dateTime: 2026-02-17T10:00:35.0000000
-    utcDateTime: 2026-02-17T10:00:35.0000000Z
-    localDateTime: 2026-02-17T04:00:35.0000000-06:00
-    date: 2026-02-17T00:00:00.0000000
-    day: 17
-    dayOfWeek: Tuesday
-    dayOfYear: 48
-    hour: 10
+    dateTime: 2026-03-02T02:29:52.0000000
+    utcDateTime: 2026-03-02T02:29:52.0000000Z
+    localDateTime: 2026-03-01T20:29:52.0000000-06:00
+    date: 2026-03-02T00:00:00.0000000
+    day: 2
+    dayOfWeek: Monday
+    dayOfYear: 61
+    hour: 2
     millisecond: 0
     microsecond: 0
     nanosecond: 0
-    minute: 0
-    month: 2
+    minute: 29
+    month: 3
     offset: 00:00:00
     totalOffsetMinutes: 0
-    second: 35
-    ticks: 639069192350000000
-    utcTicks: 639069192350000000
-    timeOfDay: 10:00:35
+    second: 52
+    ticks: 639080153920000000
+    utcTicks: 639080153920000000
+    timeOfDay: 02:29:52
     year: 2026
   depots:
   - depotId: 1085661
-    manifestId: 2207747503560041855
+    manifestId: 5385866198108274891
     branch: 
-    buildId: 21801058
+    buildId: 22003033
     installDir: 
     tags:
     - installed
@@ -2420,9 +2552,9 @@ apps:
     - has-manifest
     storeMetadata: {}
   - depotId: 1085662
-    manifestId: 8586987284149939227
+    manifestId: 8223188493982630825
     branch: 
-    buildId: 21801058
+    buildId: 22003033
     installDir: 
     tags:
     - installed
@@ -2437,10 +2569,10 @@ apps:
   storeMetadata:
     ManifestPath: M:\SteamLibrary\steamapps\appmanifest_1085660.acf
     SteamAppsRoot: M:\SteamLibrary\steamapps\
-    BuildId: 21801058
+    BuildId: 22003033
     Installdir: Destiny 2
-    StateFlags: 6
-    LastUpdatedUtc: 2026-02-17T10:00:35.0000000+00:00
+    StateFlags: 4
+    LastUpdatedUtc: 2026-03-02T02:29:52.0000000+00:00
     SteamStoreUri: https://store.steampowered.com/app/1085660/
     SteamCommunityUri: https://steamcommunity.com/app/1085660/
     SteamAppDetailsUrl: https://store.steampowered.com/api/appdetails?appids=1085660&cc=US&l=english
@@ -2452,15 +2584,15 @@ apps:
     SteamPublishers: Bungie
     SteamDlcAppIds: 3186540,3186500,3489050,3186490,3205620,3700550,3952700,2336880,1945340,1656330,1656370,1314563,1090200,1090150,1745440,1569630
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1085660/header.jpg?t=1765904462
-    EnrichedFirstUtc: 2026-02-27T15:24:46.4372982Z
-    EnrichedLastUtc: 2026-02-27T15:24:53.9312506Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.2031953Z
+    EnrichedLastUtc: 2026-03-02T12:58:04.5817778Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1085660/capsule_184x69.jpg?t=1765904462
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1085660/page_bg_raw.jpg?t=1765904462
-    SteamEnrichedUtc: 2026-02-27T15:24:46.4391424Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.2035367Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1085660_base-game-files.json
-    BaseGameManifestFileCount: 3581
-    BaseGameManifestTotalBytes: 153964839613
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:24:53.9295424Z
+    BaseGameManifestFileCount: 3610
+    BaseGameManifestTotalBytes: 153981145207
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:04.5791864Z
   issues: []
   tags:
   - installed
@@ -2564,15 +2696,15 @@ apps:
     SteamPublishers: Amazon Game Studios
     SteamDlcAppIds: 3200700,3200720,3200710,3200730,1877840,3166380,3735360
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1599340/header.jpg?t=1763571534
-    EnrichedFirstUtc: 2026-02-27T15:24:46.1534221Z
-    EnrichedLastUtc: 2026-02-27T15:25:00.1873139Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.3169869Z
+    EnrichedLastUtc: 2026-03-02T12:58:11.2915048Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1599340/capsule_184x69.jpg?t=1763571534
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1599340/page_bg_raw.jpg?t=1763571534
-    SteamEnrichedUtc: 2026-02-27T15:24:46.1540105Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.3172651Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1599340_base-game-files.json
     BaseGameManifestFileCount: 45014
     BaseGameManifestTotalBytes: 139235060501
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.1654845Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:11.2655288Z
   issues: []
   tags:
   - installed
@@ -2674,15 +2806,15 @@ apps:
     SteamPublishers: Nacon
     SteamDlcAppIds: 2436840,2436841,2436842
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1681430/header.jpg?t=1760345165
-    EnrichedFirstUtc: 2026-02-27T15:24:46.1083447Z
-    EnrichedLastUtc: 2026-02-27T15:25:00.2200541Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.3032625Z
+    EnrichedLastUtc: 2026-03-02T12:58:11.3116268Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1681430/capsule_184x69.jpg?t=1760345165
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1681430/page_bg_raw.jpg?t=1760345165
-    SteamEnrichedUtc: 2026-02-27T15:24:46.1090933Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.3036057Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1681430_base-game-files.json
     BaseGameManifestFileCount: 111
     BaseGameManifestTotalBytes: 40600272392
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.2195069Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:11.3110700Z
   issues: []
   tags:
   - installed
@@ -2798,15 +2930,15 @@ apps:
     SteamDevelopers: Bethesda Game Studios
     SteamPublishers: Bethesda Softworks
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946160/header.jpg?t=1651064749
-    EnrichedFirstUtc: 2026-02-27T15:24:46.1440356Z
-    EnrichedLastUtc: 2026-02-27T15:25:00.7790145Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.2620448Z
+    EnrichedLastUtc: 2026-03-02T12:58:12.1522217Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946160/capsule_184x69.jpg?t=1651064749
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946160/page_bg_raw.jpg?t=1651064749
-    SteamEnrichedUtc: 2026-02-27T15:24:46.1452658Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.2623804Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1946160_base-game-files.json
     BaseGameManifestFileCount: 8838
     BaseGameManifestTotalBytes: 224214749
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.7744382Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.1462255Z
   issues: []
   tags:
   - installed
@@ -2924,15 +3056,15 @@ apps:
     SteamDevelopers: Bethesda Game Studios
     SteamPublishers: Bethesda Softworks
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946180/header.jpg?t=1650906828
-    EnrichedFirstUtc: 2026-02-27T15:24:46.1508569Z
-    EnrichedLastUtc: 2026-02-27T15:25:00.7920029Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.3031624Z
+    EnrichedLastUtc: 2026-03-02T12:58:12.1651945Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946180/capsule_184x69.jpg?t=1650906828
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946180/page_bg_raw.jpg?t=1650906828
-    SteamEnrichedUtc: 2026-02-27T15:24:46.1512891Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.3035472Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1946180_base-game-files.json
     BaseGameManifestFileCount: 55
     BaseGameManifestTotalBytes: 158967930
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.7912636Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.1641631Z
   issues: []
   tags:
   - installed
@@ -3035,15 +3167,15 @@ apps:
     SteamPublishers: Bethesda Softworks
     SteamDlcAppIds: 22400,22410,22420,22430,22440,461150
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/22300/header.jpg?t=1732208474
-    EnrichedFirstUtc: 2026-02-27T15:24:46.2081440Z
-    EnrichedLastUtc: 2026-02-27T15:25:00.8118627Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.3700138Z
+    EnrichedLastUtc: 2026-03-02T12:58:12.1904092Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/22300/capsule_184x69.jpg?t=1732208474
     SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/22300?t=1732208474
-    SteamEnrichedUtc: 2026-02-27T15:24:46.2088751Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.3703908Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\22300_base-game-files.json
     BaseGameManifestFileCount: 133
     BaseGameManifestTotalBytes: 6192609672
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.8110913Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.1889814Z
   issues: []
   tags:
   - installed
@@ -3369,15 +3501,15 @@ apps:
     SteamPublishers: Bethesda Softworks
     SteamDlcAppIds: 72840,72760,72750,72740,72730,461160,22470
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/22380/header.jpg?t=1765992876
-    EnrichedFirstUtc: 2026-02-27T15:24:46.3500620Z
-    EnrichedLastUtc: 2026-02-27T15:25:00.8618659Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.4180925Z
+    EnrichedLastUtc: 2026-03-02T12:58:12.2442707Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/22380/capsule_184x69.jpg?t=1765992876
     SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/22380?t=1765992876
-    SteamEnrichedUtc: 2026-02-27T15:24:46.3504906Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.4183832Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\22380_base-game-files.json
     BaseGameManifestFileCount: 468
     BaseGameManifestTotalBytes: 9920704123
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.8612064Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.2429198Z
   issues: []
   tags:
   - installed
@@ -3450,9 +3582,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\22480_base-game-files.json
     BaseGameManifestFileCount: 468
     BaseGameManifestTotalBytes: 9920704123
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.8891464Z
-    EnrichedFirstUtc: 2026-02-27T15:25:00.8907174Z
-    EnrichedLastUtc: 2026-02-27T15:25:00.8907174Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.2807082Z
+    EnrichedFirstUtc: 2026-03-02T12:58:12.2814378Z
+    EnrichedLastUtc: 2026-03-02T12:58:12.2814378Z
   issues: []
   tags:
   - installed
@@ -3585,15 +3717,15 @@ apps:
     SteamDevelopers: Crowbar Collective
     SteamPublishers: Crowbar Collective
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/362890/674b9a0e7b31996efd5032dc15e695dbf457d71d/header.jpg?t=1747193649
-    EnrichedFirstUtc: 2026-02-27T15:24:46.2626086Z
-    EnrichedLastUtc: 2026-02-27T15:25:01.1082920Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.4501482Z
+    EnrichedLastUtc: 2026-03-02T12:58:12.5467901Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/362890/626cc060e15a64a2a268b597b9556772ad5ce486/capsule_184x69.jpg?t=1747193649
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/362890/page_bg_raw.jpg?t=1747193649
-    SteamEnrichedUtc: 2026-02-27T15:24:46.2630024Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.4505301Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\362890_base-game-files.json
     BaseGameManifestFileCount: 1769
     BaseGameManifestTotalBytes: 30602153424
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:01.1053881Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.5455260Z
   issues: []
   tags:
   - installed
@@ -3709,15 +3841,15 @@ apps:
     SteamDevelopers: Interplay Inc.
     SteamPublishers: Bethesda Softworks
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/38400/header.jpg?t=1572025441
-    EnrichedFirstUtc: 2026-02-27T15:24:46.3633357Z
-    EnrichedLastUtc: 2026-02-27T15:25:01.1277462Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.4612271Z
+    EnrichedLastUtc: 2026-03-02T12:58:12.5682196Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/38400/capsule_184x69.jpg?t=1572025441
     SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/38400?t=1572025441
-    SteamEnrichedUtc: 2026-02-27T15:24:46.3640431Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.4613913Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\38400_base-game-files.json
     BaseGameManifestFileCount: 158
     BaseGameManifestTotalBytes: 589874858
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:01.1272521Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.5673740Z
   issues: []
   tags:
   - installed
@@ -3862,15 +3994,15 @@ apps:
     SteamPublishers: Valve
     SteamDlcAppIds: 323170,2012840
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/400/header.jpg?t=1745368554
-    EnrichedFirstUtc: 2026-02-27T15:24:46.3761101Z
-    EnrichedLastUtc: 2026-02-27T15:25:01.3787741Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.5417755Z
+    EnrichedLastUtc: 2026-03-02T12:58:12.8075707Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/400/capsule_184x69.jpg?t=1745368554
     SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/400?t=1745368554
-    SteamEnrichedUtc: 2026-02-27T15:24:46.3769596Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.5420347Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\400_base-game-files.json
     BaseGameManifestFileCount: 1677
     BaseGameManifestTotalBytes: 4351158946
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:01.3776888Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.8056115Z
   issues: []
   tags:
   - installed
@@ -3972,15 +4104,15 @@ apps:
     SteamPublishers: Unknown Worlds Entertainment
     SteamDlcAppIds: 1619010
     SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/848450/header.jpg?t=1751944927
-    EnrichedFirstUtc: 2026-02-27T15:24:46.3967417Z
-    EnrichedLastUtc: 2026-02-27T15:25:04.2794622Z
+    EnrichedFirstUtc: 2026-03-02T12:57:54.5056040Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.2840138Z
     SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/848450/capsule_184x69.jpg?t=1751944927
     SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/848450/page_bg_raw.jpg?t=1751944927
-    SteamEnrichedUtc: 2026-02-27T15:24:46.3981982Z
+    SteamEnrichedUtc: 2026-03-02T12:57:54.5060903Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\848450_base-game-files.json
     BaseGameManifestFileCount: 22052
     BaseGameManifestTotalBytes: 8477279147
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.2649950Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.2662375Z
   issues: []
   tags:
   - installed
@@ -4047,10 +4179,10 @@ apps:
     LaunchExecutableFullPath: G:\Games\Cyberpunk2077\redprelauncher.exe
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\Ginger_base-game-files.json
     BaseGameManifestFileCount: 5225
-    BaseGameManifestTotalBytes: 109220327308
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.6938488Z
-    EnrichedFirstUtc: 2026-02-27T15:25:04.6971856Z
-    EnrichedLastUtc: 2026-02-27T15:25:04.6971856Z
+    BaseGameManifestTotalBytes: 109220333041
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.5725440Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.5774490Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.5774490Z
   issues: []
   tags:
   - epic
@@ -4116,9 +4248,76 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\4d0ff75b922447649057c237c0bd1545_base-game-files.json
     BaseGameManifestFileCount: 373
     BaseGameManifestTotalBytes: 127552889524
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.7545665Z
-    EnrichedFirstUtc: 2026-02-27T15:25:04.7555078Z
-    EnrichedLastUtc: 2026-02-27T15:25:04.7555078Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.6285624Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.6296311Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.6296311Z
+  issues: []
+  tags:
+  - epic
+  - application
+  - games
+  - applications
+- id:
+    storeKey: epic
+    storeAppId: 8769e24080ea413b8ebca3f1b8c50951
+    installInstanceId: 
+  displayName: Grand Theft Auto V Enhanced
+  installFolders:
+    installFolder:
+      folderId: 
+      path: M:\Games\GTAVEnhanced
+    contentFolder: 
+    dataFolder: 
+    additionalFolders: []
+  executableName: PlayGTAV.exe
+  visualAssets: 
+  version: 1.0.1013.29
+  installState: Installed
+  lastUpdatedUtc:
+    dateTime: 2026-03-02T12:57:06.7900749
+    utcDateTime: 2026-03-02T12:57:06.7900749Z
+    localDateTime: 2026-03-02T06:57:06.7900749-06:00
+    date: 2026-03-02T00:00:00.0000000
+    day: 2
+    dayOfWeek: Monday
+    dayOfYear: 61
+    hour: 12
+    millisecond: 790
+    microsecond: 74
+    nanosecond: 900
+    minute: 57
+    month: 3
+    offset: 00:00:00
+    totalOffsetMinutes: 0
+    second: 6
+    ticks: 639080530267900749
+    utcTicks: 639080530267900749
+    timeOfDay: 12:57:06.7900749
+    year: 2026
+  depots: []
+  storeMetadata:
+    ManifestPath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\40D77CFE442EB4290134D8927E64BD49.item
+    FormatVersion: 0
+    ManifestLocation: M:\Games\GTAVEnhanced/.egstore
+    StagingLocation: M:\Games\GTAVEnhanced/.egstore/bps
+    InstallLocation: M:\Games\GTAVEnhanced
+    ManifestLastWriteUtc: 2026-03-02T12:57:06.7900749Z
+    LaunchExecutable: PlayGTAV.exe
+    AppVersionString: 1.0.1013.29
+    CatalogNamespace: b0cd075465c44f87be3b505ac04a2e46
+    CatalogItemId: 122e5e90b7b8424d930be8bc1a7e05fb
+    MainGameAppName: 8769e24080ea413b8ebca3f1b8c50951
+    InstallSize: 102399070133
+    PrereqIds: '[]'
+    SourceKind: manifest-item
+    SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\40D77CFE442EB4290134D8927E64BD49.item
+    LaunchExecutableFullPath: M:\Games\GTAVEnhanced\PlayGTAV.exe
+    BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\8769e24080ea413b8ebca3f1b8c50951_base-game-files.json
+    BaseGameManifestFileCount: 451
+    BaseGameManifestTotalBytes: 102405414060
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.6828701Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.6836864Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.6836864Z
   issues: []
   tags:
   - epic
@@ -4180,10 +4379,10 @@ apps:
     SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\65344A99437EA281C70AF59E675E7384.item
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\c7250f768ab74180895fd781cbc32921_base-game-files.json
     BaseGameManifestFileCount: 5225
-    BaseGameManifestTotalBytes: 109220327308
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.8339718Z
-    EnrichedFirstUtc: 2026-02-27T15:25:04.8377146Z
-    EnrichedLastUtc: 2026-02-27T15:25:04.8377146Z
+    BaseGameManifestTotalBytes: 109220333041
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.7980637Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.8023020Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.8023020Z
   issues: []
   tags:
   - epic
@@ -4247,9 +4446,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\81ed1e946da54050af4b3be7774ea038_base-game-files.json
     BaseGameManifestFileCount: 229
     BaseGameManifestTotalBytes: 3056939621
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.8558919Z
-    EnrichedFirstUtc: 2026-02-27T15:25:04.8568688Z
-    EnrichedLastUtc: 2026-02-27T15:25:04.8568688Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.8290147Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.8296699Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.8296699Z
   issues: []
   tags:
   - epic
@@ -4318,9 +4517,9 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\adeae8bbfc94427db57c7dfecce3f1d4_base-game-files.json
     BaseGameManifestFileCount: 313
     BaseGameManifestTotalBytes: 9299225960
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.9135480Z
-    EnrichedFirstUtc: 2026-02-27T15:25:04.9142864Z
-    EnrichedLastUtc: 2026-02-27T15:25:04.9142864Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.8729998Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.8740441Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.8740441Z
   issues: []
   tags:
   - epic
@@ -4387,9 +4586,208 @@ apps:
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\c38f51843fdf4db0b24fc907b8d78221_base-game-files.json
     BaseGameManifestFileCount: 160
     BaseGameManifestTotalBytes: 79717851632
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.9356676Z
-    EnrichedFirstUtc: 2026-02-27T15:25:04.9368334Z
-    EnrichedLastUtc: 2026-02-27T15:25:04.9368334Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.8926063Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.8932589Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.8932589Z
+  issues: []
+  tags:
+  - epic
+  - application
+  - games
+  - applications
+- id:
+    storeKey: epic
+    storeAppId: 3da74e4fa1d94eceb950774f76dbfcea
+    installInstanceId: 
+  displayName: Control Expansion 2 AWE
+  installFolders:
+    installFolder:
+      folderId: 
+      path: M:\Games\Control
+    contentFolder: 
+    dataFolder: 
+    additionalFolders: []
+  executableName: 
+  visualAssets: 
+  version: 01.12.00_AWE_ENT
+  installState: Installed
+  lastUpdatedUtc:
+    dateTime: 2026-03-02T03:25:42.9358261
+    utcDateTime: 2026-03-02T03:25:42.9358261Z
+    localDateTime: 2026-03-01T21:25:42.9358261-06:00
+    date: 2026-03-02T00:00:00.0000000
+    day: 2
+    dayOfWeek: Monday
+    dayOfYear: 61
+    hour: 3
+    millisecond: 935
+    microsecond: 826
+    nanosecond: 100
+    minute: 25
+    month: 3
+    offset: 00:00:00
+    totalOffsetMinutes: 0
+    second: 42
+    ticks: 639080187429358261
+    utcTicks: 639080187429358261
+    timeOfDay: 03:25:42.9358261
+    year: 2026
+  depots: []
+  storeMetadata:
+    ManifestPath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\B9D3C17B4E5CCBC841471888EFF8E107.item
+    FormatVersion: 0
+    ManifestLocation: M:\Games\Control/.egstore
+    StagingLocation: M:\Games\Control/.egstore/bps
+    InstallLocation: M:\Games\Control
+    ManifestLastWriteUtc: 2026-03-02T03:25:42.9358261Z
+    AppVersionString: 01.12.00_AWE_ENT
+    CatalogNamespace: calluna
+    CatalogItemId: 48832223fb834bc5bba847c115691ce2
+    MainGameAppName: Calluna
+    InstallSize: 66
+    PrereqIds: '[]'
+    SourceKind: manifest-item
+    SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\B9D3C17B4E5CCBC841471888EFF8E107.item
+    BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\3da74e4fa1d94eceb950774f76dbfcea_base-game-files.json
+    BaseGameManifestFileCount: 310
+    BaseGameManifestTotalBytes: 45013157145
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.9344076Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.9350654Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.9350654Z
+  issues: []
+  tags:
+  - epic
+  - application
+  - games
+  - applications
+  - addon
+- id:
+    storeKey: epic
+    storeAppId: 737e55c2736c43a6b93c9c769e04e112
+    installInstanceId: 
+  displayName: The Foundation DLC
+  installFolders:
+    installFolder:
+      folderId: 
+      path: M:\Games\Control
+    contentFolder: 
+    dataFolder: 
+    additionalFolders: []
+  executableName: 
+  visualAssets: 
+  version: 01.08.00
+  installState: Installed
+  lastUpdatedUtc:
+    dateTime: 2026-03-02T03:25:42.9448383
+    utcDateTime: 2026-03-02T03:25:42.9448383Z
+    localDateTime: 2026-03-01T21:25:42.9448383-06:00
+    date: 2026-03-02T00:00:00.0000000
+    day: 2
+    dayOfWeek: Monday
+    dayOfYear: 61
+    hour: 3
+    millisecond: 944
+    microsecond: 838
+    nanosecond: 300
+    minute: 25
+    month: 3
+    offset: 00:00:00
+    totalOffsetMinutes: 0
+    second: 42
+    ticks: 639080187429448383
+    utcTicks: 639080187429448383
+    timeOfDay: 03:25:42.9448383
+    year: 2026
+  depots: []
+  storeMetadata:
+    ManifestPath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\CBA9559B4531227B17D002B9033045A0.item
+    FormatVersion: 0
+    ManifestLocation: M:\Games\Control/.egstore
+    StagingLocation: M:\Games\Control/.egstore/bps
+    InstallLocation: M:\Games\Control
+    ManifestLastWriteUtc: 2026-03-02T03:25:42.9448383Z
+    AppVersionString: 01.08.00
+    CatalogNamespace: calluna
+    CatalogItemId: 6dc148f7be5c4b2580b987984a3520b5
+    MainGameAppName: Calluna
+    InstallSize: 1
+    PrereqIds: '[]'
+    SourceKind: manifest-item
+    SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\CBA9559B4531227B17D002B9033045A0.item
+    BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\737e55c2736c43a6b93c9c769e04e112_base-game-files.json
+    BaseGameManifestFileCount: 310
+    BaseGameManifestTotalBytes: 45013157145
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.9633037Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.9641995Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.9641995Z
+  issues: []
+  tags:
+  - epic
+  - application
+  - games
+  - applications
+  - addon
+- id:
+    storeKey: epic
+    storeAppId: Calluna
+    installInstanceId: 
+  displayName: Control
+  installFolders:
+    installFolder:
+      folderId: 
+      path: M:\Games\Control
+    contentFolder: 
+    dataFolder: 
+    additionalFolders: []
+  executableName: Control.exe
+  visualAssets: 
+  version: 1.33
+  installState: Installed
+  lastUpdatedUtc:
+    dateTime: 2026-03-02T03:25:42.9523693
+    utcDateTime: 2026-03-02T03:25:42.9523693Z
+    localDateTime: 2026-03-01T21:25:42.9523693-06:00
+    date: 2026-03-02T00:00:00.0000000
+    day: 2
+    dayOfWeek: Monday
+    dayOfYear: 61
+    hour: 3
+    millisecond: 952
+    microsecond: 369
+    nanosecond: 300
+    minute: 25
+    month: 3
+    offset: 00:00:00
+    totalOffsetMinutes: 0
+    second: 42
+    ticks: 639080187429523693
+    utcTicks: 639080187429523693
+    timeOfDay: 03:25:42.9523693
+    year: 2026
+  depots: []
+  storeMetadata:
+    ManifestPath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\DB2BF3CC423F4C2C77EDA5BC2310321E.item
+    FormatVersion: 0
+    ManifestLocation: M:\Games\Control/.egstore
+    StagingLocation: M:\Games\Control/.egstore/bps
+    InstallLocation: M:\Games\Control
+    ManifestLastWriteUtc: 2026-03-02T03:25:42.9523693Z
+    LaunchExecutable: Control.exe
+    AppVersionString: 1.33
+    CatalogNamespace: calluna
+    CatalogItemId: 9afb582e90b74bdd9e2146fb79c78589
+    MainGameAppName: Calluna
+    InstallSize: 45010292103
+    PrereqIds: '[]'
+    SourceKind: manifest-item
+    SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\DB2BF3CC423F4C2C77EDA5BC2310321E.item
+    LaunchExecutableFullPath: M:\Games\Control\Control.exe
+    BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\Calluna_base-game-files.json
+    BaseGameManifestFileCount: 310
+    BaseGameManifestTotalBytes: 45013157145
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.9932202Z
+    EnrichedFirstUtc: 2026-03-02T12:58:16.9941867Z
+    EnrichedLastUtc: 2026-03-02T12:58:16.9941867Z
   issues: []
   tags:
   - epic
@@ -4451,10 +4849,10 @@ apps:
     SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\FF701E894A24FCAB1D1911AF6C235934.item
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\02855a2f4c044aa1a813b19f8c447fe1_base-game-files.json
     BaseGameManifestFileCount: 5225
-    BaseGameManifestTotalBytes: 109220327308
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:05.0214134Z
-    EnrichedFirstUtc: 2026-02-27T15:25:05.0246410Z
-    EnrichedLastUtc: 2026-02-27T15:25:05.0246410Z
+    BaseGameManifestTotalBytes: 109220333041
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:17.1096473Z
+    EnrichedFirstUtc: 2026-03-02T12:58:17.1137101Z
+    EnrichedLastUtc: 2026-03-02T12:58:17.1137101Z
   issues: []
   tags:
   - epic
@@ -4517,12 +4915,12 @@ apps:
     GogVisualUrl:Logo: https://images.gog-statics.com/dfa3cb9facd1f9a08e942343a81aefd8048d7ddef183919f2fd0401b2c7d0e8f.png
     GogVisualUrl:Background: https://images.gog-statics.com/ae98499730d5a834db35caa7da43a91d0c3642242842bf92504667f17a7622f3.jpg
     GogVisualUrl:BoxArt: https://images.gog-statics.com/10426b33fb6a31774a3fe82203697375b3b135571e0fdb5fd48b6c7130bfca76.jpg
-    EnrichedFirstUtc: 2026-02-27T15:25:05.6748025Z
-    EnrichedLastUtc: 2026-02-27T15:25:05.7065997Z
+    EnrichedFirstUtc: 2026-03-02T12:58:23.2675752Z
+    EnrichedLastUtc: 2026-03-02T12:58:23.3025110Z
     BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\gog\manifests\1901367087_base-game-files.json
     BaseGameManifestFileCount: 236
     BaseGameManifestTotalBytes: 44628360170
-    BaseGameManifestGeneratedUtc: 2026-02-27T15:25:05.7057746Z
+    BaseGameManifestGeneratedUtc: 2026-03-02T12:58:23.3018213Z
   issues: []
   tags:
   - gog
@@ -4901,9 +5299,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.PGDeluxeContentwPkg_base-game-files.json
         BaseGameManifestFileCount: 12
         BaseGameManifestTotalBytes: 50875021
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4090550Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.4328027Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.4328027Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.1747995Z
+        EnrichedFirstUtc: 2026-03-02T12:57:29.2032177Z
+        EnrichedLastUtc: 2026-03-02T12:57:29.2032177Z
       issues: []
       tags: []
     - id:
@@ -4933,9 +5331,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.PGPreorderContentwPkg_base-game-files.json
         BaseGameManifestFileCount: 12
         BaseGameManifestTotalBytes: 14862808
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4342068Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.4352037Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.4352037Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2038216Z
+        EnrichedFirstUtc: 2026-03-02T12:57:29.2043298Z
+        EnrichedLastUtc: 2026-03-02T12:57:29.2043298Z
       issues: []
       tags: []
     - id:
@@ -4965,9 +5363,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.ShatteredSpace_base-game-files.json
         BaseGameManifestFileCount: 14
         BaseGameManifestTotalBytes: 10711916476
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4362230Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.4366919Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.4366919Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2058707Z
+        EnrichedFirstUtc: 2026-03-02T12:57:29.2063641Z
+        EnrichedLastUtc: 2026-03-02T12:57:29.2063641Z
       issues: []
       tags: []
     - id:
@@ -4998,9 +5396,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.ProjectGold_base-game-files.json
         BaseGameManifestFileCount: 558
         BaseGameManifestTotalBytes: 136093862860
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4698194Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.4708387Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.4708387Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2307135Z
+        EnrichedFirstUtc: 2026-03-02T12:57:29.2319490Z
+        EnrichedLastUtc: 2026-03-02T12:57:29.2319490Z
       issues: []
       tags: []
     - id:
@@ -5031,9 +5429,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.438957EDB7717_base-game-files.json
         BaseGameManifestFileCount: 263
         BaseGameManifestTotalBytes: 12617640003
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.4795238Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.4807323Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.4807323Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2380305Z
+        EnrichedFirstUtc: 2026-03-02T12:57:29.2393307Z
+        EnrichedLastUtc: 2026-03-02T12:57:29.2393307Z
       issues: []
       tags: []
     - id:
@@ -5064,9 +5462,42 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.ProjectAltar_base-game-files.json
         BaseGameManifestFileCount: 269
         BaseGameManifestTotalBytes: 127351571432
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.5035323Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.5043106Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.5043106Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:29.2560433Z
+        EnrichedFirstUtc: 2026-03-02T12:57:29.2567960Z
+        EnrichedLastUtc: 2026-03-02T12:57:29.2567960Z
+      issues: []
+      tags: []
+    - id:
+        storeKey: xbox
+        storeAppId: MICROSOFT.MINECRAFTUWP
+        installInstanceId: 
+      displayName: Minecraft for Windows
+      installFolders:
+        installFolder:
+          folderId: 
+          path: M:\Games\7792D9CE-355A-493C-AFBD-768F4A77C3B0\
+        contentFolder:
+          folderId: 
+          path: M:\Games\7792D9CE-355A-493C-AFBD-768F4A77C3B0\Content\
+        dataFolder: 
+        additionalFolders: []
+      executableName: Minecraft.Windows.exe
+      visualAssets: 
+      version: 
+      installState: Installed
+      lastUpdatedUtc: 
+      depots: []
+      storeMetadata:
+        ConfigPath: M:\Games\7792D9CE-355A-493C-AFBD-768F4A77C3B0\Content\MicrosoftGame.config
+        StoreId: 9NBLGGH2JHXJ
+        TitleId: 35760C07
+        ContentPath: M:\Games\7792D9CE-355A-493C-AFBD-768F4A77C3B0\Content\
+        BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\MICROSOFT.MINECRAFTUWP_base-game-files.json
+        BaseGameManifestFileCount: 34428
+        BaseGameManifestTotalBytes: 1492019681
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.5445246Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.5947013Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.5947013Z
       issues: []
       tags: []
     - id:
@@ -5097,9 +5528,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.Avowed_base-game-files.json
         BaseGameManifestFileCount: 255
         BaseGameManifestTotalBytes: 72756833627
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.5581261Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.5588539Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.5588539Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.6455949Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.6463369Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.6463369Z
       issues: []
       tags: []
     - id:
@@ -5130,9 +5561,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\KeplerInteractive.Expedition33_base-game-files.json
         BaseGameManifestFileCount: 151
         BaseGameManifestTotalBytes: 46936603420
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.5923323Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.5930038Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.5930038Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.6776426Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.6784291Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.6784291Z
       issues: []
       tags: []
     - id:
@@ -5163,9 +5594,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.ProjectTitan_base-game-files.json
         BaseGameManifestFileCount: 243
         BaseGameManifestTotalBytes: 89364531763
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.6433727Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.6442009Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.6442009Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.7280602Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.7290639Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.7290639Z
       issues: []
       tags: []
     - id:
@@ -5195,9 +5626,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.TitanPreorderContent_base-game-files.json
         BaseGameManifestFileCount: 11
         BaseGameManifestTotalBytes: 4815414
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.6463498Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.6468605Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.6468605Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.7311588Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.7319616Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.7319616Z
       issues: []
       tags: []
     - id:
@@ -5227,9 +5658,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout2_base-game-files.json
         BaseGameManifestFileCount: 170
         BaseGameManifestTotalBytes: 1747465058
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.6743920Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.6750625Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.6750625Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.7716387Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.7727151Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.7727151Z
       issues: []
       tags: []
     - id:
@@ -5260,9 +5691,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-CoreGame_base-game-files.json
         BaseGameManifestFileCount: 120
         BaseGameManifestTotalBytes: 31472559548
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.6943904Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.6951162Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.6951162Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.7974160Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.7982625Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.7982625Z
       issues: []
       tags: []
     - id:
@@ -5293,9 +5724,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-PC_base-game-files.json
         BaseGameManifestFileCount: 336
         BaseGameManifestTotalBytes: 46835731472
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7508017Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7516151Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7516151Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8513540Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8524190Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8524190Z
       issues: []
       tags: []
     - id:
@@ -5325,9 +5756,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC1Automatron_base-game-files.json
         BaseGameManifestFileCount: 17
         BaseGameManifestTotalBytes: 1066623923
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7556298Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7566772Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7566772Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8556491Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8564277Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8564277Z
       issues: []
       tags: []
     - id:
@@ -5357,9 +5788,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4Automatron-PC_base-game-files.json
         BaseGameManifestFileCount: 15
         BaseGameManifestTotalBytes: 781943855
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7594325Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7599591Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7599591Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8593142Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8602523Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8602523Z
       issues: []
       tags: []
     - id:
@@ -5389,9 +5820,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC4ContraptionsWorksho_base-game-files.json
         BaseGameManifestFileCount: 12
         BaseGameManifestTotalBytes: 213840862
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7620656Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7625891Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7625891Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8634901Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8654777Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8654777Z
       issues: []
       tags: []
     - id:
@@ -5421,9 +5852,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4ContraptionsWorkshop-PC_base-game-files.json
         BaseGameManifestFileCount: 12
         BaseGameManifestTotalBytes: 213841177
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7652329Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7658125Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7658125Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8686559Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8695035Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8695035Z
       issues: []
       tags: []
     - id:
@@ -5453,9 +5884,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC3FarHarbor_base-game-files.json
         BaseGameManifestFileCount: 17
         BaseGameManifestTotalBytes: 4531183519
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7689657Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7695373Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7695373Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8730860Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8738637Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8738637Z
       issues: []
       tags: []
     - id:
@@ -5485,9 +5916,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4FarHarbor-PC_base-game-files.json
         BaseGameManifestFileCount: 15
         BaseGameManifestTotalBytes: 3487913063
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7726469Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7732781Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7732781Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8763487Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8771355Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8771355Z
       issues: []
       tags: []
     - id:
@@ -5517,9 +5948,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4HighResolutionTexturePac_base-game-files.json
         BaseGameManifestFileCount: 26
         BaseGameManifestTotalBytes: 62607562313
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7782905Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7798634Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7798634Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8807821Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8817237Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8817237Z
       issues: []
       tags: []
     - id:
@@ -5549,9 +5980,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC6Nuka-World_base-game-files.json
         BaseGameManifestFileCount: 17
         BaseGameManifestTotalBytes: 4379680376
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7833472Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7840044Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7840044Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8863967Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8874843Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8874843Z
       issues: []
       tags: []
     - id:
@@ -5581,9 +6012,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4Nuka-World-PC_base-game-files.json
         BaseGameManifestFileCount: 15
         BaseGameManifestTotalBytes: 3770225836
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7867980Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7873578Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7873578Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8906535Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8914324Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8914324Z
       issues: []
       tags: []
     - id:
@@ -5613,9 +6044,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC5Vault-TecWorkshop_base-game-files.json
         BaseGameManifestFileCount: 17
         BaseGameManifestTotalBytes: 511042546
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7903416Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7909005Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7909005Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8953160Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8960052Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8960052Z
       issues: []
       tags: []
     - id:
@@ -5645,9 +6076,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4Vault-TecWorkshop-PC_base-game-files.json
         BaseGameManifestFileCount: 15
         BaseGameManifestTotalBytes: 410151229
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7934707Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7940508Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7940508Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.8988923Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.8997266Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.8997266Z
       issues: []
       tags: []
     - id:
@@ -5677,9 +6108,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4-DLC2WastelandWorkshop_base-game-files.json
         BaseGameManifestFileCount: 14
         BaseGameManifestTotalBytes: 82900486
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.7974015Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.7980681Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.7980681Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.9027464Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.9036038Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.9036038Z
       issues: []
       tags: []
     - id:
@@ -5709,9 +6140,42 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout4WastelandWorkshop-PC_base-game-files.json
         BaseGameManifestFileCount: 14
         BaseGameManifestTotalBytes: 82900741
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:36.8012396Z
-        EnrichedFirstUtc: 2026-02-27T15:24:36.8017917Z
-        EnrichedLastUtc: 2026-02-27T15:24:36.8017917Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.9071690Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.9080064Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.9080064Z
+      issues: []
+      tags: []
+    - id:
+        storeKey: xbox
+        storeAppId: BethesdaSoftworks.Fallout76-PC
+        installInstanceId: 
+      displayName: Fallout 76
+      installFolders:
+        installFolder:
+          folderId: 
+          path: M:\Games\Fallout 76\
+        contentFolder:
+          folderId: 
+          path: M:\Games\Fallout 76\Content\
+        dataFolder: 
+        additionalFolders: []
+      executableName: Project76_GamePass.exe
+      visualAssets: 
+      version: 
+      installState: Installed
+      lastUpdatedUtc: 
+      depots: []
+      storeMetadata:
+        ConfigPath: M:\Games\Fallout 76\Content\MicrosoftGame.config
+        StoreId: 9NKGNMNK3K3Z
+        TitleId: 687DFD53
+        ContentPath: M:\Games\Fallout 76\Content\
+        BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.Fallout76-PC_base-game-files.json
+        BaseGameManifestFileCount: 237
+        BaseGameManifestTotalBytes: 127556807476
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:34.9417972Z
+        EnrichedFirstUtc: 2026-03-02T12:57:34.9430380Z
+        EnrichedLastUtc: 2026-03-02T12:57:34.9430380Z
       issues: []
       tags: []
     - id:
@@ -5741,9 +6205,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.FalloutNewVegas_base-game-files.json
         BaseGameManifestFileCount: 1609
         BaseGameManifestTotalBytes: 50091596702
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:37.1120699Z
-        EnrichedFirstUtc: 2026-02-27T15:24:37.1142019Z
-        EnrichedLastUtc: 2026-02-27T15:24:37.1142019Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.3251920Z
+        EnrichedFirstUtc: 2026-03-02T12:57:35.3279842Z
+        EnrichedLastUtc: 2026-03-02T12:57:35.3279842Z
       issues: []
       tags: []
     - id:
@@ -5774,9 +6238,75 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\4063811bitstudios.Frostpunk2ConsoleEdition_base-game-files.json
         BaseGameManifestFileCount: 935
         BaseGameManifestTotalBytes: 16362341857
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:37.3227084Z
-        EnrichedFirstUtc: 2026-02-27T15:24:37.3240098Z
-        EnrichedLastUtc: 2026-02-27T15:24:37.3240098Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.6085713Z
+        EnrichedFirstUtc: 2026-03-02T12:57:35.6102541Z
+        EnrichedLastUtc: 2026-03-02T12:57:35.6102541Z
+      issues: []
+      tags: []
+    - id:
+        storeKey: xbox
+        storeAppId: Microsoft.4297127D64EC6
+        installInstanceId: 
+      displayName: Minecraft Launcher
+      installFolders:
+        installFolder:
+          folderId: 
+          path: M:\Games\Minecraft Launcher_1\
+        contentFolder:
+          folderId: 
+          path: M:\Games\Minecraft Launcher_1\Content\
+        dataFolder: 
+        additionalFolders: []
+      executableName: Minecraft.exe
+      visualAssets: 
+      version: 
+      installState: Installed
+      lastUpdatedUtc: 
+      depots: []
+      storeMetadata:
+        ConfigPath: M:\Games\Minecraft Launcher_1\Content\MicrosoftGame.config
+        StoreId: 9PGW18NPBZV5
+        TitleId: 6AF6E7CC
+        ContentPath: M:\Games\Minecraft Launcher_1\Content\
+        BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.4297127D64EC6_base-game-files.json
+        BaseGameManifestFileCount: 24
+        BaseGameManifestTotalBytes: 3595561
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.6127918Z
+        EnrichedFirstUtc: 2026-03-02T12:57:35.6131732Z
+        EnrichedLastUtc: 2026-03-02T12:57:35.6131732Z
+      issues: []
+      tags: []
+    - id:
+        storeKey: xbox
+        storeAppId: Microsoft.MinecraftJavaEdition
+        installInstanceId: 
+      displayName: 'Minecraft: Java Edition'
+      installFolders:
+        installFolder:
+          folderId: 
+          path: M:\Games\Minecraft- Java Edition\
+        contentFolder:
+          folderId: 
+          path: M:\Games\Minecraft- Java Edition\Content\
+        dataFolder: 
+        additionalFolders: []
+      executableName: MCPlaceholderStub.exe
+      visualAssets: 
+      version: 
+      installState: Installed
+      lastUpdatedUtc: 
+      depots: []
+      storeMetadata:
+        ConfigPath: M:\Games\Minecraft- Java Edition\Content\MicrosoftGame.config
+        StoreId: 9PJ8266BHFWN
+        TitleId: 71A0E6A2
+        ContentPath: M:\Games\Minecraft- Java Edition\Content\
+        BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.MinecraftJavaEdition_base-game-files.json
+        BaseGameManifestFileCount: 39
+        BaseGameManifestTotalBytes: 68522014
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.6209670Z
+        EnrichedFirstUtc: 2026-03-02T12:57:35.6219736Z
+        EnrichedLastUtc: 2026-03-02T12:57:35.6219736Z
       issues: []
       tags: []
     - id:
@@ -5806,10 +6336,10 @@ stores:
         ContentPath: M:\Games\No Man's Sky\Content\
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\HelloGames.NoMansSky_base-game-files.json
         BaseGameManifestFileCount: 165
-        BaseGameManifestTotalBytes: 28781075108
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:37.3516080Z
-        EnrichedFirstUtc: 2026-02-27T15:24:37.3522903Z
-        EnrichedLastUtc: 2026-02-27T15:24:37.3522903Z
+        BaseGameManifestTotalBytes: 28781497428
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:35.6508580Z
+        EnrichedFirstUtc: 2026-03-02T12:57:35.6517761Z
+        EnrichedLastUtc: 2026-03-02T12:57:35.6517761Z
       issues: []
       tags: []
     - id:
@@ -5840,9 +6370,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.Dayton_base-game-files.json
         BaseGameManifestFileCount: 72457
         BaseGameManifestTotalBytes: 21468082164
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:45.3245160Z
-        EnrichedFirstUtc: 2026-02-27T15:24:45.4102031Z
-        EnrichedLastUtc: 2026-02-27T15:24:45.4102031Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:46.9706498Z
+        EnrichedFirstUtc: 2026-03-02T12:57:47.0609583Z
+        EnrichedLastUtc: 2026-03-02T12:57:47.0609583Z
       issues: []
       tags: []
     - id:
@@ -5873,9 +6403,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\BethesdaSoftworks.SkyrimSE-PC_base-game-files.json
         BaseGameManifestFileCount: 78
         BaseGameManifestTotalBytes: 29764729814
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:45.4231361Z
-        EnrichedFirstUtc: 2026-02-27T15:24:45.4241988Z
-        EnrichedLastUtc: 2026-02-27T15:24:45.4241988Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:47.0715410Z
+        EnrichedFirstUtc: 2026-03-02T12:57:47.0721703Z
+        EnrichedLastUtc: 2026-03-02T12:57:47.0721703Z
       issues: []
       tags: []
     - id:
@@ -5906,9 +6436,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\xbox\manifests\Microsoft.OE-Arkansas_base-game-files.json
         BaseGameManifestFileCount: 226
         BaseGameManifestTotalBytes: 82531609591
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:45.4771344Z
-        EnrichedFirstUtc: 2026-02-27T15:24:45.4778366Z
-        EnrichedLastUtc: 2026-02-27T15:24:45.4778366Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:47.1200020Z
+        EnrichedFirstUtc: 2026-03-02T12:57:47.1205902Z
+        EnrichedLastUtc: 2026-03-02T12:57:47.1205902Z
       issues: []
       tags: []
     issues: []
@@ -6063,9 +6593,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\228980_base-game-files.json
         BaseGameManifestFileCount: 182
         BaseGameManifestTotalBytes: 279385831
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:46.4766757Z
-        EnrichedFirstUtc: 2026-02-27T15:24:46.4784642Z
-        EnrichedLastUtc: 2026-02-27T15:24:46.4784642Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:55.2027608Z
+        EnrichedFirstUtc: 2026-03-02T12:57:55.2037948Z
+        EnrichedLastUtc: 2026-03-02T12:57:55.2037948Z
       issues: []
       tags:
       - installed
@@ -6213,15 +6743,15 @@ stores:
         SteamPublishers: Bethesda Softworks
         SteamDlcAppIds: 2721670,2401180,2561880,2792440
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1716740/header.jpg?t=1749757928
-        EnrichedFirstUtc: 2026-02-27T15:24:45.9831601Z
-        EnrichedLastUtc: 2026-02-27T15:24:49.9188445Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.0629777Z
+        EnrichedLastUtc: 2026-03-02T12:57:59.6395169Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1716740/capsule_184x69.jpg?t=1749757928
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1716740/page_bg_raw.jpg?t=1749757928
-        SteamEnrichedUtc: 2026-02-27T15:24:45.9834185Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.0633312Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1716740_base-game-files.json
-        BaseGameManifestFileCount: 98187
-        BaseGameManifestTotalBytes: 160175075098
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:49.8535867Z
+        BaseGameManifestFileCount: 98155
+        BaseGameManifestTotalBytes: 159656834325
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:59.5653328Z
       issues: []
       tags:
       - installed
@@ -6340,15 +6870,15 @@ stores:
         SteamDevelopers: Naughty Dog LLC | Iron Galaxy Studios
         SteamPublishers: PlayStation Publishing LLC
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888930/header.jpg?t=1750959031
-        EnrichedFirstUtc: 2026-02-27T15:24:46.0369819Z
-        EnrichedLastUtc: 2026-02-27T15:24:50.0019231Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.1385521Z
+        EnrichedLastUtc: 2026-03-02T12:57:59.7138159Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888930/capsule_184x69.jpg?t=1750959031
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888930/page_bg_raw.jpg?t=1750959031
-        SteamEnrichedUtc: 2026-02-27T15:24:46.0374310Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.1388779Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1888930_base-game-files.json
         BaseGameManifestFileCount: 186
         BaseGameManifestTotalBytes: 84550480476
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:49.9893376Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:59.7120969Z
       issues: []
       tags:
       - installed
@@ -6482,15 +7012,15 @@ stores:
         SteamDevelopers: Naughty Dog LLC | Nixxes Software | Iron Galaxy Studios
         SteamPublishers: PlayStation Publishing LLC
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2531310/header.jpg?t=1750959180
-        EnrichedFirstUtc: 2026-02-27T15:24:45.9578622Z
-        EnrichedLastUtc: 2026-02-27T15:24:50.0124425Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.0705866Z
+        EnrichedLastUtc: 2026-03-02T12:57:59.7265460Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2531310/29904ca69ae022479d64207cc40ce549d0a68acb/capsule_184x69.jpg?t=1750959180
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2531310/page_bg_raw.jpg?t=1750959180
-        SteamEnrichedUtc: 2026-02-27T15:24:45.9583656Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.0710433Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\2531310_base-game-files.json
         BaseGameManifestFileCount: 189
         BaseGameManifestTotalBytes: 124569421147
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:50.0117884Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:57:59.7257423Z
       issues: []
       tags:
       - installed
@@ -6591,15 +7121,15 @@ stores:
         SteamDevelopers: Bethesda Game Studios
         SteamPublishers: Bethesda Softworks
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2722710/header.jpg?t=1732144153
-        EnrichedFirstUtc: 2026-02-27T15:24:45.9582681Z
-        EnrichedLastUtc: 2026-02-27T15:24:51.3488074Z
+        EnrichedFirstUtc: 2026-03-02T12:57:55.1769632Z
+        EnrichedLastUtc: 2026-03-02T12:58:01.5824136Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2722710/capsule_184x69.jpg?t=1732144153
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2722710/page_bg_raw.jpg?t=1732144153
-        SteamEnrichedUtc: 2026-02-27T15:24:45.9600626Z
+        SteamEnrichedUtc: 2026-03-02T12:57:55.1772451Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\2722710_base-game-files.json
-        BaseGameManifestFileCount: 98187
-        BaseGameManifestTotalBytes: 160175075098
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:51.2966295Z
+        BaseGameManifestFileCount: 98155
+        BaseGameManifestTotalBytes: 159656834325
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:01.5207982Z
       issues: []
       tags:
       - installed
@@ -6897,15 +7427,15 @@ stores:
         SteamPublishers: Bethesda Softworks
         SteamDlcAppIds: 3868650,598110,540810,404090,435881,480631,480630,490650,435880,435870
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/377160/header.jpg?t=1764687456
-        EnrichedFirstUtc: 2026-02-27T15:24:46.2264258Z
-        EnrichedLastUtc: 2026-02-27T15:24:53.2681150Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.1361608Z
+        EnrichedLastUtc: 2026-03-02T12:58:03.9186979Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/377160/capsule_184x69.jpg?t=1764687456
         SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/377160?t=1764687456
-        SteamEnrichedUtc: 2026-02-27T15:24:46.2283685Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.1365509Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\377160_base-game-files.json
         BaseGameManifestFileCount: 9004
         BaseGameManifestTotalBytes: 39233771103
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:53.2629859Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:03.9117829Z
       issues: []
       tags:
       - installed
@@ -7036,15 +7566,15 @@ stores:
         SteamPublishers: Bethesda Softworks
         SteamDlcAppIds: 1746860,598120
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/489830/header.jpg?t=1753715778
-        EnrichedFirstUtc: 2026-02-27T15:24:46.0644333Z
-        EnrichedLastUtc: 2026-02-27T15:24:53.2816330Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.1759156Z
+        EnrichedLastUtc: 2026-03-02T12:58:03.9207984Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/489830/capsule_184x69.jpg?t=1753715778
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/489830/page_bg_raw.jpg?t=1753715778
-        SteamEnrichedUtc: 2026-02-27T15:24:46.0648134Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.1762880Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\489830_base-game-files.json
         BaseGameManifestFileCount: 46
         BaseGameManifestTotalBytes: 16095731388
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:53.2806453Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:03.9200230Z
       issues: []
       tags:
       - installed
@@ -7177,15 +7707,15 @@ stores:
         SteamDevelopers: Amazon Game Studios
         SteamPublishers: Amazon Game Studios
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1063730/bd98bbdc4fdf388d07afa6ec8d781cb863bccfb0/header.jpg?t=1768500124
-        EnrichedFirstUtc: 2026-02-27T15:24:46.1416036Z
-        EnrichedLastUtc: 2026-02-27T15:24:53.3665809Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.5440931Z
+        EnrichedLastUtc: 2026-03-02T12:58:03.9866315Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1063730/2fe94eba6734521fbd4f44fb23ea66cb79376067/capsule_184x69.jpg?t=1768500124
         SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/1063730?t=1768500124
-        SteamEnrichedUtc: 2026-02-27T15:24:46.1424883Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.5443319Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1063730_base-game-files.json
         BaseGameManifestFileCount: 201
         BaseGameManifestTotalBytes: 76747231899
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:53.3654896Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:03.9860457Z
       issues: []
       tags:
       - installed
@@ -7233,34 +7763,34 @@ stores:
             width: 
             height: 
             sha256: 
-      version: 21801058
+      version: 22003033
       installState: Installed
       lastUpdatedUtc:
-        dateTime: 2026-02-17T10:00:35.0000000
-        utcDateTime: 2026-02-17T10:00:35.0000000Z
-        localDateTime: 2026-02-17T04:00:35.0000000-06:00
-        date: 2026-02-17T00:00:00.0000000
-        day: 17
-        dayOfWeek: Tuesday
-        dayOfYear: 48
-        hour: 10
+        dateTime: 2026-03-02T02:29:52.0000000
+        utcDateTime: 2026-03-02T02:29:52.0000000Z
+        localDateTime: 2026-03-01T20:29:52.0000000-06:00
+        date: 2026-03-02T00:00:00.0000000
+        day: 2
+        dayOfWeek: Monday
+        dayOfYear: 61
+        hour: 2
         millisecond: 0
         microsecond: 0
         nanosecond: 0
-        minute: 0
-        month: 2
+        minute: 29
+        month: 3
         offset: 00:00:00
         totalOffsetMinutes: 0
-        second: 35
-        ticks: 639069192350000000
-        utcTicks: 639069192350000000
-        timeOfDay: 10:00:35
+        second: 52
+        ticks: 639080153920000000
+        utcTicks: 639080153920000000
+        timeOfDay: 02:29:52
         year: 2026
       depots:
       - depotId: 1085661
-        manifestId: 2207747503560041855
+        manifestId: 5385866198108274891
         branch: 
-        buildId: 21801058
+        buildId: 22003033
         installDir: 
         tags:
         - installed
@@ -7273,9 +7803,9 @@ stores:
         - has-manifest
         storeMetadata: {}
       - depotId: 1085662
-        manifestId: 8586987284149939227
+        manifestId: 8223188493982630825
         branch: 
-        buildId: 21801058
+        buildId: 22003033
         installDir: 
         tags:
         - installed
@@ -7290,10 +7820,10 @@ stores:
       storeMetadata:
         ManifestPath: M:\SteamLibrary\steamapps\appmanifest_1085660.acf
         SteamAppsRoot: M:\SteamLibrary\steamapps\
-        BuildId: 21801058
+        BuildId: 22003033
         Installdir: Destiny 2
-        StateFlags: 6
-        LastUpdatedUtc: 2026-02-17T10:00:35.0000000+00:00
+        StateFlags: 4
+        LastUpdatedUtc: 2026-03-02T02:29:52.0000000+00:00
         SteamStoreUri: https://store.steampowered.com/app/1085660/
         SteamCommunityUri: https://steamcommunity.com/app/1085660/
         SteamAppDetailsUrl: https://store.steampowered.com/api/appdetails?appids=1085660&cc=US&l=english
@@ -7305,15 +7835,15 @@ stores:
         SteamPublishers: Bungie
         SteamDlcAppIds: 3186540,3186500,3489050,3186490,3205620,3700550,3952700,2336880,1945340,1656330,1656370,1314563,1090200,1090150,1745440,1569630
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1085660/header.jpg?t=1765904462
-        EnrichedFirstUtc: 2026-02-27T15:24:46.4372982Z
-        EnrichedLastUtc: 2026-02-27T15:24:53.9312506Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.2031953Z
+        EnrichedLastUtc: 2026-03-02T12:58:04.5817778Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1085660/capsule_184x69.jpg?t=1765904462
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1085660/page_bg_raw.jpg?t=1765904462
-        SteamEnrichedUtc: 2026-02-27T15:24:46.4391424Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.2035367Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1085660_base-game-files.json
-        BaseGameManifestFileCount: 3581
-        BaseGameManifestTotalBytes: 153964839613
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:24:53.9295424Z
+        BaseGameManifestFileCount: 3610
+        BaseGameManifestTotalBytes: 153981145207
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:04.5791864Z
       issues: []
       tags:
       - installed
@@ -7417,15 +7947,15 @@ stores:
         SteamPublishers: Amazon Game Studios
         SteamDlcAppIds: 3200700,3200720,3200710,3200730,1877840,3166380,3735360
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1599340/header.jpg?t=1763571534
-        EnrichedFirstUtc: 2026-02-27T15:24:46.1534221Z
-        EnrichedLastUtc: 2026-02-27T15:25:00.1873139Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.3169869Z
+        EnrichedLastUtc: 2026-03-02T12:58:11.2915048Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1599340/capsule_184x69.jpg?t=1763571534
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1599340/page_bg_raw.jpg?t=1763571534
-        SteamEnrichedUtc: 2026-02-27T15:24:46.1540105Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.3172651Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1599340_base-game-files.json
         BaseGameManifestFileCount: 45014
         BaseGameManifestTotalBytes: 139235060501
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.1654845Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:11.2655288Z
       issues: []
       tags:
       - installed
@@ -7527,15 +8057,15 @@ stores:
         SteamPublishers: Nacon
         SteamDlcAppIds: 2436840,2436841,2436842
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1681430/header.jpg?t=1760345165
-        EnrichedFirstUtc: 2026-02-27T15:24:46.1083447Z
-        EnrichedLastUtc: 2026-02-27T15:25:00.2200541Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.3032625Z
+        EnrichedLastUtc: 2026-03-02T12:58:11.3116268Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1681430/capsule_184x69.jpg?t=1760345165
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1681430/page_bg_raw.jpg?t=1760345165
-        SteamEnrichedUtc: 2026-02-27T15:24:46.1090933Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.3036057Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1681430_base-game-files.json
         BaseGameManifestFileCount: 111
         BaseGameManifestTotalBytes: 40600272392
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.2195069Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:11.3110700Z
       issues: []
       tags:
       - installed
@@ -7651,15 +8181,15 @@ stores:
         SteamDevelopers: Bethesda Game Studios
         SteamPublishers: Bethesda Softworks
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946160/header.jpg?t=1651064749
-        EnrichedFirstUtc: 2026-02-27T15:24:46.1440356Z
-        EnrichedLastUtc: 2026-02-27T15:25:00.7790145Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.2620448Z
+        EnrichedLastUtc: 2026-03-02T12:58:12.1522217Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946160/capsule_184x69.jpg?t=1651064749
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946160/page_bg_raw.jpg?t=1651064749
-        SteamEnrichedUtc: 2026-02-27T15:24:46.1452658Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.2623804Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1946160_base-game-files.json
         BaseGameManifestFileCount: 8838
         BaseGameManifestTotalBytes: 224214749
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.7744382Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.1462255Z
       issues: []
       tags:
       - installed
@@ -7777,15 +8307,15 @@ stores:
         SteamDevelopers: Bethesda Game Studios
         SteamPublishers: Bethesda Softworks
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946180/header.jpg?t=1650906828
-        EnrichedFirstUtc: 2026-02-27T15:24:46.1508569Z
-        EnrichedLastUtc: 2026-02-27T15:25:00.7920029Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.3031624Z
+        EnrichedLastUtc: 2026-03-02T12:58:12.1651945Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946180/capsule_184x69.jpg?t=1650906828
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1946180/page_bg_raw.jpg?t=1650906828
-        SteamEnrichedUtc: 2026-02-27T15:24:46.1512891Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.3035472Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\1946180_base-game-files.json
         BaseGameManifestFileCount: 55
         BaseGameManifestTotalBytes: 158967930
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.7912636Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.1641631Z
       issues: []
       tags:
       - installed
@@ -7888,15 +8418,15 @@ stores:
         SteamPublishers: Bethesda Softworks
         SteamDlcAppIds: 22400,22410,22420,22430,22440,461150
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/22300/header.jpg?t=1732208474
-        EnrichedFirstUtc: 2026-02-27T15:24:46.2081440Z
-        EnrichedLastUtc: 2026-02-27T15:25:00.8118627Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.3700138Z
+        EnrichedLastUtc: 2026-03-02T12:58:12.1904092Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/22300/capsule_184x69.jpg?t=1732208474
         SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/22300?t=1732208474
-        SteamEnrichedUtc: 2026-02-27T15:24:46.2088751Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.3703908Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\22300_base-game-files.json
         BaseGameManifestFileCount: 133
         BaseGameManifestTotalBytes: 6192609672
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.8110913Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.1889814Z
       issues: []
       tags:
       - installed
@@ -8222,15 +8752,15 @@ stores:
         SteamPublishers: Bethesda Softworks
         SteamDlcAppIds: 72840,72760,72750,72740,72730,461160,22470
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/22380/header.jpg?t=1765992876
-        EnrichedFirstUtc: 2026-02-27T15:24:46.3500620Z
-        EnrichedLastUtc: 2026-02-27T15:25:00.8618659Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.4180925Z
+        EnrichedLastUtc: 2026-03-02T12:58:12.2442707Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/22380/capsule_184x69.jpg?t=1765992876
         SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/22380?t=1765992876
-        SteamEnrichedUtc: 2026-02-27T15:24:46.3504906Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.4183832Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\22380_base-game-files.json
         BaseGameManifestFileCount: 468
         BaseGameManifestTotalBytes: 9920704123
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.8612064Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.2429198Z
       issues: []
       tags:
       - installed
@@ -8303,9 +8833,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\22480_base-game-files.json
         BaseGameManifestFileCount: 468
         BaseGameManifestTotalBytes: 9920704123
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:00.8891464Z
-        EnrichedFirstUtc: 2026-02-27T15:25:00.8907174Z
-        EnrichedLastUtc: 2026-02-27T15:25:00.8907174Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.2807082Z
+        EnrichedFirstUtc: 2026-03-02T12:58:12.2814378Z
+        EnrichedLastUtc: 2026-03-02T12:58:12.2814378Z
       issues: []
       tags:
       - installed
@@ -8438,15 +8968,15 @@ stores:
         SteamDevelopers: Crowbar Collective
         SteamPublishers: Crowbar Collective
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/362890/674b9a0e7b31996efd5032dc15e695dbf457d71d/header.jpg?t=1747193649
-        EnrichedFirstUtc: 2026-02-27T15:24:46.2626086Z
-        EnrichedLastUtc: 2026-02-27T15:25:01.1082920Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.4501482Z
+        EnrichedLastUtc: 2026-03-02T12:58:12.5467901Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/362890/626cc060e15a64a2a268b597b9556772ad5ce486/capsule_184x69.jpg?t=1747193649
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/362890/page_bg_raw.jpg?t=1747193649
-        SteamEnrichedUtc: 2026-02-27T15:24:46.2630024Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.4505301Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\362890_base-game-files.json
         BaseGameManifestFileCount: 1769
         BaseGameManifestTotalBytes: 30602153424
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:01.1053881Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.5455260Z
       issues: []
       tags:
       - installed
@@ -8562,15 +9092,15 @@ stores:
         SteamDevelopers: Interplay Inc.
         SteamPublishers: Bethesda Softworks
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/38400/header.jpg?t=1572025441
-        EnrichedFirstUtc: 2026-02-27T15:24:46.3633357Z
-        EnrichedLastUtc: 2026-02-27T15:25:01.1277462Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.4612271Z
+        EnrichedLastUtc: 2026-03-02T12:58:12.5682196Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/38400/capsule_184x69.jpg?t=1572025441
         SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/38400?t=1572025441
-        SteamEnrichedUtc: 2026-02-27T15:24:46.3640431Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.4613913Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\38400_base-game-files.json
         BaseGameManifestFileCount: 158
         BaseGameManifestTotalBytes: 589874858
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:01.1272521Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.5673740Z
       issues: []
       tags:
       - installed
@@ -8715,15 +9245,15 @@ stores:
         SteamPublishers: Valve
         SteamDlcAppIds: 323170,2012840
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/400/header.jpg?t=1745368554
-        EnrichedFirstUtc: 2026-02-27T15:24:46.3761101Z
-        EnrichedLastUtc: 2026-02-27T15:25:01.3787741Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.5417755Z
+        EnrichedLastUtc: 2026-03-02T12:58:12.8075707Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/400/capsule_184x69.jpg?t=1745368554
         SteamVisualUrl:Background: https://store.akamai.steamstatic.com/images/storepagebackground/app/400?t=1745368554
-        SteamEnrichedUtc: 2026-02-27T15:24:46.3769596Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.5420347Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\400_base-game-files.json
         BaseGameManifestFileCount: 1677
         BaseGameManifestTotalBytes: 4351158946
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:01.3776888Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:12.8056115Z
       issues: []
       tags:
       - installed
@@ -8825,15 +9355,15 @@ stores:
         SteamPublishers: Unknown Worlds Entertainment
         SteamDlcAppIds: 1619010
         SteamVisualUrl:Header: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/848450/header.jpg?t=1751944927
-        EnrichedFirstUtc: 2026-02-27T15:24:46.3967417Z
-        EnrichedLastUtc: 2026-02-27T15:25:04.2794622Z
+        EnrichedFirstUtc: 2026-03-02T12:57:54.5056040Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.2840138Z
         SteamVisualUrl:Capsule: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/848450/capsule_184x69.jpg?t=1751944927
         SteamVisualUrl:Background: https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/848450/page_bg_raw.jpg?t=1751944927
-        SteamEnrichedUtc: 2026-02-27T15:24:46.3981982Z
+        SteamEnrichedUtc: 2026-03-02T12:57:54.5060903Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\steam\manifests\848450_base-game-files.json
         BaseGameManifestFileCount: 22052
         BaseGameManifestTotalBytes: 8477279147
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.2649950Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.2662375Z
       issues: []
       tags:
       - installed
@@ -8903,10 +9433,10 @@ stores:
         LaunchExecutableFullPath: G:\Games\Cyberpunk2077\redprelauncher.exe
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\Ginger_base-game-files.json
         BaseGameManifestFileCount: 5225
-        BaseGameManifestTotalBytes: 109220327308
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.6938488Z
-        EnrichedFirstUtc: 2026-02-27T15:25:04.6971856Z
-        EnrichedLastUtc: 2026-02-27T15:25:04.6971856Z
+        BaseGameManifestTotalBytes: 109220333041
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.5725440Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.5774490Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.5774490Z
       issues: []
       tags:
       - epic
@@ -8972,9 +9502,76 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\4d0ff75b922447649057c237c0bd1545_base-game-files.json
         BaseGameManifestFileCount: 373
         BaseGameManifestTotalBytes: 127552889524
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.7545665Z
-        EnrichedFirstUtc: 2026-02-27T15:25:04.7555078Z
-        EnrichedLastUtc: 2026-02-27T15:25:04.7555078Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.6285624Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.6296311Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.6296311Z
+      issues: []
+      tags:
+      - epic
+      - application
+      - games
+      - applications
+    - id:
+        storeKey: epic
+        storeAppId: 8769e24080ea413b8ebca3f1b8c50951
+        installInstanceId: 
+      displayName: Grand Theft Auto V Enhanced
+      installFolders:
+        installFolder:
+          folderId: 
+          path: M:\Games\GTAVEnhanced
+        contentFolder: 
+        dataFolder: 
+        additionalFolders: []
+      executableName: PlayGTAV.exe
+      visualAssets: 
+      version: 1.0.1013.29
+      installState: Installed
+      lastUpdatedUtc:
+        dateTime: 2026-03-02T12:57:06.7900749
+        utcDateTime: 2026-03-02T12:57:06.7900749Z
+        localDateTime: 2026-03-02T06:57:06.7900749-06:00
+        date: 2026-03-02T00:00:00.0000000
+        day: 2
+        dayOfWeek: Monday
+        dayOfYear: 61
+        hour: 12
+        millisecond: 790
+        microsecond: 74
+        nanosecond: 900
+        minute: 57
+        month: 3
+        offset: 00:00:00
+        totalOffsetMinutes: 0
+        second: 6
+        ticks: 639080530267900749
+        utcTicks: 639080530267900749
+        timeOfDay: 12:57:06.7900749
+        year: 2026
+      depots: []
+      storeMetadata:
+        ManifestPath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\40D77CFE442EB4290134D8927E64BD49.item
+        FormatVersion: 0
+        ManifestLocation: M:\Games\GTAVEnhanced/.egstore
+        StagingLocation: M:\Games\GTAVEnhanced/.egstore/bps
+        InstallLocation: M:\Games\GTAVEnhanced
+        ManifestLastWriteUtc: 2026-03-02T12:57:06.7900749Z
+        LaunchExecutable: PlayGTAV.exe
+        AppVersionString: 1.0.1013.29
+        CatalogNamespace: b0cd075465c44f87be3b505ac04a2e46
+        CatalogItemId: 122e5e90b7b8424d930be8bc1a7e05fb
+        MainGameAppName: 8769e24080ea413b8ebca3f1b8c50951
+        InstallSize: 102399070133
+        PrereqIds: '[]'
+        SourceKind: manifest-item
+        SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\40D77CFE442EB4290134D8927E64BD49.item
+        LaunchExecutableFullPath: M:\Games\GTAVEnhanced\PlayGTAV.exe
+        BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\8769e24080ea413b8ebca3f1b8c50951_base-game-files.json
+        BaseGameManifestFileCount: 451
+        BaseGameManifestTotalBytes: 102405414060
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.6828701Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.6836864Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.6836864Z
       issues: []
       tags:
       - epic
@@ -9036,10 +9633,10 @@ stores:
         SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\65344A99437EA281C70AF59E675E7384.item
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\c7250f768ab74180895fd781cbc32921_base-game-files.json
         BaseGameManifestFileCount: 5225
-        BaseGameManifestTotalBytes: 109220327308
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.8339718Z
-        EnrichedFirstUtc: 2026-02-27T15:25:04.8377146Z
-        EnrichedLastUtc: 2026-02-27T15:25:04.8377146Z
+        BaseGameManifestTotalBytes: 109220333041
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.7980637Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.8023020Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.8023020Z
       issues: []
       tags:
       - epic
@@ -9103,9 +9700,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\81ed1e946da54050af4b3be7774ea038_base-game-files.json
         BaseGameManifestFileCount: 229
         BaseGameManifestTotalBytes: 3056939621
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.8558919Z
-        EnrichedFirstUtc: 2026-02-27T15:25:04.8568688Z
-        EnrichedLastUtc: 2026-02-27T15:25:04.8568688Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.8290147Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.8296699Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.8296699Z
       issues: []
       tags:
       - epic
@@ -9174,9 +9771,9 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\adeae8bbfc94427db57c7dfecce3f1d4_base-game-files.json
         BaseGameManifestFileCount: 313
         BaseGameManifestTotalBytes: 9299225960
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.9135480Z
-        EnrichedFirstUtc: 2026-02-27T15:25:04.9142864Z
-        EnrichedLastUtc: 2026-02-27T15:25:04.9142864Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.8729998Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.8740441Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.8740441Z
       issues: []
       tags:
       - epic
@@ -9243,9 +9840,208 @@ stores:
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\c38f51843fdf4db0b24fc907b8d78221_base-game-files.json
         BaseGameManifestFileCount: 160
         BaseGameManifestTotalBytes: 79717851632
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:04.9356676Z
-        EnrichedFirstUtc: 2026-02-27T15:25:04.9368334Z
-        EnrichedLastUtc: 2026-02-27T15:25:04.9368334Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.8926063Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.8932589Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.8932589Z
+      issues: []
+      tags:
+      - epic
+      - application
+      - games
+      - applications
+    - id:
+        storeKey: epic
+        storeAppId: 3da74e4fa1d94eceb950774f76dbfcea
+        installInstanceId: 
+      displayName: Control Expansion 2 AWE
+      installFolders:
+        installFolder:
+          folderId: 
+          path: M:\Games\Control
+        contentFolder: 
+        dataFolder: 
+        additionalFolders: []
+      executableName: 
+      visualAssets: 
+      version: 01.12.00_AWE_ENT
+      installState: Installed
+      lastUpdatedUtc:
+        dateTime: 2026-03-02T03:25:42.9358261
+        utcDateTime: 2026-03-02T03:25:42.9358261Z
+        localDateTime: 2026-03-01T21:25:42.9358261-06:00
+        date: 2026-03-02T00:00:00.0000000
+        day: 2
+        dayOfWeek: Monday
+        dayOfYear: 61
+        hour: 3
+        millisecond: 935
+        microsecond: 826
+        nanosecond: 100
+        minute: 25
+        month: 3
+        offset: 00:00:00
+        totalOffsetMinutes: 0
+        second: 42
+        ticks: 639080187429358261
+        utcTicks: 639080187429358261
+        timeOfDay: 03:25:42.9358261
+        year: 2026
+      depots: []
+      storeMetadata:
+        ManifestPath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\B9D3C17B4E5CCBC841471888EFF8E107.item
+        FormatVersion: 0
+        ManifestLocation: M:\Games\Control/.egstore
+        StagingLocation: M:\Games\Control/.egstore/bps
+        InstallLocation: M:\Games\Control
+        ManifestLastWriteUtc: 2026-03-02T03:25:42.9358261Z
+        AppVersionString: 01.12.00_AWE_ENT
+        CatalogNamespace: calluna
+        CatalogItemId: 48832223fb834bc5bba847c115691ce2
+        MainGameAppName: Calluna
+        InstallSize: 66
+        PrereqIds: '[]'
+        SourceKind: manifest-item
+        SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\B9D3C17B4E5CCBC841471888EFF8E107.item
+        BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\3da74e4fa1d94eceb950774f76dbfcea_base-game-files.json
+        BaseGameManifestFileCount: 310
+        BaseGameManifestTotalBytes: 45013157145
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.9344076Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.9350654Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.9350654Z
+      issues: []
+      tags:
+      - epic
+      - application
+      - games
+      - applications
+      - addon
+    - id:
+        storeKey: epic
+        storeAppId: 737e55c2736c43a6b93c9c769e04e112
+        installInstanceId: 
+      displayName: The Foundation DLC
+      installFolders:
+        installFolder:
+          folderId: 
+          path: M:\Games\Control
+        contentFolder: 
+        dataFolder: 
+        additionalFolders: []
+      executableName: 
+      visualAssets: 
+      version: 01.08.00
+      installState: Installed
+      lastUpdatedUtc:
+        dateTime: 2026-03-02T03:25:42.9448383
+        utcDateTime: 2026-03-02T03:25:42.9448383Z
+        localDateTime: 2026-03-01T21:25:42.9448383-06:00
+        date: 2026-03-02T00:00:00.0000000
+        day: 2
+        dayOfWeek: Monday
+        dayOfYear: 61
+        hour: 3
+        millisecond: 944
+        microsecond: 838
+        nanosecond: 300
+        minute: 25
+        month: 3
+        offset: 00:00:00
+        totalOffsetMinutes: 0
+        second: 42
+        ticks: 639080187429448383
+        utcTicks: 639080187429448383
+        timeOfDay: 03:25:42.9448383
+        year: 2026
+      depots: []
+      storeMetadata:
+        ManifestPath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\CBA9559B4531227B17D002B9033045A0.item
+        FormatVersion: 0
+        ManifestLocation: M:\Games\Control/.egstore
+        StagingLocation: M:\Games\Control/.egstore/bps
+        InstallLocation: M:\Games\Control
+        ManifestLastWriteUtc: 2026-03-02T03:25:42.9448383Z
+        AppVersionString: 01.08.00
+        CatalogNamespace: calluna
+        CatalogItemId: 6dc148f7be5c4b2580b987984a3520b5
+        MainGameAppName: Calluna
+        InstallSize: 1
+        PrereqIds: '[]'
+        SourceKind: manifest-item
+        SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\CBA9559B4531227B17D002B9033045A0.item
+        BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\737e55c2736c43a6b93c9c769e04e112_base-game-files.json
+        BaseGameManifestFileCount: 310
+        BaseGameManifestTotalBytes: 45013157145
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.9633037Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.9641995Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.9641995Z
+      issues: []
+      tags:
+      - epic
+      - application
+      - games
+      - applications
+      - addon
+    - id:
+        storeKey: epic
+        storeAppId: Calluna
+        installInstanceId: 
+      displayName: Control
+      installFolders:
+        installFolder:
+          folderId: 
+          path: M:\Games\Control
+        contentFolder: 
+        dataFolder: 
+        additionalFolders: []
+      executableName: Control.exe
+      visualAssets: 
+      version: 1.33
+      installState: Installed
+      lastUpdatedUtc:
+        dateTime: 2026-03-02T03:25:42.9523693
+        utcDateTime: 2026-03-02T03:25:42.9523693Z
+        localDateTime: 2026-03-01T21:25:42.9523693-06:00
+        date: 2026-03-02T00:00:00.0000000
+        day: 2
+        dayOfWeek: Monday
+        dayOfYear: 61
+        hour: 3
+        millisecond: 952
+        microsecond: 369
+        nanosecond: 300
+        minute: 25
+        month: 3
+        offset: 00:00:00
+        totalOffsetMinutes: 0
+        second: 42
+        ticks: 639080187429523693
+        utcTicks: 639080187429523693
+        timeOfDay: 03:25:42.9523693
+        year: 2026
+      depots: []
+      storeMetadata:
+        ManifestPath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\DB2BF3CC423F4C2C77EDA5BC2310321E.item
+        FormatVersion: 0
+        ManifestLocation: M:\Games\Control/.egstore
+        StagingLocation: M:\Games\Control/.egstore/bps
+        InstallLocation: M:\Games\Control
+        ManifestLastWriteUtc: 2026-03-02T03:25:42.9523693Z
+        LaunchExecutable: Control.exe
+        AppVersionString: 1.33
+        CatalogNamespace: calluna
+        CatalogItemId: 9afb582e90b74bdd9e2146fb79c78589
+        MainGameAppName: Calluna
+        InstallSize: 45010292103
+        PrereqIds: '[]'
+        SourceKind: manifest-item
+        SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\DB2BF3CC423F4C2C77EDA5BC2310321E.item
+        LaunchExecutableFullPath: M:\Games\Control\Control.exe
+        BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\Calluna_base-game-files.json
+        BaseGameManifestFileCount: 310
+        BaseGameManifestTotalBytes: 45013157145
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:16.9932202Z
+        EnrichedFirstUtc: 2026-03-02T12:58:16.9941867Z
+        EnrichedLastUtc: 2026-03-02T12:58:16.9941867Z
       issues: []
       tags:
       - epic
@@ -9307,10 +10103,10 @@ stores:
         SourcePath: C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\FF701E894A24FCAB1D1911AF6C235934.item
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\epic\manifests\02855a2f4c044aa1a813b19f8c447fe1_base-game-files.json
         BaseGameManifestFileCount: 5225
-        BaseGameManifestTotalBytes: 109220327308
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:05.0214134Z
-        EnrichedFirstUtc: 2026-02-27T15:25:05.0246410Z
-        EnrichedLastUtc: 2026-02-27T15:25:05.0246410Z
+        BaseGameManifestTotalBytes: 109220333041
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:17.1096473Z
+        EnrichedFirstUtc: 2026-03-02T12:58:17.1137101Z
+        EnrichedLastUtc: 2026-03-02T12:58:17.1137101Z
       issues: []
       tags:
       - epic
@@ -9376,12 +10172,12 @@ stores:
         GogVisualUrl:Logo: https://images.gog-statics.com/dfa3cb9facd1f9a08e942343a81aefd8048d7ddef183919f2fd0401b2c7d0e8f.png
         GogVisualUrl:Background: https://images.gog-statics.com/ae98499730d5a834db35caa7da43a91d0c3642242842bf92504667f17a7622f3.jpg
         GogVisualUrl:BoxArt: https://images.gog-statics.com/10426b33fb6a31774a3fe82203697375b3b135571e0fdb5fd48b6c7130bfca76.jpg
-        EnrichedFirstUtc: 2026-02-27T15:25:05.6748025Z
-        EnrichedLastUtc: 2026-02-27T15:25:05.7065997Z
+        EnrichedFirstUtc: 2026-03-02T12:58:23.2675752Z
+        EnrichedLastUtc: 2026-03-02T12:58:23.3025110Z
         BaseGameManifestPath: C:\Users\RTH\AppData\Local\ZeeOgre\DevModManager\Cache\GameStore\gog\manifests\1901367087_base-game-files.json
         BaseGameManifestFileCount: 236
         BaseGameManifestTotalBytes: 44628360170
-        BaseGameManifestGeneratedUtc: 2026-02-27T15:25:05.7057746Z
+        BaseGameManifestGeneratedUtc: 2026-03-02T12:58:23.3018213Z
       issues: []
       tags:
       - gog
