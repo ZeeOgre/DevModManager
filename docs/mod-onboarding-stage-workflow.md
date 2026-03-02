@@ -160,6 +160,24 @@ For each new mod `{gameAbbrev}-{modName}`:
 
 This confirms your understanding is correct; the only key addition is explicit commit/push ordering for **both** repos (mod first, then master pointer update).
 
+### Short answer to the flow question (copy vs branches first)
+
+1. Create remote mod repo.
+2. Add mod repo as submodule in `GameMods`.
+3. Sync `GameMods` locally (`submodule update --init --recursive`) so `<ModRoot>/<Game>/<modName>` exists as a real working tree.
+4. Seed the repo layout.
+5. Create all canonical `stage/*` branches.
+6. Checkout the active branch (normally `stage/dev`).
+7. Copy/import files into `loosefiles/Data`.
+8. Commit + push mod repo.
+9. Commit + push `GameMods` submodule pointer.
+
+Implementation guardrail: never commit the parent `GameMods` repo while the submodule has uncommitted changes; commit/push inside the mod repo first, then update the parent pointer.
+
+Yes, a final re-sync of `GameMods` remains useful on other machines/working directories so the updated submodule pointer is pulled everywhere.
+
+Within the same local clone, DMM can also run a local `submodule sync --recursive` + `submodule update --init --recursive` after parent push so parent/submodule metadata stays clean in UI tools.
+
 ## End-to-End Onboarding Workflow
 
 1. **Create mod repo from DMM**
