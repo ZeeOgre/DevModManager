@@ -109,7 +109,7 @@ So yes to the workflow, but it is a DMM command that combines multiple git + fil
 
 ## Program-Wide Git/GitHub Settings
 
-Recommended settings to add:
+Recommended settings to add (stored in DB-backed program settings):
 
 - `RepoRootPath` (existing): local mod-root working folder.
 - `GitHubAccount`: owner/user namespace (example: `ZeeOgre`).
@@ -119,6 +119,8 @@ Recommended settings to add:
 ### Can base repo be derived from account?
 
 Usually yes (`https://github.com/<account>/GameMods`), but keep `GitHubModRootRepo` as explicit override for non-standard names/org layouts.
+
+Note: `program-settings.json` is bootstrap-only (database path metadata); operational settings should be stored in the local database.
 
 
 ## Local Folder Strategy and Submodule Timing
@@ -359,7 +361,6 @@ This gives enough surface area for onboarding + deployment while keeping the git
 - **Yes**: Keep git orchestration fully inside DMM, with a `LibGit2Sharp`-first abstraction and CLI fallback for worktrees/submodule edge cases.
 - **Yes**: Start with copy deployment, then add links once validated.
 - **Yes**: Use safe-switch logic to handle link teardown/rebuild around branch changes.
-<<<<<<< codex/create-core-mod-repository-structure-zkcvsu
 
 
 
@@ -440,5 +441,4 @@ For each selected mod:
 
 - **Mostly in place now**: install scan, candidate scan, base-plugin exclusion, copy-first import path, settings scaffolding.
 - **Pending/next**: automatic repo creation, submodule add/sync orchestration, dmmdeps execution pipeline, branch automation, favorites/clustered game dropdown UX.
-=======
->>>>>>> main
+
