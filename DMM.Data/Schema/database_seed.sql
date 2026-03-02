@@ -13,6 +13,44 @@ INSERT INTO Game (Name, Executable)
 SELECT 'Skyrim Special Edition', 'SkyrimSE.exe'
 WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Skyrim Special Edition');
 
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'Cyberpunk 2077', 'Cyberpunk2077.exe', 'C2077'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Cyberpunk 2077');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'The Last of Us Part I', '', 'TLOU1'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'The Last of Us Part I');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'The Last of Us Part II', '', 'TLOU2'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'The Last of Us Part II');
+
+-- Note: TLOU2 has no confirmed PC store app id in current local scan snapshot.
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'No Man''s Sky', 'NMS.exe', 'NMS'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'No Man''s Sky');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'Control', 'Control_DX11.exe', 'CONTROL'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Control');
+
+INSERT INTO Game (Name, Executable, BaseGameKeyword)
+SELECT 'Minecraft', '', 'MC'
+WHERE NOT EXISTS (SELECT 1 FROM Game WHERE Name = 'Minecraft');
+
+-- Normalize/seed preferred game abbreviations.
+UPDATE Game SET BaseGameKeyword = 'STA' WHERE Name = 'Starfield' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+UPDATE Game SET BaseGameKeyword = 'FO4' WHERE Name = 'Fallout 4' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+UPDATE Game SET BaseGameKeyword = 'SKY' WHERE Name = 'Skyrim Special Edition' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+UPDATE Game SET BaseGameKeyword = 'C2077' WHERE Name = 'Cyberpunk 2077' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+UPDATE Game SET BaseGameKeyword = 'TLOU1' WHERE Name = 'The Last of Us Part I' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+UPDATE Game SET BaseGameKeyword = 'TLOU2' WHERE Name = 'The Last of Us Part II' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+UPDATE Game SET BaseGameKeyword = 'NMS' WHERE Name = 'No Man''s Sky' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+UPDATE Game SET BaseGameKeyword = 'CONTROL' WHERE Name = 'Control' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+UPDATE Game SET BaseGameKeyword = 'MC' WHERE Name = 'Minecraft' AND (BaseGameKeyword IS NULL OR BaseGameKeyword = '');
+
 INSERT INTO Game (Name, Executable, ParentGameId, IsBaseGame, IsDlc)
 SELECT 'Starfield - Shattered Space', '', g.id, 0, 1
 FROM Game g
@@ -86,6 +124,12 @@ FROM (
     SELECT 'Starfield' AS GameName, 'Steam' AS SourceName, '1716740' AS StoreAppId
     UNION ALL SELECT 'Fallout 4', 'Steam', '377160'
     UNION ALL SELECT 'Skyrim Special Edition', 'Steam', '489830'
+    UNION ALL SELECT 'Cyberpunk 2077', 'Steam', '1091500'
+    UNION ALL SELECT 'No Man''s Sky', 'Steam', '275850'
+    UNION ALL SELECT 'Control', 'Steam', '870780'
+    UNION ALL SELECT 'The Last of Us Part I', 'Steam', '1888930'
+    UNION ALL SELECT 'No Man''s Sky', 'GamePass', 'HelloGames.NoMansSky'
+    UNION ALL SELECT 'Cyberpunk 2077', 'Epic', 'Ginger'
     UNION ALL SELECT 'Starfield', 'GamePass', 'BethesdaSoftworks.ProjectGold'
     UNION ALL SELECT 'Starfield - Shattered Space', 'GamePass', 'BethesdaSoftworks.ShatteredSpace'
     UNION ALL SELECT 'Starfield - Old Mars', 'GamePass', 'BethesdaSoftworks.PGPreorderContentwPkg'
