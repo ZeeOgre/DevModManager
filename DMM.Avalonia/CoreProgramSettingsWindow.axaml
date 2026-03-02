@@ -28,7 +28,7 @@
                 <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding GitHubToken}" PasswordChar="●" Watermark="PAT used for git/GitHub operations" />
 
                 <TextBlock Grid.Row="4" Text="GitHub ModRoot Repo:" VerticalAlignment="Center" FontWeight="SemiBold" />
-                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding GitHubModRootRepo}" Watermark="https://github.com/<account>/GameMods" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding GitHubModRootRepo}" Watermark="https://github.com/&lt;account&gt;/GameMods" />
             </Grid>
 
             <TextBlock Text="Recommended: Game repo with per-mod folders (single remote, independent stage folders/branches inside each mod workflow)." TextWrapping="Wrap" />
