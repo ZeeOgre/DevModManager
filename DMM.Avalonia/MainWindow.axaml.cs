@@ -280,6 +280,13 @@ public partial class MainWindow : Window
         ConfigureTimedAutoSync();
     }
 
+    private async void RescanGameFolder_Click(object? sender, RoutedEventArgs e)
+    {
+        _viewModel.StatusMessage = "Rescan requested for selected game folder.";
+        await Task.Yield();
+        ScanGameFolder_Click(sender, e);
+    }
+
     private async void ScanGameFolder_Click(object? sender, RoutedEventArgs e)
     {
         var scan = _viewModel.ScanSelectedGameFolderForMods();
@@ -399,6 +406,12 @@ public partial class MainWindow : Window
 
         ok.Click += (_, _) => dialog.Close();
         await dialog.ShowDialog(this);
+    }
+
+
+    private void RefreshFolders_Click(object? sender, RoutedEventArgs e)
+    {
+        _viewModel.RefreshCurrentFolderData();
     }
 
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
@@ -630,6 +643,20 @@ public sealed class MainWindowViewModel : NotifyBase
 
         SyncGameFoldersFromInstalls();
         RebuildMods();
+    }
+
+    public void RefreshCurrentFolderData()
+    {
+        var selectedGameFolder = SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selectedGameFolder))
+        {
+            StatusMessage = "Refresh skipped: no game folder selected.";
+            return;
+        }
+
+        var existingCount = Mods.Count;
+        RebuildMods();
+        StatusMessage = $"Refreshed folder data for {selectedGameFolder}. Loaded {Mods.Count} managed mod(s) (previously {existingCount}).";
     }
 
     public GameFolderScanResult ScanSelectedGameFolderForMods()

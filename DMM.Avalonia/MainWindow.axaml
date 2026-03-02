@@ -48,7 +48,14 @@
                     <TextBlock Text="Track in-development mods, stage progression, and per-mod operations." />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Grid.Column="1">
-                    <Button Content="Scan Game Folder" Click="ScanGameFolder_Click" />
+                    <Button Content="Scan Game Folder" Click="ScanGameFolder_Click">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Rescan Folder" Click="RescanGameFolder_Click" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+                    <Button Content="Refresh Folders" Click="RefreshFolders_Click" />
                     <Button Content="Help" Click="OpenHelp_Click" />
                     <Button Content="Settings" Click="OpenSettings_Click" />
                 </StackPanel>
