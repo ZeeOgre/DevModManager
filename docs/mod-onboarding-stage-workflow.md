@@ -469,6 +469,28 @@ For each selected mod:
 7. Commit/push master repo submodule pointer update.
 8. Create/check out active stage branch.
 
+### Workflow optimization notes (recommended order)
+
+Your proposed order is correct; these optimizations reduce sync churn and branch friction:
+
+1. **Bootstrap remote first** (`{gamePrefix}-{modName}`), then add as submodule once in master repo.
+2. **Single local sync** after submodule add to materialize `ModRoot/<Game>/<modName>` locally.
+3. **Do file copy + dependency generation before first push** so initial commit includes `loosefiles/Data` + `inventory/` together.
+4. **Push mod repo first, then master repo pointer update** (submodule pointer should reference already-pushed mod commit).
+5. **Stage branch creation optimization**: create stage branches once at repo bootstrap (`DEV/TEST/PREFLIGHT/...`) instead of creating on every onboarding run.
+6. **Promotion optimization**: use branch-to-branch cherry-pick/merge for stage promotion; avoid recopying unchanged files.
+7. **Sync optimization**: only sync the touched submodule + master pointer update during onboarding; reserve full recursive sync for explicit maintenance action.
+
+### Why you still saw “local repo bootstrap needed” with PAT configured
+
+PAT/config only enables authenticated remote actions. The onboarding guard also requires the local target path to already be a git working tree (`.git` present).
+
+So this message means:
+- GitHub settings are valid, **but**
+- local per-mod repo/submodule folder has not yet been created/synced as a git worktree.
+
+In short: auth is ready; local bootstrap is still pending.
+
 
 ### Base-game `.mat` inventory strategy (for dmmdeps filtering)
 
