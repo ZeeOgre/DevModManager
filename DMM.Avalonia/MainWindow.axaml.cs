@@ -127,7 +127,7 @@ public partial class MainWindow : Window
                         remember,
                         new StackPanel
                         {
-                            Orientation = Avalonia.Layout.Orientation.Horizontal,
+                            Orientation = global::Avalonia.Layout.Orientation.Horizontal,
                             Spacing = 8,
                             Children = { syncNow, skipSync, cancel }
                         }
@@ -219,7 +219,7 @@ public partial class MainWindow : Window
                         remember,
                         new StackPanel
                         {
-                            Orientation = Avalonia.Layout.Orientation.Horizontal,
+                            Orientation = global::Avalonia.Layout.Orientation.Horizontal,
                             Spacing = 8,
                             Children = { syncAndExit, exitNoSync, cancel }
                         }
