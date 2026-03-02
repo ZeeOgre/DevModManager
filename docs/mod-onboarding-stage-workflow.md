@@ -449,12 +449,13 @@ Recommended approach:
 1. **Fast catalog pass first**: at game-scan time, read file-path catalogs from:
    - `GAMEFOLDER\Tools\ContentResources.zip`
    - base archive index/catalog for `* - Materials.ba2` (and optional other base archives if needed)
+   - **Fallout 4 nuance**: treat both `Fallout4 - Materials.ba2` and `* - Main.ba2` archives as potential sources of base `BGSM` material paths.
 2. Build an in-memory `HashSet<string>` of normalized base `.mat` paths (case-insensitive, `/` + `\` normalized).
-3. When `dmmdeps` returns candidate material dependencies, include only paths **not** in that base set.
+3. When `dmmdeps` returns candidate material dependencies (`.mat`/`BGSM`), include only paths **not** in that base set.
 4. Persist discovered base `.mat` paths in DB (cache table keyed by game + source + signature/timestamp) so subsequent runs do not re-extract unless source changed.
 
 Cache invalidation guidance:
-- Rebuild cache only when `ContentResources.zip` or `* - Materials.ba2` signature changes (size + write-time or hash).
+- Rebuild cache only when `ContentResources.zip`, `* - Materials.ba2`, or relevant `* - Main.ba2` signatures change (size + write-time or hash).
 - In preproduction we can add this table directly to schema/seed baseline (no migration track required yet).
 
 Fallback:
