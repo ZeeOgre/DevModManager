@@ -433,6 +433,16 @@ public sealed class MainWindowViewModel : NotifyBase
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
+        var existingManagedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name);
+        var managedPluginNames = existingManagedMods
+            .Select(x => x.PrimaryPlugin)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var managedPluginBaseNames = managedPluginNames
+            .Select(Path.GetFileNameWithoutExtension)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         var discovered = Directory.EnumerateFiles(scanRoot, "*.*", SearchOption.TopDirectoryOnly)
             .Select(path => Path.GetFileName(path))
             .Where(name => !string.IsNullOrWhiteSpace(name))
@@ -445,6 +455,8 @@ public sealed class MainWindowViewModel : NotifyBase
             })
             .Where(name => !knownPluginNames.Contains(name))
             .Where(name => !knownPluginBaseNames.Contains(Path.GetFileNameWithoutExtension(name)))
+            .Where(name => !managedPluginNames.Contains(name))
+            .Where(name => !managedPluginBaseNames.Contains(Path.GetFileNameWithoutExtension(name)))
             .Where(name => !IsOfficialPluginName(install.ManagedGame.Name, name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .GroupBy(name => Path.GetFileNameWithoutExtension(name), StringComparer.OrdinalIgnoreCase)

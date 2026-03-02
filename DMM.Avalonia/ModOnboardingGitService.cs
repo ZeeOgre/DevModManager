@@ -209,7 +209,8 @@ internal sealed class ModOnboardingGitService
             return true;
         }
 
-        if (!RunGit(modRepoPath, "add .", out error) ||
+        if (!EnsureLfsTracking(modRepoPath, out error) ||
+            !RunGit(modRepoPath, "add .", out error) ||
             !RunGit(modRepoPath, $"commit -m \"Onboard {modName} into {stageBranch}\"", out error) ||
             !RunGit(modRepoPath, $"push -u origin {stageBranch}", out error))
         {
@@ -235,6 +236,32 @@ internal sealed class ModOnboardingGitService
             !RunGit(masterRepoPath, "submodule update --init --recursive", out error))
         {
             return false;
+        }
+
+        return true;
+    }
+
+    private bool EnsureLfsTracking(string repoPath, out string error)
+    {
+        error = string.Empty;
+
+        if (!RunGit(repoPath, "lfs install --local", out error))
+        {
+            return false;
+        }
+
+        var patterns = new[] { "*.ba2", "*.esm", "*.esp", "*.esl" };
+        foreach (var pattern in patterns)
+        {
+            if (!RunGit(repoPath, $"lfs track \"{pattern}\"", out error))
+            {
+                return false;
+            }
+        }
+
+        if (File.Exists(Path.Combine(repoPath, ".gitattributes")))
+        {
+            _ = RunGit(repoPath, "add .gitattributes", out _);
         }
 
         return true;
