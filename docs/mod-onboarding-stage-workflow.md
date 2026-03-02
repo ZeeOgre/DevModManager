@@ -467,4 +467,4 @@ Fallback:
 ### Implementation state vs your checklist
 
 - **Mostly in place now**: install scan, candidate scan, base-plugin exclusion, copy-first import path, settings scaffolding.
-- **Pending/next**: automatic repo creation, submodule add/sync orchestration, dmmdeps execution pipeline (including base-game `.mat` filtering/cache), branch automation, favorites/clustered game dropdown UX.
+- **Pending/next**: automatic repo creation, submodule add/sync orchestration, dmmdeps execution pipeline, branch automation, favorites/clustered game dropdown UX.
