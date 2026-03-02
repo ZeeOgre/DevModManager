@@ -359,3 +359,86 @@ This gives enough surface area for onboarding + deployment while keeping the git
 - **Yes**: Keep git orchestration fully inside DMM, with a `LibGit2Sharp`-first abstraction and CLI fallback for worktrees/submodule edge cases.
 - **Yes**: Start with copy deployment, then add links once validated.
 - **Yes**: Use safe-switch logic to handle link teardown/rebuild around branch changes.
+<<<<<<< codex/create-core-mod-repository-structure-zkcvsu
+
+
+
+## First-Launch / Brand-New Setup Flow (Detailed)
+
+This section captures the expected end-to-end bootstrap sequence for a new machine/profile.
+
+### 1) First launch + database bootstrap
+
+- If local DB is missing, create it in `%LOCALAPPDATA%` using:
+  - `database_schema.sql`
+  - `database_seed.sql`
+- Seed should include known game catalog entries and preferred abbreviations.
+
+#### Recommended abbreviation seeds
+
+**Bethesda focus**
+- `FO4` → Fallout 4
+- `SKY` → Skyrim
+- `STA` → Starfield
+
+**Known/non-focus catalog**
+- `C2077` → Cyberpunk 2077
+- `TLOU1` → The Last of Us Part I
+- `TLOU2` → The Last of Us Part II
+- `NMS` → No Man's Sky
+- `CONTROL` → Control
+- `MC` → Minecraft
+
+### 2) First-run settings prompt (required)
+
+If not already configured, prompt for:
+- local `ModRoot` git folder (create if missing)
+- `GitHubAccount`
+- `GitHubToken`
+- `GitHubModRootRepo`
+
+### 3) Game catalog/install setup
+
+Support adding/editing a game record with:
+- game name
+- supported game stores
+- store app IDs (allow multi-value / aliases where needed)
+- default relative modroot path
+- game abbreviation
+
+### 4) Create per-game folders under ModRoot
+
+Example:
+- `ModRoot/Fallout4`
+- `ModRoot/Skyrim`
+- `ModRoot/Starfield`
+
+### 5) Scan installs + populate game-folder dropdown
+
+- Populate install list from store scanners.
+- Keep selection scoped by game for mod-level actions.
+- Allow favorites and sorting preference (future enhancement).
+
+### 6) Scan inside selected game folder for mods
+
+- Exclude known base game plugins.
+- Present candidates for onboarding stage assignment.
+
+### 7) On save/apply for selected mods
+
+For each selected mod:
+1. Ensure remote per-mod repo exists (`{gameAbbrev}-{modName}`).
+2. Ensure mod repo is added as submodule to master modroot repo.
+3. Sync master/submodules locally so working tree exists.
+4. Copy initial files into mod repo (`loosefiles/Data`, copy-first).
+5. Run `dmmdeps` for primary plugin and store outputs in `inventory/`.
+6. Commit/push mod repo updates.
+7. Commit/push master repo submodule pointer update.
+8. Create/check out active stage branch.
+
+### Implementation state vs your checklist
+
+- **Mostly in place now**: install scan, candidate scan, base-plugin exclusion, copy-first import path, settings scaffolding.
+- **Pending/next**: automatic repo creation, submodule add/sync orchestration, dmmdeps execution pipeline, branch automation, favorites/clustered game dropdown UX.
+=======
+>>>>>>> main

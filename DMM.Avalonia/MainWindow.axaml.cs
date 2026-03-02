@@ -613,9 +613,6 @@ public sealed class MainWindowViewModel : NotifyBase
     }
 
 
-    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern bool CreateHardLinkWindows(string lpFileName, string lpExistingFileName, IntPtr lpSecurityAttributes);
-
     private void RebuildMods()
     {
         Mods.Clear();
