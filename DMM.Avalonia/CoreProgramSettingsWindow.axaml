@@ -1,6 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:DMM.Avalonia"
         x:Class="DMM.Avalonia.CoreProgramSettingsWindow"
+        x:DataType="local:CoreProgramSettingsViewModel"
         Width="760"
         Height="380"
         Title="Core Program Settings"

@@ -9,6 +9,12 @@ public sealed class ProgramWideSettings
 {
     public string RepoRootPath { get; set; } = GetDefaultRepoRoot();
     public RepoOrganizationStrategy RepoOrganization { get; set; } = RepoOrganizationStrategy.GameRepoWithPerModFolders;
+    public string LastSelectedGameFolder { get; set; } = string.Empty;
+
+    // GitHub settings for repo/bootstrap workflows.
+    public string GitHubAccount { get; set; } = string.Empty;
+    public string GitHubToken { get; set; } = string.Empty;
+    public string GitHubModRootRepo { get; set; } = string.Empty;
 
     public static string GetDefaultRepoRoot()
     {
