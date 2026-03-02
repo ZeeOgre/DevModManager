@@ -55,7 +55,6 @@
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
-                    <Button Content="Refresh Folders" Click="RefreshFolders_Click" />
                     <Button Content="Help" Click="OpenHelp_Click" />
                     <Button Content="Settings" Click="OpenSettings_Click" />
                 </StackPanel>

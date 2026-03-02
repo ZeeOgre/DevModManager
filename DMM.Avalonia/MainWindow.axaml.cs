@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System;
 using System.IO;
+using System.Text.Json;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -414,11 +415,6 @@ public partial class MainWindow : Window
     }
 
 
-    private void RefreshFolders_Click(object? sender, RoutedEventArgs e)
-    {
-        _viewModel.RefreshCurrentFolderData();
-    }
-
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
     {
         var helpWindow = HelpWindow.ForSection("Main");
@@ -555,6 +551,7 @@ public sealed class MainWindowViewModel : NotifyBase
     private readonly ProgramWideSettingsStore _settingsStore = new();
     private readonly ModOnboardingGitService _gitService = new();
     private readonly SharedCatalogService _catalogService = new();
+    private readonly ModDependencyDiscoveryService _dependencyDiscoveryService = new();
 
     public ObservableCollection<string> GameFolders { get; } = new();
     public ObservableCollection<string> StageOptions { get; } = new();
@@ -650,20 +647,6 @@ public sealed class MainWindowViewModel : NotifyBase
         RebuildMods();
     }
 
-    public void RefreshCurrentFolderData()
-    {
-        var selectedGameFolder = SelectedGameFolder;
-        if (string.IsNullOrWhiteSpace(selectedGameFolder))
-        {
-            StatusMessage = "Refresh skipped: no game folder selected.";
-            return;
-        }
-
-        var existingCount = Mods.Count;
-        RebuildMods();
-        StatusMessage = $"Refreshed folder data for {selectedGameFolder}. Loaded {Mods.Count} managed mod(s) (previously {existingCount}).";
-    }
-
     public IReadOnlyList<GameFolderStageSelection> GetCurrentManagedSelectionsForRescan()
     {
         var selectedGameFolder = SelectedGameFolder;
@@ -708,11 +691,9 @@ public sealed class MainWindowViewModel : NotifyBase
             return GameFolderScanResult.Failed();
         }
 
-        var dataFolder = Path.Combine(selectedGameFolder, "Data");
-        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : selectedGameFolder;
-        if (!Directory.Exists(scanRoot))
+        if (!TryResolveGameDataRoot(selectedGameFolder, out var scanRoot, out _))
         {
-            StatusMessage = $"Scan failed: game data folder not found at '{scanRoot}'.";
+            StatusMessage = $"Scan failed: game data folder not found under '{selectedGameFolder}'.";
             return GameFolderScanResult.Failed();
         }
 
@@ -792,11 +773,9 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
-        var dataFolder = Path.Combine(selectedGameFolder, "Data");
-        var scanRoot = Directory.Exists(dataFolder) ? dataFolder : selectedGameFolder;
-        if (!Directory.Exists(scanRoot))
+        if (!TryResolveGameDataRoot(selectedGameFolder, out var scanRoot, out var resolvedGameRoot))
         {
-            StatusMessage = $"Scan apply failed: game data folder not found at '{scanRoot}'.";
+            StatusMessage = $"Scan apply failed: game data folder not found under '{selectedGameFolder}'.";
             return;
         }
 
@@ -818,6 +797,9 @@ public sealed class MainWindowViewModel : NotifyBase
         var failed = 0;
         var row = 0;
         var bootstrapPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var dependencyFilesIncluded = 0;
+        var dependencyCollisionCount = 0;
+        long dependencyScanMsTotal = 0;
 
         foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
         {
@@ -861,24 +843,55 @@ public sealed class MainWindowViewModel : NotifyBase
                 var stageFolder = Path.Combine(modRepoRoot, "loosefiles", "Data");
                 Directory.CreateDirectory(stageFolder);
 
-                var initialFiles = CollectInitialModFiles(scanRoot, selection.ModName, selection.PluginName)
-                    .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+                var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
+                var initialEntries = discovery.Entries
+                    .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
-                if (initialFiles.Count == 0)
+                dependencyFilesIncluded += initialEntries.Count;
+                dependencyCollisionCount += discovery.CollisionCount;
+                dependencyScanMsTotal += discovery.ScanMs;
+
+                if (initialEntries.Count == 0)
                 {
                     skipped++;
                     continue;
                 }
 
-                foreach (var file in initialFiles)
+                foreach (var entry in initialEntries)
                 {
-                    var target = Path.Combine(stageFolder, Path.GetFileName(file));
-                    File.Copy(file, target, overwrite: true);
+                    var relUnderData = entry.RelativeDataPath.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                        ? entry.RelativeDataPath["Data\\".Length..]
+                        : entry.RelativeDataPath;
+                    var target = Path.Combine(stageFolder, relUnderData);
+                    Directory.CreateDirectory(Path.GetDirectoryName(target) ?? stageFolder);
+                    File.Copy(entry.SourcePath, target, overwrite: true);
                     copiedFiles++;
 
-                    // Intentionally copy-only for now; link-back is reserved for a later validation milestone.
+                    if (!string.IsNullOrWhiteSpace(entry.XboxRelativePath) && !string.IsNullOrWhiteSpace(entry.XboxSourcePath))
+                    {
+                        var xboxRel = entry.XboxRelativePath!.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                            ? entry.XboxRelativePath["Data\\".Length..]
+                            : entry.XboxRelativePath;
+                        var xboxFolder = Path.Combine(modRepoRoot, "loosefiles", "XBOX", "Data");
+                        var xboxTarget = Path.Combine(xboxFolder, xboxRel);
+                        Directory.CreateDirectory(Path.GetDirectoryName(xboxTarget) ?? xboxFolder);
+                        File.Copy(entry.XboxSourcePath!, xboxTarget, overwrite: true);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(entry.TifRelativePath) && !string.IsNullOrWhiteSpace(entry.TifSourcePath))
+                    {
+                        var tifRel = entry.TifRelativePath!.StartsWith("TGATextures\\", StringComparison.OrdinalIgnoreCase)
+                            ? entry.TifRelativePath["TGATextures\\".Length..]
+                            : entry.TifRelativePath;
+                        var tifFolder = Path.Combine(modRepoRoot, "loosefiles", "TGATextures");
+                        var tifTarget = Path.Combine(tifFolder, tifRel);
+                        Directory.CreateDirectory(Path.GetDirectoryName(tifTarget) ?? tifFolder);
+                        File.Copy(entry.TifSourcePath!, tifTarget, overwrite: true);
+                    }
                 }
+
+                WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries);
 
                 var relativeSubmodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
                     .Replace('\\', '/');
@@ -937,88 +950,76 @@ public sealed class MainWindowViewModel : NotifyBase
             : $" First missing repo: {bootstrapPaths.First()}";
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
 
         RebuildMods();
     }
 
-    private static IEnumerable<string> CollectInitialModFiles(string scanRoot, string modName, string primaryPlugin)
+    private static void WriteMetadataFiles(
+        string modRepoRoot,
+        string modName,
+        string pluginName,
+        IReadOnlyList<ModDependencyEntry> entries)
     {
-        var pluginExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".esm", ".esp", ".esl" };
-        var expectedPluginName = $"{modName}{Path.GetExtension(primaryPlugin)}";
+        var metadataFolder = Path.Combine(modRepoRoot, "metadata");
+        Directory.CreateDirectory(metadataFolder);
 
-        var pluginCandidates = new[]
-        {
-            Path.Combine(scanRoot, expectedPluginName),
-            Path.Combine(scanRoot, $"{modName}.esm"),
-            Path.Combine(scanRoot, $"{modName}.esp"),
-            Path.Combine(scanRoot, $"{modName}.esl")
-        };
-
-        var pluginFiles = pluginCandidates
-            .Where(File.Exists)
-            .Where(path => pluginExtensions.Contains(Path.GetExtension(path)))
+        var achlistPath = Path.Combine(metadataFolder, $"{modName}.achlist");
+        var achlist = entries
+            .Select(x => x.RelativeDataPath)
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
             .ToList();
+        var achlistJson = JsonSerializer.Serialize(achlist, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(achlistPath, achlistJson);
 
-        var archiveCandidates = new[]
+        var catalogPath = Path.Combine(metadataFolder, "catalog.json");
+        var catalogPayload = new
         {
-            $"{modName} - Main.ba2",
-            $"{modName} - Main_xbox.ba2",
-            $"{modName} - Textures.ba2",
-            $"{modName} - Textures_xbox.ba2"
+            mod = modName,
+            plugin = pluginName,
+            generatedUtc = DateTimeOffset.UtcNow,
+            files = entries
+                .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
+                .Select(x => new
+                {
+                    pcPath = x.RelativeDataPath,
+                    xboxPath = x.XboxRelativePath,
+                    tifPath = x.TifRelativePath
+                })
+                .ToList()
         };
-
-        var archiveFiles = archiveCandidates
-            .Select(name => Path.Combine(scanRoot, name))
-            .Where(File.Exists)
-            .ToList();
-
-        return pluginFiles
-            .Concat(archiveFiles)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
+        var catalogJson = JsonSerializer.Serialize(catalogPayload, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(catalogPath, catalogJson);
     }
 
-    private static int GetPluginExtensionPriority(string extension)
+    private static bool TryResolveGameDataRoot(string selectedGameFolder, out string dataRoot, out string gameRoot)
     {
-        if (string.Equals(extension, ".esp", StringComparison.OrdinalIgnoreCase))
+        dataRoot = string.Empty;
+        gameRoot = selectedGameFolder;
+
+        var directData = Path.Combine(selectedGameFolder, "Data");
+        if (Directory.Exists(directData))
         {
-            return 0;
+            dataRoot = directData;
+            return true;
         }
 
-        if (string.Equals(extension, ".esm", StringComparison.OrdinalIgnoreCase))
+        var contentData = Path.Combine(selectedGameFolder, "Content", "Data");
+        if (Directory.Exists(contentData))
         {
-            return 1;
+            dataRoot = contentData;
+            gameRoot = Path.Combine(selectedGameFolder, "Content");
+            return true;
         }
 
-        if (string.Equals(extension, ".esl", StringComparison.OrdinalIgnoreCase))
+        if (Directory.Exists(selectedGameFolder))
         {
-            return 2;
+            dataRoot = selectedGameFolder;
+            return true;
         }
 
-        return 3;
-    }
-
-    private static bool IsOfficialPluginName(string gameName, string pluginName)
-    {
-        if (!string.Equals(gameName, "Starfield", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var baseName = NormalizePluginBaseName(Path.GetFileNameWithoutExtension(pluginName));
-        return StarfieldOfficialPluginBaseNames.Contains(baseName);
-    }
-
-    private static string NormalizePluginBaseName(string? baseName)
-    {
-        if (string.IsNullOrWhiteSpace(baseName))
-        {
-            return string.Empty;
-        }
-
-        var chars = baseName.Where(char.IsLetterOrDigit).ToArray();
-        return new string(chars).ToLowerInvariant();
+        return false;
     }
 
     private static string BuildModRepoRoot(string repoRoot, string gameName, string modName, RepoOrganizationStrategy strategy)
