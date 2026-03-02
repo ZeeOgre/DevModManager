@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using DMM.Data;
+using Microsoft.Data.Sqlite;
 
 namespace DMM.Avalonia;
 
@@ -9,6 +10,12 @@ public sealed class ProgramWideSettings
 {
     public string RepoRootPath { get; set; } = GetDefaultRepoRoot();
     public RepoOrganizationStrategy RepoOrganization { get; set; } = RepoOrganizationStrategy.GameRepoWithPerModFolders;
+    public string LastSelectedGameFolder { get; set; } = string.Empty;
+
+    // GitHub settings for repo/bootstrap workflows.
+    public string GitHubAccount { get; set; } = string.Empty;
+    public string GitHubToken { get; set; } = string.Empty;
+    public string GitHubModRootRepo { get; set; } = string.Empty;
 
     public static string GetDefaultRepoRoot()
     {
@@ -23,6 +30,11 @@ public enum RepoOrganizationStrategy
     RepoPerMod = 1
 }
 
+internal sealed class ProgramBootstrapSettings
+{
+    public string DatabasePath { get; set; } = string.Empty;
+}
+
 public sealed class ProgramWideSettingsStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -30,31 +42,114 @@ public sealed class ProgramWideSettingsStore
         WriteIndented = true
     };
 
-    private static string SettingsPath => Path.Combine(DatabasePaths.GetDatabaseDirectory(), "program-settings.json");
+    private static string BootstrapPath => Path.Combine(DatabasePaths.GetDatabaseDirectory(), "program-settings.json");
+
+    private readonly DatabaseManager _database;
+
+    public ProgramWideSettingsStore()
+    {
+        var bootstrap = LoadBootstrapSettings();
+        _database = string.IsNullOrWhiteSpace(bootstrap.DatabasePath)
+            ? new DatabaseManager()
+            : new DatabaseManager(bootstrap.DatabasePath);
+    }
 
     public ProgramWideSettings Load()
     {
-        try
-        {
-            if (!File.Exists(SettingsPath))
-            {
-                return new ProgramWideSettings();
-            }
+        _database.EnsureCreated();
 
-            var json = File.ReadAllText(SettingsPath);
-            var loaded = JsonSerializer.Deserialize<ProgramWideSettings>(json, JsonOptions);
-            return loaded ?? new ProgramWideSettings();
-        }
-        catch
+        using var connection = _database.OpenConnection();
+        EnsureProgramSettingsTable(connection);
+
+        return new ProgramWideSettings
         {
-            return new ProgramWideSettings();
-        }
+            RepoRootPath = ReadValue(connection, nameof(ProgramWideSettings.RepoRootPath)) ?? ProgramWideSettings.GetDefaultRepoRoot(),
+            RepoOrganization = ParseEnum(ReadValue(connection, nameof(ProgramWideSettings.RepoOrganization)), RepoOrganizationStrategy.GameRepoWithPerModFolders),
+            LastSelectedGameFolder = ReadValue(connection, nameof(ProgramWideSettings.LastSelectedGameFolder)) ?? string.Empty,
+            GitHubAccount = ReadValue(connection, nameof(ProgramWideSettings.GitHubAccount)) ?? string.Empty,
+            GitHubToken = ReadValue(connection, nameof(ProgramWideSettings.GitHubToken)) ?? string.Empty,
+            GitHubModRootRepo = ReadValue(connection, nameof(ProgramWideSettings.GitHubModRootRepo)) ?? string.Empty
+        };
     }
 
     public void Save(ProgramWideSettings settings)
     {
+        _database.EnsureCreated();
+
+        using var connection = _database.OpenConnection();
+        EnsureProgramSettingsTable(connection);
+
+        UpsertValue(connection, nameof(ProgramWideSettings.RepoRootPath), settings.RepoRootPath);
+        UpsertValue(connection, nameof(ProgramWideSettings.RepoOrganization), settings.RepoOrganization.ToString());
+        UpsertValue(connection, nameof(ProgramWideSettings.LastSelectedGameFolder), settings.LastSelectedGameFolder);
+        UpsertValue(connection, nameof(ProgramWideSettings.GitHubAccount), settings.GitHubAccount);
+        UpsertValue(connection, nameof(ProgramWideSettings.GitHubToken), settings.GitHubToken);
+        UpsertValue(connection, nameof(ProgramWideSettings.GitHubModRootRepo), settings.GitHubModRootRepo);
+
+        SaveBootstrapSettings(new ProgramBootstrapSettings
+        {
+            DatabasePath = _database.DatabasePath
+        });
+    }
+
+    private static void EnsureProgramSettingsTable(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS ProgramSettings (
+                SettingKey   TEXT PRIMARY KEY,
+                SettingValue TEXT
+            );
+            """;
+        command.ExecuteNonQuery();
+    }
+
+    private static string? ReadValue(SqliteConnection connection, string key)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT SettingValue FROM ProgramSettings WHERE SettingKey = $key LIMIT 1";
+        command.Parameters.AddWithValue("$key", key);
+        return command.ExecuteScalar() as string;
+    }
+
+    private static void UpsertValue(SqliteConnection connection, string key, string? value)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO ProgramSettings (SettingKey, SettingValue)
+            VALUES ($key, $value)
+            ON CONFLICT(SettingKey) DO UPDATE SET SettingValue = excluded.SettingValue;
+            """;
+        command.Parameters.AddWithValue("$key", key);
+        command.Parameters.AddWithValue("$value", value ?? string.Empty);
+        command.ExecuteNonQuery();
+    }
+
+    private static TEnum ParseEnum<TEnum>(string? value, TEnum fallback) where TEnum : struct
+        => Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed) ? parsed : fallback;
+
+    private static ProgramBootstrapSettings LoadBootstrapSettings()
+    {
+        try
+        {
+            if (!File.Exists(BootstrapPath))
+            {
+                return new ProgramBootstrapSettings();
+            }
+
+            var json = File.ReadAllText(BootstrapPath);
+            return JsonSerializer.Deserialize<ProgramBootstrapSettings>(json, JsonOptions) ?? new ProgramBootstrapSettings();
+        }
+        catch
+        {
+            return new ProgramBootstrapSettings();
+        }
+    }
+
+    private static void SaveBootstrapSettings(ProgramBootstrapSettings settings)
+    {
         Directory.CreateDirectory(DatabasePaths.GetDatabaseDirectory());
         var json = JsonSerializer.Serialize(settings, JsonOptions);
-        File.WriteAllText(SettingsPath, json);
+        File.WriteAllText(BootstrapPath, json);
     }
 }
