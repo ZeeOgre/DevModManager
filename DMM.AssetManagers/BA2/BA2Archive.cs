@@ -11,7 +11,7 @@ public sealed class Ba2Entry
     public long DataOffset { get; init; } = -1;
     public uint PackedSize { get; init; }
     public uint UnpackedSize { get; init; }
-    public bool IsDx10TextureArchive { get; init; }
+    public string BethesdaArchiveType { get; init; } = "GNRL";
 
     public override string ToString()
         => $"{RelativePath} (size={FileSize}, from={Path.GetFileName(ArchivePath)})";
