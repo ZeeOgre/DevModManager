@@ -974,7 +974,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     }
                 }
 
-                ModMetadataService.WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries);
+                ModMetadataService.WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries, discovery);
 
                 var relativeSubmodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
                     .Replace('\\', '/');
