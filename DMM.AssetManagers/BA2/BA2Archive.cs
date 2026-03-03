@@ -330,6 +330,7 @@ public static partial class BA2Archive
             if (readA == 0) break;
             if (!bufA.AsSpan(0, readA).SequenceEqual(bufB.AsSpan(0, readB))) return false;
         }
+    }
 
         return true;
     }
