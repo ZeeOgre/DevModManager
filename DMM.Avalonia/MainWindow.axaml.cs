@@ -13,6 +13,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
+using DMM.AssetManagers;
 using DMM.AssetManagers.GameStores.BattleNet;
 using DMM.AssetManagers.GameStores.Common;
 using DMM.AssetManagers.GameStores.Common.Models;
@@ -26,6 +27,7 @@ using DMM.AssetManagers.GameStores.Rockstar;
 using DMM.AssetManagers.GameStores.Steam;
 using DMM.AssetManagers.GameStores.XBox;
 using DMM.Data;
+using DMM.Core;
 
 namespace DMM.Avalonia;
 
@@ -371,12 +373,40 @@ public partial class MainWindow : Window
             }
         };
 
+        var progressBar = new ProgressBar
+        {
+            IsIndeterminate = false,
+            Height = 12,
+            MinWidth = 420,
+            Minimum = 0,
+            Maximum = Math.Max(1, selections.Count),
+            Value = 0
+        };
+        var progressText = new TextBlock
+        {
+            Text = "Starting...",
+            FontStyle = FontStyle.Italic
+        };
+
+        if (progressWindow.Content is Border { Child: StackPanel panel })
+        {
+            panel.Children[1] = progressBar;
+            panel.Children[2] = progressText;
+        }
+
         _ = progressWindow.ShowDialog(this);
         await Task.Delay(50);
 
+        var progress = new Progress<ScanApplyProgress>(update =>
+        {
+            progressBar.Maximum = Math.Max(1, update.TotalMods);
+            progressBar.Value = Math.Min(update.CompletedMods, progressBar.Maximum);
+            progressText.Text = $"{update.Message} ({update.CompletedMods}/{update.TotalMods})";
+        });
+
         try
         {
-            _viewModel.ApplyScanSelections(selections);
+            await Task.Run(() => _viewModel.ApplyScanSelections(selections, progress));
         }
         finally
         {
@@ -534,7 +564,7 @@ public partial class MainWindow : Window
         {
             var matchingFolders = _viewModel.GetGameFoldersForGame(mod.GameName);
             var activeStages = _viewModel.GetAvailableStagesForMod(mod);
-            var modWindow = new ModWindow(mod, matchingFolders, activeStages, _viewModel.SelectedGameFolder);
+            var modWindow = new ModWindow(mod, matchingFolders, activeStages, _viewModel.SelectedGameFolder, RunSingleModGatherDependenciesAsync);
             await modWindow.ShowDialog(this);
             await HandleModFocusCloseSyncAsync(mod);
             if (!_viewModel.StatusMessage.StartsWith("autocommit :", StringComparison.OrdinalIgnoreCase))
@@ -542,6 +572,15 @@ public partial class MainWindow : Window
                 _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
             }
         }
+    }
+
+    private async Task<string> RunSingleModGatherDependenciesAsync(ModDependencyGatherRequest request)
+    {
+        var stage = string.IsNullOrWhiteSpace(request.Stage) ? "DEV" : request.Stage;
+        var selection = new GameFolderStageSelection(request.ModName, request.PrimaryPlugin, stage);
+
+        await Task.Run(() => _viewModel.ApplyScanSelectionsForGameFolder(request.GameFolder, new[] { selection }));
+        return _viewModel.StatusMessage;
     }
 }
 
@@ -744,17 +783,22 @@ public sealed class MainWindowViewModel : NotifyBase
         return GameFolderScanResult.Succeeded(candidates);
     }
 
-    public void ApplyScanSelections(IReadOnlyList<GameFolderStageSelection> selections)
+    public void ApplyScanSelections(IReadOnlyList<GameFolderStageSelection> selections, IProgress<ScanApplyProgress>? progress = null)
+    {
+        ApplyScanSelectionsForGameFolder(SelectedGameFolder, selections, progress);
+    }
+
+    public void ApplyScanSelectionsForGameFolder(string? gameFolder, IReadOnlyList<GameFolderStageSelection> selections, IProgress<ScanApplyProgress>? progress = null)
     {
         Mods.Clear();
 
-        if (string.IsNullOrWhiteSpace(SelectedGameFolder))
+        if (string.IsNullOrWhiteSpace(gameFolder))
         {
             StatusMessage = "Scan apply failed: no game folder selected.";
             return;
         }
 
-        var selectedGameFolder = SelectedGameFolder!;
+        var selectedGameFolder = gameFolder!;
 
         var install = GameInstalls.FirstOrDefault(x =>
             !x.IsDlc &&
@@ -778,7 +822,7 @@ public sealed class MainWindowViewModel : NotifyBase
             ? ProgramWideSettings.GetDefaultRepoRoot()
             : settings.RepoRootPath;
 
-        if (!_gitService.HasRequiredGitHubSettings(settings, out var missingSettings))
+        if (!_gitService.HasRequiredGitHubSettings(settings.GitHubAccount, settings.GitHubToken, settings.GitHubModRootRepo, out var missingSettings))
         {
             StatusMessage = $"Scan apply blocked: configure GitHub settings first ({missingSettings}) in Program Settings.";
             return;
@@ -793,10 +837,17 @@ public sealed class MainWindowViewModel : NotifyBase
         var bootstrapPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var dependencyFilesIncluded = 0;
         var dependencyCollisionCount = 0;
+        var dependencyMissingCount = 0;
+        var dependencyParentHitCount = 0;
         long dependencyScanMsTotal = 0;
 
-        foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
+        var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
+        var completedMods = 0;
+
+        foreach (var selection in orderedSelections)
         {
+            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Evaluating {selection.ModName}"));
+
             var sourcePath = Path.Combine(scanRoot, selection.PluginName);
             if (!File.Exists(sourcePath))
             {
@@ -806,11 +857,13 @@ public sealed class MainWindowViewModel : NotifyBase
 
             try
             {
-                var modRepoRoot = BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization);
+                var modRepoRoot = ModRepositoryPathService.BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization == RepoOrganizationStrategy.RepoPerMod);
                 if (!_gitService.IsGitWorkingTree(modRepoRoot))
                 {
                     var bootstrapped = _gitService.TryBootstrapModRepository(
-                        settings,
+                        settings.GitHubAccount,
+                        settings.GitHubToken,
+                        settings.GitHubModRootRepo,
                         repoRoot,
                         install.ManagedGame.Name,
                         selection.ModName,
@@ -844,6 +897,8 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 dependencyFilesIncluded += initialEntries.Count;
                 dependencyCollisionCount += discovery.CollisionCount;
+                dependencyMissingCount += discovery.MissingReferences.Count;
+                dependencyParentHitCount += discovery.ParentArchiveReferences.Count;
                 dependencyScanMsTotal += discovery.ScanMs;
 
                 if (initialEntries.Count == 0)
@@ -857,12 +912,20 @@ public sealed class MainWindowViewModel : NotifyBase
                     var relUnderData = entry.RelativeDataPath.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
                         ? entry.RelativeDataPath["Data\\".Length..]
                         : entry.RelativeDataPath;
-                    var target = Path.Combine(stageFolder, relUnderData);
+
+                    var isPluginOrArchive = relUnderData.EndsWith(".esm", StringComparison.OrdinalIgnoreCase)
+                        || relUnderData.EndsWith(".esp", StringComparison.OrdinalIgnoreCase)
+                        || relUnderData.EndsWith(".esl", StringComparison.OrdinalIgnoreCase)
+                        || relUnderData.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase);
+
+                    var target = isPluginOrArchive
+                        ? Path.Combine(modRepoRoot, "main", Path.GetFileName(relUnderData))
+                        : Path.Combine(stageFolder, relUnderData);
                     Directory.CreateDirectory(Path.GetDirectoryName(target) ?? stageFolder);
                     File.Copy(entry.SourcePath, target, overwrite: true);
                     copiedFiles++;
 
-                    if (!string.IsNullOrWhiteSpace(entry.XboxRelativePath) && !string.IsNullOrWhiteSpace(entry.XboxSourcePath))
+                    if (!isPluginOrArchive && !string.IsNullOrWhiteSpace(entry.XboxRelativePath) && !string.IsNullOrWhiteSpace(entry.XboxSourcePath))
                     {
                         var xboxRel = entry.XboxRelativePath!.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
                             ? entry.XboxRelativePath["Data\\".Length..]
@@ -885,9 +948,9 @@ public sealed class MainWindowViewModel : NotifyBase
                     }
                 }
 
-                WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries);
+                ModMetadataService.WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries);
 
-                var relativeSubmodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
+                var relativeSubmodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
                     .Replace('\\', '/');
                 if (!_gitService.CommitAndPushOnboardingChanges(repoRoot, modRepoRoot, relativeSubmodulePath, targetStageBranch, selection.ModName, out var commitError))
                 {
@@ -906,7 +969,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     modRepoRoot);
 
                 var modRepoName = $"{_gitService.ToSlug(install.ManagedGame.Name)}-{_gitService.ToSlug(selection.ModName)}";
-                var submodulePath = Path.Combine(SanitizePathSegment(install.ManagedGame.Name), SanitizePathSegment(selection.ModName))
+                var submodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
                     .Replace('\\', '/');
                 _catalogService.UpsertEntry(repoRoot, new SharedCatalogEntry(
                     install.ManagedGame.Name,
@@ -931,6 +994,9 @@ public sealed class MainWindowViewModel : NotifyBase
             {
                 failed++;
             }
+
+            completedMods++;
+            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Completed {selection.ModName}"));
         }
 
         if (selections.Count == 0)
@@ -944,47 +1010,9 @@ public sealed class MainWindowViewModel : NotifyBase
             : $" First missing repo: {bootstrapPaths.First()}";
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
 
         RebuildMods();
-    }
-
-    private static void WriteMetadataFiles(
-        string modRepoRoot,
-        string modName,
-        string pluginName,
-        IReadOnlyList<ModDependencyEntry> entries)
-    {
-        var metadataFolder = Path.Combine(modRepoRoot, "metadata");
-        Directory.CreateDirectory(metadataFolder);
-
-        var achlistPath = Path.Combine(metadataFolder, $"{modName}.achlist");
-        var achlist = entries
-            .Select(x => x.RelativeDataPath)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-        var achlistJson = JsonSerializer.Serialize(achlist, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(achlistPath, achlistJson);
-
-        var catalogPath = Path.Combine(metadataFolder, "catalog.json");
-        var catalogPayload = new
-        {
-            mod = modName,
-            plugin = pluginName,
-            generatedUtc = DateTimeOffset.UtcNow,
-            files = entries
-                .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-                .Select(x => new
-                {
-                    pcPath = x.RelativeDataPath,
-                    xboxPath = x.XboxRelativePath,
-                    tifPath = x.TifRelativePath
-                })
-                .ToList()
-        };
-        var catalogJson = JsonSerializer.Serialize(catalogPayload, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(catalogPath, catalogJson);
     }
 
     private static bool TryResolveGameDataRoot(string selectedGameFolder, out string dataRoot, out string gameRoot)
@@ -1015,32 +1043,6 @@ public sealed class MainWindowViewModel : NotifyBase
 
         return false;
     }
-
-    private static string BuildModRepoRoot(string repoRoot, string gameName, string modName, RepoOrganizationStrategy strategy)
-    {
-        var safeGameName = SanitizePathSegment(gameName);
-        var safeModName = SanitizePathSegment(modName);
-        var gameRoot = Path.Combine(repoRoot, safeGameName);
-
-        return strategy switch
-        {
-            RepoOrganizationStrategy.RepoPerMod => Path.Combine(gameRoot, "mods", safeModName),
-            _ => Path.Combine(gameRoot, safeModName)
-        };
-    }
-
-    private static string SanitizePathSegment(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return "Unnamed";
-        }
-
-        var invalid = Path.GetInvalidFileNameChars();
-        var cleaned = new string(value.Where(c => !invalid.Contains(c)).ToArray()).Trim();
-        return string.IsNullOrWhiteSpace(cleaned) ? "Unnamed" : cleaned;
-    }
-
 
     private void RebuildMods()
     {
@@ -1314,7 +1316,7 @@ public sealed class MainWindowViewModel : NotifyBase
             .GroupBy(x => x.StoreAppId, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
         var knownByName = knownCatalog
-            .GroupBy(x => NormalizeGameName(x.GameName), StringComparer.OrdinalIgnoreCase)
+            .GroupBy(x => GameNameNormalization.NormalizeGameName(x.GameName), StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
         var lightweightContext = new StoreScanContext
@@ -1333,7 +1335,7 @@ public sealed class MainWindowViewModel : NotifyBase
             foreach (var scanner in scanners)
             {
                 ct.ThrowIfCancellationRequested();
-                progress?.Report($"Scanning {ToStoreLabel(scanner.StoreKey)}...");
+                progress?.Report($"Scanning {GameNameNormalization.ToStoreLabel(scanner.StoreKey)}...");
 
                 StoreScanResult result;
                 try
@@ -1356,7 +1358,7 @@ public sealed class MainWindowViewModel : NotifyBase
                         continue;
                     }
 
-                    var key = $"{ToStoreLabel(app.Id.StoreKey)}|{installPath}";
+                    var key = $"{GameNameNormalization.ToStoreLabel(app.Id.StoreKey)}|{installPath}";
                     if (!seen.Add(key))
                     {
                         continue;
@@ -1367,7 +1369,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     discovered.Add(new GameInstallRecord
                     {
                         Manage = managedGame is not null,
-                        GameStore = ToStoreLabel(app.Id.StoreKey),
+                        GameStore = GameNameNormalization.ToStoreLabel(app.Id.StoreKey),
                         StoreAppId = app.Id.StoreAppId,
                         ManagedGame = managedGame,
                         InstallPath = installPath,
@@ -1393,7 +1395,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 if (byAppId.IsDlc)
                 {
                     var parent = managedGamesSnapshot.FirstOrDefault(x =>
-                        string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byAppId.ParentGameName), StringComparison.OrdinalIgnoreCase));
+                        string.Equals(GameNameNormalization.NormalizeGameName(x.Name), GameNameNormalization.NormalizeGameName(byAppId.ParentGameName), StringComparison.OrdinalIgnoreCase));
                     if (parent is not null)
                     {
                         return (parent, true);
@@ -1402,7 +1404,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 else
                 {
                     var game = managedGamesSnapshot.FirstOrDefault(x =>
-                        string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byAppId.GameName), StringComparison.OrdinalIgnoreCase));
+                        string.Equals(GameNameNormalization.NormalizeGameName(x.Name), GameNameNormalization.NormalizeGameName(byAppId.GameName), StringComparison.OrdinalIgnoreCase));
                     if (game is not null)
                     {
                         return (game, false);
@@ -1410,11 +1412,11 @@ public sealed class MainWindowViewModel : NotifyBase
                 }
             }
 
-            var normalizedDisplayName = NormalizeGameName(app.DisplayName);
+            var normalizedDisplayName = GameNameNormalization.NormalizeGameName(app.DisplayName);
             if (knownByName.TryGetValue(normalizedDisplayName, out var byName) && byName.IsDlc)
             {
                 var parent = managedGamesSnapshot.FirstOrDefault(x =>
-                    string.Equals(NormalizeGameName(x.Name), NormalizeGameName(byName.ParentGameName), StringComparison.OrdinalIgnoreCase));
+                    string.Equals(GameNameNormalization.NormalizeGameName(x.Name), GameNameNormalization.NormalizeGameName(byName.ParentGameName), StringComparison.OrdinalIgnoreCase));
                 if (parent is not null)
                 {
                     return (parent, true);
@@ -1438,32 +1440,10 @@ public sealed class MainWindowViewModel : NotifyBase
             }
 
             var knownByDisplay = managedGamesSnapshot.FirstOrDefault(x =>
-                string.Equals(NormalizeGameName(x.Name), normalizedDisplayName, System.StringComparison.OrdinalIgnoreCase));
+                string.Equals(GameNameNormalization.NormalizeGameName(x.Name), normalizedDisplayName, System.StringComparison.OrdinalIgnoreCase));
             return (knownByDisplay, false);
         }
 
-        static string NormalizeGameName(string? name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return string.Empty;
-            }
-
-            const string pcSuffix = " (PC)";
-            return name.EndsWith(pcSuffix, StringComparison.OrdinalIgnoreCase)
-                ? name[..^pcSuffix.Length].TrimEnd()
-                : name.Trim();
-        }
-
-        static string ToStoreLabel(string storeKey) => storeKey.ToLowerInvariant() switch
-        {
-            StoreKeys.BattleNet => "Battle.net",
-            StoreKeys.Ea => "EA",
-            StoreKeys.Gog => "GOG",
-            StoreKeys.Psn => "PSN",
-            StoreKeys.Xbox => "Game Pass",
-            _ => string.IsNullOrWhiteSpace(storeKey) ? "Unknown" : char.ToUpperInvariant(storeKey[0]) + storeKey[1..]
-        };
     }
 
     private static IReadOnlyList<IStoreInstallScanner> CreateAvailableScanners()
@@ -1489,24 +1469,5 @@ public sealed class MainWindowViewModel : NotifyBase
     }
 }
 
-public sealed class ModListItem
-{
-    public ModListItem(string name, string primaryPlugin, string currentStage, string gameName, string bethesdaId, string nexusId, IBrush rowBackground)
-    {
-        Name = name;
-        PrimaryPlugin = primaryPlugin;
-        CurrentStage = currentStage;
-        GameName = gameName;
-        BethesdaId = bethesdaId;
-        NexusId = nexusId;
-        RowBackground = rowBackground;
-    }
 
-    public string Name { get; }
-    public string PrimaryPlugin { get; }
-    public string CurrentStage { get; }
-    public string GameName { get; }
-    public string BethesdaId { get; }
-    public string NexusId { get; }
-    public IBrush RowBackground { get; }
-}
+public sealed record ScanApplyProgress(int CompletedMods, int TotalMods, string Message);

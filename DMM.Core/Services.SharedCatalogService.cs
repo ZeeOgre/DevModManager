@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-namespace DMM.Avalonia;
+namespace DMM.Core;
 
-internal sealed class SharedCatalogService
+public sealed class SharedCatalogService
 {
     public SharedCatalogDocument Load(string repoRoot)
     {
@@ -72,14 +72,14 @@ internal sealed class SharedCatalogService
     private static string GetPath(string repoRoot) => Path.Combine(repoRoot, ".dmm", "catalog.json");
 }
 
-internal sealed class SharedCatalogDocument
+public sealed class SharedCatalogDocument
 {
     public int Version { get; set; } = 1;
     public string GeneratedUtc { get; set; } = DateTimeOffset.UtcNow.ToString("O");
     public List<SharedCatalogEntry> Mods { get; set; } = new();
 }
 
-internal sealed record SharedCatalogEntry(
+public sealed record SharedCatalogEntry(
     string GameId,
     string ModName,
     string PrimaryPlugin,
