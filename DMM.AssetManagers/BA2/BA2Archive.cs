@@ -15,6 +15,14 @@ namespace DMM.AssetManagers
 
     public static partial class BA2Archive
     {
+    public sealed class Ba2IndexBuildStats
+    {
+        public int MasterCount { get; set; }
+        public int ArchivePathCount { get; set; }
+        public int IndexedFileCount { get; set; }
+        public long IndexedBytes { get; set; }
+    }
+
         // Reflection cache
         private static Type? s_ba2FileType;
         private static Func<string, object>? s_ba2FileCtor;
@@ -105,16 +113,22 @@ namespace DMM.AssetManagers
             IEnumerable<string> masterNames,
             string dataRoot)
         {
+            return BuildMasterArchiveIndex(masterNames, dataRoot, out _);
+        }
+
+        public static Dictionary<string, Ba2Entry> BuildMasterArchiveIndex(
+            IEnumerable<string> masterNames,
+            string dataRoot,
+            out Ba2IndexBuildStats stats)
+        {
             if (masterNames == null) throw new ArgumentNullException(nameof(masterNames));
             if (dataRoot == null) throw new ArgumentNullException(nameof(dataRoot));
 
             var ba2Paths = new List<string>();
+            var normalizedMasters = masterNames.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
 
-            foreach (var master in masterNames)
+            foreach (var master in normalizedMasters)
             {
-                if (string.IsNullOrWhiteSpace(master))
-                    continue;
-
                 string baseName = Path.GetFileNameWithoutExtension(master);
                 if (string.IsNullOrEmpty(baseName))
                     continue;
@@ -134,7 +148,15 @@ namespace DMM.AssetManagers
                 }
             }
 
-            return BuildMergedIndex(ba2Paths);
+            var merged = BuildMergedIndex(ba2Paths);
+            stats = new Ba2IndexBuildStats
+            {
+                MasterCount = normalizedMasters.Count,
+                ArchivePathCount = ba2Paths.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                IndexedFileCount = merged.Count,
+                IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize)
+            };
+            return merged;
         }
 
         public static bool IsLooseFileAlreadyPacked(
