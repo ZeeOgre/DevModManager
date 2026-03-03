@@ -84,7 +84,7 @@ public sealed class ModDependencyDiscoveryService
         foreach (var plugin in pluginFiles)
         {
             DiscoverPluginWalkCandidates(plugin, scanRoot, gameRoot, discoveredCandidates, unresolvedCandidates);
-            DiscoverConventionCandidates(plugin, scanRoot, modName, discoveredCandidates);
+            DiscoverConventionCandidates(plugin, scanRoot, gameRoot, modName, discoveredCandidates);
         }
 
         var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats);
@@ -179,9 +179,21 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var script in tesResult.ReferencedScripts)
         {
-            foreach (var candidate in ExpandScriptCandidates(script))
+            var scriptCandidates = ExpandScriptCandidates(script).ToList();
+            var resolved = false;
+            foreach (var candidate in scriptCandidates)
             {
-                TryAddByDataRelative(candidate, scanRoot, gameRoot, candidates, unresolvedCandidates);
+                if (TryResolveDataRelative(candidate, scanRoot, gameRoot, out var fullPath))
+                {
+                    candidates.Add(fullPath);
+                    resolved = true;
+                    break;
+                }
+            }
+
+            if (!resolved && scriptCandidates.Count > 0)
+            {
+                unresolvedCandidates.Add(NormalizeToDataRelative(scriptCandidates[0]));
             }
         }
 
@@ -313,7 +325,7 @@ public sealed class ModDependencyDiscoveryService
     }
 
 
-    private static void DiscoverConventionCandidates(string pluginFile, string scanRoot, string modName, HashSet<string> candidates)
+    private static void DiscoverConventionCandidates(string pluginFile, string scanRoot, string gameRoot, string modName, HashSet<string> candidates)
     {
         var pluginName = Path.GetFileName(pluginFile);
         var pluginStem = Path.GetFileNameWithoutExtension(pluginFile);
@@ -336,12 +348,51 @@ public sealed class ModDependencyDiscoveryService
             }
         }
 
-        var allTexturesRoot = Path.Combine(scanRoot, "Textures");
-        if (Directory.Exists(allTexturesRoot))
+        DiscoverInterfaceIconCandidates(scanRoot, gameRoot, pluginStem, pluginName, modName, candidates);
+    }
+
+    private static void DiscoverInterfaceIconCandidates(
+        string scanRoot,
+        string? gameRoot,
+        string pluginStem,
+        string pluginName,
+        string modName,
+        HashSet<string> candidates)
+    {
+        var roots = new List<string> { scanRoot };
+        if (!string.IsNullOrWhiteSpace(gameRoot))
         {
-            foreach (var dds in Directory.EnumerateFiles(allTexturesRoot, "*.dds", SearchOption.AllDirectories))
+            roots.Add(Path.Combine(gameRoot, "Data"));
+        }
+
+        var bucketNames = new[] { "InventoryIcons", "ShipBuilderIcons", "WorkshopIcons" };
+        var idCandidates = new[]
+        {
+            pluginName,
+            pluginStem,
+            modName,
+            pluginStem + ".esm",
+            pluginStem + ".esp",
+            modName + ".esm",
+            modName + ".esp"
+        }
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+        foreach (var dataRoot in roots.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (var bucket in bucketNames)
             {
-                candidates.Add(dds);
+                foreach (var id in idCandidates)
+                {
+                    var root = Path.Combine(dataRoot, "Textures", "Interface", bucket, id);
+                    if (!Directory.Exists(root)) continue;
+
+                    foreach (var dds in Directory.EnumerateFiles(root, "*.dds", SearchOption.AllDirectories))
+                    {
+                        candidates.Add(dds);
+                    }
+                }
             }
         }
     }
