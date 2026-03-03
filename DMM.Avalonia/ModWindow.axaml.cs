@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using Avalonia.Controls;
@@ -9,20 +11,23 @@ namespace DMM.Avalonia;
 public partial class ModWindow : Window
 {
     private readonly ModWindowViewModel _viewModel;
+    private readonly Func<ModDependencyGatherRequest, Task<string>>? _singleModGatherDependenciesAsync;
 
     public ModWindow()
     {
         InitializeComponent();
         var placeholderMod = new ModListItem("Mod", "", "DEV", "", "", "", new SolidColorBrush(Colors.Transparent));
         _viewModel = new ModWindowViewModel(placeholderMod, Array.Empty<string>(), Array.Empty<string>(), null);
+        _singleModGatherDependenciesAsync = null;
         DataContext = _viewModel;
         BuildStageFolderContextMenu();
     }
 
-    public ModWindow(ModListItem mod, IReadOnlyList<string> gameFolders, IReadOnlyList<string> stages, string? selectedGameFolder)
+    public ModWindow(ModListItem mod, IReadOnlyList<string> gameFolders, IReadOnlyList<string> stages, string? selectedGameFolder, Func<ModDependencyGatherRequest, Task<string>>? singleModGatherDependenciesAsync = null)
     {
         InitializeComponent();
         _viewModel = new ModWindowViewModel(mod, gameFolders, stages, selectedGameFolder);
+        _singleModGatherDependenciesAsync = singleModGatherDependenciesAsync;
         DataContext = _viewModel;
         BuildStageFolderContextMenu();
     }
@@ -44,16 +49,22 @@ public partial class ModWindow : Window
         StageFolderButton.ContextMenu = menu;
     }
 
-    private void Action_Click(object? sender, RoutedEventArgs e)
+    private async void Action_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { CommandParameter: string action })
         {
+            if (string.Equals(action, "Gather Dependencies", StringComparison.OrdinalIgnoreCase))
+            {
+                await RunSingleModGatherDependenciesAsync(action);
+                return;
+            }
+
             _viewModel.StatusMessage =
                 $"{action} requested for {_viewModel.ModName} ({_viewModel.SelectedStage} @ {_viewModel.SelectedGameFolder}). Right-click for options.";
         }
     }
 
-    private void ContextAction_Click(object? sender, RoutedEventArgs e)
+    private async void ContextAction_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is MenuItem { CommandParameter: string action })
         {
@@ -64,9 +75,36 @@ public partial class ModWindow : Window
                 return;
             }
 
+            if (string.Equals(action, "Gather Dependencies", StringComparison.OrdinalIgnoreCase))
+            {
+                await RunSingleModGatherDependenciesAsync(action);
+                return;
+            }
+
             _viewModel.StatusMessage =
                 $"{action} requested for {_viewModel.ModName} ({_viewModel.SelectedStage} @ {_viewModel.SelectedGameFolder}).";
         }
+    }
+
+    private async Task RunSingleModGatherDependenciesAsync(string action)
+    {
+        if (_singleModGatherDependenciesAsync is null)
+        {
+            _viewModel.StatusMessage =
+                $"{action} not wired for this window instance. Open this mod from MainWindow to run scan/apply.";
+            return;
+        }
+
+        _viewModel.StatusMessage =
+            $"{action} started for {_viewModel.ModName} ({_viewModel.SelectedStage} @ {_viewModel.SelectedGameFolder}).";
+
+        var result = await _singleModGatherDependenciesAsync(new ModDependencyGatherRequest(
+            _viewModel.ModName,
+            _viewModel.PrimaryPlugin,
+            _viewModel.SelectedGameFolder,
+            _viewModel.SelectedStage ?? "DEV"));
+
+        _viewModel.StatusMessage = result;
     }
 
     private async void OpenHelp_Click(object? sender, RoutedEventArgs e)
@@ -93,6 +131,7 @@ public sealed class ModWindowViewModel : NotifyBase
     public ModWindowViewModel(ModListItem mod, IReadOnlyList<string> gameFolders, IReadOnlyList<string> stages, string? selectedGameFolder)
     {
         ModName = mod.Name;
+        PrimaryPlugin = mod.PrimaryPlugin;
         PluginInfo = $"Primary plugin: {mod.PrimaryPlugin}";
 
         foreach (var folder in gameFolders)
@@ -113,6 +152,7 @@ public sealed class ModWindowViewModel : NotifyBase
     }
 
     public string ModName { get; }
+    public string PrimaryPlugin { get; }
     public string PluginInfo { get; }
     public ObservableCollection<string> GameFolders { get; } = new();
     public ObservableCollection<string> StageOptions { get; } = new();
@@ -138,3 +178,5 @@ public sealed class ModWindowViewModel : NotifyBase
         set => SetField(ref _statusMessage, value);
     }
 }
+
+public sealed record ModDependencyGatherRequest(string ModName, string PrimaryPlugin, string? GameFolder, string Stage);
