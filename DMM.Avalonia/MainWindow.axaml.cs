@@ -574,13 +574,13 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task<string> RunSingleModGatherDependenciesAsync(ModDependencyGatherRequest request)
+    private Task<string> RunSingleModGatherDependenciesAsync(ModDependencyGatherRequest request)
     {
         var stage = string.IsNullOrWhiteSpace(request.Stage) ? "DEV" : request.Stage;
         var selection = new GameFolderStageSelection(request.ModName, request.PrimaryPlugin, stage);
 
-        await Task.Run(() => _viewModel.ApplyScanSelectionsForGameFolder(request.GameFolder, new[] { selection }));
-        return _viewModel.StatusMessage;
+        _viewModel.ApplyScanSelectionsForGameFolder(request.GameFolder, new[] { selection });
+        return Task.FromResult(_viewModel.StatusMessage);
     }
 }
 
