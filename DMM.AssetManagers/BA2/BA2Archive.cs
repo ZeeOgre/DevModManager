@@ -11,6 +11,7 @@ public sealed class Ba2Entry
     public long DataOffset { get; init; } = -1;
     public uint PackedSize { get; init; }
     public uint UnpackedSize { get; init; }
+    public string BethesdaArchiveType { get; init; } = "GNRL";
 
     public override string ToString()
         => $"{RelativePath} (size={FileSize}, from={Path.GetFileName(ArchivePath)})";
@@ -230,6 +231,13 @@ public static partial class BA2Archive
         var looseSize = new FileInfo(fullLoose).Length;
         if (entry.FileSize >= 0 && entry.FileSize != looseSize) return false;
 
+        // For chunked Bethesda texture archives (DX10/GNMF), we currently compare by canonical
+        // path + logical unpacked size match and treat that as already packed.
+        if (!string.Equals(entry.BethesdaArchiveType, "GNRL", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
         using var looseStream = File.OpenRead(fullLoose);
         using var archiveStream = OpenArchiveEntryStream(entry);
 
@@ -330,7 +338,6 @@ public static partial class BA2Archive
             if (readA == 0) break;
             if (!bufA.AsSpan(0, readA).SequenceEqual(bufB.AsSpan(0, readB))) return false;
         }
-    }
 
         return true;
     }
