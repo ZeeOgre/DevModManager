@@ -103,123 +103,42 @@ public static partial class BA2Archive
         records = Array.Empty<(ulong Offset, uint Packed, uint Unpacked, string Type)>();
         failureReason = string.Empty;
 
-        var candidatePositions = new List<long>();
-
-        void addCandidate(long pos)
+        var recordStart = version switch
         {
-            if (pos < 24 || pos >= fs.Length) return;
-            if (!candidatePositions.Contains(pos)) candidatePositions.Add(pos);
-        }
+            1 or 7 or 8 => 24L,
+            2 => 32L,
+            3 => 36L,
+            _ => 24L
+        };
 
-        addCandidate(24);
-        if (version == 2) addCandidate(32);
-        if (version == 3)
-        {
-            addCandidate(32);
-            addCandidate(36);
-        }
-
-        // Fallback probe (4-byte aligned) for header variants, without reparsing full records per byte.
-        var probeEnd = (long)Math.Min(Math.Min(fs.Length, (long)nameTableOffset), 128);
-        for (var pos = 24L; pos < probeEnd; pos += 4)
-        {
-            addCandidate(pos);
-        }
-
-        foreach (var position in candidatePositions)
-        {
-            try
-            {
-                if (!LooksLikeRecordStart(fs, br, type, position, nameTableOffset))
-                {
-                    continue;
-                }
-
-                fs.Position = position;
-                var parsed = type switch
-                {
-                    "GNRL" => ReadGeneralRecords(br, fileCount),
-                    "DX10" => ReadChunkedTextureRecords(br, fileCount, "DX10", 24),
-                    "GNMF" => ReadChunkedTextureRecords(br, fileCount, "GNMF", 48),
-                    _ => throw new NotSupportedException($"unsupported BA2 type '{type}'")
-                };
-
-                if (nameTableOffset > (ulong)fs.Length)
-                {
-                    throw new InvalidDataException($"name table offset {nameTableOffset} is outside archive length {fs.Length}.");
-                }
-
-                if (parsed.Length != fileCount)
-                {
-                    throw new InvalidDataException($"expected {fileCount} records but parsed {parsed.Length}.");
-                }
-
-                records = parsed;
-                return true;
-            }
-            catch (Exception ex)
-            {
-                failureReason = $"offset {position}: {ex.Message}";
-            }
-        }
-
-        failureReason = $"{type} record parse failed for all candidate offsets: {failureReason}";
-        return false;
-    }
-
-
-    private static bool LooksLikeRecordStart(FileStream fs, BinaryReader br, string type, long position, ulong nameTableOffset)
-    {
-        var restore = fs.Position;
         try
         {
-            if (position < 24 || (ulong)position >= nameTableOffset) return false;
-
-            fs.Position = position;
-
-            if (string.Equals(type, "GNRL", StringComparison.Ordinal))
+            fs.Position = recordStart;
+            var parsed = type switch
             {
-                _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                var dataOffset = br.ReadUInt64();
-                _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                var sentinel = br.ReadUInt32();
-                return sentinel == 0xBAADF00D && dataOffset < nameTableOffset;
+                "GNRL" => ReadGeneralRecords(br, fileCount),
+                "DX10" => ReadChunkedTextureRecords(br, fileCount, "DX10", 24),
+                "GNMF" => ReadChunkedTextureRecords(br, fileCount, "GNMF", 48),
+                _ => throw new NotSupportedException($"unsupported BA2 type '{type}'")
+            };
+
+            if (nameTableOffset > (ulong)fs.Length)
+            {
+                throw new InvalidDataException($"name table offset {nameTableOffset} is outside archive length {fs.Length}.");
             }
 
-            if (string.Equals(type, "DX10", StringComparison.Ordinal) || string.Equals(type, "GNMF", StringComparison.Ordinal))
+            if (parsed.Length != fileCount)
             {
-                var expectedFileHeaderSize = string.Equals(type, "DX10", StringComparison.Ordinal) ? (ushort)24 : (ushort)48;
-
-                _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                _ = br.ReadByte();
-                var chunkCount = br.ReadByte();
-                var fileHeaderSize = br.ReadUInt16();
-
-                if (fileHeaderSize != expectedFileHeaderSize || chunkCount == 0) return false;
-
-                var firstChunkSentinelPos = position + fileHeaderSize + 20;
-                if ((ulong)firstChunkSentinelPos + 4 > nameTableOffset) return false;
-
-                fs.Position = firstChunkSentinelPos;
-                var sentinel = br.ReadUInt32();
-                return sentinel == 0xBAADF00D;
+                throw new InvalidDataException($"expected {fileCount} records but parsed {parsed.Length}.");
             }
 
-            return false;
+            records = parsed;
+            return true;
         }
-        catch
+        catch (Exception ex)
         {
+            failureReason = $"record parse failed at offset {recordStart}: {ex.Message}";
             return false;
-        }
-        finally
-        {
-            fs.Position = restore;
         }
     }
 
