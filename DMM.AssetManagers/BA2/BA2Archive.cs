@@ -11,6 +11,7 @@ public sealed class Ba2Entry
     public long DataOffset { get; init; } = -1;
     public uint PackedSize { get; init; }
     public uint UnpackedSize { get; init; }
+    public bool IsDx10TextureArchive { get; init; }
 
     public override string ToString()
         => $"{RelativePath} (size={FileSize}, from={Path.GetFileName(ArchivePath)})";
@@ -231,12 +232,20 @@ public static partial class BA2Archive
         if (entry.FileSize >= 0 && entry.FileSize != looseSize) return false;
 
         using var looseStream = File.OpenRead(fullLoose);
-        using var archiveStream = OpenArchiveEntryStream(entry);
 
-        if (!archiveStream.CanRead || !archiveStream.CanSeek)
-            return FullCompareSIMD(looseStream, archiveStream);
+        try
+        {
+            using var archiveStream = OpenArchiveEntryStream(entry);
 
-        return FastApproxEqual(looseStream, archiveStream);
+            if (!archiveStream.CanRead || !archiveStream.CanSeek)
+                return FullCompareSIMD(looseStream, archiveStream);
+
+            return FastApproxEqual(looseStream, archiveStream);
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
     }
 
     private static Stream OpenArchiveEntryStream(Ba2Entry entry)
@@ -330,7 +339,6 @@ public static partial class BA2Archive
             if (readA == 0) break;
             if (!bufA.AsSpan(0, readA).SequenceEqual(bufB.AsSpan(0, readB))) return false;
         }
-    }
 
         return true;
     }
