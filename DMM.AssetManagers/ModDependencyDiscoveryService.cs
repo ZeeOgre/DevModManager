@@ -106,18 +106,26 @@ public sealed class ModDependencyDiscoveryService
                 result.HighProbabilityDiscard.Add(rel);
                 continue;
             }
+            string? xboxRel = null;
+            string? xboxSource = null;
+            if (IsXboxMirroredCandidate(rel))
+            {
+                xboxRel = rel;
+                xboxSource = ResolveSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
+            }
 
-            var xboxRel = rel.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && !rel.Contains("_xbox", StringComparison.OrdinalIgnoreCase)
-                ? rel.Replace(".ba2", "_xbox.ba2", StringComparison.OrdinalIgnoreCase)
-                : (rel.Contains("_xbox", StringComparison.OrdinalIgnoreCase) ? rel : null);
-            var xboxSource = xboxRel is null ? null : ResolveSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
-
-            var tifRel = rel.StartsWith("Data\\Textures\\", StringComparison.OrdinalIgnoreCase)
-                ? Path.Combine("TGATextures", Path.ChangeExtension(rel["Data\\Textures\\".Length..], ".tga"))
-                : null;
-            var tifSource = tifRel is null || string.IsNullOrWhiteSpace(tifRoot)
-                ? null
-                : ResolveTifSource(tifRoot, tifRel);
+            string? tifRel = null;
+            string? tifSource = null;
+            if (rel.StartsWith("Data\\Textures\\", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(tifRoot))
+            {
+                var tifCandidateRel = Path.Combine("TGATextures", Path.ChangeExtension(rel["Data\\Textures\\".Length..], ".tga"));
+                tifSource = ResolveTifSource(tifRoot, tifCandidateRel);
+                if (!string.IsNullOrWhiteSpace(tifSource))
+                {
+                    var relUnderTgaRoot = Path.GetRelativePath(tifRoot, tifSource!).Replace('/', '\\');
+                    tifRel = NormalizeRel(Path.Combine("TGATextures", relUnderTgaRoot));
+                }
+            }
 
             result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource));
             result.HighProbabilityKeep.Add(rel);
@@ -634,6 +642,15 @@ public sealed class ModDependencyDiscoveryService
         }
 
         return null;
+    }
+
+    private static bool IsXboxMirroredCandidate(string relDataPath)
+    {
+        if (string.IsNullOrWhiteSpace(relDataPath)) return false;
+        if (relDataPath.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase)) return false;
+
+        return relDataPath.StartsWith("Data\\Textures\\", StringComparison.OrdinalIgnoreCase)
+            || relDataPath.StartsWith("Data\\Sound\\", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string? ResolveSourceFromDataRelative(string scanRoot, string gameRoot, string relDataPath)
