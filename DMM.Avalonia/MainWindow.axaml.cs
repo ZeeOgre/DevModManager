@@ -552,19 +552,13 @@ public sealed class MainWindowViewModel : NotifyBase
     private readonly ModOnboardingGitService _gitService = new();
     private readonly SharedCatalogService _catalogService = new();
     private readonly ModDependencyDiscoveryService _dependencyDiscoveryService = new();
+    private readonly ModScanRulesService _modScanRulesService = new();
 
     public ObservableCollection<string> GameFolders { get; } = new();
     public ObservableCollection<string> StageOptions { get; } = new();
     public ObservableCollection<ModListItem> Mods { get; } = new();
     public ObservableCollection<ManagedGame> ManagedGames { get; } = new();
     public ObservableCollection<GameInstallRecord> GameInstalls { get; } = new();
-
-    private static readonly HashSet<string> StarfieldOfficialPluginBaseNames = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "starfield",
-        "constellation",
-        "blueprintshipsstarfield"
-    };
 
     private string? _selectedGameFolder;
     public string? SelectedGameFolder
@@ -729,11 +723,11 @@ public sealed class MainWindowViewModel : NotifyBase
             .Where(name => !knownPluginBaseNames.Contains(Path.GetFileNameWithoutExtension(name)))
             .Where(name => !managedPluginNames.Contains(name))
             .Where(name => !managedPluginBaseNames.Contains(Path.GetFileNameWithoutExtension(name)))
-            .Where(name => !IsOfficialPluginName(install.ManagedGame.Name, name))
+            .Where(name => !_modScanRulesService.IsOfficialPluginName(install.ManagedGame.Name, name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .GroupBy(name => Path.GetFileNameWithoutExtension(name), StringComparer.OrdinalIgnoreCase)
             .Select(group => group
-                .OrderBy(name => GetPluginExtensionPriority(Path.GetExtension(name)))
+                .OrderBy(name => _modScanRulesService.GetPluginExtensionPriority(Path.GetExtension(name)))
                 .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
                 .First())
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
