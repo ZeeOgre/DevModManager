@@ -111,7 +111,7 @@ public sealed class ModDependencyDiscoveryService
             if (IsXboxMirroredCandidate(rel))
             {
                 xboxRel = rel;
-                xboxSource = ResolveSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
+                xboxSource = ResolveXboxSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
             }
 
             string? tifRel = null;
@@ -651,6 +651,54 @@ public sealed class ModDependencyDiscoveryService
 
         return relDataPath.StartsWith("Data\\Textures\\", StringComparison.OrdinalIgnoreCase)
             || relDataPath.StartsWith("Data\\Sound\\", StringComparison.OrdinalIgnoreCase);
+    }
+
+
+    private static string? ResolveXboxSourceFromDataRelative(string scanRoot, string gameRoot, string relDataPath)
+    {
+        var rel = relDataPath.Replace('/', '\\').TrimStart('\\');
+        if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+        {
+            rel = Path.Combine("Data", rel);
+        }
+
+        var relUnderData = rel["Data\\".Length..];
+        var candidateRoots = new[]
+        {
+            Path.Combine(Path.GetDirectoryName(scanRoot) ?? scanRoot, "XBOX", "Data"),
+            Path.Combine(gameRoot, "XBOX", "Data"),
+            Path.GetFullPath(Path.Combine(gameRoot, "..", "XBOX", "Data"))
+        }
+        .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var root in candidateRoots)
+        {
+            try
+            {
+                var full = Path.GetFullPath(Path.Combine(root, relUnderData));
+                var normalizedRoot = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    + Path.DirectorySeparatorChar;
+                if (!full.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (File.Exists(full))
+                {
+                    var marker = $"{Path.DirectorySeparatorChar}XBOX{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}";
+                    var fullNormalized = full.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                    if (fullNormalized.Contains(marker, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return full;
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        return null;
     }
 
     private static string? ResolveSourceFromDataRelative(string scanRoot, string gameRoot, string relDataPath)
