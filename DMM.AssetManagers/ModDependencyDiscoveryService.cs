@@ -21,6 +21,8 @@ public sealed record ModDependencyEntry(
 public sealed class ModDependencyDiscoveryResult
 {
     public List<ModDependencyEntry> Entries { get; } = new();
+    public List<string> MissingReferences { get; } = new();
+    public List<string> ParentArchiveReferences { get; } = new();
     public int CollisionCount { get; set; }
     public long ScanMs { get; set; }
 }
@@ -60,9 +62,11 @@ public sealed class ModDependencyDiscoveryService
             .ToList();
 
         var discoveredCandidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var unresolvedCandidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var plugin in pluginFiles)
         {
-            DiscoverPluginWalkCandidates(plugin, scanRoot, gameRoot, discoveredCandidates);
+            DiscoverPluginWalkCandidates(plugin, scanRoot, gameRoot, discoveredCandidates, unresolvedCandidates);
+            DiscoverConventionCandidates(plugin, scanRoot, modName, discoveredCandidates);
         }
 
         var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, pluginFiles);
@@ -80,6 +84,7 @@ public sealed class ModDependencyDiscoveryService
             if (!source.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && parentArchiveIndex.ContainsKey(rel))
             {
                 result.CollisionCount++;
+                result.ParentArchiveReferences.Add(rel);
                 continue;
             }
 
@@ -98,12 +103,21 @@ public sealed class ModDependencyDiscoveryService
             result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource));
         }
 
+        foreach (var missing in unresolvedCandidates.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!result.Entries.Any(x => string.Equals(x.RelativeDataPath, missing, StringComparison.OrdinalIgnoreCase)) &&
+                !result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
+            {
+                result.MissingReferences.Add(missing);
+            }
+        }
+
         timer.Stop();
         result.ScanMs = timer.ElapsedMilliseconds;
         return result;
     }
 
-    private void DiscoverPluginWalkCandidates(string pluginFile, string scanRoot, string gameRoot, HashSet<string> candidates)
+    private void DiscoverPluginWalkCandidates(string pluginFile, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
         TesFileResult tesResult;
         try
@@ -117,26 +131,26 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var script in tesResult.ReferencedScripts)
         {
-            TryAddByDataRelative(script, scanRoot, gameRoot, candidates);
+            TryAddByDataRelative(script, scanRoot, gameRoot, candidates, unresolvedCandidates);
 
             if (script.EndsWith(".pex", StringComparison.OrdinalIgnoreCase))
             {
-                TryAddByDataRelative(script[..^4] + ".psc", scanRoot, gameRoot, candidates);
+                TryAddByDataRelative(script[..^4] + ".psc", scanRoot, gameRoot, candidates, unresolvedCandidates);
             }
             else if (script.EndsWith(".psc", StringComparison.OrdinalIgnoreCase))
             {
-                TryAddByDataRelative(script[..^4] + ".pex", scanRoot, gameRoot, candidates);
+                TryAddByDataRelative(script[..^4] + ".pex", scanRoot, gameRoot, candidates, unresolvedCandidates);
             }
         }
 
         foreach (var audio in tesResult.ReferencedAudio)
         {
-            TryAddByDataRelative(audio, scanRoot, gameRoot, candidates);
+            TryAddByDataRelative(audio, scanRoot, gameRoot, candidates, unresolvedCandidates);
         }
 
         foreach (var texture in tesResult.ReferencedTextures)
         {
-            TryAddByDataRelative(texture, scanRoot, gameRoot, candidates);
+            TryAddByDataRelative(texture, scanRoot, gameRoot, candidates, unresolvedCandidates);
         }
 
         foreach (var mat in tesResult.ReferencedMats)
@@ -144,7 +158,11 @@ public sealed class ModDependencyDiscoveryService
             if (TryResolveDataRelative(mat, scanRoot, gameRoot, out var matPath))
             {
                 candidates.Add(matPath);
-                DiscoverMatTextures(matPath, scanRoot, gameRoot, candidates);
+                DiscoverMatTextures(matPath, scanRoot, gameRoot, candidates, unresolvedCandidates);
+            }
+            else
+            {
+                unresolvedCandidates.Add(NormalizeToDataRelative(mat));
             }
         }
 
@@ -164,11 +182,22 @@ public sealed class ModDependencyDiscoveryService
                 {
                     if (!TryResolveDataRelative(mat, scanRoot, gameRoot, out var matPath))
                     {
+                        unresolvedCandidates.Add(NormalizeToDataRelative(mat));
                         continue;
                     }
 
                     candidates.Add(matPath);
-                    DiscoverMatTextures(matPath, scanRoot, gameRoot, candidates);
+                    DiscoverMatTextures(matPath, scanRoot, gameRoot, candidates, unresolvedCandidates);
+                }
+
+                foreach (var mesh in nifRead.Meshes)
+                {
+                    TryAddByDataRelative(mesh, scanRoot, gameRoot, candidates, unresolvedCandidates);
+                }
+
+                foreach (var rig in nifRead.Rigs)
+                {
+                    TryAddByDataRelative(rig, scanRoot, gameRoot, candidates, unresolvedCandidates);
                 }
             }
             catch
@@ -177,7 +206,7 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
-    private void DiscoverMatTextures(string matPath, string scanRoot, string gameRoot, HashSet<string> candidates)
+    private void DiscoverMatTextures(string matPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
         try
         {
@@ -191,11 +220,49 @@ public sealed class ModDependencyDiscoveryService
                         ? Path.Combine("Data", normalized)
                         : Path.Combine("Data", "Textures", normalized);
 
-                TryAddByDataRelative(rel, scanRoot, gameRoot, candidates);
+                TryAddByDataRelative(rel, scanRoot, gameRoot, candidates, unresolvedCandidates);
             }
         }
         catch
         {
+        }
+    }
+
+
+    private static void DiscoverConventionCandidates(string pluginFile, string scanRoot, string modName, HashSet<string> candidates)
+    {
+        var pluginName = Path.GetFileName(pluginFile);
+        var pluginStem = Path.GetFileNameWithoutExtension(pluginFile);
+
+        foreach (var scriptsRoot in new[] { Path.Combine(scanRoot, "Scripts"), Path.Combine(scanRoot, "Scripts", "Source") })
+        {
+            if (!Directory.Exists(scriptsRoot))
+            {
+                continue;
+            }
+
+            foreach (var script in Directory.EnumerateFiles(scriptsRoot, "*.*", SearchOption.AllDirectories)
+                         .Where(x => x.EndsWith(".psc", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".pex", StringComparison.OrdinalIgnoreCase)))
+            {
+                var name = Path.GetFileName(script);
+                if (name.Contains(pluginStem, StringComparison.OrdinalIgnoreCase) || name.Contains(modName, StringComparison.OrdinalIgnoreCase))
+                {
+                    candidates.Add(script);
+                }
+            }
+        }
+
+        foreach (var textureRoot in new[] { Path.Combine(scanRoot, "Textures", pluginName), Path.Combine(scanRoot, "Textures", pluginStem), Path.Combine(scanRoot, "Textures", modName) })
+        {
+            if (!Directory.Exists(textureRoot))
+            {
+                continue;
+            }
+
+            foreach (var dds in Directory.EnumerateFiles(textureRoot, "*.dds", SearchOption.AllDirectories))
+            {
+                candidates.Add(dds);
+            }
         }
     }
 
@@ -204,6 +271,7 @@ public sealed class ModDependencyDiscoveryService
         var expectedPluginName = $"{modName}{Path.GetExtension(primaryPlugin)}";
         var pluginCandidates = new[]
         {
+            Path.Combine(scanRoot, primaryPlugin),
             Path.Combine(scanRoot, expectedPluginName),
             Path.Combine(scanRoot, $"{modName}.esm"),
             Path.Combine(scanRoot, $"{modName}.esp"),
@@ -348,12 +416,15 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
-    private static void TryAddByDataRelative(string relDataPath, string scanRoot, string gameRoot, HashSet<string> candidates)
+    private static void TryAddByDataRelative(string relDataPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
         if (TryResolveDataRelative(relDataPath, scanRoot, gameRoot, out var fullPath))
         {
             candidates.Add(fullPath);
+            return;
         }
+
+        unresolvedCandidates.Add(NormalizeToDataRelative(relDataPath));
     }
 
     private static bool TryResolveDataRelative(string relDataPath, string scanRoot, string gameRoot, out string fullPath)
@@ -447,6 +518,17 @@ public sealed class ModDependencyDiscoveryService
         }
 
         return null;
+    }
+
+    private static string NormalizeToDataRelative(string relDataPath)
+    {
+        var rel = relDataPath.Replace('/', '\\').TrimStart('\\');
+        if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+        {
+            rel = Path.Combine("Data", rel);
+        }
+
+        return NormalizeRel(rel);
     }
 
     private static string NormalizeRel(string rel)

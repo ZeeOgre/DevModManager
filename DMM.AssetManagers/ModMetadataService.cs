@@ -20,6 +20,10 @@ public static class ModMetadataService
         var achlistPath = Path.Combine(metadataFolder, $"{modName}.achlist");
         var achlist = entries
             .Select(x => x.RelativeDataPath)
+            .Where(x => !x.EndsWith(".esm", StringComparison.OrdinalIgnoreCase)
+                     && !x.EndsWith(".esp", StringComparison.OrdinalIgnoreCase)
+                     && !x.EndsWith(".esl", StringComparison.OrdinalIgnoreCase)
+                     && !x.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
             .ToList();

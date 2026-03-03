@@ -373,12 +373,40 @@ public partial class MainWindow : Window
             }
         };
 
+        var progressBar = new ProgressBar
+        {
+            IsIndeterminate = false,
+            Height = 12,
+            MinWidth = 420,
+            Minimum = 0,
+            Maximum = Math.Max(1, selections.Count),
+            Value = 0
+        };
+        var progressText = new TextBlock
+        {
+            Text = "Starting...",
+            FontStyle = FontStyle.Italic
+        };
+
+        if (progressWindow.Content is Border { Child: StackPanel panel })
+        {
+            panel.Children[1] = progressBar;
+            panel.Children[2] = progressText;
+        }
+
         _ = progressWindow.ShowDialog(this);
         await Task.Delay(50);
 
+        var progress = new Progress<ScanApplyProgress>(update =>
+        {
+            progressBar.Maximum = Math.Max(1, update.TotalMods);
+            progressBar.Value = Math.Min(update.CompletedMods, progressBar.Maximum);
+            progressText.Text = $"{update.Message} ({update.CompletedMods}/{update.TotalMods})";
+        });
+
         try
         {
-            _viewModel.ApplyScanSelections(selections);
+            await Task.Run(() => _viewModel.ApplyScanSelections(selections, progress));
         }
         finally
         {
@@ -536,7 +564,7 @@ public partial class MainWindow : Window
         {
             var matchingFolders = _viewModel.GetGameFoldersForGame(mod.GameName);
             var activeStages = _viewModel.GetAvailableStagesForMod(mod);
-            var modWindow = new ModWindow(mod, matchingFolders, activeStages, _viewModel.SelectedGameFolder);
+            var modWindow = new ModWindow(mod, matchingFolders, activeStages, _viewModel.SelectedGameFolder, RunSingleModGatherDependenciesAsync);
             await modWindow.ShowDialog(this);
             await HandleModFocusCloseSyncAsync(mod);
             if (!_viewModel.StatusMessage.StartsWith("autocommit :", StringComparison.OrdinalIgnoreCase))
@@ -544,6 +572,15 @@ public partial class MainWindow : Window
                 _viewModel.StatusMessage = $"Closed focus window for {mod.Name}.";
             }
         }
+    }
+
+    private async Task<string> RunSingleModGatherDependenciesAsync(ModDependencyGatherRequest request)
+    {
+        var stage = string.IsNullOrWhiteSpace(request.Stage) ? "DEV" : request.Stage;
+        var selection = new GameFolderStageSelection(request.ModName, request.PrimaryPlugin, stage);
+
+        await Task.Run(() => _viewModel.ApplyScanSelectionsForGameFolder(request.GameFolder, new[] { selection }));
+        return _viewModel.StatusMessage;
     }
 }
 
@@ -746,17 +783,22 @@ public sealed class MainWindowViewModel : NotifyBase
         return GameFolderScanResult.Succeeded(candidates);
     }
 
-    public void ApplyScanSelections(IReadOnlyList<GameFolderStageSelection> selections)
+    public void ApplyScanSelections(IReadOnlyList<GameFolderStageSelection> selections, IProgress<ScanApplyProgress>? progress = null)
+    {
+        ApplyScanSelectionsForGameFolder(SelectedGameFolder, selections, progress);
+    }
+
+    public void ApplyScanSelectionsForGameFolder(string? gameFolder, IReadOnlyList<GameFolderStageSelection> selections, IProgress<ScanApplyProgress>? progress = null)
     {
         Mods.Clear();
 
-        if (string.IsNullOrWhiteSpace(SelectedGameFolder))
+        if (string.IsNullOrWhiteSpace(gameFolder))
         {
             StatusMessage = "Scan apply failed: no game folder selected.";
             return;
         }
 
-        var selectedGameFolder = SelectedGameFolder!;
+        var selectedGameFolder = gameFolder!;
 
         var install = GameInstalls.FirstOrDefault(x =>
             !x.IsDlc &&
@@ -795,10 +837,17 @@ public sealed class MainWindowViewModel : NotifyBase
         var bootstrapPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var dependencyFilesIncluded = 0;
         var dependencyCollisionCount = 0;
+        var dependencyMissingCount = 0;
+        var dependencyParentHitCount = 0;
         long dependencyScanMsTotal = 0;
 
-        foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
+        var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
+        var completedMods = 0;
+
+        foreach (var selection in orderedSelections)
         {
+            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Evaluating {selection.ModName}"));
+
             var sourcePath = Path.Combine(scanRoot, selection.PluginName);
             if (!File.Exists(sourcePath))
             {
@@ -848,6 +897,8 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 dependencyFilesIncluded += initialEntries.Count;
                 dependencyCollisionCount += discovery.CollisionCount;
+                dependencyMissingCount += discovery.MissingReferences.Count;
+                dependencyParentHitCount += discovery.ParentArchiveReferences.Count;
                 dependencyScanMsTotal += discovery.ScanMs;
 
                 if (initialEntries.Count == 0)
@@ -861,12 +912,20 @@ public sealed class MainWindowViewModel : NotifyBase
                     var relUnderData = entry.RelativeDataPath.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
                         ? entry.RelativeDataPath["Data\\".Length..]
                         : entry.RelativeDataPath;
-                    var target = Path.Combine(stageFolder, relUnderData);
+
+                    var isPluginOrArchive = relUnderData.EndsWith(".esm", StringComparison.OrdinalIgnoreCase)
+                        || relUnderData.EndsWith(".esp", StringComparison.OrdinalIgnoreCase)
+                        || relUnderData.EndsWith(".esl", StringComparison.OrdinalIgnoreCase)
+                        || relUnderData.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase);
+
+                    var target = isPluginOrArchive
+                        ? Path.Combine(modRepoRoot, "main", Path.GetFileName(relUnderData))
+                        : Path.Combine(stageFolder, relUnderData);
                     Directory.CreateDirectory(Path.GetDirectoryName(target) ?? stageFolder);
                     File.Copy(entry.SourcePath, target, overwrite: true);
                     copiedFiles++;
 
-                    if (!string.IsNullOrWhiteSpace(entry.XboxRelativePath) && !string.IsNullOrWhiteSpace(entry.XboxSourcePath))
+                    if (!isPluginOrArchive && !string.IsNullOrWhiteSpace(entry.XboxRelativePath) && !string.IsNullOrWhiteSpace(entry.XboxSourcePath))
                     {
                         var xboxRel = entry.XboxRelativePath!.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
                             ? entry.XboxRelativePath["Data\\".Length..]
@@ -935,6 +994,9 @@ public sealed class MainWindowViewModel : NotifyBase
             {
                 failed++;
             }
+
+            completedMods++;
+            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Completed {selection.ModName}"));
         }
 
         if (selections.Count == 0)
@@ -948,7 +1010,7 @@ public sealed class MainWindowViewModel : NotifyBase
             : $" First missing repo: {bootstrapPaths.First()}";
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
 
         RebuildMods();
     }
@@ -1406,3 +1468,6 @@ public sealed class MainWindowViewModel : NotifyBase
         ];
     }
 }
+
+
+public sealed record ScanApplyProgress(int CompletedMods, int TotalMods, string Message);
