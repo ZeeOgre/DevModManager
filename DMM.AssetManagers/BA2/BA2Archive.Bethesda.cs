@@ -34,29 +34,54 @@ public static partial class BA2Archive
                 return false;
             }
 
-            _ = br.ReadUInt32();
+            var version = br.ReadUInt32();
+            if (version is not (1 or 2 or 3 or 7 or 8))
+            {
+                failureReason = $"unsupported BA2 version '{version}'";
+                return false;
+            }
+
             var type = new string(br.ReadChars(4));
             var fileCount = br.ReadUInt32();
             var nameTableOffset = br.ReadUInt64();
 
-            if (!string.Equals(type, "GNRL", StringComparison.Ordinal))
+            // Starfield v2/v3 BA2 headers contain extra fields before file records.
+            if (version is 2 or 3)
             {
-                failureReason = $"unsupported BA2 type '{type}'";
-                return false;
+                _ = br.ReadUInt64();
             }
 
-            var records = new (ulong Offset, uint Packed, uint Unpacked)[fileCount];
-            for (var i = 0; i < fileCount; i++)
+            if (version == 3)
             {
                 _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                var dataOffset = br.ReadUInt64();
-                var packedSize = br.ReadUInt32();
-                var unpackedSize = br.ReadUInt32();
-                _ = br.ReadUInt32();
-                records[i] = (dataOffset, packedSize, unpackedSize);
+            }
+
+            var records = new (ulong Offset, uint Packed, uint Unpacked, string Type)[fileCount];
+            switch (type)
+            {
+                case "GNRL":
+                    for (var i = 0; i < fileCount; i++)
+                    {
+                        _ = br.ReadUInt32();
+                        _ = br.ReadUInt32();
+                        _ = br.ReadUInt32();
+                        _ = br.ReadUInt32();
+                        var dataOffset = br.ReadUInt64();
+                        var packedSize = br.ReadUInt32();
+                        var unpackedSize = br.ReadUInt32();
+                        _ = br.ReadUInt32();
+                        records[i] = (dataOffset, packedSize, unpackedSize, "GNRL");
+                    }
+                    break;
+                case "DX10":
+                    ReadChunkedTextureRecords(br, records, "DX10");
+                    break;
+                case "GNMF":
+                    ReadGnmfRecords(br, records);
+                    break;
+                default:
+                    failureReason = $"unsupported BA2 type '{type}'";
+                    return false;
             }
 
             fs.Position = (long)nameTableOffset;
@@ -68,6 +93,11 @@ public static partial class BA2Archive
                 var innerPath = NormalizeInnerPath(System.Text.Encoding.UTF8.GetString(pathBytes));
                 var rec = records[i];
                 var fileSize = rec.Unpacked > 0 ? rec.Unpacked : rec.Packed;
+                if (string.Equals(rec.Type, "DX10", StringComparison.Ordinal))
+                {
+                    // DDS header is reconstructed from metadata in DX10 archives.
+                    fileSize += 148;
+                }
 
                 list.Add(new Ba2Entry
                 {
@@ -77,7 +107,8 @@ public static partial class BA2Archive
                     FileSize = fileSize,
                     DataOffset = (long)rec.Offset,
                     PackedSize = rec.Packed,
-                    UnpackedSize = rec.Unpacked
+                    UnpackedSize = rec.Unpacked,
+                    BethesdaArchiveType = rec.Type
                 });
             }
 
@@ -92,8 +123,118 @@ public static partial class BA2Archive
         }
     }
 
+    private static void ReadChunkedTextureRecords(
+        BinaryReader br,
+        (ulong Offset, uint Packed, uint Unpacked, string Type)[] records,
+        string type)
+    {
+        for (var i = 0; i < records.Length; i++)
+        {
+            _ = br.ReadUInt32();
+            _ = br.ReadUInt32();
+            _ = br.ReadUInt32();
+
+            _ = br.ReadByte(); // unknown
+            var chunkCount = br.ReadByte();
+            var chunkHeaderSize = br.ReadUInt16();
+            _ = br.ReadUInt16(); // height
+            _ = br.ReadUInt16(); // width
+            _ = br.ReadByte();   // mip count
+            _ = br.ReadByte();   // dxgi format
+            _ = br.ReadUInt16(); // flags
+
+            if (chunkHeaderSize != 24)
+            {
+                throw new InvalidDataException($"{type} entry has unexpected chunk header size {chunkHeaderSize}.");
+            }
+
+            ulong firstOffset = 0;
+            uint totalPacked = 0;
+            uint totalUnpacked = 0;
+
+            for (var chunk = 0; chunk < chunkCount; chunk++)
+            {
+                var dataOffset = br.ReadUInt64();
+                var packedSize = br.ReadUInt32();
+                var unpackedSize = br.ReadUInt32();
+                _ = br.ReadUInt16(); // start mip
+                _ = br.ReadUInt16(); // end mip
+                var sentinel = br.ReadUInt32();
+                if (sentinel != 0xBAADF00D)
+                {
+                    throw new InvalidDataException($"{type} chunk has invalid sentinel 0x{sentinel:X8}.");
+                }
+
+                if (chunk == 0)
+                {
+                    firstOffset = dataOffset;
+                }
+
+                totalPacked = unchecked(totalPacked + packedSize);
+                totalUnpacked = unchecked(totalUnpacked + unpackedSize);
+            }
+
+            records[i] = (firstOffset, totalPacked, totalUnpacked, type);
+        }
+    }
+
+    private static void ReadGnmfRecords(BinaryReader br, (ulong Offset, uint Packed, uint Unpacked, string Type)[] records)
+    {
+        for (var i = 0; i < records.Length; i++)
+        {
+            _ = br.ReadUInt32();
+            _ = br.ReadUInt32();
+            _ = br.ReadUInt32();
+
+            _ = br.ReadByte(); // unknown
+            var chunkCount = br.ReadByte();
+            var chunkHeaderSize = br.ReadUInt16();
+
+            // GNMF has a larger per-file metadata block (0x30 total after hash triplet).
+            _ = br.ReadBytes(32);
+
+            if (chunkHeaderSize != 24)
+            {
+                throw new InvalidDataException($"GNMF entry has unexpected chunk header size {chunkHeaderSize}.");
+            }
+
+            ulong firstOffset = 0;
+            uint totalPacked = 0;
+            uint totalUnpacked = 0;
+
+            for (var chunk = 0; chunk < chunkCount; chunk++)
+            {
+                var dataOffset = br.ReadUInt64();
+                var packedSize = br.ReadUInt32();
+                var unpackedSize = br.ReadUInt32();
+                _ = br.ReadUInt16(); // start mip
+                _ = br.ReadUInt16(); // end mip
+                var sentinel = br.ReadUInt32();
+                if (sentinel != 0xBAADF00D)
+                {
+                    throw new InvalidDataException($"GNMF chunk has invalid sentinel 0x{sentinel:X8}.");
+                }
+
+                if (chunk == 0)
+                {
+                    firstOffset = dataOffset;
+                }
+
+                totalPacked = unchecked(totalPacked + packedSize);
+                totalUnpacked = unchecked(totalUnpacked + unpackedSize);
+            }
+
+            records[i] = (firstOffset, totalPacked, totalUnpacked, "GNMF");
+        }
+    }
+
     private static byte[] ExtractBethesdaBa2File(Ba2Entry entry)
     {
+        if (!string.Equals(entry.BethesdaArchiveType, "GNRL", StringComparison.Ordinal))
+        {
+            throw new NotSupportedException($"{entry.BethesdaArchiveType} BA2 extraction is not implemented for byte-for-byte loose file comparison yet.");
+        }
+
         using var fs = File.OpenRead(entry.ArchivePath);
         fs.Position = entry.DataOffset;
 
