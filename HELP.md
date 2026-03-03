@@ -35,3 +35,25 @@
 - Import target path is local mod repo `loosefiles/Data` (copy-first).
 
 - Program-wide operational settings are persisted in the local DMM database; `program-settings.json` is reserved for database bootstrap metadata only.
+
+
+## New Machine Setup (Repo + Mods + Deploy Targets)
+When moving to a new machine, set up the mod repo root first, then configure DMM settings before onboarding/sync.
+
+1. Choose your local mod repo root folder (example: `D:\ModRepos` or `S:\devmods`).
+2. Run the bootstrap script to clone or sync the root repo + submodules:
+   - `pwsh ./scripts/setup-mod-root.ps1 -RepoRoot "D:\ModRepos" -RemoteUrl "https://github.com/<org>/<root-repo>.git"`
+   - Add `-ForceReclone` if the local folder is broken and should be recreated.
+   - Add `-SkipLfs` if the machine does not need LFS assets yet.
+3. In DMM Program Settings set:
+   - `Mod Repo Root` to the same folder you passed as `-RepoRoot`.
+   - `GitHubAccount`, `GitHubToken`, and `GitHubModRootRepo`.
+4. Verify game install path(s):
+   - **GameRoot should be where the executable + `Data` live**.
+   - For Xbox/GamePass layouts, this is typically `<Install>\Content` (not the outer library folder).
+   - For Steam/Epic/GOG, this is usually the main game folder directly.
+5. Run Scan/Sync/Onboarding in DMM.
+
+If you need to wipe experiment repos and start clean:
+- Preview: `pwsh ./scripts/purge-mod-repos.ps1 -ModRepoRoot "D:\ModRepos" -DryRun`
+- Execute: `pwsh ./scripts/purge-mod-repos.ps1 -ModRepoRoot "D:\ModRepos" -Force`
