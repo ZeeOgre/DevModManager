@@ -8,9 +8,9 @@ using DMM.AssetManagers.MAT;
 using DMM.AssetManagers.NIF;
 using DMM.AssetManagers.TES;
 
-namespace DMM.Avalonia;
+namespace DMM.AssetManagers;
 
-internal sealed record ModDependencyEntry(
+public sealed record ModDependencyEntry(
     string RelativeDataPath,
     string SourcePath,
     string? XboxRelativePath,
@@ -18,18 +18,18 @@ internal sealed record ModDependencyEntry(
     string? TifRelativePath,
     string? TifSourcePath);
 
-internal sealed class ModDependencyDiscoveryResult
+public sealed class ModDependencyDiscoveryResult
 {
     public List<ModDependencyEntry> Entries { get; } = new();
     public int CollisionCount { get; set; }
     public long ScanMs { get; set; }
 }
 
-internal sealed class ModDependencyDiscoveryService
+public sealed class ModDependencyDiscoveryService
 {
     private readonly TESFile _tesFile = new();
     private readonly NifReader _nifReader = new();
-    private readonly MAT _matReader = new();
+    private readonly global::DMM.AssetManagers.MAT.MAT _matReader = new();
 
     private static readonly string[] CanonicalBa2Suffixes =
     {
