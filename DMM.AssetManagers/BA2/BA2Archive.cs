@@ -171,6 +171,7 @@ public static partial class BA2Archive
                 {
                     stats.AttemptedArchiveSamples.Add($"INDEXED :: {full}");
                 }
+                continue;
             }
             catch (Exception ex)
             {
