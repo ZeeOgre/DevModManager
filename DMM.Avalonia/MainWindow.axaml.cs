@@ -504,21 +504,28 @@ public partial class MainWindow : Window
 
     private void OpenGameFolder_Click(object? sender, RoutedEventArgs e)
     {
-        var folder = _viewModel.SelectedGameFolder;
-        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+        var selected = _viewModel.SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selected) || !Directory.Exists(selected))
         {
             _viewModel.StatusMessage = "Open game folder failed: selected folder is missing.";
             return;
+        }
+
+        var folderToOpen = selected;
+        var contentRoot = Path.Combine(selected, "Content");
+        if (Directory.Exists(Path.Combine(contentRoot, "Data")))
+        {
+            folderToOpen = contentRoot;
         }
 
         try
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = folder,
+                FileName = folderToOpen,
                 UseShellExecute = true
             });
-            _viewModel.StatusMessage = $"Opened game folder: {folder}";
+            _viewModel.StatusMessage = $"Opened game folder: {folderToOpen}";
         }
         catch (Exception ex)
         {
