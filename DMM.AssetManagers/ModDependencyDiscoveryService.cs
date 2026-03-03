@@ -8,9 +8,9 @@ using DMM.AssetManagers.MAT;
 using DMM.AssetManagers.NIF;
 using DMM.AssetManagers.TES;
 
-namespace DMM.Avalonia;
+namespace DMM.AssetManagers;
 
-internal sealed record ModDependencyEntry(
+public sealed record ModDependencyEntry(
     string RelativeDataPath,
     string SourcePath,
     string? XboxRelativePath,
@@ -18,18 +18,34 @@ internal sealed record ModDependencyEntry(
     string? TifRelativePath,
     string? TifSourcePath);
 
-internal sealed class ModDependencyDiscoveryResult
+public sealed class ModDependencyDiscoveryResult
 {
     public List<ModDependencyEntry> Entries { get; } = new();
+    public List<string> MissingReferences { get; } = new();
+    public List<string> ParentArchiveReferences { get; } = new();
     public int CollisionCount { get; set; }
+    public int ParentMasterCount { get; set; }
+    public int ParentArchiveCount { get; set; }
+    public int ParentZipCount { get; set; }
+    public int ParentIndexedFileCount { get; set; }
+    public long ParentIndexedBytes { get; set; }
+    public long ParentEstimatedRecordBytes { get; set; }
+    public int ParentNonBa2CandidateCount { get; set; }
+    public List<string> ParentNonBa2CandidateSamples { get; } = new();
+    public int ParentReadFailureCount { get; set; }
+    public List<string> ParentReadFailureSamples { get; } = new();
+    public int ParentAttemptedArchiveCount { get; set; }
+    public List<string> ParentAttemptedArchiveSamples { get; } = new();
+    public string? ParentLastArchiveCandidate { get; set; }
+    public string? ParentLastArchiveOutcome { get; set; }
     public long ScanMs { get; set; }
 }
 
-internal sealed class ModDependencyDiscoveryService
+public sealed class ModDependencyDiscoveryService
 {
     private readonly TESFile _tesFile = new();
     private readonly NifReader _nifReader = new();
-    private readonly MAT _matReader = new();
+    private readonly global::DMM.AssetManagers.MAT.MAT _matReader = new();
 
     private static readonly string[] CanonicalBa2Suffixes =
     {
@@ -60,12 +76,14 @@ internal sealed class ModDependencyDiscoveryService
             .ToList();
 
         var discoveredCandidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var unresolvedCandidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var plugin in pluginFiles)
         {
-            DiscoverPluginWalkCandidates(plugin, scanRoot, gameRoot, discoveredCandidates);
+            DiscoverPluginWalkCandidates(plugin, scanRoot, gameRoot, discoveredCandidates, unresolvedCandidates);
+            DiscoverConventionCandidates(plugin, scanRoot, modName, discoveredCandidates);
         }
 
-        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, pluginFiles);
+        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats);
         var tifRoot = ResolveTifRoot(gameRoot);
         var result = new ModDependencyDiscoveryResult();
 
@@ -80,6 +98,7 @@ internal sealed class ModDependencyDiscoveryService
             if (!source.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && parentArchiveIndex.ContainsKey(rel))
             {
                 result.CollisionCount++;
+                result.ParentArchiveReferences.Add(rel);
                 continue;
             }
 
@@ -98,12 +117,37 @@ internal sealed class ModDependencyDiscoveryService
             result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource));
         }
 
+        foreach (var missing in unresolvedCandidates.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!result.Entries.Any(x => string.Equals(x.RelativeDataPath, missing, StringComparison.OrdinalIgnoreCase)) &&
+                !result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
+            {
+                result.MissingReferences.Add(missing);
+            }
+        }
+
+
+        result.ParentMasterCount = parentStats.MasterCount;
+        result.ParentArchiveCount = parentStats.ArchivePathCount;
+        result.ParentZipCount = parentStats.ZipPathCount;
+        result.ParentIndexedFileCount = parentStats.IndexedFileCount;
+        result.ParentIndexedBytes = parentStats.IndexedBytes;
+        result.ParentEstimatedRecordBytes = parentStats.EstimatedRecordBytes;
+        result.ParentNonBa2CandidateCount = parentStats.NonBa2CandidateCount;
+        result.ParentReadFailureCount = parentStats.ReadFailureCount;
+        result.ParentNonBa2CandidateSamples.AddRange(parentStats.NonBa2CandidateSamples);
+        result.ParentReadFailureSamples.AddRange(parentStats.ReadFailureSamples);
+        result.ParentAttemptedArchiveCount = parentStats.AttemptedArchiveCount;
+        result.ParentAttemptedArchiveSamples.AddRange(parentStats.AttemptedArchiveSamples);
+        result.ParentLastArchiveCandidate = parentStats.LastArchiveCandidate;
+        result.ParentLastArchiveOutcome = parentStats.LastArchiveOutcome;
+
         timer.Stop();
         result.ScanMs = timer.ElapsedMilliseconds;
         return result;
     }
 
-    private void DiscoverPluginWalkCandidates(string pluginFile, string scanRoot, string gameRoot, HashSet<string> candidates)
+    private void DiscoverPluginWalkCandidates(string pluginFile, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
         TesFileResult tesResult;
         try
@@ -117,26 +161,26 @@ internal sealed class ModDependencyDiscoveryService
 
         foreach (var script in tesResult.ReferencedScripts)
         {
-            TryAddByDataRelative(script, scanRoot, gameRoot, candidates);
+            TryAddByDataRelative(script, scanRoot, gameRoot, candidates, unresolvedCandidates);
 
             if (script.EndsWith(".pex", StringComparison.OrdinalIgnoreCase))
             {
-                TryAddByDataRelative(script[..^4] + ".psc", scanRoot, gameRoot, candidates);
+                TryAddByDataRelative(script[..^4] + ".psc", scanRoot, gameRoot, candidates, unresolvedCandidates);
             }
             else if (script.EndsWith(".psc", StringComparison.OrdinalIgnoreCase))
             {
-                TryAddByDataRelative(script[..^4] + ".pex", scanRoot, gameRoot, candidates);
+                TryAddByDataRelative(script[..^4] + ".pex", scanRoot, gameRoot, candidates, unresolvedCandidates);
             }
         }
 
         foreach (var audio in tesResult.ReferencedAudio)
         {
-            TryAddByDataRelative(audio, scanRoot, gameRoot, candidates);
+            TryAddByDataRelative(audio, scanRoot, gameRoot, candidates, unresolvedCandidates);
         }
 
         foreach (var texture in tesResult.ReferencedTextures)
         {
-            TryAddByDataRelative(texture, scanRoot, gameRoot, candidates);
+            TryAddByDataRelative(texture, scanRoot, gameRoot, candidates, unresolvedCandidates);
         }
 
         foreach (var mat in tesResult.ReferencedMats)
@@ -144,7 +188,11 @@ internal sealed class ModDependencyDiscoveryService
             if (TryResolveDataRelative(mat, scanRoot, gameRoot, out var matPath))
             {
                 candidates.Add(matPath);
-                DiscoverMatTextures(matPath, scanRoot, gameRoot, candidates);
+                DiscoverMatTextures(matPath, scanRoot, gameRoot, candidates, unresolvedCandidates);
+            }
+            else
+            {
+                unresolvedCandidates.Add(NormalizeToDataRelative(mat));
             }
         }
 
@@ -164,11 +212,22 @@ internal sealed class ModDependencyDiscoveryService
                 {
                     if (!TryResolveDataRelative(mat, scanRoot, gameRoot, out var matPath))
                     {
+                        unresolvedCandidates.Add(NormalizeToDataRelative(mat));
                         continue;
                     }
 
                     candidates.Add(matPath);
-                    DiscoverMatTextures(matPath, scanRoot, gameRoot, candidates);
+                    DiscoverMatTextures(matPath, scanRoot, gameRoot, candidates, unresolvedCandidates);
+                }
+
+                foreach (var mesh in nifRead.Meshes)
+                {
+                    TryAddByDataRelative(mesh, scanRoot, gameRoot, candidates, unresolvedCandidates);
+                }
+
+                foreach (var rig in nifRead.Rigs)
+                {
+                    TryAddByDataRelative(rig, scanRoot, gameRoot, candidates, unresolvedCandidates);
                 }
             }
             catch
@@ -177,7 +236,7 @@ internal sealed class ModDependencyDiscoveryService
         }
     }
 
-    private void DiscoverMatTextures(string matPath, string scanRoot, string gameRoot, HashSet<string> candidates)
+    private void DiscoverMatTextures(string matPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
         try
         {
@@ -191,11 +250,49 @@ internal sealed class ModDependencyDiscoveryService
                         ? Path.Combine("Data", normalized)
                         : Path.Combine("Data", "Textures", normalized);
 
-                TryAddByDataRelative(rel, scanRoot, gameRoot, candidates);
+                TryAddByDataRelative(rel, scanRoot, gameRoot, candidates, unresolvedCandidates);
             }
         }
         catch
         {
+        }
+    }
+
+
+    private static void DiscoverConventionCandidates(string pluginFile, string scanRoot, string modName, HashSet<string> candidates)
+    {
+        var pluginName = Path.GetFileName(pluginFile);
+        var pluginStem = Path.GetFileNameWithoutExtension(pluginFile);
+
+        foreach (var scriptsRoot in new[] { Path.Combine(scanRoot, "Scripts"), Path.Combine(scanRoot, "Scripts", "Source") })
+        {
+            if (!Directory.Exists(scriptsRoot))
+            {
+                continue;
+            }
+
+            foreach (var script in Directory.EnumerateFiles(scriptsRoot, "*.*", SearchOption.AllDirectories)
+                         .Where(x => x.EndsWith(".psc", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".pex", StringComparison.OrdinalIgnoreCase)))
+            {
+                var name = Path.GetFileName(script);
+                if (name.Contains(pluginStem, StringComparison.OrdinalIgnoreCase) || name.Contains(modName, StringComparison.OrdinalIgnoreCase))
+                {
+                    candidates.Add(script);
+                }
+            }
+        }
+
+        foreach (var textureRoot in new[] { Path.Combine(scanRoot, "Textures", pluginName), Path.Combine(scanRoot, "Textures", pluginStem), Path.Combine(scanRoot, "Textures", modName) })
+        {
+            if (!Directory.Exists(textureRoot))
+            {
+                continue;
+            }
+
+            foreach (var dds in Directory.EnumerateFiles(textureRoot, "*.dds", SearchOption.AllDirectories))
+            {
+                candidates.Add(dds);
+            }
         }
     }
 
@@ -204,6 +301,7 @@ internal sealed class ModDependencyDiscoveryService
         var expectedPluginName = $"{modName}{Path.GetExtension(primaryPlugin)}";
         var pluginCandidates = new[]
         {
+            Path.Combine(scanRoot, primaryPlugin),
             Path.Combine(scanRoot, expectedPluginName),
             Path.Combine(scanRoot, $"{modName}.esm"),
             Path.Combine(scanRoot, $"{modName}.esp"),
@@ -217,7 +315,7 @@ internal sealed class ModDependencyDiscoveryService
             .ToList();
     }
 
-    private static Dictionary<string, Ba2Entry> BuildParentArchiveIndex(string scanRoot, IReadOnlyList<string> pluginFiles)
+    private static Dictionary<string, Ba2Entry> BuildParentArchiveIndex(string scanRoot, string gameRoot, IReadOnlyList<string> pluginFiles, out BA2Archive.Ba2IndexBuildStats stats)
     {
         var masterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var plugin in pluginFiles)
@@ -228,12 +326,22 @@ internal sealed class ModDependencyDiscoveryService
             }
         }
 
-        var merged = BA2Archive.BuildMasterArchiveIndex(masterNames, scanRoot);
+        var merged = BA2Archive.BuildMasterArchiveIndex(masterNames, scanRoot, out stats);
 
-        foreach (var listedArchive in LoadStarfieldArchiveList(scanRoot))
+        var listedArchives = LoadStarfieldArchiveList(scanRoot)
+            .Where(File.Exists)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var listedArchive in listedArchives)
         {
-            if (!File.Exists(listedArchive))
+            if (!BA2Archive.TryValidateBa2Path(listedArchive, out var reason))
             {
+                stats.NonBa2CandidateCount++;
+                if (stats.NonBa2CandidateSamples.Count < 5)
+                {
+                    stats.NonBa2CandidateSamples.Add($"{listedArchive} :: {reason}");
+                }
                 continue;
             }
 
@@ -244,10 +352,38 @@ internal sealed class ModDependencyDiscoveryService
                     merged[kvp.Key] = kvp.Value;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                stats.ReadFailureCount++;
+                if (stats.ReadFailureSamples.Count < 5)
+                {
+                    stats.ReadFailureSamples.Add($"{listedArchive} :: {ex.Message}");
+                }
             }
         }
+
+        var zipCandidates = new[]
+        {
+            Path.Combine(gameRoot, "ContentResources.zip"),
+            Path.Combine(Directory.GetParent(gameRoot)?.FullName ?? gameRoot, "ContentResources.zip")
+        }
+        .Where(File.Exists)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+        if (zipCandidates.Count > 0)
+        {
+            foreach (var kvp in BA2Archive.BuildZipIndex(zipCandidates))
+            {
+                merged[kvp.Key] = kvp.Value;
+            }
+        }
+
+        stats.ArchivePathCount += listedArchives.Count;
+        stats.ZipPathCount = zipCandidates.Count;
+        stats.IndexedFileCount = merged.Count;
+        stats.IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize);
+        stats.EstimatedRecordBytes = merged.Sum(x => 64L + (x.Key?.Length ?? 0) * sizeof(char));
 
         return merged;
     }
@@ -348,12 +484,15 @@ internal sealed class ModDependencyDiscoveryService
         }
     }
 
-    private static void TryAddByDataRelative(string relDataPath, string scanRoot, string gameRoot, HashSet<string> candidates)
+    private static void TryAddByDataRelative(string relDataPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
         if (TryResolveDataRelative(relDataPath, scanRoot, gameRoot, out var fullPath))
         {
             candidates.Add(fullPath);
+            return;
         }
+
+        unresolvedCandidates.Add(NormalizeToDataRelative(relDataPath));
     }
 
     private static bool TryResolveDataRelative(string relDataPath, string scanRoot, string gameRoot, out string fullPath)
@@ -447,6 +586,17 @@ internal sealed class ModDependencyDiscoveryService
         }
 
         return null;
+    }
+
+    private static string NormalizeToDataRelative(string relDataPath)
+    {
+        var rel = relDataPath.Replace('/', '\\').TrimStart('\\');
+        if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+        {
+            rel = Path.Combine("Data", rel);
+        }
+
+        return NormalizeRel(rel);
     }
 
     private static string NormalizeRel(string rel)

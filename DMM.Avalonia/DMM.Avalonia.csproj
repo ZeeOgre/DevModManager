@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
+    <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
     <ProjectReference Include="..\DMM.Data\DMM.Data.csproj" />
   </ItemGroup>
 
