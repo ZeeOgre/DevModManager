@@ -231,6 +231,13 @@ public static partial class BA2Archive
         var looseSize = new FileInfo(fullLoose).Length;
         if (entry.FileSize >= 0 && entry.FileSize != looseSize) return false;
 
+        // For chunked Bethesda texture archives (DX10/GNMF), we currently compare by canonical
+        // path + logical unpacked size match and treat that as already packed.
+        if (!string.Equals(entry.BethesdaArchiveType, "GNRL", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
         using var looseStream = File.OpenRead(fullLoose);
 
         try
