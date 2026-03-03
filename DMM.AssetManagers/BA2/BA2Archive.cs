@@ -1,453 +1,370 @@
-﻿using System.Reflection;
+using System.IO.Compression;
 
-namespace DMM.AssetManagers
+namespace DMM.AssetManagers;
+
+public sealed class Ba2Entry
 {
-    public sealed class Ba2Entry
-    {
-        public string ArchivePath { get; init; } = "";
-        public string RelativePath { get; init; } = "";
-        public string ArchiveInnerPath { get; init; } = "";
-        public long FileSize { get; init; } = -1;
+    public string ArchivePath { get; init; } = "";
+    public string RelativePath { get; init; } = "";
+    public string ArchiveInnerPath { get; init; } = "";
+    public long FileSize { get; init; } = -1;
+    public long DataOffset { get; init; } = -1;
+    public uint PackedSize { get; init; }
+    public uint UnpackedSize { get; init; }
 
-        public override string ToString()
-            => $"{RelativePath} (size={FileSize}, from={Path.GetFileName(ArchivePath)})";
+    public override string ToString()
+        => $"{RelativePath} (size={FileSize}, from={Path.GetFileName(ArchivePath)})";
+}
+
+public static partial class BA2Archive
+{
+    public sealed class Ba2IndexBuildStats
+    {
+        public int MasterCount { get; set; }
+        public int ArchivePathCount { get; set; }
+        public int ZipPathCount { get; set; }
+        public int IndexedFileCount { get; set; }
+        public long IndexedBytes { get; set; }
+        public long EstimatedRecordBytes { get; set; }
+        public int NonBa2CandidateCount { get; set; }
+        public List<string> NonBa2CandidateSamples { get; } = new();
+        public int ReadFailureCount { get; set; }
+        public List<string> ReadFailureSamples { get; } = new();
+        public int AttemptedArchiveCount { get; set; }
+        public List<string> AttemptedArchiveSamples { get; } = new();
+        public string? LastArchiveCandidate { get; set; }
+        public string? LastArchiveOutcome { get; set; }
     }
 
-    public static partial class BA2Archive
+    public static IReadOnlyList<Ba2Entry> ReadIndex(string ba2Path)
     {
-        // Reflection cache
-        private static Type? s_ba2FileType;
-        private static Func<string, object>? s_ba2FileCtor;
-        private static Func<object, IEnumerable<object>>? s_getAssets;
-        private static Func<object, string?>? s_getAssetNameOrPath;
-        private static Func<object, long>? s_getAssetUncompressedSize;
-        private static Action<object, Stream>? s_assetExtractToStream;
-        private static Action<object>? s_ba2Dispose;
+        if (ba2Path is null) throw new ArgumentNullException(nameof(ba2Path));
+        if (!File.Exists(ba2Path)) throw new FileNotFoundException("BA2 archive not found", ba2Path);
 
-        public static IReadOnlyList<Ba2Entry> ReadIndex(string ba2Path)
+        if (TryReadBethesdaBa2Index(ba2Path, out var bethesdaEntries, out var bethesdaFailure))
         {
-            if (ba2Path is null) throw new ArgumentNullException(nameof(ba2Path));
-            if (!File.Exists(ba2Path))
-                throw new FileNotFoundException("BA2 archive not found", ba2Path);
+            return bethesdaEntries;
+        }
 
-            EnsureBindings();
+        if (IsBethesdaBa2Magic(ba2Path))
+        {
+            throw new NotSupportedException($"BA2 archive '{ba2Path}' could not be indexed by current Bethesda reader: {bethesdaFailure}");
+        }
 
-            var entries = new List<Ba2Entry>();
-            string archiveFull = Path.GetFullPath(ba2Path);
+        return ReadBuildIndex(ba2Path)
+            .Select(x => new Ba2Entry
+            {
+                ArchivePath = x.ArchivePath,
+                ArchiveInnerPath = x.ArchiveInnerPath,
+                RelativePath = NormalizeRel(x.ArchiveInnerPath),
+                FileSize = x.UncompressedSize,
+                DataOffset = -1,
+                PackedSize = (uint)Math.Max(0, x.StoredSize),
+                UnpackedSize = (uint)Math.Max(0, x.UncompressedSize)
+            })
+            .ToArray();
+    }
 
-            object ba2 = s_ba2FileCtor!(archiveFull);
+    public static Dictionary<string, Ba2Entry> BuildMergedIndex(IEnumerable<string> ba2Paths)
+    {
+        if (ba2Paths == null) throw new ArgumentNullException(nameof(ba2Paths));
+
+        var index = new Dictionary<string, Ba2Entry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var path in ba2Paths.Where(p => !string.IsNullOrWhiteSpace(p)))
+        {
+            string full = Path.GetFullPath(path);
+            if (!File.Exists(full)) continue;
+
+            if (!LooksLikeBa2Archive(full, out var signatureReason))
+            {
+                Console.WriteLine($"[WARN] Skipping non-BA2 file '{full}': {signatureReason}");
+                continue;
+            }
+
+            IReadOnlyList<Ba2Entry> entries;
             try
             {
-                foreach (var asset in s_getAssets!(ba2))
-                {
-                    string? rawInner = s_getAssetNameOrPath!(asset);
-                    if (string.IsNullOrWhiteSpace(rawInner))
-                        continue;
-
-                    string inner = NormalizeInnerPath(rawInner);
-                    if (string.IsNullOrWhiteSpace(inner))
-                        continue;
-
-                    string rel = NormalizeRel(inner);
-                    long size = SafeGetSize(asset);
-
-                    entries.Add(new Ba2Entry
-                    {
-                        ArchivePath = archiveFull,
-                        ArchiveInnerPath = inner,
-                        RelativePath = rel,
-                        FileSize = size
-                    });
-                }
+                entries = ReadIndex(full);
             }
-            finally
+            catch (Exception ex)
             {
-                s_ba2Dispose?.Invoke(ba2);
-                (ba2 as IDisposable)?.Dispose();
+                Console.WriteLine($"[WARN] Failed to read BA2 '{full}': {ex.Message}");
+                continue;
             }
 
-            return entries;
-        }
-
-        public static Dictionary<string, Ba2Entry> BuildMergedIndex(IEnumerable<string> ba2Paths)
-        {
-            if (ba2Paths == null) throw new ArgumentNullException(nameof(ba2Paths));
-
-            var index = new Dictionary<string, Ba2Entry>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var path in ba2Paths.Where(p => !string.IsNullOrWhiteSpace(p)))
+            foreach (var e in entries)
             {
-                string full = Path.GetFullPath(path);
-                if (!File.Exists(full))
-                    continue;
-
-                IReadOnlyList<Ba2Entry> entries;
-                try
-                {
-                    entries = ReadIndex(full);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[WARN] Failed to read BA2 '{full}': {ex.Message}");
-                    continue;
-                }
-
-                foreach (var e in entries)
-                {
-                    index[e.RelativePath] = e;
-                }
+                index[e.RelativePath] = e;
             }
-
-            return index;
         }
 
-        public static Dictionary<string, Ba2Entry> BuildMasterArchiveIndex(
-            IEnumerable<string> masterNames,
-            string dataRoot)
+        return index;
+    }
+
+    public static Dictionary<string, Ba2Entry> BuildMasterArchiveIndex(IEnumerable<string> masterNames, string dataRoot)
+        => BuildMasterArchiveIndex(masterNames, dataRoot, out _);
+
+    public static Dictionary<string, Ba2Entry> BuildMasterArchiveIndex(
+        IEnumerable<string> masterNames,
+        string dataRoot,
+        out Ba2IndexBuildStats stats)
+    {
+        if (masterNames == null) throw new ArgumentNullException(nameof(masterNames));
+        if (dataRoot == null) throw new ArgumentNullException(nameof(dataRoot));
+
+        var normalizedMasters = masterNames.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+        var ba2Paths = new List<string>();
+
+        foreach (var master in normalizedMasters)
         {
-            if (masterNames == null) throw new ArgumentNullException(nameof(masterNames));
-            if (dataRoot == null) throw new ArgumentNullException(nameof(dataRoot));
+            var baseName = Path.GetFileNameWithoutExtension(master);
+            if (string.IsNullOrWhiteSpace(baseName)) continue;
 
-            var ba2Paths = new List<string>();
-
-            foreach (var master in masterNames)
-            {
-                if (string.IsNullOrWhiteSpace(master))
-                    continue;
-
-                string baseName = Path.GetFileNameWithoutExtension(master);
-                if (string.IsNullOrEmpty(baseName))
-                    continue;
-
-                try
-                {
-                    var matches = Directory.GetFiles(
-                        dataRoot,
-                        baseName + "*.ba2",
-                        SearchOption.TopDirectoryOnly);
-
-                    ba2Paths.AddRange(matches);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[WARN] Failed to enumerate BA2s for master '{master}': {ex.Message}");
-                }
-            }
-
-            return BuildMergedIndex(ba2Paths);
-        }
-
-        public static bool IsLooseFileAlreadyPacked(
-            string gameRoot,
-            string relPath,
-            IReadOnlyDictionary<string, Ba2Entry> mergedIndex,
-            out Ba2Entry? matchedEntry)
-        {
-            if (gameRoot is null) throw new ArgumentNullException(nameof(gameRoot));
-            if (relPath is null) throw new ArgumentNullException(nameof(relPath));
-            if (mergedIndex is null) throw new ArgumentNullException(nameof(mergedIndex));
-
-            matchedEntry = null;
-
-            string normRel = NormalizeRel(relPath);
-
-            if (!mergedIndex.TryGetValue(normRel, out var entry))
-                return false;
-
-            matchedEntry = entry;
-
-            string fullLoose = Path.Combine(gameRoot, normRel);
-            if (!File.Exists(fullLoose))
-                return false;
-
-            var looseInfo = new FileInfo(fullLoose);
-            long looseSize = looseInfo.Length;
-
-            if (entry.FileSize >= 0 && entry.FileSize != looseSize)
-                return false;
-
-            using var looseStream = File.OpenRead(fullLoose);
-            using var archiveStream = OpenArchiveEntryStream(entry);
-
-            if (!archiveStream.CanRead || !archiveStream.CanSeek)
-                return FullCompareSIMD(looseStream, archiveStream);
-
-            bool approxEqual = FastApproxEqual(looseStream, archiveStream);
-            return approxEqual;
-        }
-
-        private static Stream OpenArchiveEntryStream(Ba2Entry entry)
-        {
-            if (entry is null) throw new ArgumentNullException(nameof(entry));
-            EnsureBindings();
-
-            object ba2 = s_ba2FileCtor!(entry.ArchivePath);
             try
             {
-                var asset = s_getAssets!(ba2).FirstOrDefault(a =>
-                {
-                    string? raw = s_getAssetNameOrPath!(a);
-                    string inner = NormalizeInnerPath(raw);
-                    return inner.Equals(entry.ArchiveInnerPath, StringComparison.OrdinalIgnoreCase);
-                });
-
-                if (asset == null)
-                    throw new FileNotFoundException("Asset not found in BA2: " + entry.ArchiveInnerPath, entry.ArchivePath);
-
-                var ms = new MemoryStream();
-                s_assetExtractToStream!(asset, ms);
-                ms.Position = 0;
-                return ms;
+                ba2Paths.AddRange(Directory.GetFiles(dataRoot, baseName + "*.ba2", SearchOption.TopDirectoryOnly));
             }
-            finally
+            catch (Exception ex)
             {
-                s_ba2Dispose?.Invoke(ba2);
-                (ba2 as IDisposable)?.Dispose();
+                Console.WriteLine($"[WARN] Failed to enumerate BA2s for master '{master}': {ex.Message}");
             }
         }
 
-        private static bool FastApproxEqual(Stream a, Stream b)
+        stats = new Ba2IndexBuildStats
         {
-            if (a == null) throw new ArgumentNullException(nameof(a));
-            if (b == null) throw new ArgumentNullException(nameof(b));
+            MasterCount = normalizedMasters.Count,
+            ArchivePathCount = ba2Paths.Distinct(StringComparer.OrdinalIgnoreCase).Count()
+        };
 
-            if (!a.CanRead || !b.CanRead || !a.CanSeek || !b.CanSeek)
-                return FullCompareSIMD(a, b);
+        var merged = new Dictionary<string, Ba2Entry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var full in ba2Paths.Distinct(StringComparer.OrdinalIgnoreCase).Select(Path.GetFullPath))
+        {
+            stats.AttemptedArchiveCount++;
+            stats.LastArchiveCandidate = full;
 
-            long lenA = a.Length;
-            long lenB = b.Length;
-            if (lenA != lenB)
-                return false;
-
-            const int BlockSize = 4096;
-            var bufA = new byte[BlockSize];
-            var bufB = new byte[BlockSize];
-
-            if (!ReadAndCompareBlock(a, b, 0, bufA, bufB))
-                return false;
-
-            if (lenA > BlockSize)
+            if (!TryValidateBa2Path(full, out var reason))
             {
-                long tailPos = lenA - BlockSize;
-                if (!ReadAndCompareBlock(a, b, tailPos, bufA, bufB))
-                    return false;
+                stats.NonBa2CandidateCount++;
+                stats.LastArchiveOutcome = $"SKIPPED: {reason}";
+                if (stats.NonBa2CandidateSamples.Count < 5)
+                {
+                    stats.NonBa2CandidateSamples.Add($"{full} :: {reason}");
+                }
+                if (stats.AttemptedArchiveSamples.Count < 10)
+                {
+                    stats.AttemptedArchiveSamples.Add($"SKIPPED :: {full} :: {reason}");
+                }
+                continue;
             }
 
-            if (lenA > 2 * BlockSize)
+            try
             {
-                long midPos = lenA / 2;
-                if (!ReadAndCompareBlock(a, b, midPos, bufA, bufB))
-                    return false;
+                foreach (var e in ReadIndex(full))
+                {
+                    merged[e.RelativePath] = e;
+                }
+
+                stats.LastArchiveOutcome = "INDEXED";
+                if (stats.AttemptedArchiveSamples.Count < 10)
+                {
+                    stats.AttemptedArchiveSamples.Add($"INDEXED :: {full}");
+                }
+            }
+            catch (Exception ex)
+            {
+                stats.ReadFailureCount++;
+                stats.LastArchiveOutcome = $"FAILED: {ex.Message}";
+                if (stats.ReadFailureSamples.Count < 5)
+                {
+                    stats.ReadFailureSamples.Add($"{full} :: {ex.Message}");
+                }
+                if (stats.AttemptedArchiveSamples.Count < 10)
+                {
+                    stats.AttemptedArchiveSamples.Add($"FAILED :: {full} :: {ex.Message}");
+                }
+                Console.WriteLine($"[WARN] Failed to read BA2 '{full}': {ex.Message}");
+            }
+        }
+
+        stats.IndexedFileCount = merged.Count;
+        stats.IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize);
+        return merged;
+    }
+
+    public static bool TryValidateBa2Path(string path, out string reason)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            reason = "path is empty";
+            return false;
+        }
+
+        if (!File.Exists(path))
+        {
+            reason = "file does not exist";
+            return false;
+        }
+
+        return LooksLikeBa2Archive(path, out reason);
+    }
+
+    public static bool IsLooseFileAlreadyPacked(
+        string gameRoot,
+        string relPath,
+        IReadOnlyDictionary<string, Ba2Entry> mergedIndex,
+        out Ba2Entry? matchedEntry)
+    {
+        if (gameRoot is null) throw new ArgumentNullException(nameof(gameRoot));
+        if (relPath is null) throw new ArgumentNullException(nameof(relPath));
+        if (mergedIndex is null) throw new ArgumentNullException(nameof(mergedIndex));
+
+        matchedEntry = null;
+        var normRel = NormalizeRel(relPath);
+
+        if (!mergedIndex.TryGetValue(normRel, out var entry)) return false;
+        matchedEntry = entry;
+
+        var fullLoose = Path.Combine(gameRoot, normRel);
+        if (!File.Exists(fullLoose)) return false;
+
+        var looseSize = new FileInfo(fullLoose).Length;
+        if (entry.FileSize >= 0 && entry.FileSize != looseSize) return false;
+
+        using var looseStream = File.OpenRead(fullLoose);
+        using var archiveStream = OpenArchiveEntryStream(entry);
+
+        if (!archiveStream.CanRead || !archiveStream.CanSeek)
+            return FullCompareSIMD(looseStream, archiveStream);
+
+        return FastApproxEqual(looseStream, archiveStream);
+    }
+
+    private static Stream OpenArchiveEntryStream(Ba2Entry entry)
+    {
+        if (entry is null) throw new ArgumentNullException(nameof(entry));
+
+        if (entry.ArchivePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            using var archive = ZipFile.OpenRead(entry.ArchivePath);
+            var zipEntry = archive.GetEntry(entry.ArchiveInnerPath.Replace('\\', '/'));
+            if (zipEntry == null)
+                throw new FileNotFoundException("Asset not found in ZIP: " + entry.ArchiveInnerPath, entry.ArchivePath);
+
+            var ms = new MemoryStream();
+            using var zs = zipEntry.Open();
+            zs.CopyTo(ms);
+            ms.Position = 0;
+            return ms;
+        }
+
+        if (!LooksLikeBa2Archive(entry.ArchivePath, out var signatureReason))
+            throw new InvalidDataException($"Expected BA2 archive but got '{entry.ArchivePath}' ({signatureReason}).");
+
+        if (entry.DataOffset >= 0)
+        {
+            var bytes = ExtractBethesdaBa2File(entry);
+            return new MemoryStream(bytes, writable: false);
+        }
+
+        var builtBytes = ExtractBuiltFile(entry.ArchivePath, entry.ArchiveInnerPath);
+        return new MemoryStream(builtBytes, writable: false);
+    }
+
+    private static bool FastApproxEqual(Stream a, Stream b)
+    {
+        if (!a.CanRead || !b.CanRead || !a.CanSeek || !b.CanSeek)
+            return FullCompareSIMD(a, b);
+
+        if (a.Length != b.Length) return false;
+
+        const int blockSize = 4096;
+        var bufA = new byte[blockSize];
+        var bufB = new byte[blockSize];
+
+        if (!ReadAndCompareBlock(a, b, 0, bufA, bufB)) return false;
+
+        if (a.Length > blockSize)
+        {
+            var tailPos = a.Length - blockSize;
+            if (!ReadAndCompareBlock(a, b, tailPos, bufA, bufB)) return false;
+        }
+
+        if (a.Length > 2 * blockSize)
+        {
+            var midPos = a.Length / 2;
+            if (!ReadAndCompareBlock(a, b, midPos, bufA, bufB)) return false;
+        }
+
+        return true;
+    }
+
+    private static bool ReadAndCompareBlock(Stream a, Stream b, long position, byte[] bufA, byte[] bufB)
+    {
+        const int blockSize = 4096;
+        a.Position = position;
+        b.Position = position;
+
+        var readA = a.Read(bufA, 0, blockSize);
+        var readB = b.Read(bufB, 0, blockSize);
+        if (readA != readB) return false;
+
+        return bufA.AsSpan(0, readA).SequenceEqual(bufB.AsSpan(0, readB));
+    }
+
+    private static bool FullCompareSIMD(Stream a, Stream b)
+    {
+        if (a.CanSeek && b.CanSeek && a.Length != b.Length) return false;
+
+        const int bufSize = 65536;
+        var bufA = new byte[bufSize];
+        var bufB = new byte[bufSize];
+
+        if (a.CanSeek) a.Position = 0;
+        if (b.CanSeek) b.Position = 0;
+
+        while (true)
+        {
+            var readA = a.Read(bufA, 0, bufSize);
+            var readB = b.Read(bufB, 0, bufSize);
+            if (readA != readB) return false;
+            if (readA == 0) break;
+            if (!bufA.AsSpan(0, readA).SequenceEqual(bufB.AsSpan(0, readB))) return false;
+        }
+
+        return true;
+    }
+
+
+    private static bool LooksLikeBa2Archive(string path, out string reason)
+    {
+        reason = string.Empty;
+        try
+        {
+            using var fs = File.OpenRead(path);
+            if (fs.Length < 4)
+            {
+                reason = "file too small";
+                return false;
+            }
+
+            Span<byte> magic = stackalloc byte[4];
+            _ = fs.Read(magic);
+            var isBethesdaBa2 = magic[0] == (byte)'B' && magic[1] == (byte)'T' && magic[2] == (byte)'D' && magic[3] == (byte)'X';
+            var isLegacyBuildArchive = magic[0] == (byte)'B' && magic[1] == (byte)'S' && magic[2] == (byte)'A' && magic[3] == 0;
+            if (!isBethesdaBa2 && !isLegacyBuildArchive)
+            {
+                reason = $"invalid magic 0x{magic[0]:X2}{magic[1]:X2}{magic[2]:X2}{magic[3]:X2}";
+                return false;
             }
 
             return true;
         }
-
-        private static bool ReadAndCompareBlock(
-            Stream a,
-            Stream b,
-            long position,
-            byte[] bufA,
-            byte[] bufB)
+        catch (Exception ex)
         {
-            const int BlockSize = 4096;
-
-            a.Position = position;
-            b.Position = position;
-
-            int readA = a.Read(bufA, 0, BlockSize);
-            int readB = b.Read(bufB, 0, BlockSize);
-
-            if (readA != readB)
-                return false;
-
-            return bufA.AsSpan(0, readA).SequenceEqual(bufB.AsSpan(0, readB));
-        }
-
-        private static bool FullCompareSIMD(Stream a, Stream b)
-        {
-            if (a == null) throw new ArgumentNullException(nameof(a));
-            if (b == null) throw new ArgumentNullException(nameof(b));
-
-            long lenA = a.CanSeek ? a.Length : -1;
-            long lenB = b.CanSeek ? b.Length : -1;
-
-            if (lenA >= 0 && lenB >= 0 && lenA != lenB)
-                return false;
-
-            const int BufSize = 65536;
-            var bufA = new byte[BufSize];
-            var bufB = new byte[BufSize];
-
-            if (a.CanSeek) a.Position = 0;
-            if (b.CanSeek) b.Position = 0;
-
-            while (true)
-            {
-                int readA = a.Read(bufA, 0, BufSize);
-                int readB = b.Read(bufB, 0, BufSize);
-
-                if (readA != readB)
-                    return false;
-
-                if (readA == 0)
-                    break;
-
-                if (!bufA.AsSpan(0, readA).SequenceEqual(bufB.AsSpan(0, readB)))
-                    return false;
-            }
-
-            return true;
-        }
-
-        private static string NormalizeRel(string? raw)
-        {
-            if (string.IsNullOrWhiteSpace(raw))
-                return "Data\\";
-
-            string rel = raw.Trim();
-            rel = rel.Replace('/', '\\');
-
-            while (rel.StartsWith("\\", StringComparison.Ordinal))
-                rel = rel.Substring(1);
-
-            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
-                rel = Path.Combine("Data", rel);
-
-            return rel;
-        }
-
-        private static string NormalizeInnerPath(string? raw)
-        {
-            if (string.IsNullOrWhiteSpace(raw))
-                return string.Empty;
-
-            string p = raw.Trim();
-            p = p.Replace('/', '\\');
-
-            while (p.StartsWith("\\", StringComparison.Ordinal))
-                p = p.Substring(1);
-
-            return p;
-        }
-
-        private static long SafeGetSize(object asset)
-        {
-            try
-            {
-                return s_getAssetUncompressedSize != null ? s_getAssetUncompressedSize(asset) : -1;
-            }
-            catch
-            {
-                return -1;
-            }
-        }
-
-        private static void EnsureBindings()
-        {
-            if (s_ba2FileType != null) return;
-
-            // Try common types/namespaces for BA2 readers.
-            // Adjust if your library uses different names.
-
-            // Candidate fully qualified names
-            string[] candidates =
-            {
-                "SharpBSA.BA2.BA2File",
-                "SharpBSA.BA2.Ba2File",
-                "Bethesda.Archives.BA2File",
-                "BA2Lib.BA2File"
-            };
-
-            Type? ba2Type = candidates.Select(Type.GetType).FirstOrDefault(t => t != null);
-            if (ba2Type == null)
-                throw new InvalidOperationException("BA2 reader type not found. Ensure a BA2 library (e.g., SharpBSA) is referenced and available.");
-
-            s_ba2FileType = ba2Type;
-
-            // Constructor: BA2File(string path)
-            var ctor = ba2Type.GetConstructor(new[] { typeof(string) })
-                       ?? throw new InvalidOperationException("BA2File(string) constructor not found.");
-            s_ba2FileCtor = (string path) => ctor.Invoke(new object[] { path });
-
-            // Assets enumerable property or method
-            // Try property "Assets" or "Files"
-            var assetsProp = ba2Type.GetProperty("Assets") ?? ba2Type.GetProperty("Files");
-            if (assetsProp == null)
-                throw new InvalidOperationException("BA2File.Assets (or Files) property not found.");
-
-            s_getAssets = (object ba2) =>
-            {
-                var obj = assetsProp.GetValue(ba2);
-                return (obj as IEnumerable<object>) ?? ((obj as System.Collections.IEnumerable)?.Cast<object>()
-                        ?? throw new InvalidOperationException("BA2 Assets enumeration not supported."));
-            };
-
-            // Asset type discovery (first item)
-            var probeBa2 = s_ba2FileCtor!(Path.GetTempFileName()); // we won't enumerate; just dispose
-            try
-            {
-                s_ba2Dispose = (probeBa2 as IDisposable != null)
-                    ? (Action<object>)(o => ((IDisposable)o).Dispose())
-                    : null;
-            }
-            catch { s_ba2Dispose = null; }
-            finally
-            {
-                s_ba2Dispose?.Invoke(probeBa2);
-                (probeBa2 as IDisposable)?.Dispose();
-            }
-
-            // Asset string path getters — try FileName, Name, Path
-            s_getAssetNameOrPath = BindStringGetterFromAsset("FileName")
-                                   ?? BindStringGetterFromAsset("Name")
-                                   ?? BindStringGetterFromAsset("Path")
-                                   ?? throw new InvalidOperationException("Asset path/name getter not found (FileName/Name/Path).");
-
-            // Asset uncompressed size — try UncompressedSize, Size
-            s_getAssetUncompressedSize = BindLongGetterFromAsset("UncompressedSize")
-                                         ?? BindLongGetterFromAsset("Size");
-
-            // Asset extract — try Extract(Stream) or CopyTo(Stream)
-            s_assetExtractToStream = BindExtractToStream("Extract")
-                                     ?? BindExtractToStream("CopyTo")
-                                     ?? throw new InvalidOperationException("Asset extract method not found (Extract/CopyTo).");
-        }
-
-        private static Func<object, string?>? BindStringGetterFromAsset(string propertyName)
-        {
-            return (object asset) =>
-            {
-                var prop = asset.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                return prop != null ? (string?)prop.GetValue(asset) : null;
-            };
-        }
-
-        private static Func<object, long>? BindLongGetterFromAsset(string propertyName)
-        {
-            return (object asset) =>
-            {
-                var prop = asset.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                if (prop == null) return -1;
-                var val = prop.GetValue(asset);
-                if (val == null) return -1;
-                if (val is long l) return l;
-                if (val is int i) return i;
-                if (val is uint ui) return unchecked((long)ui);
-                if (val is ulong ul) return unchecked((long)ul);
-                if (long.TryParse(val.ToString(), out var parsed)) return parsed;
-                return -1;
-            };
-        }
-
-        private static Action<object, Stream>? BindExtractToStream(string methodName)
-        {
-            return (object asset, Stream output) =>
-            {
-                var m = asset.GetType().GetMethod(methodName, new[] { typeof(Stream) });
-                if (m == null) return;
-                m.Invoke(asset, new object[] { output });
-            };
+            reason = ex.Message;
+            return false;
         }
     }
+
+
 }

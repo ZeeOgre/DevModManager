@@ -97,4 +97,48 @@ public sealed class Ba2ArchiveTests
         Assert.Equal(BA2CompressionMode.Smart, entries[1].Compression);
         Assert.Equal(BA2CompressionMode.InheritArchive, entries[2].Compression);
     }
+
+    [Fact]
+    public void TryValidateBa2Path_AcceptsBethesdaBtdxMagic()
+    {
+        string tempRoot = Path.Combine(Path.GetTempPath(), "dmm-ba2-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        try
+        {
+            string archivePath = Path.Combine(tempRoot, "starfield-animations.ba2");
+            File.WriteAllBytes(archivePath, new byte[] { (byte)'B', (byte)'T', (byte)'D', (byte)'X', 0, 0, 0, 0 });
+
+            var valid = BA2Archive.TryValidateBa2Path(archivePath, out var reason);
+
+            Assert.True(valid);
+            Assert.True(string.IsNullOrWhiteSpace(reason));
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+                Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void TryValidateBa2Path_RejectsUnexpectedMagic()
+    {
+        string tempRoot = Path.Combine(Path.GetTempPath(), "dmm-ba2-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        try
+        {
+            string archivePath = Path.Combine(tempRoot, "invalid.ba2");
+            File.WriteAllBytes(archivePath, new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+            var valid = BA2Archive.TryValidateBa2Path(archivePath, out var reason);
+
+            Assert.False(valid);
+            Assert.Contains("invalid magic", reason, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+                Directory.Delete(tempRoot, recursive: true);
+        }
+    }
 }
