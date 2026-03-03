@@ -373,7 +373,7 @@ public sealed class ModDependencyDiscoveryService
 
         if (zipCandidates.Count > 0)
         {
-            foreach (var kvp in BA2Archive.BuildZipIndex(zipCandidates))
+            foreach (var kvp in ZipArchiveIndex.BuildIndex(zipCandidates))
             {
                 merged[kvp.Key] = kvp.Value;
             }
