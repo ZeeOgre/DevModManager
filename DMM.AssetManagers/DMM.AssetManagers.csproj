@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" />
-    <PackageReference Include="Sharp.BSA.BA2" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
