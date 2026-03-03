@@ -1382,9 +1382,7 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 foreach (var app in result.Apps)
                 {
-                    var installPath = app.InstallFolders.InstallFolder?.Path
-                        ?? app.InstallFolders.ContentFolder?.Path
-                        ?? app.InstallFolders.DataFolder?.Path;
+                    var installPath = ResolvePreferredInstallPath(app);
 
                     if (string.IsNullOrWhiteSpace(installPath))
                     {
@@ -1420,6 +1418,27 @@ public sealed class MainWindowViewModel : NotifyBase
                 .ThenBy(x => x.GameStore)
                 .ToList();
         }, ct);
+
+        static string? ResolvePreferredInstallPath(AppInstallSnapshot app)
+        {
+            var install = app.InstallFolders.InstallFolder?.Path;
+            var content = app.InstallFolders.ContentFolder?.Path;
+            var data = app.InstallFolders.DataFolder?.Path;
+
+            bool hasData(string? p) => !string.IsNullOrWhiteSpace(p) && Directory.Exists(Path.Combine(p, "Data"));
+            bool hasExe(string? p) => !string.IsNullOrWhiteSpace(p) && !string.IsNullOrWhiteSpace(app.ExecutableName) && File.Exists(Path.Combine(p, app.ExecutableName));
+
+            // Prefer content roots when they look like the real game root (Xbox/GamePass pattern).
+            if (!string.IsNullOrWhiteSpace(content) && (hasData(content) || hasExe(content)))
+                return content;
+
+            if (!string.IsNullOrWhiteSpace(install) && (hasData(install) || hasExe(install)))
+                return install;
+
+            if (!string.IsNullOrWhiteSpace(content)) return content;
+            if (!string.IsNullOrWhiteSpace(install)) return install;
+            return data;
+        }
 
         (ManagedGame? Game, bool IsDlc) MatchManagedGame(AppInstallSnapshot app)
         {
