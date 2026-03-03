@@ -163,6 +163,8 @@ public static partial class BA2Archive
                 {
                     merged[e.RelativePath] = e;
                 }
+                continue;
+            }
 
                 stats.LastArchiveOutcome = "INDEXED";
                 if (stats.AttemptedArchiveSamples.Count < 10)
@@ -500,6 +502,7 @@ public static partial class BA2Archive
         {
             return Array.Empty<byte>();
         }
+    }
 
         var raw = new byte[storedSize];
         var read = fs.Read(raw, 0, raw.Length);
