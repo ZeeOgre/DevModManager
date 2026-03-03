@@ -26,8 +26,10 @@ public sealed class ModDependencyDiscoveryResult
     public int CollisionCount { get; set; }
     public int ParentMasterCount { get; set; }
     public int ParentArchiveCount { get; set; }
+    public int ParentZipCount { get; set; }
     public int ParentIndexedFileCount { get; set; }
     public long ParentIndexedBytes { get; set; }
+    public long ParentEstimatedRecordBytes { get; set; }
     public long ScanMs { get; set; }
 }
 
@@ -73,7 +75,7 @@ public sealed class ModDependencyDiscoveryService
             DiscoverConventionCandidates(plugin, scanRoot, modName, discoveredCandidates);
         }
 
-        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, pluginFiles, out var parentStats);
+        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats);
         var tifRoot = ResolveTifRoot(gameRoot);
         var result = new ModDependencyDiscoveryResult();
 
@@ -119,8 +121,10 @@ public sealed class ModDependencyDiscoveryService
 
         result.ParentMasterCount = parentStats.MasterCount;
         result.ParentArchiveCount = parentStats.ArchivePathCount;
+        result.ParentZipCount = parentStats.ZipPathCount;
         result.ParentIndexedFileCount = parentStats.IndexedFileCount;
         result.ParentIndexedBytes = parentStats.IndexedBytes;
+        result.ParentEstimatedRecordBytes = parentStats.EstimatedRecordBytes;
 
         timer.Stop();
         result.ScanMs = timer.ElapsedMilliseconds;
@@ -295,7 +299,7 @@ public sealed class ModDependencyDiscoveryService
             .ToList();
     }
 
-    private static Dictionary<string, Ba2Entry> BuildParentArchiveIndex(string scanRoot, IReadOnlyList<string> pluginFiles, out BA2Archive.Ba2IndexBuildStats stats)
+    private static Dictionary<string, Ba2Entry> BuildParentArchiveIndex(string scanRoot, string gameRoot, IReadOnlyList<string> pluginFiles, out BA2Archive.Ba2IndexBuildStats stats)
     {
         var masterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var plugin in pluginFiles)
@@ -327,9 +331,28 @@ public sealed class ModDependencyDiscoveryService
             }
         }
 
+        var zipCandidates = new[]
+        {
+            Path.Combine(gameRoot, "ContentResources.zip"),
+            Path.Combine(Directory.GetParent(gameRoot)?.FullName ?? gameRoot, "ContentResources.zip")
+        }
+        .Where(File.Exists)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+        if (zipCandidates.Count > 0)
+        {
+            foreach (var kvp in BA2Archive.BuildZipIndex(zipCandidates))
+            {
+                merged[kvp.Key] = kvp.Value;
+            }
+        }
+
         stats.ArchivePathCount += listedArchives.Count;
+        stats.ZipPathCount = zipCandidates.Count;
         stats.IndexedFileCount = merged.Count;
         stats.IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize);
+        stats.EstimatedRecordBytes = merged.Sum(x => 64L + (x.Key?.Length ?? 0) * sizeof(char));
 
         return merged;
     }

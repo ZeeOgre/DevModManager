@@ -841,8 +841,10 @@ public sealed class MainWindowViewModel : NotifyBase
         var dependencyParentHitCount = 0;
         var parentMasterCountMax = 0;
         var parentArchiveCountMax = 0;
+        var parentZipCountMax = 0;
         var parentIndexedFileCountMax = 0;
         long parentIndexedBytesMax = 0;
+        long parentEstimatedRecordBytesMax = 0;
         long dependencyScanMsTotal = 0;
 
         var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
@@ -905,8 +907,10 @@ public sealed class MainWindowViewModel : NotifyBase
                 dependencyParentHitCount += discovery.ParentArchiveReferences.Count;
                 parentMasterCountMax = Math.Max(parentMasterCountMax, discovery.ParentMasterCount);
                 parentArchiveCountMax = Math.Max(parentArchiveCountMax, discovery.ParentArchiveCount);
+                parentZipCountMax = Math.Max(parentZipCountMax, discovery.ParentZipCount);
                 parentIndexedFileCountMax = Math.Max(parentIndexedFileCountMax, discovery.ParentIndexedFileCount);
                 parentIndexedBytesMax = Math.Max(parentIndexedBytesMax, discovery.ParentIndexedBytes);
+                parentEstimatedRecordBytesMax = Math.Max(parentEstimatedRecordBytesMax, discovery.ParentEstimatedRecordBytes);
                 dependencyScanMsTotal += discovery.ScanMs;
 
                 if (initialEntries.Count == 0)
@@ -1018,7 +1022,7 @@ public sealed class MainWindowViewModel : NotifyBase
             : $" First missing repo: {bootstrapPaths.First()}";
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, archives={parentArchiveCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, ba2 archives={parentArchiveCountMax}, zips={parentZipCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax}, est record bytes={parentEstimatedRecordBytesMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
 
         RebuildMods();
     }
