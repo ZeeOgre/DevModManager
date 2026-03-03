@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+using System.IO.Compression;
+using System.Reflection;
 
 namespace DMM.AssetManagers
 {
@@ -15,13 +16,20 @@ namespace DMM.AssetManagers
 
     public static partial class BA2Archive
     {
+        public sealed class Ba2IndexBuildStats
+    {
+        public int MasterCount { get; set; }
+        public int ArchivePathCount { get; set; }
+        public int ZipPathCount { get; set; }
+        public int IndexedFileCount { get; set; }
+        public long IndexedBytes { get; set; }
+        public long EstimatedRecordBytes { get; set; }
+    }
+
         // Reflection cache
         private static Type? s_ba2FileType;
         private static Func<string, object>? s_ba2FileCtor;
         private static Func<object, IEnumerable<object>>? s_getAssets;
-        private static Func<object, string?>? s_getAssetNameOrPath;
-        private static Func<object, long>? s_getAssetUncompressedSize;
-        private static Action<object, Stream>? s_assetExtractToStream;
         private static Action<object>? s_ba2Dispose;
 
         public static IReadOnlyList<Ba2Entry> ReadIndex(string ba2Path)
@@ -40,7 +48,7 @@ namespace DMM.AssetManagers
             {
                 foreach (var asset in s_getAssets!(ba2))
                 {
-                    string? rawInner = s_getAssetNameOrPath!(asset);
+                    string? rawInner = GetAssetNameOrPath(asset);
                     if (string.IsNullOrWhiteSpace(rawInner))
                         continue;
 
@@ -49,7 +57,7 @@ namespace DMM.AssetManagers
                         continue;
 
                     string rel = NormalizeRel(inner);
-                    long size = SafeGetSize(asset);
+                    long size = GetAssetSize(asset);
 
                     entries.Add(new Ba2Entry
                     {
@@ -105,16 +113,22 @@ namespace DMM.AssetManagers
             IEnumerable<string> masterNames,
             string dataRoot)
         {
+            return BuildMasterArchiveIndex(masterNames, dataRoot, out _);
+        }
+
+        public static Dictionary<string, Ba2Entry> BuildMasterArchiveIndex(
+            IEnumerable<string> masterNames,
+            string dataRoot,
+            out Ba2IndexBuildStats stats)
+        {
             if (masterNames == null) throw new ArgumentNullException(nameof(masterNames));
             if (dataRoot == null) throw new ArgumentNullException(nameof(dataRoot));
 
             var ba2Paths = new List<string>();
+            var normalizedMasters = masterNames.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
 
-            foreach (var master in masterNames)
+            foreach (var master in normalizedMasters)
             {
-                if (string.IsNullOrWhiteSpace(master))
-                    continue;
-
                 string baseName = Path.GetFileNameWithoutExtension(master);
                 if (string.IsNullOrEmpty(baseName))
                     continue;
@@ -134,7 +148,58 @@ namespace DMM.AssetManagers
                 }
             }
 
-            return BuildMergedIndex(ba2Paths);
+            var merged = BuildMergedIndex(ba2Paths);
+            stats = new Ba2IndexBuildStats
+            {
+                MasterCount = normalizedMasters.Count,
+                ArchivePathCount = ba2Paths.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                IndexedFileCount = merged.Count,
+                IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize)
+            };
+            return merged;
+        }
+
+        public static Dictionary<string, Ba2Entry> BuildZipIndex(IEnumerable<string> zipPaths)
+        {
+            if (zipPaths == null) throw new ArgumentNullException(nameof(zipPaths));
+
+            var index = new Dictionary<string, Ba2Entry>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var path in zipPaths.Where(p => !string.IsNullOrWhiteSpace(p)))
+            {
+                string full = Path.GetFullPath(path);
+                if (!File.Exists(full))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    using var archive = ZipFile.OpenRead(full);
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (string.IsNullOrWhiteSpace(entry.FullName) || entry.FullName.EndsWith('/'))
+                        {
+                            continue;
+                        }
+
+                        var rel = NormalizeRel(entry.FullName);
+                        index[rel] = new Ba2Entry
+                        {
+                            ArchivePath = full,
+                            ArchiveInnerPath = NormalizeInnerPath(entry.FullName),
+                            RelativePath = rel,
+                            FileSize = entry.Length
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[WARN] Failed to read ZIP '{full}': {ex.Message}");
+                }
+            }
+
+            return index;
         }
 
         public static bool IsLooseFileAlreadyPacked(
@@ -186,7 +251,7 @@ namespace DMM.AssetManagers
             {
                 var asset = s_getAssets!(ba2).FirstOrDefault(a =>
                 {
-                    string? raw = s_getAssetNameOrPath!(a);
+                    string? raw = GetAssetNameOrPath(a);
                     string inner = NormalizeInnerPath(raw);
                     return inner.Equals(entry.ArchiveInnerPath, StringComparison.OrdinalIgnoreCase);
                 });
@@ -195,7 +260,8 @@ namespace DMM.AssetManagers
                     throw new FileNotFoundException("Asset not found in BA2: " + entry.ArchiveInnerPath, entry.ArchivePath);
 
                 var ms = new MemoryStream();
-                s_assetExtractToStream!(asset, ms);
+                if (!TryExtractToStream(asset, ms))
+                    throw new InvalidOperationException("Asset extract method not found (Extract/CopyTo).") ;
                 ms.Position = 0;
                 return ms;
             }
@@ -331,16 +397,46 @@ namespace DMM.AssetManagers
             return p;
         }
 
-        private static long SafeGetSize(object asset)
+        private static long GetAssetSize(object asset)
         {
-            try
+            foreach (var propertyName in new[] { "UncompressedSize", "Size", "Length" })
             {
-                return s_getAssetUncompressedSize != null ? s_getAssetUncompressedSize(asset) : -1;
+                var prop = asset.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                if (prop == null) continue;
+                var val = prop.GetValue(asset);
+                if (val == null) continue;
+                if (val is long l) return l;
+                if (val is int i) return i;
+                if (val is uint ui) return unchecked((long)ui);
+                if (val is ulong ul) return unchecked((long)ul);
+                if (long.TryParse(val.ToString(), out var parsed)) return parsed;
             }
-            catch
+            return -1;
+        }
+
+        private static string? GetAssetNameOrPath(object asset)
+        {
+            foreach (var propertyName in new[] { "FileName", "Name", "Path", "RelativePath" })
             {
-                return -1;
+                var prop = asset.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                if (prop?.GetValue(asset) is string s && !string.IsNullOrWhiteSpace(s))
+                    return s;
             }
+
+            return null;
+        }
+
+        private static bool TryExtractToStream(object asset, Stream output)
+        {
+            foreach (var methodName in new[] { "Extract", "CopyTo" })
+            {
+                var m = asset.GetType().GetMethod(methodName, new[] { typeof(Stream) });
+                if (m == null) continue;
+                m.Invoke(asset, new object[] { output });
+                return true;
+            }
+
+            return false;
         }
 
         private static void EnsureBindings()
@@ -359,9 +455,18 @@ namespace DMM.AssetManagers
                 "BA2Lib.BA2File"
             };
 
-            Type? ba2Type = candidates.Select(Type.GetType).FirstOrDefault(t => t != null);
+            Type? ba2Type = candidates
+                .Select(name => Type.GetType(name, throwOnError: false, ignoreCase: true))
+                .FirstOrDefault(t => t != null)
+                ?? AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(a => candidates.Select(name => a.GetType(name, throwOnError: false, ignoreCase: true)))
+                    .FirstOrDefault(t => t != null);
+
             if (ba2Type == null)
-                throw new InvalidOperationException("BA2 reader type not found. Ensure a BA2 library (e.g., SharpBSA) is referenced and available.");
+            {
+                var loaded = string.Join(", ", AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetName().Name).OrderBy(x => x));
+                throw new InvalidOperationException($"BA2 reader type not found. Ensure Sharp.BSA.BA2 is referenced and loaded. Loaded assemblies: {loaded}");
+            }
 
             s_ba2FileType = ba2Type;
 
@@ -383,71 +488,7 @@ namespace DMM.AssetManagers
                         ?? throw new InvalidOperationException("BA2 Assets enumeration not supported."));
             };
 
-            // Asset type discovery (first item)
-            var probeBa2 = s_ba2FileCtor!(Path.GetTempFileName()); // we won't enumerate; just dispose
-            try
-            {
-                s_ba2Dispose = (probeBa2 as IDisposable != null)
-                    ? (Action<object>)(o => ((IDisposable)o).Dispose())
-                    : null;
-            }
-            catch { s_ba2Dispose = null; }
-            finally
-            {
-                s_ba2Dispose?.Invoke(probeBa2);
-                (probeBa2 as IDisposable)?.Dispose();
-            }
-
-            // Asset string path getters — try FileName, Name, Path
-            s_getAssetNameOrPath = BindStringGetterFromAsset("FileName")
-                                   ?? BindStringGetterFromAsset("Name")
-                                   ?? BindStringGetterFromAsset("Path")
-                                   ?? throw new InvalidOperationException("Asset path/name getter not found (FileName/Name/Path).");
-
-            // Asset uncompressed size — try UncompressedSize, Size
-            s_getAssetUncompressedSize = BindLongGetterFromAsset("UncompressedSize")
-                                         ?? BindLongGetterFromAsset("Size");
-
-            // Asset extract — try Extract(Stream) or CopyTo(Stream)
-            s_assetExtractToStream = BindExtractToStream("Extract")
-                                     ?? BindExtractToStream("CopyTo")
-                                     ?? throw new InvalidOperationException("Asset extract method not found (Extract/CopyTo).");
-        }
-
-        private static Func<object, string?>? BindStringGetterFromAsset(string propertyName)
-        {
-            return (object asset) =>
-            {
-                var prop = asset.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                return prop != null ? (string?)prop.GetValue(asset) : null;
-            };
-        }
-
-        private static Func<object, long>? BindLongGetterFromAsset(string propertyName)
-        {
-            return (object asset) =>
-            {
-                var prop = asset.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                if (prop == null) return -1;
-                var val = prop.GetValue(asset);
-                if (val == null) return -1;
-                if (val is long l) return l;
-                if (val is int i) return i;
-                if (val is uint ui) return unchecked((long)ui);
-                if (val is ulong ul) return unchecked((long)ul);
-                if (long.TryParse(val.ToString(), out var parsed)) return parsed;
-                return -1;
-            };
-        }
-
-        private static Action<object, Stream>? BindExtractToStream(string methodName)
-        {
-            return (object asset, Stream output) =>
-            {
-                var m = asset.GetType().GetMethod(methodName, new[] { typeof(Stream) });
-                if (m == null) return;
-                m.Invoke(asset, new object[] { output });
-            };
+            s_ba2Dispose = (Action<object>)(o => (o as IDisposable)?.Dispose());
         }
     }
 }
