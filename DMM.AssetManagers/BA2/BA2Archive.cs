@@ -8,6 +8,9 @@ public sealed class Ba2Entry
     public string RelativePath { get; init; } = "";
     public string ArchiveInnerPath { get; init; } = "";
     public long FileSize { get; init; } = -1;
+    public long DataOffset { get; init; } = -1;
+    public uint PackedSize { get; init; }
+    public uint UnpackedSize { get; init; }
 
     public override string ToString()
         => $"{RelativePath} (size={FileSize}, from={Path.GetFileName(ArchivePath)})";
@@ -38,13 +41,26 @@ public static partial class BA2Archive
         if (ba2Path is null) throw new ArgumentNullException(nameof(ba2Path));
         if (!File.Exists(ba2Path)) throw new FileNotFoundException("BA2 archive not found", ba2Path);
 
+        if (TryReadBethesdaBa2Index(ba2Path, out var bethesdaEntries, out var bethesdaFailure))
+        {
+            return bethesdaEntries;
+        }
+
+        if (IsBethesdaBa2Magic(ba2Path))
+        {
+            throw new NotSupportedException($"BA2 archive '{ba2Path}' could not be indexed by current Bethesda reader: {bethesdaFailure}");
+        }
+
         return ReadBuildIndex(ba2Path)
             .Select(x => new Ba2Entry
             {
                 ArchivePath = x.ArchivePath,
                 ArchiveInnerPath = x.ArchiveInnerPath,
                 RelativePath = NormalizeRel(x.ArchiveInnerPath),
-                FileSize = x.UncompressedSize
+                FileSize = x.UncompressedSize,
+                DataOffset = -1,
+                PackedSize = (uint)Math.Max(0, x.StoredSize),
+                UnpackedSize = (uint)Math.Max(0, x.UncompressedSize)
             })
             .ToArray();
     }
@@ -147,6 +163,8 @@ public static partial class BA2Archive
                 {
                     merged[e.RelativePath] = e;
                 }
+                continue;
+            }
 
                 stats.LastArchiveOutcome = "INDEXED";
                 if (stats.AttemptedArchiveSamples.Count < 10)
@@ -280,8 +298,14 @@ public static partial class BA2Archive
         if (!LooksLikeBa2Archive(entry.ArchivePath, out var signatureReason))
             throw new InvalidDataException($"Expected BA2 archive but got '{entry.ArchivePath}' ({signatureReason}).");
 
-        var bytes = ExtractBuiltFile(entry.ArchivePath, entry.ArchiveInnerPath);
-        return new MemoryStream(bytes, writable: false);
+        if (entry.DataOffset >= 0)
+        {
+            var bytes = ExtractBethesdaBa2File(entry);
+            return new MemoryStream(bytes, writable: false);
+        }
+
+        var builtBytes = ExtractBuiltFile(entry.ArchivePath, entry.ArchiveInnerPath);
+        return new MemoryStream(builtBytes, writable: false);
     }
 
     private static bool FastApproxEqual(Stream a, Stream b)
@@ -363,8 +387,9 @@ public static partial class BA2Archive
 
             Span<byte> magic = stackalloc byte[4];
             _ = fs.Read(magic);
-            // BA2 magic in little-endian header bytes = 'BSA\0'
-            if (!(magic[0] == (byte)'B' && magic[1] == (byte)'S' && magic[2] == (byte)'A' && magic[3] == 0))
+            var isBethesdaBa2 = magic[0] == (byte)'B' && magic[1] == (byte)'T' && magic[2] == (byte)'D' && magic[3] == (byte)'X';
+            var isLegacyBuildArchive = magic[0] == (byte)'B' && magic[1] == (byte)'S' && magic[2] == (byte)'A' && magic[3] == 0;
+            if (!isBethesdaBa2 && !isLegacyBuildArchive)
             {
                 reason = $"invalid magic 0x{magic[0]:X2}{magic[1]:X2}{magic[2]:X2}{magic[3]:X2}";
                 return false;
@@ -377,6 +402,125 @@ public static partial class BA2Archive
             reason = ex.Message;
             return false;
         }
+    }
+
+    private static bool IsBethesdaBa2Magic(string archivePath)
+    {
+        using var fs = File.OpenRead(archivePath);
+        if (fs.Length < 4)
+        {
+            return false;
+        }
+
+        Span<byte> magic = stackalloc byte[4];
+        _ = fs.Read(magic);
+        return magic[0] == (byte)'B' && magic[1] == (byte)'T' && magic[2] == (byte)'D' && magic[3] == (byte)'X';
+    }
+
+    private static bool TryReadBethesdaBa2Index(string archivePath, out IReadOnlyList<Ba2Entry> entries, out string failureReason)
+    {
+        entries = Array.Empty<Ba2Entry>();
+        failureReason = string.Empty;
+
+        try
+        {
+            using var fs = File.OpenRead(archivePath);
+            using var br = new BinaryReader(fs);
+
+            var magic = br.ReadUInt32();
+            if (magic != 0x58445442)
+            {
+                failureReason = "not BTDX";
+                return false;
+            }
+
+            _ = br.ReadUInt32();
+            var type = new string(br.ReadChars(4));
+            var fileCount = br.ReadUInt32();
+            var nameTableOffset = br.ReadUInt64();
+
+            if (!string.Equals(type, "GNRL", StringComparison.Ordinal))
+            {
+                failureReason = $"unsupported BA2 type '{type}'";
+                return false;
+            }
+
+            var records = new (ulong Offset, uint Packed, uint Unpacked)[fileCount];
+            for (var i = 0; i < fileCount; i++)
+            {
+                _ = br.ReadUInt32();
+                _ = br.ReadUInt32();
+                _ = br.ReadUInt32();
+                _ = br.ReadUInt32();
+                var dataOffset = br.ReadUInt64();
+                var packedSize = br.ReadUInt32();
+                var unpackedSize = br.ReadUInt32();
+                _ = br.ReadUInt32();
+                records[i] = (dataOffset, packedSize, unpackedSize);
+            }
+
+            fs.Position = (long)nameTableOffset;
+            var list = new List<Ba2Entry>((int)fileCount);
+            for (var i = 0; i < fileCount; i++)
+            {
+                var pathLength = br.ReadUInt16();
+                var pathBytes = br.ReadBytes(pathLength);
+                var innerPath = NormalizeInnerPath(System.Text.Encoding.UTF8.GetString(pathBytes));
+                var rec = records[i];
+                var fileSize = rec.Unpacked > 0 ? rec.Unpacked : rec.Packed;
+
+                list.Add(new Ba2Entry
+                {
+                    ArchivePath = Path.GetFullPath(archivePath),
+                    ArchiveInnerPath = innerPath,
+                    RelativePath = NormalizeRel(innerPath),
+                    FileSize = fileSize,
+                    DataOffset = (long)rec.Offset,
+                    PackedSize = rec.Packed,
+                    UnpackedSize = rec.Unpacked
+                });
+            }
+
+            entries = list;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            failureReason = ex.Message;
+            entries = Array.Empty<Ba2Entry>();
+            return false;
+        }
+    }
+
+    private static byte[] ExtractBethesdaBa2File(Ba2Entry entry)
+    {
+        using var fs = File.OpenRead(entry.ArchivePath);
+        fs.Position = entry.DataOffset;
+
+        var storedSize = entry.PackedSize > 0 ? entry.PackedSize : entry.UnpackedSize;
+        if (storedSize == 0)
+        {
+            return Array.Empty<byte>();
+        }
+    }
+
+        var raw = new byte[storedSize];
+        var read = fs.Read(raw, 0, raw.Length);
+        if (read != raw.Length)
+        {
+            throw new EndOfStreamException($"Expected {raw.Length} bytes but read {read} from '{entry.ArchivePath}'.");
+        }
+
+        if (entry.PackedSize == 0 || entry.PackedSize == entry.UnpackedSize)
+        {
+            return raw;
+        }
+
+        using var input = new MemoryStream(raw, writable: false);
+        using var z = new DeflateStream(input, CompressionMode.Decompress);
+        using var output = new MemoryStream();
+        z.CopyTo(output);
+        return output.ToArray();
     }
 
     private static string NormalizeRel(string? raw)
