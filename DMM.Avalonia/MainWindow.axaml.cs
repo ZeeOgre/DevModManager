@@ -845,6 +845,13 @@ public sealed class MainWindowViewModel : NotifyBase
         var parentIndexedFileCountMax = 0;
         long parentIndexedBytesMax = 0;
         long parentEstimatedRecordBytesMax = 0;
+        var parentNonBa2CountMax = 0;
+        var parentReadFailureCountMax = 0;
+        var parentAttemptedArchiveCountMax = 0;
+        string? parentNonBa2Sample = null;
+        string? parentAttemptedArchiveSample = null;
+        string? parentLastArchiveCandidate = null;
+        string? parentLastArchiveOutcome = null;
         long dependencyScanMsTotal = 0;
 
         var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
@@ -911,6 +918,13 @@ public sealed class MainWindowViewModel : NotifyBase
                 parentIndexedFileCountMax = Math.Max(parentIndexedFileCountMax, discovery.ParentIndexedFileCount);
                 parentIndexedBytesMax = Math.Max(parentIndexedBytesMax, discovery.ParentIndexedBytes);
                 parentEstimatedRecordBytesMax = Math.Max(parentEstimatedRecordBytesMax, discovery.ParentEstimatedRecordBytes);
+                parentNonBa2CountMax = Math.Max(parentNonBa2CountMax, discovery.ParentNonBa2CandidateCount);
+                parentReadFailureCountMax = Math.Max(parentReadFailureCountMax, discovery.ParentReadFailureCount);
+                parentAttemptedArchiveCountMax = Math.Max(parentAttemptedArchiveCountMax, discovery.ParentAttemptedArchiveCount);
+                parentNonBa2Sample ??= discovery.ParentNonBa2CandidateSamples.FirstOrDefault() ?? discovery.ParentReadFailureSamples.FirstOrDefault();
+                parentAttemptedArchiveSample ??= discovery.ParentAttemptedArchiveSamples.FirstOrDefault();
+                parentLastArchiveCandidate = discovery.ParentLastArchiveCandidate ?? parentLastArchiveCandidate;
+                parentLastArchiveOutcome = discovery.ParentLastArchiveOutcome ?? parentLastArchiveOutcome;
                 dependencyScanMsTotal += discovery.ScanMs;
 
                 if (initialEntries.Count == 0)
@@ -1022,7 +1036,7 @@ public sealed class MainWindowViewModel : NotifyBase
             : $" First missing repo: {bootstrapPaths.First()}";
 
         StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, ba2 archives={parentArchiveCountMax}, zips={parentZipCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax}, est record bytes={parentEstimatedRecordBytesMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{bootstrapPreview}";
+            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, ba2 archives={parentArchiveCountMax}, zips={parentZipCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax}, est record bytes={parentEstimatedRecordBytesMax}, attempted archives={parentAttemptedArchiveCountMax}, non-ba2 skipped={parentNonBa2CountMax}, read-failures={parentReadFailureCountMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{(string.IsNullOrWhiteSpace(parentNonBa2Sample) ? string.Empty : $" Sample skipped candidate: {parentNonBa2Sample}")}{(string.IsNullOrWhiteSpace(parentAttemptedArchiveSample) ? string.Empty : $" Sample attempted archive: {parentAttemptedArchiveSample}")}{(string.IsNullOrWhiteSpace(parentLastArchiveCandidate) ? string.Empty : $" Last archive candidate: {parentLastArchiveCandidate} ({parentLastArchiveOutcome ?? "unknown outcome"})")}{bootstrapPreview}";
 
         RebuildMods();
     }

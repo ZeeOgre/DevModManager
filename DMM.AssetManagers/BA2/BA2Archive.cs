@@ -23,6 +23,14 @@ public static partial class BA2Archive
         public int IndexedFileCount { get; set; }
         public long IndexedBytes { get; set; }
         public long EstimatedRecordBytes { get; set; }
+        public int NonBa2CandidateCount { get; set; }
+        public List<string> NonBa2CandidateSamples { get; } = new();
+        public int ReadFailureCount { get; set; }
+        public List<string> ReadFailureSamples { get; } = new();
+        public int AttemptedArchiveCount { get; set; }
+        public List<string> AttemptedArchiveSamples { get; } = new();
+        public string? LastArchiveCandidate { get; set; }
+        public string? LastArchiveOutcome { get; set; }
     }
 
     public static IReadOnlyList<Ba2Entry> ReadIndex(string ba2Path)
@@ -50,6 +58,12 @@ public static partial class BA2Archive
         {
             string full = Path.GetFullPath(path);
             if (!File.Exists(full)) continue;
+
+            if (!LooksLikeBa2Archive(full, out var signatureReason))
+            {
+                Console.WriteLine($"[WARN] Skipping non-BA2 file '{full}': {signatureReason}");
+                continue;
+            }
 
             IReadOnlyList<Ba2Entry> entries;
             try
@@ -100,15 +114,64 @@ public static partial class BA2Archive
             }
         }
 
-        var merged = BuildMergedIndex(ba2Paths);
         stats = new Ba2IndexBuildStats
         {
             MasterCount = normalizedMasters.Count,
-            ArchivePathCount = ba2Paths.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
-            IndexedFileCount = merged.Count,
-            IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize)
+            ArchivePathCount = ba2Paths.Distinct(StringComparer.OrdinalIgnoreCase).Count()
         };
 
+        var merged = new Dictionary<string, Ba2Entry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var full in ba2Paths.Distinct(StringComparer.OrdinalIgnoreCase).Select(Path.GetFullPath))
+        {
+            stats.AttemptedArchiveCount++;
+            stats.LastArchiveCandidate = full;
+
+            if (!TryValidateBa2Path(full, out var reason))
+            {
+                stats.NonBa2CandidateCount++;
+                stats.LastArchiveOutcome = $"SKIPPED: {reason}";
+                if (stats.NonBa2CandidateSamples.Count < 5)
+                {
+                    stats.NonBa2CandidateSamples.Add($"{full} :: {reason}");
+                }
+                if (stats.AttemptedArchiveSamples.Count < 10)
+                {
+                    stats.AttemptedArchiveSamples.Add($"SKIPPED :: {full} :: {reason}");
+                }
+                continue;
+            }
+
+            try
+            {
+                foreach (var e in ReadIndex(full))
+                {
+                    merged[e.RelativePath] = e;
+                }
+
+                stats.LastArchiveOutcome = "INDEXED";
+                if (stats.AttemptedArchiveSamples.Count < 10)
+                {
+                    stats.AttemptedArchiveSamples.Add($"INDEXED :: {full}");
+                }
+            }
+            catch (Exception ex)
+            {
+                stats.ReadFailureCount++;
+                stats.LastArchiveOutcome = $"FAILED: {ex.Message}";
+                if (stats.ReadFailureSamples.Count < 5)
+                {
+                    stats.ReadFailureSamples.Add($"{full} :: {ex.Message}");
+                }
+                if (stats.AttemptedArchiveSamples.Count < 10)
+                {
+                    stats.AttemptedArchiveSamples.Add($"FAILED :: {full} :: {ex.Message}");
+                }
+                Console.WriteLine($"[WARN] Failed to read BA2 '{full}': {ex.Message}");
+            }
+        }
+
+        stats.IndexedFileCount = merged.Count;
+        stats.IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize);
         return merged;
     }
 
@@ -146,6 +209,23 @@ public static partial class BA2Archive
         }
 
         return index;
+    }
+
+    public static bool TryValidateBa2Path(string path, out string reason)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            reason = "path is empty";
+            return false;
+        }
+
+        if (!File.Exists(path))
+        {
+            reason = "file does not exist";
+            return false;
+        }
+
+        return LooksLikeBa2Archive(path, out reason);
     }
 
     public static bool IsLooseFileAlreadyPacked(
@@ -196,6 +276,9 @@ public static partial class BA2Archive
             ms.Position = 0;
             return ms;
         }
+
+        if (!LooksLikeBa2Archive(entry.ArchivePath, out var signatureReason))
+            throw new InvalidDataException($"Expected BA2 archive but got '{entry.ArchivePath}' ({signatureReason}).");
 
         var bytes = ExtractBuiltFile(entry.ArchivePath, entry.ArchiveInnerPath);
         return new MemoryStream(bytes, writable: false);
@@ -263,6 +346,37 @@ public static partial class BA2Archive
         }
 
         return true;
+    }
+
+
+    private static bool LooksLikeBa2Archive(string path, out string reason)
+    {
+        reason = string.Empty;
+        try
+        {
+            using var fs = File.OpenRead(path);
+            if (fs.Length < 4)
+            {
+                reason = "file too small";
+                return false;
+            }
+
+            Span<byte> magic = stackalloc byte[4];
+            _ = fs.Read(magic);
+            // BA2 magic in little-endian header bytes = 'BSA\0'
+            if (!(magic[0] == (byte)'B' && magic[1] == (byte)'S' && magic[2] == (byte)'A' && magic[3] == 0))
+            {
+                reason = $"invalid magic 0x{magic[0]:X2}{magic[1]:X2}{magic[2]:X2}{magic[3]:X2}";
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            reason = ex.Message;
+            return false;
+        }
     }
 
     private static string NormalizeRel(string? raw)

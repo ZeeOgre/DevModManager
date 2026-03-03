@@ -30,6 +30,14 @@ public sealed class ModDependencyDiscoveryResult
     public int ParentIndexedFileCount { get; set; }
     public long ParentIndexedBytes { get; set; }
     public long ParentEstimatedRecordBytes { get; set; }
+    public int ParentNonBa2CandidateCount { get; set; }
+    public List<string> ParentNonBa2CandidateSamples { get; } = new();
+    public int ParentReadFailureCount { get; set; }
+    public List<string> ParentReadFailureSamples { get; } = new();
+    public int ParentAttemptedArchiveCount { get; set; }
+    public List<string> ParentAttemptedArchiveSamples { get; } = new();
+    public string? ParentLastArchiveCandidate { get; set; }
+    public string? ParentLastArchiveOutcome { get; set; }
     public long ScanMs { get; set; }
 }
 
@@ -125,6 +133,14 @@ public sealed class ModDependencyDiscoveryService
         result.ParentIndexedFileCount = parentStats.IndexedFileCount;
         result.ParentIndexedBytes = parentStats.IndexedBytes;
         result.ParentEstimatedRecordBytes = parentStats.EstimatedRecordBytes;
+        result.ParentNonBa2CandidateCount = parentStats.NonBa2CandidateCount;
+        result.ParentReadFailureCount = parentStats.ReadFailureCount;
+        result.ParentNonBa2CandidateSamples.AddRange(parentStats.NonBa2CandidateSamples);
+        result.ParentReadFailureSamples.AddRange(parentStats.ReadFailureSamples);
+        result.ParentAttemptedArchiveCount = parentStats.AttemptedArchiveCount;
+        result.ParentAttemptedArchiveSamples.AddRange(parentStats.AttemptedArchiveSamples);
+        result.ParentLastArchiveCandidate = parentStats.LastArchiveCandidate;
+        result.ParentLastArchiveOutcome = parentStats.LastArchiveOutcome;
 
         timer.Stop();
         result.ScanMs = timer.ElapsedMilliseconds;
@@ -319,6 +335,16 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var listedArchive in listedArchives)
         {
+            if (!BA2Archive.TryValidateBa2Path(listedArchive, out var reason))
+            {
+                stats.NonBa2CandidateCount++;
+                if (stats.NonBa2CandidateSamples.Count < 5)
+                {
+                    stats.NonBa2CandidateSamples.Add($"{listedArchive} :: {reason}");
+                }
+                continue;
+            }
+
             try
             {
                 foreach (var kvp in BA2Archive.BuildMergedIndex(new[] { listedArchive }))
@@ -326,8 +352,13 @@ public sealed class ModDependencyDiscoveryService
                     merged[kvp.Key] = kvp.Value;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                stats.ReadFailureCount++;
+                if (stats.ReadFailureSamples.Count < 5)
+                {
+                    stats.ReadFailureSamples.Add($"{listedArchive} :: {ex.Message}");
+                }
             }
         }
 
