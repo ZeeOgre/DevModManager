@@ -161,15 +161,9 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var script in tesResult.ReferencedScripts)
         {
-            TryAddByDataRelative(script, scanRoot, gameRoot, candidates, unresolvedCandidates);
-
-            if (script.EndsWith(".pex", StringComparison.OrdinalIgnoreCase))
+            foreach (var candidate in ExpandScriptCandidates(script))
             {
-                TryAddByDataRelative(script[..^4] + ".psc", scanRoot, gameRoot, candidates, unresolvedCandidates);
-            }
-            else if (script.EndsWith(".psc", StringComparison.OrdinalIgnoreCase))
-            {
-                TryAddByDataRelative(script[..^4] + ".pex", scanRoot, gameRoot, candidates, unresolvedCandidates);
+                TryAddByDataRelative(candidate, scanRoot, gameRoot, candidates, unresolvedCandidates);
             }
         }
 
@@ -232,6 +226,48 @@ public sealed class ModDependencyDiscoveryService
             }
             catch
             {
+            }
+        }
+    }
+
+
+    private static IEnumerable<string> ExpandScriptCandidates(string scriptToken)
+    {
+        if (string.IsNullOrWhiteSpace(scriptToken))
+            yield break;
+
+        var normalized = scriptToken.Replace('/', '\\').TrimStart('\\').Trim();
+
+        // ScriptName token style in plugins: Namespace:Folder:ScriptName
+        if (normalized.Contains(':'))
+        {
+            normalized = normalized.Replace(':', '\\');
+            yield return Path.Combine("Data", "Scripts", normalized + ".pex");
+            yield return Path.Combine("Data", "Scripts", "Source", normalized + ".psc");
+            yield break;
+        }
+
+        if (normalized.EndsWith(".pex", StringComparison.OrdinalIgnoreCase) || normalized.EndsWith(".psc", StringComparison.OrdinalIgnoreCase))
+        {
+            string rel = normalized.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                ? normalized
+                : normalized.StartsWith("Scripts\\", StringComparison.OrdinalIgnoreCase)
+                    ? Path.Combine("Data", normalized)
+                    : Path.Combine("Data", "Scripts", normalized);
+
+            yield return rel;
+
+            if (rel.EndsWith(".pex", StringComparison.OrdinalIgnoreCase))
+            {
+                var stem = rel[..^4];
+                yield return stem + ".psc";
+                yield return stem.Replace("Data\\Scripts\\", "Data\\Scripts\\Source\\", StringComparison.OrdinalIgnoreCase) + ".psc";
+            }
+            else
+            {
+                var stem = rel[..^4];
+                yield return stem + ".pex";
+                yield return stem.Replace("Data\\Scripts\\Source\\", "Data\\Scripts\\", StringComparison.OrdinalIgnoreCase) + ".pex";
             }
         }
     }
