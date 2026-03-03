@@ -8,16 +8,16 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace DMM.Avalonia;
+namespace DMM.Core;
 
-internal sealed class ModOnboardingGitService
+public sealed class ModOnboardingGitService
 {
-    public bool HasRequiredGitHubSettings(ProgramWideSettings settings, out string missing)
+    public bool HasRequiredGitHubSettings(string githubAccount, string githubToken, string githubModRootRepo, out string missing)
     {
         var missingItems = new List<string>();
-        if (string.IsNullOrWhiteSpace(settings.GitHubAccount)) missingItems.Add(nameof(settings.GitHubAccount));
-        if (string.IsNullOrWhiteSpace(settings.GitHubToken)) missingItems.Add(nameof(settings.GitHubToken));
-        if (string.IsNullOrWhiteSpace(settings.GitHubModRootRepo)) missingItems.Add(nameof(settings.GitHubModRootRepo));
+        if (string.IsNullOrWhiteSpace(githubAccount)) missingItems.Add("GitHubAccount");
+        if (string.IsNullOrWhiteSpace(githubToken)) missingItems.Add("GitHubToken");
+        if (string.IsNullOrWhiteSpace(githubModRootRepo)) missingItems.Add("GitHubModRootRepo");
 
         missing = string.Join(", ", missingItems);
         return missingItems.Count == 0;
@@ -35,7 +35,9 @@ internal sealed class ModOnboardingGitService
     }
 
     public bool TryBootstrapModRepository(
-        ProgramWideSettings settings,
+        string githubAccount,
+        string githubToken,
+        string githubModRootRepo,
         string repoRoot,
         string gameName,
         string modName,
@@ -45,7 +47,7 @@ internal sealed class ModOnboardingGitService
         error = string.Empty;
 
         var masterRepoPath = repoRoot;
-        if (!EnsureMasterRepositoryPresent(masterRepoPath, settings.GitHubModRootRepo, out error))
+        if (!EnsureMasterRepositoryPresent(masterRepoPath, githubModRootRepo, out error))
         {
             return false;
         }
@@ -53,9 +55,9 @@ internal sealed class ModOnboardingGitService
         var gameSlug = ToSlug(gameName);
         var modSlug = ToSlug(modName);
         var modRepoName = $"{gameSlug}-{modSlug}";
-        var remoteModUrl = $"https://github.com/{settings.GitHubAccount}/{modRepoName}.git";
+        var remoteModUrl = $"https://github.com/{githubAccount}/{modRepoName}.git";
 
-        if (!EnsureGitHubRepository(settings.GitHubAccount, settings.GitHubToken, modRepoName, out error))
+        if (!EnsureGitHubRepository(githubAccount, githubToken, modRepoName, out error))
         {
             return false;
         }
