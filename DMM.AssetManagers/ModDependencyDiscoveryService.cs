@@ -884,13 +884,6 @@ public sealed class ModDependencyDiscoveryService
             return true;
         }
 
-        var fromGameData = Path.Combine(gameRoot, "Data", relUnderData);
-        if (File.Exists(fromGameData))
-        {
-            fullPath = fromGameData;
-            return true;
-        }
-
         return false;
     }
 
