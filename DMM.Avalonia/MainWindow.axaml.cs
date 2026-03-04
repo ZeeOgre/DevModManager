@@ -336,7 +336,7 @@ public partial class MainWindow : Window
 
     private async Task RunScanApplyWithProgressDialogAsync(IReadOnlyList<GameFolderStageSelection> selections)
     {
-        var reviewSelections = await BuildDependencyReviewSelectionsAsync(selections);
+        var reviewSelections = await DependencyReviewCoordinator.BuildSelectionsAsync(this, _viewModel, _viewModel.SelectedGameFolder, selections);
         if (reviewSelections is null)
         {
             _viewModel.StatusMessage = "Scan apply canceled during dependency review.";
@@ -589,49 +589,12 @@ public partial class MainWindow : Window
     }
 
 
-    private async Task<IReadOnlyDictionary<string, HashSet<string>>?> BuildDependencyReviewSelectionsAsync(IReadOnlyList<GameFolderStageSelection> selections)
-    {
-        var map = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
-        {
-            if (!_viewModel.TryCollectDependencyPreview(_viewModel.SelectedGameFolder, selection, out var preview, out var error))
-            {
-                _viewModel.StatusMessage = $"Dependency preview failed for {selection.ModName}: {error}";
-                continue;
-            }
-
-            var reviewEntries = preview.Discovery.Entries
-                .Where(x => !MainWindowViewModel.IsPluginOrArchiveRelativePath(x.RelativeDataPath))
-                .ToList();
-
-            var dialog = new DependencyReviewWindow(
-                selection.ModName,
-                selection.PluginName,
-                preview.PluginFiles,
-                preview.Ba2Files,
-                reviewEntries,
-                preview.Discovery.MissingReferences,
-                preview.Discovery.UndefinedDiscard);
-
-            var decision = await dialog.ShowDialog<DependencyReviewDecision?>(this);
-            if (decision is null)
-            {
-                return null;
-            }
-
-            map[MainWindowViewModel.BuildSelectionReviewKey(selection)] = new HashSet<string>(decision.KeepRelativePaths, StringComparer.OrdinalIgnoreCase);
-        }
-
-        return map;
-    }
-
     private async Task<string> RunSingleModGatherDependenciesAsync(ModDependencyGatherRequest request)
     {
         var stage = string.IsNullOrWhiteSpace(request.Stage) ? "DEV" : request.Stage;
         var selection = new GameFolderStageSelection(request.ModName, request.PrimaryPlugin, stage);
 
-        var reviewSelections = await BuildDependencyReviewSelectionsAsync(new[] { selection });
+        var reviewSelections = await DependencyReviewCoordinator.BuildSelectionsAsync(this, _viewModel, request.GameFolder, new[] { selection });
         if (reviewSelections is null)
         {
             _viewModel.StatusMessage = "Single-mod gather canceled during dependency review.";
