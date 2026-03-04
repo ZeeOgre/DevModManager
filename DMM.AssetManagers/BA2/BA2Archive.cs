@@ -266,12 +266,20 @@ public static partial class BA2Archive
         }
 
         using var looseStream = File.OpenRead(fullLoose);
-        using var archiveStream = OpenArchiveEntryStream(entry);
 
-        if (!archiveStream.CanRead || !archiveStream.CanSeek)
-            return FullCompareSIMD(looseStream, archiveStream);
+        try
+        {
+            using var archiveStream = OpenArchiveEntryStream(entry);
 
-        return FastApproxEqual(looseStream, archiveStream);
+            if (!archiveStream.CanRead || !archiveStream.CanSeek)
+                return FullCompareSIMD(looseStream, archiveStream);
+
+            return FastApproxEqual(looseStream, archiveStream);
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
     }
 
     private static Stream OpenArchiveEntryStream(Ba2Entry entry)
