@@ -130,7 +130,7 @@ public sealed class ModOnboardingGitService
             return false;
         }
 
-        var payload = JsonSerializer.Serialize(new { name = repoName, @private = false, auto_init = true });
+        var payload = JsonSerializer.Serialize(new { name = repoName, @private = true, auto_init = true });
         var createResponse = client.PostAsync(
             "https://api.github.com/user/repos",
             new StringContent(payload, System.Text.Encoding.UTF8, "application/json")).GetAwaiter().GetResult();

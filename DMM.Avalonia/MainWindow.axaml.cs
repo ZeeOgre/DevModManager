@@ -285,6 +285,13 @@ public partial class MainWindow : Window
 
     private async void RescanGameFolder_Click(object? sender, RoutedEventArgs e)
     {
+        if (!_viewModel.TryValidateGitHubOnboardingSettings(out var settingsMessage))
+        {
+            _viewModel.StatusMessage = settingsMessage;
+            await ShowInfoDialogAsync("Scan Apply Blocked", settingsMessage);
+            return;
+        }
+
         var selections = _viewModel.GetCurrentManagedSelectionsForRescan();
         if (selections.Count == 0)
         {
@@ -297,6 +304,13 @@ public partial class MainWindow : Window
 
     private async void ScanGameFolder_Click(object? sender, RoutedEventArgs e)
     {
+        if (!_viewModel.TryValidateGitHubOnboardingSettings(out var settingsMessage))
+        {
+            _viewModel.StatusMessage = settingsMessage;
+            await ShowInfoDialogAsync("Scan Apply Blocked", settingsMessage);
+            return;
+        }
+
         var scan = _viewModel.ScanSelectedGameFolderForMods();
         if (!scan.Success)
         {
@@ -852,6 +866,19 @@ public sealed class MainWindowViewModel : NotifyBase
         }
     }
 
+    public bool TryValidateGitHubOnboardingSettings(out string message)
+    {
+        var settings = _settingsStore.Load();
+        if (_gitService.HasRequiredGitHubSettings(settings.GitHubAccount, settings.GitHubToken, settings.GitHubModRootRepo, out var missingSettings))
+        {
+            message = string.Empty;
+            return true;
+        }
+
+        message = $"Scan apply blocked: configure GitHub settings first ({missingSettings}) in Program Settings.";
+        return false;
+    }
+
     public Task ApplyScanSelections(
         IReadOnlyList<GameFolderStageSelection> selections,
         IProgress<ScanApplyProgress>? progress = null,
@@ -898,9 +925,9 @@ public sealed class MainWindowViewModel : NotifyBase
             ? ProgramWideSettings.GetDefaultRepoRoot()
             : settings.RepoRootPath;
 
-        if (!_gitService.HasRequiredGitHubSettings(settings.GitHubAccount, settings.GitHubToken, settings.GitHubModRootRepo, out var missingSettings))
+        if (!TryValidateGitHubOnboardingSettings(out var settingsMessage))
         {
-            StatusMessage = $"Scan apply blocked: configure GitHub settings first ({missingSettings}) in Program Settings.";
+            StatusMessage = settingsMessage;
             return;
         }
 
