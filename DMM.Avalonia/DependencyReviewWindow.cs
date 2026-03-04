@@ -164,8 +164,17 @@ public sealed class DependencyReviewWindow : Window
         {
             Content = stack,
             HorizontalScrollBarVisibility = global::Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            VerticalScrollBarVisibility = global::Avalonia.Controls.Primitives.ScrollBarVisibility.Auto
+            VerticalScrollBarVisibility = global::Avalonia.Controls.Primitives.ScrollBarVisibility.Visible
         };
+
+        var columnLayout = new Grid
+        {
+            RowDefinitions = new RowDefinitions("Auto,*")
+        };
+        columnLayout.Children.Add(header);
+        Grid.SetRow(header, 0);
+        columnLayout.Children.Add(scroller);
+        Grid.SetRow(scroller, 1);
 
         var border = new Border
         {
@@ -173,7 +182,7 @@ public sealed class DependencyReviewWindow : Window
             BorderThickness = new Thickness(1),
             Padding = new Thickness(6),
             Margin = new Thickness(4, 0, 4, 0),
-            Child = new StackPanel { Children = { header, scroller } }
+            Child = columnLayout
         };
 
         if (allowDrop)
