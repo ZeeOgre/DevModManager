@@ -24,6 +24,7 @@ public partial class GameInstallWindow : Window
         EnsureStoreOptionExists(install.GameStore);
         DataContext = install;
         InitializeComponent();
+        SelectGameStoreValue(install.GameStore);
     }
 
     public GameInstallWindow(GameInstallRecord install, ObservableCollection<ManagedGame> managedGames, bool showNavigation, Action<ManagedGame>? onManagedGameAdded = null)
@@ -37,6 +38,7 @@ public partial class GameInstallWindow : Window
         EnsureStoreOptionExists(install.GameStore);
         DataContext = install;
         InitializeComponent();
+        SelectGameStoreValue(install.GameStore);
     }
 
     private static ObservableCollection<string> BuildGameStoreOptions()
@@ -67,6 +69,21 @@ public partial class GameInstallWindow : Window
         if (!GameStoreOptions.Any(x => string.Equals(x, gameStore, StringComparison.OrdinalIgnoreCase)))
         {
             GameStoreOptions.Add(gameStore);
+        }
+    }
+
+    private void SelectGameStoreValue(string? gameStore)
+    {
+        if (string.IsNullOrWhiteSpace(gameStore))
+        {
+            return;
+        }
+
+        var matched = GameStoreOptions.FirstOrDefault(x =>
+            string.Equals(x, gameStore, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(matched))
+        {
+            GameStoreComboBox.SelectedItem = matched;
         }
     }
 
@@ -150,9 +167,14 @@ public partial class GameInstallWindow : Window
                     ?? GameStoreComboBox.Text.Trim();
             }
 
+            if (string.IsNullOrWhiteSpace(selectedStore))
+            {
+                selectedStore = install.GameStore;
+            }
+
             install.GameStore = string.IsNullOrWhiteSpace(selectedStore)
                 ? "Custom"
-                : selectedStore;
+                : selectedStore.Trim();
 
             var selectedGame = MainGameComboBox.SelectedItem as ManagedGame;
             if (selectedGame is null && MainGameComboBox.SelectedIndex >= 0 && MainGameComboBox.SelectedIndex < ManagedGames.Count)
