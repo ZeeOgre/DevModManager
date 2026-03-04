@@ -423,6 +423,7 @@ public partial class MainWindow : Window
             progressBar.Maximum = Math.Max(1, update.TotalMods);
             progressBar.Value = Math.Min(update.CompletedMods, progressBar.Maximum);
             progressText.Text = $"{update.Message} ({update.CompletedMods}/{update.TotalMods})";
+            _viewModel.StatusMessage = update.Message;
         });
 
         try
@@ -962,7 +963,7 @@ public sealed class MainWindowViewModel : NotifyBase
 
         foreach (var selection in orderedSelections)
         {
-            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Evaluating {selection.ModName}"));
+            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Preparing {selection.ModName}"));
 
             var sourcePath = Path.Combine(scanRoot, selection.PluginName);
             if (!File.Exists(sourcePath))
@@ -974,6 +975,7 @@ public sealed class MainWindowViewModel : NotifyBase
             try
             {
                 var modRepoRoot = ModRepositoryPathService.BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization == RepoOrganizationStrategy.RepoPerMod);
+                progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Scanning {selection.ModName} dependencies, please verify the discovered files"));
                 var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
                 var initialEntries = discovery.Entries
                     .Where(x => !x.ParentArchiveMatch)
@@ -1044,6 +1046,8 @@ public sealed class MainWindowViewModel : NotifyBase
                 parentLastArchiveCandidate = discovery.ParentLastArchiveCandidate ?? parentLastArchiveCandidate;
                 parentLastArchiveOutcome = discovery.ParentLastArchiveOutcome ?? parentLastArchiveOutcome;
                 dependencyScanMsTotal += discovery.ScanMs;
+
+                progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Copying {selection.ModName} files"));
 
                 foreach (var entry in initialEntries)
                 {

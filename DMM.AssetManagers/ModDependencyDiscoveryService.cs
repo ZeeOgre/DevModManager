@@ -103,7 +103,6 @@ public sealed class ModDependencyDiscoveryService
 
             if (ShouldForceDiscardDataRelativeToken(rel))
             {
-                result.UndefinedDiscard.Add(rel);
                 continue;
             }
 
@@ -145,7 +144,6 @@ public sealed class ModDependencyDiscoveryService
         {
             if (ShouldForceDiscardDataRelativeToken(missing))
             {
-                result.UndefinedDiscard.Add(missing);
                 continue;
             }
 
@@ -857,7 +855,6 @@ public sealed class ModDependencyDiscoveryService
     {
         if (ShouldForceDiscardDataRelativeToken(relDataPath))
         {
-            unresolvedCandidates.Add(NormalizeToDataRelative(relDataPath));
             return;
         }
 
