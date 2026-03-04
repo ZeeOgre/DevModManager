@@ -601,12 +601,16 @@ public partial class MainWindow : Window
                 continue;
             }
 
+            var reviewEntries = preview.Discovery.Entries
+                .Where(x => !MainWindowViewModel.IsPluginOrArchiveRelativePath(x.RelativeDataPath))
+                .ToList();
+
             var dialog = new DependencyReviewWindow(
                 selection.ModName,
                 selection.PluginName,
                 preview.PluginFiles,
                 preview.Ba2Files,
-                preview.Discovery.Entries,
+                reviewEntries,
                 preview.Discovery.MissingReferences,
                 preview.Discovery.UndefinedDiscard);
 
@@ -1021,7 +1025,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 if (reviewSelections is not null && reviewSelections.TryGetValue(BuildSelectionReviewKey(selection), out var reviewedKeep))
                 {
                     initialEntries = discovery.Entries
-                        .Where(x => reviewedKeep.Contains(x.RelativeDataPath))
+                        .Where(x => IsPluginOrArchiveRelativePath(x.RelativeDataPath) || reviewedKeep.Contains(x.RelativeDataPath))
                         .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
                         .ToList();
                 }
@@ -1160,6 +1164,17 @@ public sealed class MainWindowViewModel : NotifyBase
         await Task.CompletedTask;
     }
 
+
+    public static bool IsPluginOrArchiveRelativePath(string relativeDataPath)
+    {
+        if (string.IsNullOrWhiteSpace(relativeDataPath))
+            return false;
+
+        return relativeDataPath.EndsWith(".esm", StringComparison.OrdinalIgnoreCase)
+               || relativeDataPath.EndsWith(".esp", StringComparison.OrdinalIgnoreCase)
+               || relativeDataPath.EndsWith(".esl", StringComparison.OrdinalIgnoreCase)
+               || relativeDataPath.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static List<string> CollectCanonicalPluginFiles(string scanRoot, string modName, string primaryPlugin)
     {

@@ -39,12 +39,12 @@ public sealed class DependencyReviewWindow : Window
         _definiteKeep = new ObservableCollection<DependencyReviewItem>(entries
             .Where(x => !x.ParentArchiveMatch)
             .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new DependencyReviewItem(x.RelativeDataPath, x.SourcePath, true)));
+            .Select(x => new DependencyReviewItem(x.RelativeDataPath, x.SourcePath, true, Brushes.LightGreen)));
 
         _maybeKeep = new ObservableCollection<DependencyReviewItem>(entries
             .Where(x => x.ParentArchiveMatch)
             .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new DependencyReviewItem(x.RelativeDataPath, x.SourcePath, false)));
+            .Select(x => new DependencyReviewItem(x.RelativeDataPath, x.SourcePath, false, Brushes.Khaki)));
 
         _errors = new ObservableCollection<DependencyReviewItem>(
             missingReferences.OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
@@ -163,6 +163,8 @@ public sealed class DependencyReviewWindow : Window
         var scroller = new ScrollViewer
         {
             Content = stack,
+            HorizontalScrollBarVisibility = global::Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = global::Avalonia.Controls.Primitives.ScrollBarVisibility.Auto
         };
 
         var border = new Border
@@ -200,6 +202,7 @@ public sealed class DependencyReviewWindow : Window
             Foreground = item.Foreground ?? Brushes.White,
             TextWrapping = TextWrapping.Wrap
         };
+        ToolTip.SetTip(text, item.Source);
         panel.Children.Add(text);
 
         return panel;

@@ -100,6 +100,12 @@ public sealed class ModDependencyDiscoveryService
                 continue;
             }
 
+            if (ContainsInvalidDataRelativeCharacters(rel))
+            {
+                result.UndefinedDiscard.Add(rel);
+                continue;
+            }
+
             if (!source.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && parentArchiveIndex.ContainsKey(rel))
             {
                 result.CollisionCount++;
@@ -135,6 +141,12 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var missing in unresolvedCandidates.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
         {
+            if (ContainsInvalidDataRelativeCharacters(missing))
+            {
+                result.UndefinedDiscard.Add(missing);
+                continue;
+            }
+
             if (parentArchiveIndex.ContainsKey(missing) || result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
             {
                 result.UndefinedDiscard.Add(missing);
@@ -189,6 +201,11 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var script in tesResult.ReferencedScripts)
         {
+            if (!IsLikelyScriptToken(script))
+            {
+                continue;
+            }
+
             var scriptCandidates = ExpandScriptCandidates(script).ToList();
             var resolved = false;
             foreach (var candidate in scriptCandidates)
@@ -270,6 +287,37 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
+
+    private static bool IsLikelyScriptToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return false;
+
+        var normalized = token.Replace('/', '\\').TrimStart('\\').Trim();
+        if (normalized.Length < 3 || normalized.Length > 180)
+            return false;
+
+        var hasLetter = normalized.Any(char.IsLetter);
+        if (!hasLetter)
+            return false;
+
+        foreach (var ch in normalized)
+        {
+            if (char.IsLetterOrDigit(ch))
+                continue;
+
+            if (ch is '_' or '-' or '\\' or ':' or '.')
+                continue;
+
+            return false;
+        }
+
+        var firstSegment = normalized.Split(new[] { '\\', ':' }, 2)[0];
+        if (string.IsNullOrWhiteSpace(firstSegment) || firstSegment.Length < 2)
+            return false;
+
+        return true;
+    }
 
     private static IEnumerable<string> ExpandScriptCandidates(string scriptToken)
     {
@@ -444,6 +492,23 @@ public sealed class ModDependencyDiscoveryService
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
+        // Fallback: when INI archive list is unavailable, index all BA2 files under Data
+        // (except archives that belong to the mod being scanned) so parent/base matches still work.
+        if (listedArchives.Count == 0)
+        {
+            var currentModPrefixes = pluginFiles
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            listedArchives = Directory.EnumerateFiles(scanRoot, "*.ba2", SearchOption.TopDirectoryOnly)
+                .Where(path => !currentModPrefixes.Any(prefix =>
+                    Path.GetFileName(path).StartsWith(prefix + " - ", StringComparison.OrdinalIgnoreCase)))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
         foreach (var listedArchive in listedArchives)
         {
             if (!BA2Archive.TryValidateBa2Path(listedArchive, out var reason))
@@ -595,8 +660,23 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
+    private static bool ContainsInvalidDataRelativeCharacters(string relDataPath)
+    {
+        if (string.IsNullOrWhiteSpace(relDataPath))
+            return true;
+
+        // Windows file names cannot contain ':'; treat these as malformed parse artifacts.
+        return relDataPath.Contains(':');
+    }
+
     private static void TryAddByDataRelative(string relDataPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
+        if (ContainsInvalidDataRelativeCharacters(relDataPath))
+        {
+            unresolvedCandidates.Add(NormalizeToDataRelative(relDataPath));
+            return;
+        }
+
         if (TryResolveDataRelative(relDataPath, scanRoot, gameRoot, out var fullPath))
         {
             candidates.Add(fullPath);
