@@ -974,6 +974,26 @@ public sealed class MainWindowViewModel : NotifyBase
             try
             {
                 var modRepoRoot = ModRepositoryPathService.BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization == RepoOrganizationStrategy.RepoPerMod);
+                var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
+                var initialEntries = discovery.Entries
+                    .Where(x => !x.ParentArchiveMatch)
+                    .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (reviewSelections is not null && reviewSelections.TryGetValue(BuildSelectionReviewKey(selection), out var reviewedKeep))
+                {
+                    initialEntries = discovery.Entries
+                        .Where(x => IsPluginOrArchiveRelativePath(x.RelativeDataPath) || reviewedKeep.Contains(x.RelativeDataPath))
+                        .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+                }
+
+                if (initialEntries.Count == 0)
+                {
+                    skipped++;
+                    continue;
+                }
+
                 if (!_gitService.IsGitWorkingTree(modRepoRoot))
                 {
                     var bootstrapped = _gitService.TryBootstrapModRepository(
@@ -1006,20 +1026,6 @@ public sealed class MainWindowViewModel : NotifyBase
                 var stageFolder = Path.Combine(modRepoRoot, "loosefiles", "Data");
                 Directory.CreateDirectory(stageFolder);
 
-                var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
-                var initialEntries = discovery.Entries
-                    .Where(x => !x.ParentArchiveMatch)
-                    .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                if (reviewSelections is not null && reviewSelections.TryGetValue(BuildSelectionReviewKey(selection), out var reviewedKeep))
-                {
-                    initialEntries = discovery.Entries
-                        .Where(x => IsPluginOrArchiveRelativePath(x.RelativeDataPath) || reviewedKeep.Contains(x.RelativeDataPath))
-                        .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-                        .ToList();
-                }
-
                 dependencyFilesIncluded += initialEntries.Count;
                 dependencyCollisionCount += discovery.CollisionCount;
                 dependencyMissingCount += discovery.MissingReferences.Count;
@@ -1038,12 +1044,6 @@ public sealed class MainWindowViewModel : NotifyBase
                 parentLastArchiveCandidate = discovery.ParentLastArchiveCandidate ?? parentLastArchiveCandidate;
                 parentLastArchiveOutcome = discovery.ParentLastArchiveOutcome ?? parentLastArchiveOutcome;
                 dependencyScanMsTotal += discovery.ScanMs;
-
-                if (initialEntries.Count == 0)
-                {
-                    skipped++;
-                    continue;
-                }
 
                 foreach (var entry in initialEntries)
                 {

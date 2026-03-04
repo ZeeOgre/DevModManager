@@ -89,8 +89,7 @@ public sealed class ModDependencyDiscoveryService
             DiscoverConventionCandidates(plugin, scanRoot, gameRoot, modName, discoveredCandidates);
         }
 
-        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats, out var catalog);
-        ExportParentCatalogCsv(modName, catalog, parentArchiveIndex);
+        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats, out _);
         var tifRoot = ResolveTifRoot(gameRoot);
         var result = new ModDependencyDiscoveryResult();
 
