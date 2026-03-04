@@ -12,7 +12,8 @@ public static class ModMetadataService
         string modRepoRoot,
         string modName,
         string pluginName,
-        IReadOnlyList<ModDependencyEntry> entries)
+        IReadOnlyList<ModDependencyEntry> entries,
+        ModDependencyDiscoveryResult? discovery = null)
     {
         var metadataFolder = Path.Combine(modRepoRoot, "metadata");
         Directory.CreateDirectory(metadataFolder);
@@ -48,5 +49,31 @@ public static class ModMetadataService
         };
         var catalogJson = JsonSerializer.Serialize(catalogPayload, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(catalogPath, catalogJson);
+
+        var reviewPath = Path.Combine(metadataFolder, "dependency-review.json");
+        var reviewPayload = new
+        {
+            mod = modName,
+            plugin = pluginName,
+            generatedUtc = DateTimeOffset.UtcNow,
+            highProbabilityKeep = (discovery?.HighProbabilityKeep ?? new List<string>())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToList(),
+            highProbabilityDiscard = (discovery?.HighProbabilityDiscard ?? new List<string>())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToList(),
+            undefinedDiscard = (discovery?.UndefinedDiscard ?? new List<string>())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToList(),
+            definiteKeep = (discovery?.DefiniteKeep ?? new List<string>())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToList()
+        };
+        var reviewJson = JsonSerializer.Serialize(reviewPayload, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(reviewPath, reviewJson);
     }
 }
