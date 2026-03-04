@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.IO.Compression;
 
 namespace DMM.AssetManagers;
@@ -11,6 +12,7 @@ public sealed class Ba2Entry
     public long DataOffset { get; init; } = -1;
     public uint PackedSize { get; init; }
     public uint UnpackedSize { get; init; }
+    public string BethesdaArchiveType { get; init; } = "GNRL";
 
     public override string ToString()
         => $"{RelativePath} (size={FileSize}, from={Path.GetFileName(ArchivePath)})";
@@ -65,6 +67,32 @@ public static partial class BA2Archive
             .ToArray();
     }
 
+
+    private sealed record CachedArchiveIndex(long Length, DateTime LastWriteTimeUtc, IReadOnlyList<Ba2Entry> Entries);
+
+    private static readonly ConcurrentDictionary<string, CachedArchiveIndex> ArchiveIndexCache = new(StringComparer.OrdinalIgnoreCase);
+
+    public static void ClearArchiveIndexCache() => ArchiveIndexCache.Clear();
+
+    private static IReadOnlyList<Ba2Entry> ReadIndexCached(string ba2Path)
+    {
+        var fullPath = Path.GetFullPath(ba2Path);
+        var info = new FileInfo(fullPath);
+        var currentLength = info.Length;
+        var currentWriteTime = info.LastWriteTimeUtc;
+
+        if (ArchiveIndexCache.TryGetValue(fullPath, out var cached) &&
+            cached.Length == currentLength &&
+            cached.LastWriteTimeUtc == currentWriteTime)
+        {
+            return cached.Entries;
+        }
+
+        var entries = ReadIndex(fullPath);
+        ArchiveIndexCache[fullPath] = new CachedArchiveIndex(currentLength, currentWriteTime, entries);
+        return entries;
+    }
+
     public static Dictionary<string, Ba2Entry> BuildMergedIndex(IEnumerable<string> ba2Paths)
     {
         if (ba2Paths == null) throw new ArgumentNullException(nameof(ba2Paths));
@@ -84,7 +112,7 @@ public static partial class BA2Archive
             IReadOnlyList<Ba2Entry> entries;
             try
             {
-                entries = ReadIndex(full);
+                entries = ReadIndexCached(full);
             }
             catch (Exception ex)
             {
@@ -159,7 +187,7 @@ public static partial class BA2Archive
 
             try
             {
-                foreach (var e in ReadIndex(full))
+                foreach (var e in ReadIndexCached(full))
                 {
                     merged[e.RelativePath] = e;
                 }
@@ -229,6 +257,13 @@ public static partial class BA2Archive
 
         var looseSize = new FileInfo(fullLoose).Length;
         if (entry.FileSize >= 0 && entry.FileSize != looseSize) return false;
+
+        // For chunked Bethesda texture archives (DX10/GNMF), we currently compare by canonical
+        // path + logical unpacked size match and treat that as already packed.
+        if (!string.Equals(entry.BethesdaArchiveType, "GNRL", StringComparison.Ordinal))
+        {
+            return true;
+        }
 
         using var looseStream = File.OpenRead(fullLoose);
         using var archiveStream = OpenArchiveEntryStream(entry);
@@ -330,7 +365,6 @@ public static partial class BA2Archive
             if (readA == 0) break;
             if (!bufA.AsSpan(0, readA).SequenceEqual(bufB.AsSpan(0, readB))) return false;
         }
-    }
 
         return true;
     }
