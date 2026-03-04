@@ -100,7 +100,7 @@ public sealed class ModDependencyDiscoveryService
                 continue;
             }
 
-            if (ContainsInvalidDataRelativeCharacters(rel))
+            if (ShouldForceDiscardDataRelativeToken(rel))
             {
                 result.UndefinedDiscard.Add(rel);
                 continue;
@@ -141,7 +141,7 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var missing in unresolvedCandidates.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
         {
-            if (ContainsInvalidDataRelativeCharacters(missing))
+            if (ShouldForceDiscardDataRelativeToken(missing))
             {
                 result.UndefinedDiscard.Add(missing);
                 continue;
@@ -660,18 +660,29 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
-    private static bool ContainsInvalidDataRelativeCharacters(string relDataPath)
+    private static bool ShouldForceDiscardDataRelativeToken(string relDataPath)
     {
         if (string.IsNullOrWhiteSpace(relDataPath))
             return true;
 
+        var normalized = NormalizeToDataRelative(relDataPath);
+
+        // NIF descriptor/tweak fields (for example "BSMaterial::...") are not asset paths.
+        if (normalized.Contains("::", StringComparison.Ordinal))
+            return true;
+
+        // Resource-handle style pseudo-paths (for example "res:112BA342:...") are identifiers,
+        // not loose-file paths we can resolve/copy.
+        if (normalized.StartsWith("Data\\Textures\\res:", StringComparison.OrdinalIgnoreCase))
+            return true;
+
         // Windows file names cannot contain ':'; treat these as malformed parse artifacts.
-        return relDataPath.Contains(':');
+        return normalized.Contains(':');
     }
 
     private static void TryAddByDataRelative(string relDataPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
-        if (ContainsInvalidDataRelativeCharacters(relDataPath))
+        if (ShouldForceDiscardDataRelativeToken(relDataPath))
         {
             unresolvedCandidates.Add(NormalizeToDataRelative(relDataPath));
             return;
