@@ -16,7 +16,7 @@ public sealed class NifReader
         foreach (NifStringEntry entry in ReadStringTable(nifPath))
         {
             string normalized = entry.Value.Replace('/', '\\').Trim();
-            if (string.IsNullOrWhiteSpace(normalized))
+            if (string.IsNullOrWhiteSpace(normalized) || ContainsInvalidPathCharacters(normalized))
                 continue;
 
             if (TryNormalizeMatToken(normalized, out string mat))
@@ -62,6 +62,20 @@ public sealed class NifReader
         if (!File.Exists(nifPath)) throw new FileNotFoundException("NIF not found", nifPath);
 
         byte[] bytes = File.ReadAllBytes(nifPath);
+
+        // Prefer structured Bethesda header string table parsing instead of whole-file
+        // string scavenging, then fall back for unknown/malformed layouts.
+        if (TryReadBethesdaStructure(bytes, out var structure) && structure.HeaderStrings.Count > 0)
+        {
+            var headerEntries = new List<NifStringEntry>(structure.HeaderStrings.Count);
+            for (int i = 0; i < structure.HeaderStrings.Count; i++)
+            {
+                headerEntries.Add(new NifStringEntry { Index = i, Value = structure.HeaderStrings[i] });
+            }
+
+            return headerEntries;
+        }
+
         var serialized = ReadSerializedStrings(bytes);
         var entries = new List<NifStringEntry>(serialized.Count);
         for (int i = 0; i < serialized.Count; i++)
@@ -430,6 +444,8 @@ public sealed class NifReader
             return false;
 
         string path = token.Substring(0, end).TrimStart('\\');
+        if (ContainsInvalidPathCharacters(path))
+            return false;
         if (!path.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
         {
             path = path.StartsWith("Materials\\", StringComparison.OrdinalIgnoreCase)
@@ -445,6 +461,8 @@ public sealed class NifReader
     {
         normalized = string.Empty;
         string trimmed = token.TrimStart('\\');
+        if (ContainsInvalidPathCharacters(trimmed))
+            return false;
 
         if (trimmed.EndsWith(".mesh", StringComparison.OrdinalIgnoreCase))
         {
@@ -499,6 +517,8 @@ public sealed class NifReader
             return false;
 
         string path = token.Substring(0, end).TrimStart('\\');
+        if (ContainsInvalidPathCharacters(path))
+            return false;
         if (!path.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
         {
             foreach (string knownRoot in knownRootFolders)
@@ -519,6 +539,14 @@ public sealed class NifReader
     }
 
     internal static string NormalizePath(string path) => path.Replace('/', '\\').TrimStart('\\');
+
+    private static bool ContainsInvalidPathCharacters(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
+
+        return value.IndexOfAny(Path.GetInvalidPathChars()) >= 0 || value.Contains(':');
+    }
 
     private static bool LooksLikeAssetToken(string token) => token.Contains('\\') || token.Contains('.') || token.Contains('/');
 
