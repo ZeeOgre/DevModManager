@@ -16,13 +16,18 @@ public sealed record ModDependencyEntry(
     string? XboxRelativePath,
     string? XboxSourcePath,
     string? TifRelativePath,
-    string? TifSourcePath);
+    string? TifSourcePath,
+    bool ParentArchiveMatch);
 
 public sealed class ModDependencyDiscoveryResult
 {
     public List<ModDependencyEntry> Entries { get; } = new();
     public List<string> MissingReferences { get; } = new();
     public List<string> ParentArchiveReferences { get; } = new();
+    public List<string> HighProbabilityKeep { get; } = new();
+    public List<string> HighProbabilityDiscard { get; } = new();
+    public List<string> UndefinedDiscard { get; } = new();
+    public List<string> DefiniteKeep { get; } = new();
     public int CollisionCount { get; set; }
     public int ParentMasterCount { get; set; }
     public int ParentArchiveCount { get; set; }
@@ -80,7 +85,7 @@ public sealed class ModDependencyDiscoveryService
         foreach (var plugin in pluginFiles)
         {
             DiscoverPluginWalkCandidates(plugin, scanRoot, gameRoot, discoveredCandidates, unresolvedCandidates);
-            DiscoverConventionCandidates(plugin, scanRoot, modName, discoveredCandidates);
+            DiscoverConventionCandidates(plugin, scanRoot, gameRoot, modName, discoveredCandidates);
         }
 
         var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats);
@@ -95,32 +100,60 @@ public sealed class ModDependencyDiscoveryService
                 continue;
             }
 
+            if (ShouldForceDiscardDataRelativeToken(rel))
+            {
+                result.UndefinedDiscard.Add(rel);
+                continue;
+            }
+
             if (!source.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && parentArchiveIndex.ContainsKey(rel))
             {
                 result.CollisionCount++;
                 result.ParentArchiveReferences.Add(rel);
+                result.HighProbabilityDiscard.Add(rel);
+                result.Entries.Add(new ModDependencyEntry(rel, source, null, null, null, null, true));
                 continue;
             }
+            string? xboxRel = null;
+            string? xboxSource = null;
+            if (IsXboxMirroredCandidate(rel))
+            {
+                xboxRel = rel;
+                xboxSource = ResolveXboxSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
+            }
 
-            var xboxRel = rel.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && !rel.Contains("_xbox", StringComparison.OrdinalIgnoreCase)
-                ? rel.Replace(".ba2", "_xbox.ba2", StringComparison.OrdinalIgnoreCase)
-                : (rel.Contains("_xbox", StringComparison.OrdinalIgnoreCase) ? rel : null);
-            var xboxSource = xboxRel is null ? null : ResolveSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
+            string? tifRel = null;
+            string? tifSource = null;
+            if (rel.StartsWith("Data\\Textures\\", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(tifRoot))
+            {
+                var tifCandidateRel = Path.Combine("TGATextures", Path.ChangeExtension(rel["Data\\Textures\\".Length..], ".tga"));
+                tifSource = ResolveTifSource(tifRoot, tifCandidateRel);
+                if (!string.IsNullOrWhiteSpace(tifSource))
+                {
+                    var relUnderTgaRoot = Path.GetRelativePath(tifRoot, tifSource!).Replace('/', '\\');
+                    tifRel = NormalizeRel(Path.Combine("TGATextures", relUnderTgaRoot));
+                }
+            }
 
-            var tifRel = rel.StartsWith("Data\\Textures\\", StringComparison.OrdinalIgnoreCase)
-                ? Path.Combine("TGATextures", Path.ChangeExtension(rel["Data\\Textures\\".Length..], ".tga"))
-                : null;
-            var tifSource = tifRel is null || string.IsNullOrWhiteSpace(tifRoot)
-                ? null
-                : ResolveTifSource(tifRoot, tifRel);
-
-            result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource));
+            result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource, false));
+            result.HighProbabilityKeep.Add(rel);
         }
 
         foreach (var missing in unresolvedCandidates.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
         {
-            if (!result.Entries.Any(x => string.Equals(x.RelativeDataPath, missing, StringComparison.OrdinalIgnoreCase)) &&
-                !result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
+            if (ShouldForceDiscardDataRelativeToken(missing))
+            {
+                result.UndefinedDiscard.Add(missing);
+                continue;
+            }
+
+            if (parentArchiveIndex.ContainsKey(missing) || result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
+            {
+                result.UndefinedDiscard.Add(missing);
+                continue;
+            }
+
+            if (!result.Entries.Any(x => string.Equals(x.RelativeDataPath, missing, StringComparison.OrdinalIgnoreCase)))
             {
                 result.MissingReferences.Add(missing);
             }
@@ -142,6 +175,13 @@ public sealed class ModDependencyDiscoveryService
         result.ParentLastArchiveCandidate = parentStats.LastArchiveCandidate;
         result.ParentLastArchiveOutcome = parentStats.LastArchiveOutcome;
 
+        foreach (var rel in result.HighProbabilityKeep.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
+            result.DefiniteKeep.Add(rel);
+
+        result.HighProbabilityKeep.Sort(StringComparer.OrdinalIgnoreCase);
+        result.HighProbabilityDiscard.Sort(StringComparer.OrdinalIgnoreCase);
+        result.UndefinedDiscard.Sort(StringComparer.OrdinalIgnoreCase);
+
         timer.Stop();
         result.ScanMs = timer.ElapsedMilliseconds;
         return result;
@@ -161,15 +201,26 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var script in tesResult.ReferencedScripts)
         {
-            TryAddByDataRelative(script, scanRoot, gameRoot, candidates, unresolvedCandidates);
-
-            if (script.EndsWith(".pex", StringComparison.OrdinalIgnoreCase))
+            if (!IsLikelyScriptToken(script))
             {
-                TryAddByDataRelative(script[..^4] + ".psc", scanRoot, gameRoot, candidates, unresolvedCandidates);
+                continue;
             }
-            else if (script.EndsWith(".psc", StringComparison.OrdinalIgnoreCase))
+
+            var scriptCandidates = ExpandScriptCandidates(script).ToList();
+            var resolved = false;
+            foreach (var candidate in scriptCandidates)
             {
-                TryAddByDataRelative(script[..^4] + ".pex", scanRoot, gameRoot, candidates, unresolvedCandidates);
+                if (TryResolveDataRelative(candidate, scanRoot, gameRoot, out var fullPath))
+                {
+                    candidates.Add(fullPath);
+                    resolved = true;
+                    break;
+                }
+            }
+
+            if (!resolved && scriptCandidates.Count > 0)
+            {
+                unresolvedCandidates.Add(NormalizeToDataRelative(scriptCandidates[0]));
             }
         }
 
@@ -236,6 +287,79 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
+
+    private static bool IsLikelyScriptToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return false;
+
+        var normalized = token.Replace('/', '\\').TrimStart('\\').Trim();
+        if (normalized.Length < 3 || normalized.Length > 180)
+            return false;
+
+        var hasLetter = normalized.Any(char.IsLetter);
+        if (!hasLetter)
+            return false;
+
+        foreach (var ch in normalized)
+        {
+            if (char.IsLetterOrDigit(ch))
+                continue;
+
+            if (ch is '_' or '-' or '\\' or ':' or '.')
+                continue;
+
+            return false;
+        }
+
+        var firstSegment = normalized.Split(new[] { '\\', ':' }, 2)[0];
+        if (string.IsNullOrWhiteSpace(firstSegment) || firstSegment.Length < 2)
+            return false;
+
+        return true;
+    }
+
+    private static IEnumerable<string> ExpandScriptCandidates(string scriptToken)
+    {
+        if (string.IsNullOrWhiteSpace(scriptToken))
+            yield break;
+
+        var normalized = scriptToken.Replace('/', '\\').TrimStart('\\').Trim();
+
+        // ScriptName token style in plugins: Namespace:Folder:ScriptName
+        if (normalized.Contains(':'))
+        {
+            normalized = normalized.Replace(':', '\\');
+            yield return Path.Combine("Data", "Scripts", normalized + ".pex");
+            yield return Path.Combine("Data", "Scripts", "Source", normalized + ".psc");
+            yield break;
+        }
+
+        if (normalized.EndsWith(".pex", StringComparison.OrdinalIgnoreCase) || normalized.EndsWith(".psc", StringComparison.OrdinalIgnoreCase))
+        {
+            string rel = normalized.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase)
+                ? normalized
+                : normalized.StartsWith("Scripts\\", StringComparison.OrdinalIgnoreCase)
+                    ? Path.Combine("Data", normalized)
+                    : Path.Combine("Data", "Scripts", normalized);
+
+            yield return rel;
+
+            if (rel.EndsWith(".pex", StringComparison.OrdinalIgnoreCase))
+            {
+                var stem = rel[..^4];
+                yield return stem + ".psc";
+                yield return stem.Replace("Data\\Scripts\\", "Data\\Scripts\\Source\\", StringComparison.OrdinalIgnoreCase) + ".psc";
+            }
+            else
+            {
+                var stem = rel[..^4];
+                yield return stem + ".pex";
+                yield return stem.Replace("Data\\Scripts\\Source\\", "Data\\Scripts\\", StringComparison.OrdinalIgnoreCase) + ".pex";
+            }
+        }
+    }
+
     private void DiscoverMatTextures(string matPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
         try
@@ -259,7 +383,7 @@ public sealed class ModDependencyDiscoveryService
     }
 
 
-    private static void DiscoverConventionCandidates(string pluginFile, string scanRoot, string modName, HashSet<string> candidates)
+    private static void DiscoverConventionCandidates(string pluginFile, string scanRoot, string gameRoot, string modName, HashSet<string> candidates)
     {
         var pluginName = Path.GetFileName(pluginFile);
         var pluginStem = Path.GetFileNameWithoutExtension(pluginFile);
@@ -282,16 +406,51 @@ public sealed class ModDependencyDiscoveryService
             }
         }
 
-        foreach (var textureRoot in new[] { Path.Combine(scanRoot, "Textures", pluginName), Path.Combine(scanRoot, "Textures", pluginStem), Path.Combine(scanRoot, "Textures", modName) })
-        {
-            if (!Directory.Exists(textureRoot))
-            {
-                continue;
-            }
+        DiscoverInterfaceIconCandidates(scanRoot, gameRoot, pluginStem, pluginName, modName, candidates);
+    }
 
-            foreach (var dds in Directory.EnumerateFiles(textureRoot, "*.dds", SearchOption.AllDirectories))
+    private static void DiscoverInterfaceIconCandidates(
+        string scanRoot,
+        string? gameRoot,
+        string pluginStem,
+        string pluginName,
+        string modName,
+        HashSet<string> candidates)
+    {
+        var roots = new List<string> { scanRoot };
+        if (!string.IsNullOrWhiteSpace(gameRoot))
+        {
+            roots.Add(Path.Combine(gameRoot, "Data"));
+        }
+
+        var bucketNames = new[] { "InventoryIcons", "ShipBuilderIcons", "WorkshopIcons" };
+        var idCandidates = new[]
+        {
+            pluginName,
+            pluginStem,
+            modName,
+            pluginStem + ".esm",
+            pluginStem + ".esp",
+            modName + ".esm",
+            modName + ".esp"
+        }
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+        foreach (var dataRoot in roots.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (var bucket in bucketNames)
             {
-                candidates.Add(dds);
+                foreach (var id in idCandidates)
+                {
+                    var root = Path.Combine(dataRoot, "Textures", "Interface", bucket, id);
+                    if (!Directory.Exists(root)) continue;
+
+                    foreach (var dds in Directory.EnumerateFiles(root, "*.dds", SearchOption.AllDirectories))
+                    {
+                        candidates.Add(dds);
+                    }
+                }
             }
         }
     }
@@ -332,6 +491,23 @@ public sealed class ModDependencyDiscoveryService
             .Where(File.Exists)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        // Fallback: when INI archive list is unavailable, index all BA2 files under Data
+        // (except archives that belong to the mod being scanned) so parent/base matches still work.
+        if (listedArchives.Count == 0)
+        {
+            var currentModPrefixes = pluginFiles
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            listedArchives = Directory.EnumerateFiles(scanRoot, "*.ba2", SearchOption.TopDirectoryOnly)
+                .Where(path => !currentModPrefixes.Any(prefix =>
+                    Path.GetFileName(path).StartsWith(prefix + " - ", StringComparison.OrdinalIgnoreCase)))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
 
         foreach (var listedArchive in listedArchives)
         {
@@ -484,8 +660,34 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
+    private static bool ShouldForceDiscardDataRelativeToken(string relDataPath)
+    {
+        if (string.IsNullOrWhiteSpace(relDataPath))
+            return true;
+
+        var normalized = NormalizeToDataRelative(relDataPath);
+
+        // NIF descriptor/tweak fields (for example "BSMaterial::...") are not asset paths.
+        if (normalized.Contains("::", StringComparison.Ordinal))
+            return true;
+
+        // Resource-handle style pseudo-paths (for example "res:112BA342:...") are identifiers,
+        // not loose-file paths we can resolve/copy.
+        if (normalized.StartsWith("Data\\Textures\\res:", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Windows file names cannot contain ':'; treat these as malformed parse artifacts.
+        return normalized.Contains(':');
+    }
+
     private static void TryAddByDataRelative(string relDataPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
+        if (ShouldForceDiscardDataRelativeToken(relDataPath))
+        {
+            unresolvedCandidates.Add(NormalizeToDataRelative(relDataPath));
+            return;
+        }
+
         if (TryResolveDataRelative(relDataPath, scanRoot, gameRoot, out var fullPath))
         {
             candidates.Add(fullPath);
@@ -537,6 +739,63 @@ public sealed class ModDependencyDiscoveryService
         {
             var rel = full[gameData.Length..].Replace('/', '\\');
             return NormalizeRel(Path.Combine("Data", rel));
+        }
+
+        return null;
+    }
+
+    private static bool IsXboxMirroredCandidate(string relDataPath)
+    {
+        if (string.IsNullOrWhiteSpace(relDataPath)) return false;
+        if (relDataPath.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase)) return false;
+
+        return relDataPath.StartsWith("Data\\Textures\\", StringComparison.OrdinalIgnoreCase)
+            || relDataPath.StartsWith("Data\\Sound\\", StringComparison.OrdinalIgnoreCase);
+    }
+
+
+    private static string? ResolveXboxSourceFromDataRelative(string scanRoot, string gameRoot, string relDataPath)
+    {
+        var rel = relDataPath.Replace('/', '\\').TrimStart('\\');
+        if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+        {
+            rel = Path.Combine("Data", rel);
+        }
+
+        var relUnderData = rel["Data\\".Length..];
+        var candidateRoots = new[]
+        {
+            Path.Combine(Path.GetDirectoryName(scanRoot) ?? scanRoot, "XBOX", "Data"),
+            Path.Combine(gameRoot, "XBOX", "Data"),
+            Path.GetFullPath(Path.Combine(gameRoot, "..", "XBOX", "Data"))
+        }
+        .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var root in candidateRoots)
+        {
+            try
+            {
+                var full = Path.GetFullPath(Path.Combine(root, relUnderData));
+                var normalizedRoot = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    + Path.DirectorySeparatorChar;
+                if (!full.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (File.Exists(full))
+                {
+                    var marker = $"{Path.DirectorySeparatorChar}XBOX{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}";
+                    var fullNormalized = full.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                    if (fullNormalized.Contains(marker, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return full;
+                    }
+                }
+            }
+            catch
+            {
+            }
         }
 
         return null;
