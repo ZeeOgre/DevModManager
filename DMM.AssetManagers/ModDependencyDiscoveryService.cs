@@ -89,7 +89,8 @@ public sealed class ModDependencyDiscoveryService
             DiscoverConventionCandidates(plugin, scanRoot, gameRoot, modName, discoveredCandidates);
         }
 
-        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats);
+        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats, out var catalog);
+        ExportParentCatalogCsv(modName, catalog, parentArchiveIndex);
         var tifRoot = ResolveTifRoot(gameRoot);
         var result = new ModDependencyDiscoveryResult();
 
@@ -480,7 +481,7 @@ public sealed class ModDependencyDiscoveryService
             .ToList();
     }
 
-    private static Dictionary<string, Ba2Entry> BuildParentArchiveIndex(string scanRoot, string gameRoot, IReadOnlyList<string> pluginFiles, out BA2Archive.Ba2IndexBuildStats stats)
+    private static Dictionary<string, Ba2Entry> BuildParentArchiveIndex(string scanRoot, string gameRoot, IReadOnlyList<string> pluginFiles, out BA2Archive.Ba2IndexBuildStats stats, out ParentCatalogSources catalogSources)
     {
         var masterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var plugin in pluginFiles)
@@ -567,7 +568,124 @@ public sealed class ModDependencyDiscoveryService
         stats.IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize);
         stats.EstimatedRecordBytes = merged.Sum(x => 64L + (x.Key?.Length ?? 0) * sizeof(char));
 
+        catalogSources = new ParentCatalogSources(masterNames, listedArchives, zipCandidates);
         return merged;
+    }
+
+
+
+    private sealed record ParentCatalogSources(
+        IReadOnlyCollection<string> MasterNames,
+        IReadOnlyCollection<string> ArchivePaths,
+        IReadOnlyCollection<string> ZipPaths);
+
+    private static void ExportParentCatalogCsv(string modName, ParentCatalogSources catalog, IReadOnlyDictionary<string, Ba2Entry> index)
+    {
+        try
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (string.IsNullOrWhiteSpace(localAppData))
+            {
+                return;
+            }
+
+            var exportRoot = Path.Combine(localAppData, "zeeogre", "devmodmanager");
+            Directory.CreateDirectory(exportRoot);
+
+            var safeModName = string.IsNullOrWhiteSpace(modName)
+                ? "unknown-mod"
+                : string.Join("_", modName.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
+            if (string.IsNullOrWhiteSpace(safeModName))
+            {
+                safeModName = "unknown-mod";
+            }
+
+            var exportPath = Path.Combine(exportRoot, $"{safeModName}_parentcatalog.csv");
+            using var writer = new StreamWriter(exportPath, false);
+
+            WriteSection(writer, "Section 1 - Parent Mods",
+                catalog.MasterNames
+                    .Where(x => !IsBaseGameMaster(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 2 - Basegame Mods",
+                catalog.MasterNames
+                    .Where(IsBaseGameMaster)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 3 - Parent Archives",
+                catalog.ArchivePaths
+                    .Where(x => string.Equals(ClassifyArchiveHitKind(x), "parent-archive", StringComparison.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 4 - Basegame Archives",
+                catalog.ArchivePaths
+                    .Where(x => string.Equals(ClassifyArchiveHitKind(x), "basegame-archive", StringComparison.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 5 - Creations Zip",
+                catalog.ZipPaths
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 6 - File Catalog",
+                index
+                    .OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[]
+                    {
+                        x.Key,
+                        x.Value.ArchivePath,
+                        ClassifyArchiveHitKind(x.Value.ArchivePath)
+                    }),
+                "filename", "source", "source_type");
+        }
+        catch
+        {
+            // Debug export should never block dependency discovery.
+        }
+    }
+
+    private static bool IsBaseGameMaster(string name)
+    {
+        var fileName = Path.GetFileName(name);
+        return fileName.StartsWith("Starfield", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void WriteSection(StreamWriter writer, string title, IEnumerable<string[]> rows, params string[]? header)
+    {
+        writer.WriteLine(EscapeCsv(title));
+
+        if (header is { Length: > 0 })
+        {
+            writer.WriteLine(string.Join(',', header.Select(EscapeCsv)));
+        }
+
+        foreach (var row in rows)
+        {
+            writer.WriteLine(string.Join(',', row.Select(EscapeCsv)));
+        }
+
+        writer.WriteLine();
+    }
+
+    private static string EscapeCsv(string? value)
+    {
+        var text = value ?? string.Empty;
+        if (!text.Contains('"') && !text.Contains(',') && !text.Contains('\n') && !text.Contains('\r'))
+        {
+            return text;
+        }
+
+        return $"\"{text.Replace("\"", "\"\"")}\"";
     }
 
     private static string ClassifyArchiveHitKind(string archivePath)
