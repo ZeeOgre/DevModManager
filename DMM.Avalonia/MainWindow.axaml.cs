@@ -504,21 +504,28 @@ public partial class MainWindow : Window
 
     private void OpenGameFolder_Click(object? sender, RoutedEventArgs e)
     {
-        var folder = _viewModel.SelectedGameFolder;
-        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+        var selected = _viewModel.SelectedGameFolder;
+        if (string.IsNullOrWhiteSpace(selected) || !Directory.Exists(selected))
         {
             _viewModel.StatusMessage = "Open game folder failed: selected folder is missing.";
             return;
+        }
+
+        var folderToOpen = selected;
+        var contentRoot = Path.Combine(selected, "Content");
+        if (Directory.Exists(Path.Combine(contentRoot, "Data")))
+        {
+            folderToOpen = contentRoot;
         }
 
         try
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = folder,
+                FileName = folderToOpen,
                 UseShellExecute = true
             });
-            _viewModel.StatusMessage = $"Opened game folder: {folder}";
+            _viewModel.StatusMessage = $"Opened game folder: {folderToOpen}";
         }
         catch (Exception ex)
         {
@@ -974,7 +981,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     }
                 }
 
-                ModMetadataService.WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries);
+                ModMetadataService.WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries, discovery);
 
                 var relativeSubmodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
                     .Replace('\\', '/');
@@ -1375,9 +1382,7 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 foreach (var app in result.Apps)
                 {
-                    var installPath = app.InstallFolders.InstallFolder?.Path
-                        ?? app.InstallFolders.ContentFolder?.Path
-                        ?? app.InstallFolders.DataFolder?.Path;
+                    var installPath = ResolvePreferredInstallPath(app);
 
                     if (string.IsNullOrWhiteSpace(installPath))
                     {
@@ -1413,6 +1418,27 @@ public sealed class MainWindowViewModel : NotifyBase
                 .ThenBy(x => x.GameStore)
                 .ToList();
         }, ct);
+
+        static string? ResolvePreferredInstallPath(AppInstallSnapshot app)
+        {
+            var install = app.InstallFolders.InstallFolder?.Path;
+            var content = app.InstallFolders.ContentFolder?.Path;
+            var data = app.InstallFolders.DataFolder?.Path;
+
+            bool hasData(string? p) => !string.IsNullOrWhiteSpace(p) && Directory.Exists(Path.Combine(p, "Data"));
+            bool hasExe(string? p) => !string.IsNullOrWhiteSpace(p) && !string.IsNullOrWhiteSpace(app.ExecutableName) && File.Exists(Path.Combine(p, app.ExecutableName));
+
+            // Prefer content roots when they look like the real game root (Xbox/GamePass pattern).
+            if (!string.IsNullOrWhiteSpace(content) && (hasData(content) || hasExe(content)))
+                return content;
+
+            if (!string.IsNullOrWhiteSpace(install) && (hasData(install) || hasExe(install)))
+                return install;
+
+            if (!string.IsNullOrWhiteSpace(content)) return content;
+            if (!string.IsNullOrWhiteSpace(install)) return install;
+            return data;
+        }
 
         (ManagedGame? Game, bool IsDlc) MatchManagedGame(AppInstallSnapshot app)
         {
