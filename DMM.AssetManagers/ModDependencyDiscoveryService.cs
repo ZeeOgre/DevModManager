@@ -16,7 +16,8 @@ public sealed record ModDependencyEntry(
     string? XboxRelativePath,
     string? XboxSourcePath,
     string? TifRelativePath,
-    string? TifSourcePath);
+    string? TifSourcePath,
+    bool ParentArchiveMatch);
 
 public sealed class ModDependencyDiscoveryResult
 {
@@ -104,6 +105,7 @@ public sealed class ModDependencyDiscoveryService
                 result.CollisionCount++;
                 result.ParentArchiveReferences.Add(rel);
                 result.HighProbabilityDiscard.Add(rel);
+                result.Entries.Add(new ModDependencyEntry(rel, source, null, null, null, null, true));
                 continue;
             }
             string? xboxRel = null;
@@ -127,7 +129,7 @@ public sealed class ModDependencyDiscoveryService
                 }
             }
 
-            result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource));
+            result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource, false));
             result.HighProbabilityKeep.Add(rel);
         }
 
