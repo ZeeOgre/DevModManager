@@ -545,14 +545,7 @@ public sealed class ModDependencyDiscoveryService
             }
         }
 
-        var zipCandidates = new[]
-        {
-            Path.Combine(gameRoot, "ContentResources.zip"),
-            Path.Combine(Directory.GetParent(gameRoot)?.FullName ?? gameRoot, "ContentResources.zip")
-        }
-        .Where(File.Exists)
-        .Distinct(StringComparer.OrdinalIgnoreCase)
-        .ToList();
+        var zipCandidates = DiscoverCreationKitZipCandidates(gameRoot);
 
         if (zipCandidates.Count > 0)
         {
@@ -686,6 +679,51 @@ public sealed class ModDependencyDiscoveryService
         }
 
         return $"\"{text.Replace("\"", "\"\"")}\"";
+    }
+
+    private static List<string> DiscoverCreationKitZipCandidates(string gameRoot)
+    {
+        var candidateRoots = new[]
+        {
+            gameRoot,
+            Directory.GetParent(gameRoot)?.FullName ?? gameRoot,
+            Path.Combine(gameRoot, "Tools"),
+            Path.Combine(gameRoot, "tools")
+        }
+        .Where(x => !string.IsNullOrWhiteSpace(x))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+        var candidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var root in candidateRoots)
+        {
+            if (!Directory.Exists(root))
+            {
+                continue;
+            }
+
+            var canonical = Path.Combine(root, "ContentResources.zip");
+            if (File.Exists(canonical))
+            {
+                candidates.Add(canonical);
+            }
+
+            try
+            {
+                foreach (var zip in Directory.EnumerateFiles(root, "*.zip", SearchOption.TopDirectoryOnly))
+                {
+                    candidates.Add(zip);
+                }
+            }
+            catch
+            {
+                // Continue scanning remaining roots.
+            }
+        }
+
+        return candidates
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static string ClassifyArchiveHitKind(string archivePath)
