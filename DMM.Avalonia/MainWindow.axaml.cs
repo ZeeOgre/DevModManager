@@ -842,7 +842,7 @@ public sealed class MainWindowViewModel : NotifyBase
             .ToList();
 
             var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
-            preview = new ModDependencyPreview(pluginFiles, ba2Files, discovery);
+            preview = new ModDependencyPreview(pluginFiles, ba2Files, discovery, scanRoot, resolvedGameRoot);
             return true;
         }
         catch (Exception ex)
@@ -1644,6 +1644,8 @@ public sealed class MainWindowViewModel : NotifyBase
 public sealed record ModDependencyPreview(
     IReadOnlyList<string> PluginFiles,
     IReadOnlyList<string> Ba2Files,
-    ModDependencyDiscoveryResult Discovery);
+    ModDependencyDiscoveryResult Discovery,
+    string ScanRoot,
+    string GameRoot);
 
 public sealed record ScanApplyProgress(int CompletedMods, int TotalMods, string Message);

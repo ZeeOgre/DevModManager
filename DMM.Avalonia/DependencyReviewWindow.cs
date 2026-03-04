@@ -21,6 +21,10 @@ public sealed class DependencyReviewWindow : Window
     private readonly ObservableCollection<DependencyReviewItem> _definiteKeep;
     private readonly ObservableCollection<DependencyReviewItem> _maybeKeep;
     private readonly ObservableCollection<DependencyReviewItem> _errors;
+    private readonly HashSet<string> _parentArchiveReferences;
+    private readonly string _scanRoot;
+    private readonly string _gameRoot;
+    private readonly Dictionary<string, string> _archiveHitKinds;
 
     public DependencyReviewWindow(
         string modName,
@@ -29,8 +33,17 @@ public sealed class DependencyReviewWindow : Window
         IReadOnlyList<string> archiveFiles,
         IReadOnlyList<ModDependencyEntry> entries,
         IReadOnlyCollection<string> missingReferences,
-        IReadOnlyCollection<string> undefinedDiscard)
+        IReadOnlyCollection<string> undefinedDiscard,
+        IReadOnlyCollection<string> parentArchiveReferences,
+        string scanRoot,
+        string gameRoot,
+        IReadOnlyDictionary<string, string> archiveHitKinds)
     {
+        _parentArchiveReferences = new HashSet<string>(parentArchiveReferences, StringComparer.OrdinalIgnoreCase);
+        _scanRoot = scanRoot;
+        _gameRoot = gameRoot;
+        _archiveHitKinds = new Dictionary<string, string>(archiveHitKinds, StringComparer.OrdinalIgnoreCase);
+
         Title = $"Dependency Review - {modName}";
         Width = 1300;
         Height = 760;
@@ -44,7 +57,7 @@ public sealed class DependencyReviewWindow : Window
         _maybeKeep = new ObservableCollection<DependencyReviewItem>(entries
             .Where(x => x.ParentArchiveMatch)
             .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new DependencyReviewItem(x.RelativeDataPath, x.SourcePath, false, Brushes.Khaki)));
+            .Select(x => new DependencyReviewItem(x.RelativeDataPath, x.SourcePath, false, ResolveArchiveHitBrush(x.RelativeDataPath, Brushes.Khaki))));
 
         _errors = new ObservableCollection<DependencyReviewItem>(
             missingReferences.OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
@@ -53,7 +66,7 @@ public sealed class DependencyReviewWindow : Window
                 undefinedDiscard
                     .Where(x => !missingReferences.Contains(x, StringComparer.OrdinalIgnoreCase))
                     .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
-                    .Select(x => new DependencyReviewItem(x, "Found in parent/base archive but not present on disk.", false, Brushes.Goldenrod))));
+                    .Select(x => new DependencyReviewItem(x, "Found in parent/base archive but not present on disk.", false, ResolveArchiveHitBrush(x, Brushes.Goldenrod)))));
 
         var modSummary = new TextBlock
         {
@@ -74,6 +87,8 @@ public sealed class DependencyReviewWindow : Window
 
         var addNewButton = new Button { Content = "Add New", HorizontalAlignment = HorizontalAlignment.Left, MinWidth = 100 };
         addNewButton.Click += async (_, _) => await AddNewFromPickerAsync();
+        var refreshButton = new Button { Content = "Refresh Scan", HorizontalAlignment = HorizontalAlignment.Left, MinWidth = 120, Margin = new Thickness(8, 0, 0, 0) };
+        refreshButton.Click += (_, _) => RefreshMissingEntriesFromDisk();
 
         var okButton = new Button { Content = "OK", MinWidth = 90 };
         var cancelButton = new Button { Content = "Cancel", MinWidth = 90 };
@@ -95,9 +110,15 @@ public sealed class DependencyReviewWindow : Window
         Grid.SetRow(metadataText, 1);
         Grid.SetColumnSpan(metadataText, 3);
 
-        body.Children.Add(addNewButton);
-        Grid.SetRow(addNewButton, 2);
-        Grid.SetColumn(addNewButton, 0);
+        var topButtons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 8,
+            Children = { addNewButton, refreshButton }
+        };
+        body.Children.Add(topButtons);
+        Grid.SetRow(topButtons, 2);
+        Grid.SetColumn(topButtons, 0);
 
         var definiteColumn = BuildColumn("Definitely Keep (file exists, no parent match)", _definiteKeep, allowDrop: true);
         var maybeColumn = BuildColumn("Maybe Keep (file exists, matches parent)", _maybeKeep, allowDrop: false);
@@ -194,6 +215,20 @@ public sealed class DependencyReviewWindow : Window
         return border;
     }
 
+    private IBrush ResolveArchiveHitBrush(string relativePath, IBrush fallback)
+    {
+        if (!_archiveHitKinds.TryGetValue(relativePath, out var kind))
+            return fallback;
+
+        return kind switch
+        {
+            "parent-archive" => Brushes.Khaki,
+            "basegame-archive" => Brushes.Orange,
+            "base-ck-zip" => Brushes.DarkOrange,
+            _ => fallback
+        };
+    }
+
     private Control BuildRow(DependencyReviewItem item, bool checkable)
     {
         var panel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
@@ -228,10 +263,17 @@ public sealed class DependencyReviewWindow : Window
 
     private async Task AddNewFromPickerAsync()
     {
+        IStorageFolder? suggestedStart = null;
+        if (!string.IsNullOrWhiteSpace(_scanRoot))
+        {
+            suggestedStart = await StorageProvider.TryGetFolderFromPathAsync(_scanRoot);
+        }
+
         var selected = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select files under Data",
-            AllowMultiple = true
+            AllowMultiple = true,
+            SuggestedStartLocation = suggestedStart
         });
 
         foreach (var file in selected)
@@ -266,6 +308,63 @@ public sealed class DependencyReviewWindow : Window
         }
 
         return Task.CompletedTask;
+    }
+
+    private void RefreshMissingEntriesFromDisk()
+    {
+        var moved = new List<DependencyReviewItem>();
+
+        foreach (var item in _errors.ToList())
+        {
+            if (TryResolveDataRelative(item.RelativePath, out var fullPath))
+            {
+                moved.Add(new DependencyReviewItem(item.RelativePath, fullPath, true,
+                    _parentArchiveReferences.Contains(item.RelativePath) ? ResolveArchiveHitBrush(item.RelativePath, Brushes.Khaki) : Brushes.LightGreen));
+                _errors.Remove(item);
+            }
+        }
+
+        foreach (var item in moved)
+        {
+            if (_parentArchiveReferences.Contains(item.RelativePath))
+            {
+                _maybeKeep.Add(item);
+            }
+            else
+            {
+                _definiteKeep.Add(item);
+            }
+        }
+    }
+
+    private bool TryResolveDataRelative(string relativeDataPath, out string fullPath)
+    {
+        fullPath = string.Empty;
+        if (string.IsNullOrWhiteSpace(relativeDataPath))
+            return false;
+
+        var rel = relativeDataPath.Replace('/', '\\').TrimStart('\\');
+        if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+        {
+            rel = Path.Combine("Data", rel);
+        }
+
+        var underData = rel["Data\\".Length..];
+        var fromScan = Path.Combine(_scanRoot, underData);
+        if (File.Exists(fromScan))
+        {
+            fullPath = fromScan;
+            return true;
+        }
+
+        var fromGame = Path.Combine(_gameRoot, "Data", underData);
+        if (File.Exists(fromGame))
+        {
+            fullPath = fromGame;
+            return true;
+        }
+
+        return false;
     }
 
     private void TryAddDroppedFile(string fullPath)

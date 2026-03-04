@@ -28,6 +28,7 @@ public sealed class ModDependencyDiscoveryResult
     public List<string> HighProbabilityDiscard { get; } = new();
     public List<string> UndefinedDiscard { get; } = new();
     public List<string> DefiniteKeep { get; } = new();
+    public Dictionary<string, string> ArchiveHitKinds { get; } = new(StringComparer.OrdinalIgnoreCase);
     public int CollisionCount { get; set; }
     public int ParentMasterCount { get; set; }
     public int ParentArchiveCount { get; set; }
@@ -106,11 +107,12 @@ public sealed class ModDependencyDiscoveryService
                 continue;
             }
 
-            if (!source.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && parentArchiveIndex.ContainsKey(rel))
+            if (!source.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && parentArchiveIndex.TryGetValue(rel, out var archiveMatchEntry))
             {
                 result.CollisionCount++;
                 result.ParentArchiveReferences.Add(rel);
                 result.HighProbabilityDiscard.Add(rel);
+                result.ArchiveHitKinds[rel] = ClassifyArchiveHitKind(archiveMatchEntry.ArchivePath);
                 result.Entries.Add(new ModDependencyEntry(rel, source, null, null, null, null, true));
                 continue;
             }
@@ -147,8 +149,12 @@ public sealed class ModDependencyDiscoveryService
                 continue;
             }
 
-            if (parentArchiveIndex.ContainsKey(missing) || result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
+            if (parentArchiveIndex.TryGetValue(missing, out var unresolvedArchiveMatch) || result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
             {
+                if (unresolvedArchiveMatch is not null)
+                {
+                    result.ArchiveHitKinds[missing] = ClassifyArchiveHitKind(unresolvedArchiveMatch.ArchivePath);
+                }
                 result.UndefinedDiscard.Add(missing);
                 continue;
             }
@@ -562,6 +568,18 @@ public sealed class ModDependencyDiscoveryService
         stats.EstimatedRecordBytes = merged.Sum(x => 64L + (x.Key?.Length ?? 0) * sizeof(char));
 
         return merged;
+    }
+
+    private static string ClassifyArchiveHitKind(string archivePath)
+    {
+        if (archivePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            return "base-ck-zip";
+
+        var file = Path.GetFileName(archivePath);
+        if (file.StartsWith("Starfield", StringComparison.OrdinalIgnoreCase))
+            return "basegame-archive";
+
+        return "parent-archive";
     }
 
     private static IEnumerable<string> LoadStarfieldArchiveList(string dataRoot)

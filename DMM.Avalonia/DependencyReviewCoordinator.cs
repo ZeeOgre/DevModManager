@@ -35,7 +35,11 @@ internal static class DependencyReviewCoordinator
                 preview.Ba2Files,
                 reviewEntries,
                 preview.Discovery.MissingReferences,
-                preview.Discovery.UndefinedDiscard);
+                preview.Discovery.UndefinedDiscard,
+                preview.Discovery.ParentArchiveReferences,
+                preview.ScanRoot,
+                preview.GameRoot,
+                preview.Discovery.ArchiveHitKinds);
 
             var decision = await dialog.ShowDialog<DependencyReviewDecision?>(owner);
             if (decision is null)
