@@ -118,10 +118,9 @@ public sealed class ModOnboardingGitService
             return true;
         }
 
-        var hasReusableLocalRepo = IsGitWorkingTree(fullSubmodulePath)
-                                   && (error.Contains("A git directory for", StringComparison.OrdinalIgnoreCase)
-                                       || error.Contains("already exists in the index", StringComparison.OrdinalIgnoreCase)
-                                       || error.Contains("already exists and is not a valid git repo", StringComparison.OrdinalIgnoreCase));
+        var hasReusableLocalRepo = error.Contains("A git directory for", StringComparison.OrdinalIgnoreCase)
+                                   || error.Contains("already exists in the index", StringComparison.OrdinalIgnoreCase)
+                                   || error.Contains("already exists and is not a valid git repo", StringComparison.OrdinalIgnoreCase);
         if (!hasReusableLocalRepo)
         {
             return false;
