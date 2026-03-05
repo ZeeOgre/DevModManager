@@ -7,11 +7,14 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace DMM.Core;
 
 public sealed class ModOnboardingGitService
 {
+    private static readonly TimeSpan GitCommandTimeout = TimeSpan.FromMinutes(5);
+
     public bool HasRequiredGitHubSettings(string githubAccount, string githubToken, string githubModRootRepo, out string missing)
     {
         var missingItems = new List<string>();
@@ -61,10 +64,15 @@ public sealed class ModOnboardingGitService
         {
             return false;
         }
-
-        var relativeSubmodulePath = Path.Combine(SanitizePathSegment(gameName), SanitizePathSegment(modName))
+        var fullSubmodulePath = modRepoRoot;
+        var relativeSubmodulePath = Path.GetRelativePath(masterRepoPath, fullSubmodulePath)
             .Replace('\\', '/');
-        var fullSubmodulePath = Path.Combine(masterRepoPath, SanitizePathSegment(gameName), SanitizePathSegment(modName));
+        if (relativeSubmodulePath.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relativeSubmodulePath))
+        {
+            error = $"mod repo path '{modRepoRoot}' is outside repo root '{masterRepoPath}'";
+            return false;
+        }
+
         Directory.CreateDirectory(Path.GetDirectoryName(fullSubmodulePath) ?? masterRepoPath);
 
         if (!IsGitWorkingTree(fullSubmodulePath))
@@ -372,6 +380,8 @@ public sealed class ModOnboardingGitService
             UseShellExecute = false,
             CreateNoWindow = true
         };
+        psi.Environment["GIT_TERMINAL_PROMPT"] = "0";
+        psi.Environment["GCM_INTERACTIVE"] = "Never";
 
         using var process = Process.Start(psi);
         if (process is null)
@@ -380,9 +390,27 @@ public sealed class ModOnboardingGitService
             return false;
         }
 
-        var stdout = process.StandardOutput.ReadToEnd().Trim();
-        var stderr = process.StandardError.ReadToEnd().Trim();
-        process.WaitForExit();
+        var stdoutTask = process.StandardOutput.ReadToEndAsync();
+        var stderrTask = process.StandardError.ReadToEndAsync();
+
+        if (!process.WaitForExit((int)GitCommandTimeout.TotalMilliseconds))
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch
+            {
+                // Best effort; if this fails, return timeout error anyway.
+            }
+
+            error = $"git command timed out after {GitCommandTimeout.TotalMinutes:0} minutes: git {arguments}";
+            return false;
+        }
+
+        Task.WaitAll(stdoutTask, stderrTask);
+        var stdout = stdoutTask.Result.Trim();
+        var stderr = stderrTask.Result.Trim();
         if (process.ExitCode == 0)
         {
             error = string.Empty;

@@ -428,7 +428,7 @@ public partial class MainWindow : Window
 
         try
         {
-            await _viewModel.ApplyScanSelections(selections, progress, reviewSelections);
+            await Task.Run(async () => await _viewModel.ApplyScanSelections(selections, progress, reviewSelections));
         }
         finally
         {
@@ -587,6 +587,12 @@ public partial class MainWindow : Window
     private void GitDown_Click(object? sender, RoutedEventArgs e) =>
         _viewModel.StatusMessage = "Git control: pull/down requested.";
 
+    private void SortByMod_Click(object? sender, RoutedEventArgs e) => _viewModel.ToggleSortByModName();
+
+    private void SortByPrimaryPlugin_Click(object? sender, RoutedEventArgs e) => _viewModel.ToggleSortByPrimaryPlugin();
+
+    private void SortByStage_Click(object? sender, RoutedEventArgs e) => _viewModel.ToggleSortByCurrentStage();
+
     private async void OpenModWindow_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { CommandParameter: ModListItem mod })
@@ -623,6 +629,13 @@ public partial class MainWindow : Window
 
 public sealed class MainWindowViewModel : NotifyBase
 {
+    private enum ModSortColumn
+    {
+        ModName,
+        PrimaryPlugin,
+        Stage
+    }
+
     private readonly GameSetupRepository _repository = new();
     private readonly ProgramWideSettingsStore _settingsStore = new();
     private readonly ModOnboardingGitService _gitService = new();
@@ -635,6 +648,13 @@ public sealed class MainWindowViewModel : NotifyBase
     public ObservableCollection<ModListItem> Mods { get; } = new();
     public ObservableCollection<ManagedGame> ManagedGames { get; } = new();
     public ObservableCollection<GameInstallRecord> GameInstalls { get; } = new();
+
+    private ModSortColumn _sortColumn = ModSortColumn.ModName;
+    private bool _sortAscending = true;
+
+    public string ModHeaderText => BuildSortHeader("Mod", ModSortColumn.ModName);
+    public string PrimaryPluginHeaderText => BuildSortHeader("Primary Plugin", ModSortColumn.PrimaryPlugin);
+    public string CurrentStageHeaderText => BuildSortHeader("Current Stage", ModSortColumn.Stage);
 
     private string? _selectedGameFolder;
     public string? SelectedGameFolder
@@ -655,6 +675,53 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         get => _statusMessage;
         set => SetField(ref _statusMessage, value);
+    }
+
+    public void ToggleSortByModName() => ToggleSort(ModSortColumn.ModName);
+
+    public void ToggleSortByPrimaryPlugin() => ToggleSort(ModSortColumn.PrimaryPlugin);
+
+    public void ToggleSortByCurrentStage() => ToggleSort(ModSortColumn.Stage);
+
+    private void ToggleSort(ModSortColumn column)
+    {
+        if (_sortColumn == column)
+        {
+            _sortAscending = !_sortAscending;
+        }
+        else
+        {
+            _sortColumn = column;
+            _sortAscending = true;
+        }
+
+        OnPropertyChanged(nameof(ModHeaderText));
+        OnPropertyChanged(nameof(PrimaryPluginHeaderText));
+        OnPropertyChanged(nameof(CurrentStageHeaderText));
+        RebuildMods();
+    }
+
+    private string BuildSortHeader(string label, ModSortColumn column)
+    {
+        if (_sortColumn != column)
+        {
+            return label;
+        }
+
+        return _sortAscending ? $"{label} ▲" : $"{label} ▼";
+    }
+
+    private IEnumerable<ManagedModRecord> ApplyModSort(IEnumerable<ManagedModRecord> mods)
+    {
+        return (_sortColumn, _sortAscending) switch
+        {
+            (ModSortColumn.PrimaryPlugin, true) => mods.OrderBy(x => x.PrimaryPlugin, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            (ModSortColumn.PrimaryPlugin, false) => mods.OrderByDescending(x => x.PrimaryPlugin, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            (ModSortColumn.Stage, true) => mods.OrderBy(x => x.Stage, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            (ModSortColumn.Stage, false) => mods.OrderByDescending(x => x.Stage, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            (ModSortColumn.ModName, true) => mods.OrderBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            _ => mods.OrderByDescending(x => x.ModName, StringComparer.OrdinalIgnoreCase)
+        };
     }
 
     public static MainWindowViewModel CreateSample()
@@ -896,9 +963,21 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         Mods.Clear();
 
+        async Task SetStatusAsync(string message)
+        {
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                StatusMessage = message;
+            }
+            else
+            {
+                await Dispatcher.UIThread.InvokeAsync(() => StatusMessage = message);
+            }
+        }
+
         if (string.IsNullOrWhiteSpace(gameFolder))
         {
-            StatusMessage = "Scan apply failed: no game folder selected.";
+            await SetStatusAsync("Scan apply failed: no game folder selected.");
             return;
         }
 
@@ -911,13 +990,13 @@ public sealed class MainWindowViewModel : NotifyBase
 
         if (install?.ManagedGame is null)
         {
-            StatusMessage = "Scan apply failed: selected game folder is not mapped to a managed base game install.";
+            await SetStatusAsync("Scan apply failed: selected game folder is not mapped to a managed base game install.");
             return;
         }
 
         if (!TryResolveGameDataRoot(selectedGameFolder, out var scanRoot, out var resolvedGameRoot))
         {
-            StatusMessage = $"Scan apply failed: game data folder not found under '{selectedGameFolder}'.";
+            await SetStatusAsync($"Scan apply failed: game data folder not found under '{selectedGameFolder}'.");
             return;
         }
 
@@ -928,7 +1007,7 @@ public sealed class MainWindowViewModel : NotifyBase
 
         if (!TryValidateGitHubOnboardingSettings(out var settingsMessage))
         {
-            StatusMessage = settingsMessage;
+            await SetStatusAsync(settingsMessage);
             return;
         }
 
@@ -937,8 +1016,8 @@ public sealed class MainWindowViewModel : NotifyBase
         var skipped = 0;
         var bootstrapRequired = 0;
         var failed = 0;
-        var row = 0;
         var bootstrapPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var failureDetails = new List<string>();
         var dependencyFilesIncluded = 0;
         var dependencyCollisionCount = 0;
         var dependencyMissingCount = 0;
@@ -961,43 +1040,99 @@ public sealed class MainWindowViewModel : NotifyBase
         var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
         var completedMods = 0;
 
-        foreach (var selection in orderedSelections)
+        Task<(bool SourceExists, ModDependencyDiscoveryResult? Discovery, List<ModDependencyEntry> InitialEntries, string? Error)> StartDependencyScanTask(GameFolderStageSelection selection)
         {
-            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Preparing {selection.ModName}"));
+            return Task.Run(() =>
+            {
+                try
+                {
+                    var sourcePath = Path.Combine(scanRoot, selection.PluginName);
+                    if (!File.Exists(sourcePath))
+                    {
+                        return (false, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), (string?)null);
+                    }
 
-            var sourcePath = Path.Combine(scanRoot, selection.PluginName);
-            if (!File.Exists(sourcePath))
+                    var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
+                    var initialEntries = discovery.Entries
+                        .Where(x => !x.ParentArchiveMatch)
+                        .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    if (reviewSelections is not null && reviewSelections.TryGetValue(BuildSelectionReviewKey(selection), out var reviewedKeep))
+                    {
+                        initialEntries = discovery.Entries
+                            .Where(x => IsPluginOrArchiveRelativePath(x.RelativeDataPath) || reviewedKeep.Contains(x.RelativeDataPath))
+                            .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
+                            .ToList();
+                    }
+
+                    return (true, discovery, initialEntries, (string?)null);
+                }
+                catch (Exception ex)
+                {
+                    return (true, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), ex.Message);
+                }
+            });
+        }
+
+        async Task ReportProgressAsync(string message)
+        {
+            await SetStatusAsync(message);
+            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, message));
+            await Task.Yield();
+        }
+
+        Task<(bool SourceExists, ModDependencyDiscoveryResult? Discovery, List<ModDependencyEntry> InitialEntries, string? Error)>? pendingScanTask =
+            orderedSelections.Count > 0 ? StartDependencyScanTask(orderedSelections[0]) : null;
+
+        for (var selectionIndex = 0; selectionIndex < orderedSelections.Count; selectionIndex++)
+        {
+            var selection = orderedSelections[selectionIndex];
+            await ReportProgressAsync($"Preparing {selection.ModName}");
+            await ReportProgressAsync($"Scanning {selection.ModName} dependencies (verify discovered files)");
+
+            var (sourceExists, discovery, initialEntries, scanError) = pendingScanTask is null
+                ? (false, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), "internal scan task was not initialized")
+                : await pendingScanTask;
+
+            pendingScanTask = selectionIndex + 1 < orderedSelections.Count
+                ? StartDependencyScanTask(orderedSelections[selectionIndex + 1])
+                : null;
+
+            if (!sourceExists)
             {
                 skipped++;
+                completedMods++;
+                failureDetails.Add($"{selection.ModName}: source plugin file '{selection.PluginName}' was not found under {scanRoot}");
+                await ReportProgressAsync($"Skipped {selection.ModName}: source plugin file was not found");
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(scanError) || discovery is null)
+            {
+                failed++;
+                completedMods++;
+                failureDetails.Add($"{selection.ModName}: dependency scan failed ({scanError ?? "unknown error"})");
+                await ReportProgressAsync($"Failed scanning {selection.ModName}: {scanError ?? "unknown error"}");
                 continue;
             }
 
             try
             {
                 var modRepoRoot = ModRepositoryPathService.BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization == RepoOrganizationStrategy.RepoPerMod);
-                progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Scanning {selection.ModName} dependencies, please verify the discovered files"));
-                var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
-                var initialEntries = discovery.Entries
-                    .Where(x => !x.ParentArchiveMatch)
-                    .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                if (reviewSelections is not null && reviewSelections.TryGetValue(BuildSelectionReviewKey(selection), out var reviewedKeep))
-                {
-                    initialEntries = discovery.Entries
-                        .Where(x => IsPluginOrArchiveRelativePath(x.RelativeDataPath) || reviewedKeep.Contains(x.RelativeDataPath))
-                        .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-                        .ToList();
-                }
-
+                
                 if (initialEntries.Count == 0)
                 {
                     skipped++;
+                    completedMods++;
+                    failureDetails.Add($"{selection.ModName}: no dependency files were selected to stage");
+                    await ReportProgressAsync($"Skipped {selection.ModName}: no dependency files selected");
                     continue;
                 }
 
                 if (!_gitService.IsGitWorkingTree(modRepoRoot))
                 {
+                    await ReportProgressAsync($"Bootstrapping git repo for {selection.ModName}");
                     var bootstrapped = _gitService.TryBootstrapModRepository(
                         settings.GitHubAccount,
                         settings.GitHubToken,
@@ -1011,17 +1146,22 @@ public sealed class MainWindowViewModel : NotifyBase
                     {
                         bootstrapRequired++;
                         bootstrapPaths.Add($"{modRepoRoot} ({bootstrapError})");
+                        failureDetails.Add($"{selection.ModName}: bootstrap failed ({bootstrapError})");
                         skipped++;
+                        await ReportProgressAsync($"Skipped {selection.ModName}: bootstrap failed ({bootstrapError})");
                         continue;
                     }
                 }
 
                 var targetStageBranch = _gitService.ToStageBranch(selection.Stage);
+                await ReportProgressAsync($"Checking out {targetStageBranch} for {selection.ModName}");
                 if (!_gitService.EnsureBranchCheckedOut(modRepoRoot, targetStageBranch, out var branchError))
                 {
                     bootstrapRequired++;
                     bootstrapPaths.Add($"{modRepoRoot} ({branchError})");
+                    failureDetails.Add($"{selection.ModName}: failed to checkout branch {targetStageBranch} ({branchError})");
                     skipped++;
+                    await ReportProgressAsync($"Skipped {selection.ModName}: branch checkout failed ({branchError})");
                     continue;
                 }
 
@@ -1047,7 +1187,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 parentLastArchiveOutcome = discovery.ParentLastArchiveOutcome ?? parentLastArchiveOutcome;
                 dependencyScanMsTotal += discovery.ScanMs;
 
-                progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Copying {selection.ModName} files"));
+                await ReportProgressAsync($"Copying {selection.ModName} files");
 
                 foreach (var entry in initialEntries)
                 {
@@ -1092,13 +1232,16 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 ModMetadataService.WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries, discovery);
 
-                var relativeSubmodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
+                var relativeSubmodulePath = Path.GetRelativePath(repoRoot, modRepoRoot)
                     .Replace('\\', '/');
+                await ReportProgressAsync($"Committing and syncing {selection.ModName} ({targetStageBranch})");
                 if (!_gitService.CommitAndPushOnboardingChanges(repoRoot, modRepoRoot, relativeSubmodulePath, targetStageBranch, selection.ModName, out var commitError))
                 {
                     bootstrapRequired++;
                     bootstrapPaths.Add($"{modRepoRoot} ({commitError})");
+                    failureDetails.Add($"{selection.ModName}: commit/push failed ({commitError})");
                     skipped++;
+                    await ReportProgressAsync($"Skipped {selection.ModName}: commit/push failed ({commitError})");
                     continue;
                 }
 
@@ -1111,8 +1254,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     modRepoRoot);
 
                 var modRepoName = $"{_gitService.ToSlug(install.ManagedGame.Name)}-{_gitService.ToSlug(selection.ModName)}";
-                var submodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
-                    .Replace('\\', '/');
+                var submodulePath = relativeSubmodulePath;
                 _catalogService.UpsertEntry(repoRoot, new SharedCatalogEntry(
                     install.ManagedGame.Name,
                     selection.ModName,
@@ -1122,28 +1264,22 @@ public sealed class MainWindowViewModel : NotifyBase
                     $"https://github.com/{settings.GitHubAccount}/{modRepoName}.git",
                     targetStageBranch));
 
-                Mods.Add(new ModListItem(
-                    selection.ModName,
-                    selection.PluginName,
-                    selection.Stage,
-                    install.ManagedGame.Name,
-                    string.Empty,
-                    string.Empty,
-                    new SolidColorBrush(Color.Parse(row++ % 2 == 0 ? "#2B2B2B" : "#343434"))));
                 created++;
             }
-            catch
+            catch (Exception ex)
             {
                 failed++;
+                failureDetails.Add($"{selection.ModName}: unexpected exception ({ex.Message})");
+                await ReportProgressAsync($"Failed {selection.ModName}; continuing with remaining mods ({ex.Message})");
             }
 
             completedMods++;
-            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Completed {selection.ModName}"));
+            await ReportProgressAsync($"Completed {selection.ModName}");
         }
 
         if (selections.Count == 0)
         {
-            StatusMessage = "Scan apply complete. All discovered candidates were ignored.";
+            await SetStatusAsync("Scan apply complete. All discovered candidates were ignored.");
             return;
         }
 
@@ -1151,11 +1287,13 @@ public sealed class MainWindowViewModel : NotifyBase
             ? string.Empty
             : $" First missing repo: {bootstrapPaths.First()}";
 
-        StatusMessage =
-            $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, ba2 archives={parentArchiveCountMax}, zips={parentZipCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax}, est record bytes={parentEstimatedRecordBytesMax}, attempted archives={parentAttemptedArchiveCountMax}, non-ba2 skipped={parentNonBa2CountMax}, read-failures={parentReadFailureCountMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{(string.IsNullOrWhiteSpace(parentNonBa2Sample) ? string.Empty : $" Sample skipped candidate: {parentNonBa2Sample}")}{(string.IsNullOrWhiteSpace(parentAttemptedArchiveSample) ? string.Empty : $" Sample attempted archive: {parentAttemptedArchiveSample}")}{(string.IsNullOrWhiteSpace(parentLastArchiveCandidate) ? string.Empty : $" Last archive candidate: {parentLastArchiveCandidate} ({parentLastArchiveOutcome ?? "unknown outcome"})")}{bootstrapPreview}";
+        var failurePreview = failureDetails.Count == 0
+            ? string.Empty
+            : $" Failure details: {string.Join(" | ", failureDetails.Take(3))}{(failureDetails.Count > 3 ? $" (+{failureDetails.Count - 3} more)" : string.Empty)}";
 
-        RebuildMods();
-        await Task.CompletedTask;
+        await SetStatusAsync($"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, ba2 archives={parentArchiveCountMax}, zips={parentZipCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax}, est record bytes={parentEstimatedRecordBytesMax}, attempted archives={parentAttemptedArchiveCountMax}, non-ba2 skipped={parentNonBa2CountMax}, read-failures={parentReadFailureCountMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{(string.IsNullOrWhiteSpace(parentNonBa2Sample) ? string.Empty : $" Sample skipped candidate: {parentNonBa2Sample}")}{(string.IsNullOrWhiteSpace(parentAttemptedArchiveSample) ? string.Empty : $" Sample attempted archive: {parentAttemptedArchiveSample}")}{(string.IsNullOrWhiteSpace(parentLastArchiveCandidate) ? string.Empty : $" Last archive candidate: {parentLastArchiveCandidate} ({parentLastArchiveOutcome ?? "unknown outcome"})")}{bootstrapPreview}{failurePreview}");
+
+        await Dispatcher.UIThread.InvokeAsync(RebuildMods);
     }
 
 
@@ -1250,18 +1388,19 @@ public sealed class MainWindowViewModel : NotifyBase
         }
 
         var persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name).ToList();
-        if (persistedMods.Count == 0)
+
+        var filteredOutByFolder = 0;
+        if (TryResolveGameDataRoot(selectedGameFolder, out var selectedDataRoot, out _))
         {
-            var settings = _settingsStore.Load();
-            var repoRoot = string.IsNullOrWhiteSpace(settings.RepoRootPath)
-                ? ProgramWideSettings.GetDefaultRepoRoot()
-                : settings.RepoRootPath;
-            var imported = ImportManagedModsFromSharedCatalog(repoRoot, selectedGameFolder, install.ManagedGame.Name);
-            if (imported > 0)
-            {
-                persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name).ToList();
-            }
+            var folderScopedMods = persistedMods
+                .Where(mod => !string.IsNullOrWhiteSpace(mod.PrimaryPlugin))
+                .Where(mod => File.Exists(Path.Combine(selectedDataRoot, mod.PrimaryPlugin)))
+                .ToList();
+            filteredOutByFolder = persistedMods.Count - folderScopedMods.Count;
+            persistedMods = folderScopedMods;
         }
+
+        persistedMods = ApplyModSort(persistedMods).ToList();
 
         var row = 0;
         foreach (var mod in persistedMods)
@@ -1278,7 +1417,9 @@ public sealed class MainWindowViewModel : NotifyBase
 
         StatusMessage = persistedMods.Count == 0
             ? "Ready. Scan the selected game folder to onboard mods under management."
-            : $"Loaded {persistedMods.Count} managed mod(s) for this game install.";
+            : filteredOutByFolder > 0
+                ? $"Loaded {persistedMods.Count} managed mod(s) present in this folder (filtered {filteredOutByFolder} from other installs)."
+                : $"Loaded {persistedMods.Count} managed mod(s) for this game install.";
     }
 
     private int ImportManagedModsFromSharedCatalog(string repoRoot, string installPath, string gameName)
