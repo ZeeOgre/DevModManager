@@ -587,6 +587,12 @@ public partial class MainWindow : Window
     private void GitDown_Click(object? sender, RoutedEventArgs e) =>
         _viewModel.StatusMessage = "Git control: pull/down requested.";
 
+    private void SortByMod_Click(object? sender, RoutedEventArgs e) => _viewModel.ToggleSortByModName();
+
+    private void SortByPrimaryPlugin_Click(object? sender, RoutedEventArgs e) => _viewModel.ToggleSortByPrimaryPlugin();
+
+    private void SortByStage_Click(object? sender, RoutedEventArgs e) => _viewModel.ToggleSortByCurrentStage();
+
     private async void OpenModWindow_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { CommandParameter: ModListItem mod })
@@ -623,6 +629,13 @@ public partial class MainWindow : Window
 
 public sealed class MainWindowViewModel : NotifyBase
 {
+    private enum ModSortColumn
+    {
+        ModName,
+        PrimaryPlugin,
+        Stage
+    }
+
     private readonly GameSetupRepository _repository = new();
     private readonly ProgramWideSettingsStore _settingsStore = new();
     private readonly ModOnboardingGitService _gitService = new();
@@ -635,6 +648,13 @@ public sealed class MainWindowViewModel : NotifyBase
     public ObservableCollection<ModListItem> Mods { get; } = new();
     public ObservableCollection<ManagedGame> ManagedGames { get; } = new();
     public ObservableCollection<GameInstallRecord> GameInstalls { get; } = new();
+
+    private ModSortColumn _sortColumn = ModSortColumn.ModName;
+    private bool _sortAscending = true;
+
+    public string ModHeaderText => BuildSortHeader("Mod", ModSortColumn.ModName);
+    public string PrimaryPluginHeaderText => BuildSortHeader("Primary Plugin", ModSortColumn.PrimaryPlugin);
+    public string CurrentStageHeaderText => BuildSortHeader("Current Stage", ModSortColumn.Stage);
 
     private string? _selectedGameFolder;
     public string? SelectedGameFolder
@@ -655,6 +675,53 @@ public sealed class MainWindowViewModel : NotifyBase
     {
         get => _statusMessage;
         set => SetField(ref _statusMessage, value);
+    }
+
+    public void ToggleSortByModName() => ToggleSort(ModSortColumn.ModName);
+
+    public void ToggleSortByPrimaryPlugin() => ToggleSort(ModSortColumn.PrimaryPlugin);
+
+    public void ToggleSortByCurrentStage() => ToggleSort(ModSortColumn.Stage);
+
+    private void ToggleSort(ModSortColumn column)
+    {
+        if (_sortColumn == column)
+        {
+            _sortAscending = !_sortAscending;
+        }
+        else
+        {
+            _sortColumn = column;
+            _sortAscending = true;
+        }
+
+        OnPropertyChanged(nameof(ModHeaderText));
+        OnPropertyChanged(nameof(PrimaryPluginHeaderText));
+        OnPropertyChanged(nameof(CurrentStageHeaderText));
+        RebuildMods();
+    }
+
+    private string BuildSortHeader(string label, ModSortColumn column)
+    {
+        if (_sortColumn != column)
+        {
+            return label;
+        }
+
+        return _sortAscending ? $"{label} ▲" : $"{label} ▼";
+    }
+
+    private IEnumerable<ManagedModRecord> ApplyModSort(IEnumerable<ManagedModRecord> mods)
+    {
+        return (_sortColumn, _sortAscending) switch
+        {
+            (ModSortColumn.PrimaryPlugin, true) => mods.OrderBy(x => x.PrimaryPlugin, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            (ModSortColumn.PrimaryPlugin, false) => mods.OrderByDescending(x => x.PrimaryPlugin, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            (ModSortColumn.Stage, true) => mods.OrderBy(x => x.Stage, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            (ModSortColumn.Stage, false) => mods.OrderByDescending(x => x.Stage, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            (ModSortColumn.ModName, true) => mods.OrderBy(x => x.ModName, StringComparer.OrdinalIgnoreCase),
+            _ => mods.OrderByDescending(x => x.ModName, StringComparer.OrdinalIgnoreCase)
+        };
     }
 
     public static MainWindowViewModel CreateSample()
@@ -1157,7 +1224,7 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 ModMetadataService.WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries, discovery);
 
-                var relativeSubmodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
+                var relativeSubmodulePath = Path.GetRelativePath(repoRoot, modRepoRoot)
                     .Replace('\\', '/');
                 await ReportProgressAsync($"Committing and syncing {selection.ModName} ({targetStageBranch})");
                 if (!_gitService.CommitAndPushOnboardingChanges(repoRoot, modRepoRoot, relativeSubmodulePath, targetStageBranch, selection.ModName, out var commitError))
@@ -1177,8 +1244,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     modRepoRoot);
 
                 var modRepoName = $"{_gitService.ToSlug(install.ManagedGame.Name)}-{_gitService.ToSlug(selection.ModName)}";
-                var submodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
-                    .Replace('\\', '/');
+                var submodulePath = relativeSubmodulePath;
                 _catalogService.UpsertEntry(repoRoot, new SharedCatalogEntry(
                     install.ManagedGame.Name,
                     selection.ModName,
@@ -1306,7 +1372,7 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
-        var persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name).ToList();
+        var persistedMods = ApplyModSort(_repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name)).ToList();
 
         var row = 0;
         foreach (var mod in persistedMods)

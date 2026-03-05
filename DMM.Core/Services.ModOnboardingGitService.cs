@@ -64,10 +64,15 @@ public sealed class ModOnboardingGitService
         {
             return false;
         }
-
-        var relativeSubmodulePath = Path.Combine(SanitizePathSegment(gameName), SanitizePathSegment(modName))
+        var fullSubmodulePath = modRepoRoot;
+        var relativeSubmodulePath = Path.GetRelativePath(masterRepoPath, fullSubmodulePath)
             .Replace('\\', '/');
-        var fullSubmodulePath = Path.Combine(masterRepoPath, SanitizePathSegment(gameName), SanitizePathSegment(modName));
+        if (relativeSubmodulePath.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relativeSubmodulePath))
+        {
+            error = $"mod repo path '{modRepoRoot}' is outside repo root '{masterRepoPath}'";
+            return false;
+        }
+
         Directory.CreateDirectory(Path.GetDirectoryName(fullSubmodulePath) ?? masterRepoPath);
 
         if (!IsGitWorkingTree(fullSubmodulePath))
