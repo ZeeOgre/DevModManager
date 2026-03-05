@@ -1017,6 +1017,7 @@ public sealed class MainWindowViewModel : NotifyBase
         var bootstrapRequired = 0;
         var failed = 0;
         var bootstrapPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var failureDetails = new List<string>();
         var dependencyFilesIncluded = 0;
         var dependencyCollisionCount = 0;
         var dependencyMissingCount = 0;
@@ -1102,6 +1103,7 @@ public sealed class MainWindowViewModel : NotifyBase
             {
                 skipped++;
                 completedMods++;
+                failureDetails.Add($"{selection.ModName}: source plugin file '{selection.PluginName}' was not found under {scanRoot}");
                 await ReportProgressAsync($"Skipped {selection.ModName}: source plugin file was not found");
                 continue;
             }
@@ -1110,6 +1112,7 @@ public sealed class MainWindowViewModel : NotifyBase
             {
                 failed++;
                 completedMods++;
+                failureDetails.Add($"{selection.ModName}: dependency scan failed ({scanError ?? "unknown error"})");
                 await ReportProgressAsync($"Failed scanning {selection.ModName}: {scanError ?? "unknown error"}");
                 continue;
             }
@@ -1122,6 +1125,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 {
                     skipped++;
                     completedMods++;
+                    failureDetails.Add($"{selection.ModName}: no dependency files were selected to stage");
                     await ReportProgressAsync($"Skipped {selection.ModName}: no dependency files selected");
                     continue;
                 }
@@ -1142,7 +1146,9 @@ public sealed class MainWindowViewModel : NotifyBase
                     {
                         bootstrapRequired++;
                         bootstrapPaths.Add($"{modRepoRoot} ({bootstrapError})");
+                        failureDetails.Add($"{selection.ModName}: bootstrap failed ({bootstrapError})");
                         skipped++;
+                        await ReportProgressAsync($"Skipped {selection.ModName}: bootstrap failed ({bootstrapError})");
                         continue;
                     }
                 }
@@ -1153,7 +1159,9 @@ public sealed class MainWindowViewModel : NotifyBase
                 {
                     bootstrapRequired++;
                     bootstrapPaths.Add($"{modRepoRoot} ({branchError})");
+                    failureDetails.Add($"{selection.ModName}: failed to checkout branch {targetStageBranch} ({branchError})");
                     skipped++;
+                    await ReportProgressAsync($"Skipped {selection.ModName}: branch checkout failed ({branchError})");
                     continue;
                 }
 
@@ -1231,7 +1239,9 @@ public sealed class MainWindowViewModel : NotifyBase
                 {
                     bootstrapRequired++;
                     bootstrapPaths.Add($"{modRepoRoot} ({commitError})");
+                    failureDetails.Add($"{selection.ModName}: commit/push failed ({commitError})");
                     skipped++;
+                    await ReportProgressAsync($"Skipped {selection.ModName}: commit/push failed ({commitError})");
                     continue;
                 }
 
@@ -1256,10 +1266,11 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 created++;
             }
-            catch
+            catch (Exception ex)
             {
                 failed++;
-                await ReportProgressAsync($"Failed {selection.ModName}; continuing with remaining mods");
+                failureDetails.Add($"{selection.ModName}: unexpected exception ({ex.Message})");
+                await ReportProgressAsync($"Failed {selection.ModName}; continuing with remaining mods ({ex.Message})");
             }
 
             completedMods++;
@@ -1276,7 +1287,11 @@ public sealed class MainWindowViewModel : NotifyBase
             ? string.Empty
             : $" First missing repo: {bootstrapPaths.First()}";
 
-        await SetStatusAsync($"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, ba2 archives={parentArchiveCountMax}, zips={parentZipCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax}, est record bytes={parentEstimatedRecordBytesMax}, attempted archives={parentAttemptedArchiveCountMax}, non-ba2 skipped={parentNonBa2CountMax}, read-failures={parentReadFailureCountMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{(string.IsNullOrWhiteSpace(parentNonBa2Sample) ? string.Empty : $" Sample skipped candidate: {parentNonBa2Sample}")}{(string.IsNullOrWhiteSpace(parentAttemptedArchiveSample) ? string.Empty : $" Sample attempted archive: {parentAttemptedArchiveSample}")}{(string.IsNullOrWhiteSpace(parentLastArchiveCandidate) ? string.Empty : $" Last archive candidate: {parentLastArchiveCandidate} ({parentLastArchiveOutcome ?? "unknown outcome"})")}{bootstrapPreview}");
+        var failurePreview = failureDetails.Count == 0
+            ? string.Empty
+            : $" Failure details: {string.Join(" | ", failureDetails.Take(3))}{(failureDetails.Count > 3 ? $" (+{failureDetails.Count - 3} more)" : string.Empty)}";
+
+        await SetStatusAsync($"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, ba2 archives={parentArchiveCountMax}, zips={parentZipCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax}, est record bytes={parentEstimatedRecordBytesMax}, attempted archives={parentAttemptedArchiveCountMax}, non-ba2 skipped={parentNonBa2CountMax}, read-failures={parentReadFailureCountMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{(string.IsNullOrWhiteSpace(parentNonBa2Sample) ? string.Empty : $" Sample skipped candidate: {parentNonBa2Sample}")}{(string.IsNullOrWhiteSpace(parentAttemptedArchiveSample) ? string.Empty : $" Sample attempted archive: {parentAttemptedArchiveSample}")}{(string.IsNullOrWhiteSpace(parentLastArchiveCandidate) ? string.Empty : $" Last archive candidate: {parentLastArchiveCandidate} ({parentLastArchiveOutcome ?? "unknown outcome"})")}{bootstrapPreview}{failurePreview}");
 
         await Dispatcher.UIThread.InvokeAsync(RebuildMods);
     }
@@ -1372,7 +1387,20 @@ public sealed class MainWindowViewModel : NotifyBase
             return;
         }
 
-        var persistedMods = ApplyModSort(_repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name)).ToList();
+        var persistedMods = _repository.LoadManagedModsForInstall(selectedGameFolder, install.ManagedGame.Name).ToList();
+
+        var filteredOutByFolder = 0;
+        if (TryResolveGameDataRoot(selectedGameFolder, out var selectedDataRoot, out _))
+        {
+            var folderScopedMods = persistedMods
+                .Where(mod => !string.IsNullOrWhiteSpace(mod.PrimaryPlugin))
+                .Where(mod => File.Exists(Path.Combine(selectedDataRoot, mod.PrimaryPlugin)))
+                .ToList();
+            filteredOutByFolder = persistedMods.Count - folderScopedMods.Count;
+            persistedMods = folderScopedMods;
+        }
+
+        persistedMods = ApplyModSort(persistedMods).ToList();
 
         var row = 0;
         foreach (var mod in persistedMods)
@@ -1389,7 +1417,9 @@ public sealed class MainWindowViewModel : NotifyBase
 
         StatusMessage = persistedMods.Count == 0
             ? "Ready. Scan the selected game folder to onboard mods under management."
-            : $"Loaded {persistedMods.Count} managed mod(s) for this game install.";
+            : filteredOutByFolder > 0
+                ? $"Loaded {persistedMods.Count} managed mod(s) present in this folder (filtered {filteredOutByFolder} from other installs)."
+                : $"Loaded {persistedMods.Count} managed mod(s) for this game install.";
     }
 
     private int ImportManagedModsFromSharedCatalog(string repoRoot, string installPath, string gameName)
