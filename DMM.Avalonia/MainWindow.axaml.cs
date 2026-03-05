@@ -961,9 +961,16 @@ public sealed class MainWindowViewModel : NotifyBase
         var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
         var completedMods = 0;
 
+        async Task ReportProgressAsync(string message)
+        {
+            StatusMessage = message;
+            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, message));
+            await Task.Yield();
+        }
+
         foreach (var selection in orderedSelections)
         {
-            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Preparing {selection.ModName}"));
+            await ReportProgressAsync($"Preparing {selection.ModName}");
 
             var sourcePath = Path.Combine(scanRoot, selection.PluginName);
             if (!File.Exists(sourcePath))
@@ -975,7 +982,7 @@ public sealed class MainWindowViewModel : NotifyBase
             try
             {
                 var modRepoRoot = ModRepositoryPathService.BuildModRepoRoot(repoRoot, install.ManagedGame.Name, selection.ModName, settings.RepoOrganization == RepoOrganizationStrategy.RepoPerMod);
-                progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Scanning {selection.ModName} dependencies, please verify the discovered files"));
+                await ReportProgressAsync($"Scanning {selection.ModName} dependencies (verify discovered files)");
                 var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
                 var initialEntries = discovery.Entries
                     .Where(x => !x.ParentArchiveMatch)
@@ -998,6 +1005,7 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 if (!_gitService.IsGitWorkingTree(modRepoRoot))
                 {
+                    await ReportProgressAsync($"Bootstrapping git repo for {selection.ModName}");
                     var bootstrapped = _gitService.TryBootstrapModRepository(
                         settings.GitHubAccount,
                         settings.GitHubToken,
@@ -1017,6 +1025,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 }
 
                 var targetStageBranch = _gitService.ToStageBranch(selection.Stage);
+                await ReportProgressAsync($"Checking out {targetStageBranch} for {selection.ModName}");
                 if (!_gitService.EnsureBranchCheckedOut(modRepoRoot, targetStageBranch, out var branchError))
                 {
                     bootstrapRequired++;
@@ -1047,7 +1056,7 @@ public sealed class MainWindowViewModel : NotifyBase
                 parentLastArchiveOutcome = discovery.ParentLastArchiveOutcome ?? parentLastArchiveOutcome;
                 dependencyScanMsTotal += discovery.ScanMs;
 
-                progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Copying {selection.ModName} files"));
+                await ReportProgressAsync($"Copying {selection.ModName} files");
 
                 foreach (var entry in initialEntries)
                 {
@@ -1094,6 +1103,7 @@ public sealed class MainWindowViewModel : NotifyBase
 
                 var relativeSubmodulePath = Path.Combine(ModRepositoryPathService.SanitizePathSegment(install.ManagedGame.Name), ModRepositoryPathService.SanitizePathSegment(selection.ModName))
                     .Replace('\\', '/');
+                await ReportProgressAsync($"Committing and syncing {selection.ModName} ({targetStageBranch})");
                 if (!_gitService.CommitAndPushOnboardingChanges(repoRoot, modRepoRoot, relativeSubmodulePath, targetStageBranch, selection.ModName, out var commitError))
                 {
                     bootstrapRequired++;
@@ -1135,10 +1145,11 @@ public sealed class MainWindowViewModel : NotifyBase
             catch
             {
                 failed++;
+                await ReportProgressAsync($"Failed {selection.ModName}; continuing with remaining mods");
             }
 
             completedMods++;
-            progress?.Report(new ScanApplyProgress(completedMods, orderedSelections.Count, $"Completed {selection.ModName}"));
+            await ReportProgressAsync($"Completed {selection.ModName}");
         }
 
         if (selections.Count == 0)
@@ -1155,7 +1166,6 @@ public sealed class MainWindowViewModel : NotifyBase
             $"Scan apply complete. Added {created} mod(s); copied {copiedFiles} file(s); dependency files included {dependencyFilesIncluded}; parent-archive collisions filtered {dependencyCollisionCount}; parent/base hits {dependencyParentHitCount}; missing refs {dependencyMissingCount}; parent catalog snapshot: masters={parentMasterCountMax}, ba2 archives={parentArchiveCountMax}, zips={parentZipCountMax}, indexed files={parentIndexedFileCountMax}, indexed bytes={parentIndexedBytesMax}, est record bytes={parentEstimatedRecordBytesMax}, attempted archives={parentAttemptedArchiveCountMax}, non-ba2 skipped={parentNonBa2CountMax}, read-failures={parentReadFailureCountMax} (scan {dependencyScanMsTotal} ms); skipped {skipped} (local git repo bootstrap needed: {bootstrapRequired}); failed {failed}. Repo root: {repoRoot}. Mod repos were pushed and parent submodule pointers were synced.{(string.IsNullOrWhiteSpace(parentNonBa2Sample) ? string.Empty : $" Sample skipped candidate: {parentNonBa2Sample}")}{(string.IsNullOrWhiteSpace(parentAttemptedArchiveSample) ? string.Empty : $" Sample attempted archive: {parentAttemptedArchiveSample}")}{(string.IsNullOrWhiteSpace(parentLastArchiveCandidate) ? string.Empty : $" Last archive candidate: {parentLastArchiveCandidate} ({parentLastArchiveOutcome ?? "unknown outcome"})")}{bootstrapPreview}";
 
         RebuildMods();
-        await Task.CompletedTask;
     }
 
 
