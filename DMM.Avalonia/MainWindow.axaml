@@ -77,9 +77,20 @@
         <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="4">
             <Border Background="{StaticResource HeaderBackground}" Padding="10" CornerRadius="6,6,0,0">
                 <Grid ColumnDefinitions="3*,1.4*,1.1*,1.3*,1.2*,1.2*,1.4*" ColumnSpacing="8">
-                    <TextBlock Text="Mod" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                    <TextBlock Grid.Column="1" Text="Primary Plugin" FontWeight="SemiBold" Foreground="#FFFFFF" />
-                    <TextBlock Grid.Column="2" Text="Current Stage" FontWeight="SemiBold" Foreground="#FFFFFF" />
+                    <Button Content="{Binding ModHeaderText}"
+                            Click="SortByMod_Click"
+                            HorizontalAlignment="Left"
+                            FontWeight="SemiBold" />
+                    <Button Grid.Column="1"
+                            Content="{Binding PrimaryPluginHeaderText}"
+                            Click="SortByPrimaryPlugin_Click"
+                            HorizontalAlignment="Left"
+                            FontWeight="SemiBold" />
+                    <Button Grid.Column="2"
+                            Content="{Binding CurrentStageHeaderText}"
+                            Click="SortByStage_Click"
+                            HorizontalAlignment="Left"
+                            FontWeight="SemiBold" />
                     <TextBlock Grid.Column="3" Text="Backup Folder" FontWeight="SemiBold" Foreground="#FFFFFF" />
                     <TextBlock Grid.Column="4" Text="Bethesda" FontWeight="SemiBold" Foreground="#FFFFFF" />
                     <TextBlock Grid.Column="5" Text="Nexus" FontWeight="SemiBold" Foreground="#FFFFFF" />
