@@ -16,8 +16,13 @@ internal static class DependencyReviewCoordinator
     {
         var map = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var selection in selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase))
+        var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
+        for (var index = 0; index < orderedSelections.Count; index++)
         {
+            var selection = orderedSelections[index];
+            viewModel.StatusMessage =
+                $"Dependency review {index + 1}/{orderedSelections.Count}: {selection.ModName}. Mark good files to keep, then click Continue.";
+
             if (!viewModel.TryCollectDependencyPreview(gameFolder, selection, out var preview, out var error))
             {
                 viewModel.StatusMessage = $"Dependency preview failed for {selection.ModName}: {error}";
@@ -48,6 +53,8 @@ internal static class DependencyReviewCoordinator
             }
 
             map[MainWindowViewModel.BuildSelectionReviewKey(selection)] = new HashSet<string>(decision.KeepRelativePaths, StringComparer.OrdinalIgnoreCase);
+            viewModel.StatusMessage =
+                $"Saved dependency selection for {selection.ModName} ({decision.KeepRelativePaths.Count} file(s) kept).";
         }
 
         return map;
