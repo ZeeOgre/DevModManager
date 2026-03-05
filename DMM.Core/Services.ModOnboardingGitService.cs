@@ -77,7 +77,7 @@ public sealed class ModOnboardingGitService
 
         if (!IsGitWorkingTree(fullSubmodulePath))
         {
-            if (!RunGit(masterRepoPath, $"submodule add \"{remoteModUrl}\" \"{relativeSubmodulePath}\"", out error))
+            if (!TryAddSubmodule(masterRepoPath, remoteModUrl, relativeSubmodulePath, fullSubmodulePath, out error))
             {
                 return false;
             }
@@ -104,6 +104,30 @@ public sealed class ModOnboardingGitService
         }
 
         return true;
+    }
+
+    private bool TryAddSubmodule(
+        string masterRepoPath,
+        string remoteModUrl,
+        string relativeSubmodulePath,
+        string fullSubmodulePath,
+        out string error)
+    {
+        if (RunGit(masterRepoPath, $"submodule add \"{remoteModUrl}\" \"{relativeSubmodulePath}\"", out error))
+        {
+            return true;
+        }
+
+        var hasReusableLocalRepo = IsGitWorkingTree(fullSubmodulePath)
+                                   && (error.Contains("A git directory for", StringComparison.OrdinalIgnoreCase)
+                                       || error.Contains("already exists in the index", StringComparison.OrdinalIgnoreCase)
+                                       || error.Contains("already exists and is not a valid git repo", StringComparison.OrdinalIgnoreCase));
+        if (!hasReusableLocalRepo)
+        {
+            return false;
+        }
+
+        return RunGit(masterRepoPath, $"submodule add --force \"{remoteModUrl}\" \"{relativeSubmodulePath}\"", out error);
     }
 
     private bool EnsureMasterRepositoryPresent(string masterRepoPath, string remoteUrl, out string error)
