@@ -33,6 +33,7 @@ namespace DmmDep
     // Source generator context for trim-safe JSON serialization
     [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(string[]))]
+    [JsonSerializable(typeof(DependencyManifest))]
     internal partial class AchlistSerializerContext : JsonSerializerContext
     {
     }
