@@ -16,7 +16,8 @@ public sealed record ModDependencyEntry(
     string? XboxRelativePath,
     string? XboxSourcePath,
     string? TifRelativePath,
-    string? TifSourcePath);
+    string? TifSourcePath,
+    bool ParentArchiveMatch);
 
 public sealed class ModDependencyDiscoveryResult
 {
@@ -27,6 +28,7 @@ public sealed class ModDependencyDiscoveryResult
     public List<string> HighProbabilityDiscard { get; } = new();
     public List<string> UndefinedDiscard { get; } = new();
     public List<string> DefiniteKeep { get; } = new();
+    public Dictionary<string, string> ArchiveHitKinds { get; } = new(StringComparer.OrdinalIgnoreCase);
     public int CollisionCount { get; set; }
     public int ParentMasterCount { get; set; }
     public int ParentArchiveCount { get; set; }
@@ -87,7 +89,7 @@ public sealed class ModDependencyDiscoveryService
             DiscoverConventionCandidates(plugin, scanRoot, gameRoot, modName, discoveredCandidates);
         }
 
-        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats);
+        var parentArchiveIndex = BuildParentArchiveIndex(scanRoot, gameRoot, pluginFiles, out var parentStats, out _);
         var tifRoot = ResolveTifRoot(gameRoot);
         var result = new ModDependencyDiscoveryResult();
 
@@ -99,11 +101,18 @@ public sealed class ModDependencyDiscoveryService
                 continue;
             }
 
-            if (!source.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && parentArchiveIndex.ContainsKey(rel))
+            if (ShouldForceDiscardDataRelativeToken(rel))
+            {
+                continue;
+            }
+
+            if (!source.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase) && parentArchiveIndex.TryGetValue(rel, out var archiveMatchEntry))
             {
                 result.CollisionCount++;
                 result.ParentArchiveReferences.Add(rel);
                 result.HighProbabilityDiscard.Add(rel);
+                result.ArchiveHitKinds[rel] = ClassifyArchiveHitKind(archiveMatchEntry.ArchivePath);
+                result.Entries.Add(new ModDependencyEntry(rel, source, null, null, null, null, true));
                 continue;
             }
             string? xboxRel = null;
@@ -111,7 +120,7 @@ public sealed class ModDependencyDiscoveryService
             if (IsXboxMirroredCandidate(rel))
             {
                 xboxRel = rel;
-                xboxSource = ResolveSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
+                xboxSource = ResolveXboxSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
             }
 
             string? tifRel = null;
@@ -127,14 +136,23 @@ public sealed class ModDependencyDiscoveryService
                 }
             }
 
-            result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource));
+            result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource, false));
             result.HighProbabilityKeep.Add(rel);
         }
 
         foreach (var missing in unresolvedCandidates.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
         {
-            if (parentArchiveIndex.ContainsKey(missing) || result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
+            if (ShouldForceDiscardDataRelativeToken(missing))
             {
+                continue;
+            }
+
+            if (parentArchiveIndex.TryGetValue(missing, out var unresolvedArchiveMatch) || result.ParentArchiveReferences.Contains(missing, StringComparer.OrdinalIgnoreCase))
+            {
+                if (unresolvedArchiveMatch is not null)
+                {
+                    result.ArchiveHitKinds[missing] = ClassifyArchiveHitKind(unresolvedArchiveMatch.ArchivePath);
+                }
                 result.UndefinedDiscard.Add(missing);
                 continue;
             }
@@ -187,6 +205,11 @@ public sealed class ModDependencyDiscoveryService
 
         foreach (var script in tesResult.ReferencedScripts)
         {
+            if (!IsLikelyScriptToken(script))
+            {
+                continue;
+            }
+
             var scriptCandidates = ExpandScriptCandidates(script).ToList();
             var resolved = false;
             foreach (var candidate in scriptCandidates)
@@ -268,6 +291,37 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
+
+    private static bool IsLikelyScriptToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return false;
+
+        var normalized = token.Replace('/', '\\').TrimStart('\\').Trim();
+        if (normalized.Length < 3 || normalized.Length > 180)
+            return false;
+
+        var hasLetter = normalized.Any(char.IsLetter);
+        if (!hasLetter)
+            return false;
+
+        foreach (var ch in normalized)
+        {
+            if (char.IsLetterOrDigit(ch))
+                continue;
+
+            if (ch is '_' or '-' or '\\' or ':' or '.')
+                continue;
+
+            return false;
+        }
+
+        var firstSegment = normalized.Split(new[] { '\\', ':' }, 2)[0];
+        if (string.IsNullOrWhiteSpace(firstSegment) || firstSegment.Length < 2)
+            return false;
+
+        return true;
+    }
 
     private static IEnumerable<string> ExpandScriptCandidates(string scriptToken)
     {
@@ -424,7 +478,7 @@ public sealed class ModDependencyDiscoveryService
             .ToList();
     }
 
-    private static Dictionary<string, Ba2Entry> BuildParentArchiveIndex(string scanRoot, string gameRoot, IReadOnlyList<string> pluginFiles, out BA2Archive.Ba2IndexBuildStats stats)
+    private static Dictionary<string, Ba2Entry> BuildParentArchiveIndex(string scanRoot, string gameRoot, IReadOnlyList<string> pluginFiles, out BA2Archive.Ba2IndexBuildStats stats, out ParentCatalogSources catalogSources)
     {
         var masterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var plugin in pluginFiles)
@@ -441,6 +495,23 @@ public sealed class ModDependencyDiscoveryService
             .Where(File.Exists)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        // Fallback: when INI archive list is unavailable, index all BA2 files under Data
+        // (except archives that belong to the mod being scanned) so parent/base matches still work.
+        if (listedArchives.Count == 0)
+        {
+            var currentModPrefixes = pluginFiles
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            listedArchives = Directory.EnumerateFiles(scanRoot, "*.ba2", SearchOption.TopDirectoryOnly)
+                .Where(path => !currentModPrefixes.Any(prefix =>
+                    Path.GetFileName(path).StartsWith(prefix + " - ", StringComparison.OrdinalIgnoreCase)))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
 
         foreach (var listedArchive in listedArchives)
         {
@@ -471,14 +542,7 @@ public sealed class ModDependencyDiscoveryService
             }
         }
 
-        var zipCandidates = new[]
-        {
-            Path.Combine(gameRoot, "ContentResources.zip"),
-            Path.Combine(Directory.GetParent(gameRoot)?.FullName ?? gameRoot, "ContentResources.zip")
-        }
-        .Where(File.Exists)
-        .Distinct(StringComparer.OrdinalIgnoreCase)
-        .ToList();
+        var zipCandidates = DiscoverCreationKitZipCandidates(gameRoot);
 
         if (zipCandidates.Count > 0)
         {
@@ -494,7 +558,181 @@ public sealed class ModDependencyDiscoveryService
         stats.IndexedBytes = merged.Values.Where(x => x.FileSize > 0).Sum(x => x.FileSize);
         stats.EstimatedRecordBytes = merged.Sum(x => 64L + (x.Key?.Length ?? 0) * sizeof(char));
 
+        catalogSources = new ParentCatalogSources(masterNames, listedArchives, zipCandidates);
         return merged;
+    }
+
+
+
+    private sealed record ParentCatalogSources(
+        IReadOnlyCollection<string> MasterNames,
+        IReadOnlyCollection<string> ArchivePaths,
+        IReadOnlyCollection<string> ZipPaths);
+
+    private static void ExportParentCatalogCsv(string modName, ParentCatalogSources catalog, IReadOnlyDictionary<string, Ba2Entry> index)
+    {
+        try
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (string.IsNullOrWhiteSpace(localAppData))
+            {
+                return;
+            }
+
+            var exportRoot = Path.Combine(localAppData, "zeeogre", "devmodmanager");
+            Directory.CreateDirectory(exportRoot);
+
+            var safeModName = string.IsNullOrWhiteSpace(modName)
+                ? "unknown-mod"
+                : string.Join("_", modName.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
+            if (string.IsNullOrWhiteSpace(safeModName))
+            {
+                safeModName = "unknown-mod";
+            }
+
+            var exportPath = Path.Combine(exportRoot, $"{safeModName}_parentcatalog.csv");
+            using var writer = new StreamWriter(exportPath, false);
+
+            WriteSection(writer, "Section 1 - Parent Mods",
+                catalog.MasterNames
+                    .Where(x => !IsBaseGameMaster(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 2 - Basegame Mods",
+                catalog.MasterNames
+                    .Where(IsBaseGameMaster)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 3 - Parent Archives",
+                catalog.ArchivePaths
+                    .Where(x => string.Equals(ClassifyArchiveHitKind(x), "parent-archive", StringComparison.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 4 - Basegame Archives",
+                catalog.ArchivePaths
+                    .Where(x => string.Equals(ClassifyArchiveHitKind(x), "basegame-archive", StringComparison.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 5 - Creations Zip",
+                catalog.ZipPaths
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[] { x }));
+
+            WriteSection(writer, "Section 6 - File Catalog",
+                index
+                    .OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new[]
+                    {
+                        x.Key,
+                        x.Value.ArchivePath,
+                        ClassifyArchiveHitKind(x.Value.ArchivePath)
+                    }),
+                "filename", "source", "source_type");
+        }
+        catch
+        {
+            // Debug export should never block dependency discovery.
+        }
+    }
+
+    private static bool IsBaseGameMaster(string name)
+    {
+        var fileName = Path.GetFileName(name);
+        return fileName.StartsWith("Starfield", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void WriteSection(StreamWriter writer, string title, IEnumerable<string[]> rows, params string[]? header)
+    {
+        writer.WriteLine(EscapeCsv(title));
+
+        if (header is { Length: > 0 })
+        {
+            writer.WriteLine(string.Join(',', header.Select(EscapeCsv)));
+        }
+
+        foreach (var row in rows)
+        {
+            writer.WriteLine(string.Join(',', row.Select(EscapeCsv)));
+        }
+
+        writer.WriteLine();
+    }
+
+    private static string EscapeCsv(string? value)
+    {
+        var text = value ?? string.Empty;
+        if (!text.Contains('"') && !text.Contains(',') && !text.Contains('\n') && !text.Contains('\r'))
+        {
+            return text;
+        }
+
+        return $"\"{text.Replace("\"", "\"\"")}\"";
+    }
+
+    private static List<string> DiscoverCreationKitZipCandidates(string gameRoot)
+    {
+        var candidateRoots = new[]
+        {
+            gameRoot,
+            Directory.GetParent(gameRoot)?.FullName ?? gameRoot,
+            Path.Combine(gameRoot, "Tools"),
+            Path.Combine(gameRoot, "tools")
+        }
+        .Where(x => !string.IsNullOrWhiteSpace(x))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+
+        var candidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var root in candidateRoots)
+        {
+            if (!Directory.Exists(root))
+            {
+                continue;
+            }
+
+            var canonical = Path.Combine(root, "ContentResources.zip");
+            if (File.Exists(canonical))
+            {
+                candidates.Add(canonical);
+            }
+
+            try
+            {
+                foreach (var zip in Directory.EnumerateFiles(root, "*.zip", SearchOption.TopDirectoryOnly))
+                {
+                    candidates.Add(zip);
+                }
+            }
+            catch
+            {
+                // Continue scanning remaining roots.
+            }
+        }
+
+        return candidates
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static string ClassifyArchiveHitKind(string archivePath)
+    {
+        if (archivePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            return "base-ck-zip";
+
+        var file = Path.GetFileName(archivePath);
+        if (file.StartsWith("Starfield", StringComparison.OrdinalIgnoreCase))
+            return "basegame-archive";
+
+        return "parent-archive";
     }
 
     private static IEnumerable<string> LoadStarfieldArchiveList(string dataRoot)
@@ -593,8 +831,33 @@ public sealed class ModDependencyDiscoveryService
         }
     }
 
+    private static bool ShouldForceDiscardDataRelativeToken(string relDataPath)
+    {
+        if (string.IsNullOrWhiteSpace(relDataPath))
+            return true;
+
+        var normalized = NormalizeToDataRelative(relDataPath);
+
+        // NIF descriptor/tweak fields (for example "BSMaterial::...") are not asset paths.
+        if (normalized.Contains("::", StringComparison.Ordinal))
+            return true;
+
+        // Resource-handle style pseudo-paths (for example "res:112BA342:...") are identifiers,
+        // not loose-file paths we can resolve/copy.
+        if (normalized.StartsWith("Data\\Textures\\res:", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Windows file names cannot contain ':'; treat these as malformed parse artifacts.
+        return normalized.Contains(':');
+    }
+
     private static void TryAddByDataRelative(string relDataPath, string scanRoot, string gameRoot, HashSet<string> candidates, HashSet<string> unresolvedCandidates)
     {
+        if (ShouldForceDiscardDataRelativeToken(relDataPath))
+        {
+            return;
+        }
+
         if (TryResolveDataRelative(relDataPath, scanRoot, gameRoot, out var fullPath))
         {
             candidates.Add(fullPath);
@@ -651,6 +914,54 @@ public sealed class ModDependencyDiscoveryService
 
         return relDataPath.StartsWith("Data\\Textures\\", StringComparison.OrdinalIgnoreCase)
             || relDataPath.StartsWith("Data\\Sound\\", StringComparison.OrdinalIgnoreCase);
+    }
+
+
+    private static string? ResolveXboxSourceFromDataRelative(string scanRoot, string gameRoot, string relDataPath)
+    {
+        var rel = relDataPath.Replace('/', '\\').TrimStart('\\');
+        if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+        {
+            rel = Path.Combine("Data", rel);
+        }
+
+        var relUnderData = rel["Data\\".Length..];
+        var candidateRoots = new[]
+        {
+            Path.Combine(Path.GetDirectoryName(scanRoot) ?? scanRoot, "XBOX", "Data"),
+            Path.Combine(gameRoot, "XBOX", "Data"),
+            Path.GetFullPath(Path.Combine(gameRoot, "..", "XBOX", "Data"))
+        }
+        .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var root in candidateRoots)
+        {
+            try
+            {
+                var full = Path.GetFullPath(Path.Combine(root, relUnderData));
+                var normalizedRoot = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    + Path.DirectorySeparatorChar;
+                if (!full.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (File.Exists(full))
+                {
+                    var marker = $"{Path.DirectorySeparatorChar}XBOX{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}";
+                    var fullNormalized = full.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                    if (fullNormalized.Contains(marker, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return full;
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        return null;
     }
 
     private static string? ResolveSourceFromDataRelative(string scanRoot, string gameRoot, string relDataPath)

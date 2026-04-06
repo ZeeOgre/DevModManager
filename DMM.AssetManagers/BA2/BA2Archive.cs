@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.IO.Compression;
 
 namespace DMM.AssetManagers;
@@ -66,6 +67,32 @@ public static partial class BA2Archive
             .ToArray();
     }
 
+
+    private sealed record CachedArchiveIndex(long Length, DateTime LastWriteTimeUtc, IReadOnlyList<Ba2Entry> Entries);
+
+    private static readonly ConcurrentDictionary<string, CachedArchiveIndex> ArchiveIndexCache = new(StringComparer.OrdinalIgnoreCase);
+
+    public static void ClearArchiveIndexCache() => ArchiveIndexCache.Clear();
+
+    private static IReadOnlyList<Ba2Entry> ReadIndexCached(string ba2Path)
+    {
+        var fullPath = Path.GetFullPath(ba2Path);
+        var info = new FileInfo(fullPath);
+        var currentLength = info.Length;
+        var currentWriteTime = info.LastWriteTimeUtc;
+
+        if (ArchiveIndexCache.TryGetValue(fullPath, out var cached) &&
+            cached.Length == currentLength &&
+            cached.LastWriteTimeUtc == currentWriteTime)
+        {
+            return cached.Entries;
+        }
+
+        var entries = ReadIndex(fullPath);
+        ArchiveIndexCache[fullPath] = new CachedArchiveIndex(currentLength, currentWriteTime, entries);
+        return entries;
+    }
+
     public static Dictionary<string, Ba2Entry> BuildMergedIndex(IEnumerable<string> ba2Paths)
     {
         if (ba2Paths == null) throw new ArgumentNullException(nameof(ba2Paths));
@@ -85,7 +112,7 @@ public static partial class BA2Archive
             IReadOnlyList<Ba2Entry> entries;
             try
             {
-                entries = ReadIndex(full);
+                entries = ReadIndexCached(full);
             }
             catch (Exception ex)
             {
@@ -160,7 +187,7 @@ public static partial class BA2Archive
 
             try
             {
-                foreach (var e in ReadIndex(full))
+                foreach (var e in ReadIndexCached(full))
                 {
                     merged[e.RelativePath] = e;
                 }
