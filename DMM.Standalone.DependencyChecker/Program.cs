@@ -1276,7 +1276,7 @@ namespace DmmDep
                     {
                         string relUnderData = GetRelativePath(dataRoot, f);
                         string relPc = NormalizeRel(Path.Combine("Data", relUnderData));
-                        AddFile(manifest, achlist, relPc, FileKind.Voice, "pc-voice-runtime", gameRoot, xboxDataRoot);
+                        AddFile(manifest, achlistPaths, relPc, FileKind.Voice, "pc-voice-runtime", gameRoot, xboxDataRoot);
                     }
                 }
             }
@@ -1368,12 +1368,7 @@ namespace DmmDep
 
         private static void WriteDepsJson(string path, DependencyManifest manifest)
         {
-            var jsonOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-
-            string json = JsonSerializer.Serialize(manifest, jsonOptions);
+            string json = JsonSerializer.Serialize(manifest, AchlistSerializerContext.Default.DependencyManifest);
             File.WriteAllText(path, json, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
 
@@ -1738,7 +1733,10 @@ namespace DmmDep
                 // Your achlist is written as a JSON string array.
                 string json = File.ReadAllText(achlistPath, Encoding.ASCII);
 
-                string[]? items = JsonSerializer.Deserialize<string[]>(json);
+                //string[]? items = JsonSerializer.Deserialize<string[]>(json);
+
+                string[]? items = JsonSerializer.Deserialize(json, AchlistSerializerContext.Default.StringArray);
+
                 if (items == null || items.Length == 0)
                     return 0;
 
