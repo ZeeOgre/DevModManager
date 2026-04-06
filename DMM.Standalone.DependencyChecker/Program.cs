@@ -1276,7 +1276,7 @@ namespace DmmDep
                     {
                         string relUnderData = GetRelativePath(dataRoot, f);
                         string relPc = NormalizeRel(Path.Combine("Data", relUnderData));
-                        AddFile(manifest, achlistPaths, relPc, FileKind.Voice, "pc-voice-runtime", gameRoot, xboxDataRoot);
+                        AddFile(manifest, achlist, relPc, FileKind.Voice, "pc-voice-runtime", gameRoot, xboxDataRoot);
                     }
                 }
             }
