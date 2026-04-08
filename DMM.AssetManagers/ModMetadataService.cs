@@ -43,6 +43,7 @@ public static class ModMetadataService
                 {
                     pcPath = x.RelativeDataPath,
                     xboxPath = x.XboxRelativePath,
+                    ps5Path = x.Ps5RelativePath,
                     tifPath = x.TifRelativePath
                 })
                 .ToList()

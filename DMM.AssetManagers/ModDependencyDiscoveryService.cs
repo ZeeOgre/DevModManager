@@ -15,6 +15,8 @@ public sealed record ModDependencyEntry(
     string SourcePath,
     string? XboxRelativePath,
     string? XboxSourcePath,
+    string? Ps5RelativePath,
+    string? Ps5SourcePath,
     string? TifRelativePath,
     string? TifSourcePath,
     bool ParentArchiveMatch);
@@ -57,8 +59,10 @@ public sealed class ModDependencyDiscoveryService
     {
         " - Main.ba2",
         " - Main_xbox.ba2",
+        " - Main_ps.ba2",
         " - Textures.ba2",
-        " - Textures_xbox.ba2"
+        " - Textures_xbox.ba2",
+        " - Textures_ps.ba2"
     };
 
     private static readonly HashSet<string> PluginExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -112,15 +116,24 @@ public sealed class ModDependencyDiscoveryService
                 result.ParentArchiveReferences.Add(rel);
                 result.HighProbabilityDiscard.Add(rel);
                 result.ArchiveHitKinds[rel] = ClassifyArchiveHitKind(archiveMatchEntry.ArchivePath);
-                result.Entries.Add(new ModDependencyEntry(rel, source, null, null, null, null, true));
+                result.Entries.Add(new ModDependencyEntry(rel, source, null, null, null, null, null, null, true));
                 continue;
             }
+
             string? xboxRel = null;
             string? xboxSource = null;
             if (IsXboxMirroredCandidate(rel))
             {
                 xboxRel = rel;
                 xboxSource = ResolveXboxSourceFromDataRelative(scanRoot, gameRoot, xboxRel);
+            }
+
+            string? ps5Rel = null;
+            string? ps5Source = null;
+            if (IsPs5MirroredCandidate(rel))
+            {
+                ps5Rel = rel;
+                ps5Source = ResolvePs5SourceFromDataRelative(scanRoot, gameRoot, ps5Rel);
             }
 
             string? tifRel = null;
@@ -136,7 +149,7 @@ public sealed class ModDependencyDiscoveryService
                 }
             }
 
-            result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, tifRel, tifSource, false));
+            result.Entries.Add(new ModDependencyEntry(rel, source, xboxRel, xboxSource, ps5Rel, ps5Source, tifRel, tifSource, false));
             result.HighProbabilityKeep.Add(rel);
         }
 
@@ -964,11 +977,57 @@ public sealed class ModDependencyDiscoveryService
         return null;
     }
 
-    private static string? ResolveSourceFromDataRelative(string scanRoot, string gameRoot, string relDataPath)
+    private static bool IsPs5MirroredCandidate(string relDataPath)
     {
-        if (TryResolveDataRelative(relDataPath, scanRoot, gameRoot, out var fullPath))
+        if (string.IsNullOrWhiteSpace(relDataPath)) return false;
+        if (relDataPath.EndsWith(".ba2", StringComparison.OrdinalIgnoreCase)) return false;
+
+        return relDataPath.StartsWith("Data\\Sound\\Voice\\", StringComparison.OrdinalIgnoreCase)
+            && relDataPath.EndsWith(".wem", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? ResolvePs5SourceFromDataRelative(string scanRoot, string gameRoot, string relDataPath)
+    {
+        var rel = relDataPath.Replace('/', '\\').TrimStart('\\');
+        if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
         {
-            return fullPath;
+            rel = Path.Combine("Data", rel);
+        }
+
+        var relUnderData = rel["Data\\".Length..];
+        var candidateRoots = new[]
+        {
+            Path.Combine(Path.GetDirectoryName(scanRoot) ?? scanRoot, "PS5", "Data"),
+            Path.Combine(gameRoot, "PS5", "Data"),
+            Path.GetFullPath(Path.Combine(gameRoot, "..", "PS5", "Data"))
+        }
+        .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var root in candidateRoots)
+        {
+            try
+            {
+                var full = Path.GetFullPath(Path.Combine(root, relUnderData));
+                var normalizedRoot = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    + Path.DirectorySeparatorChar;
+                if (!full.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (File.Exists(full))
+                {
+                    var marker = $"{Path.DirectorySeparatorChar}PS5{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}";
+                    var fullNormalized = full.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                    if (fullNormalized.Contains(marker, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return full;
+                    }
+                }
+            }
+            catch
+            {
+            }
         }
 
         return null;
