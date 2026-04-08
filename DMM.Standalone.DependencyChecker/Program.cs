@@ -35,6 +35,7 @@ namespace DmmDep
     // Source generator context for trim-safe JSON serialization
     [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(string[]))]
+    [JsonSerializable(typeof(DependencyManifest))]
     internal partial class AchlistSerializerContext : JsonSerializerContext
     {
     }
@@ -1497,12 +1498,7 @@ private static string BuildPlatformRelativePath(string platformDataRoot, string 
 
         private static void WriteDepsJson(string path, DependencyManifest manifest)
         {
-            var jsonOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-
-            string json = JsonSerializer.Serialize(manifest, jsonOptions);
+            string json = JsonSerializer.Serialize(manifest, AchlistSerializerContext.Default.DependencyManifest);
             File.WriteAllText(path, json, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
 
@@ -1867,7 +1863,10 @@ private static string BuildPlatformRelativePath(string platformDataRoot, string 
                 // Your achlist is written as a JSON string array.
                 string json = File.ReadAllText(achlistPath, Encoding.ASCII);
 
-                string[]? items = JsonSerializer.Deserialize<string[]>(json);
+                //string[]? items = JsonSerializer.Deserialize<string[]>(json);
+
+                string[]? items = JsonSerializer.Deserialize(json, AchlistSerializerContext.Default.StringArray);
+
                 if (items == null || items.Length == 0)
                     return 0;
 
