@@ -8,13 +8,13 @@ namespace DMM.Avalonia;
 
 internal static class DependencyReviewCoordinator
 {
-    public static async Task<IReadOnlyDictionary<string, HashSet<string>>?> BuildSelectionsAsync(
+    public static async Task<IReadOnlyDictionary<string, DependencyReviewDecision>?> BuildSelectionsAsync(
         Window owner,
         MainWindowViewModel viewModel,
         string? gameFolder,
         IReadOnlyList<GameFolderStageSelection> selections)
     {
-        var map = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        var map = new Dictionary<string, DependencyReviewDecision>(StringComparer.OrdinalIgnoreCase);
 
         var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
         for (var index = 0; index < orderedSelections.Count; index++)
@@ -52,7 +52,7 @@ internal static class DependencyReviewCoordinator
                 return null;
             }
 
-            map[MainWindowViewModel.BuildSelectionReviewKey(selection)] = new HashSet<string>(decision.KeepRelativePaths, StringComparer.OrdinalIgnoreCase);
+            map[MainWindowViewModel.BuildSelectionReviewKey(selection)] = decision;
             viewModel.StatusMessage =
                 $"Saved dependency selection for {selection.ModName} ({decision.KeepRelativePaths.Count} file(s) kept).";
         }

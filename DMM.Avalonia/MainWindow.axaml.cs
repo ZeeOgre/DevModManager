@@ -950,7 +950,7 @@ public sealed class MainWindowViewModel : NotifyBase
     public Task ApplyScanSelections(
         IReadOnlyList<GameFolderStageSelection> selections,
         IProgress<ScanApplyProgress>? progress = null,
-        IReadOnlyDictionary<string, HashSet<string>>? reviewSelections = null)
+        IReadOnlyDictionary<string, DependencyReviewDecision>? reviewSelections = null)
     {
         return ApplyScanSelectionsForGameFolder(SelectedGameFolder, selections, progress, reviewSelections);
     }
@@ -959,7 +959,7 @@ public sealed class MainWindowViewModel : NotifyBase
         string? gameFolder,
         IReadOnlyList<GameFolderStageSelection> selections,
         IProgress<ScanApplyProgress>? progress = null,
-        IReadOnlyDictionary<string, HashSet<string>>? reviewSelections = null)
+        IReadOnlyDictionary<string, DependencyReviewDecision>? reviewSelections = null)
     {
         Mods.Clear();
 
@@ -1040,7 +1040,7 @@ public sealed class MainWindowViewModel : NotifyBase
         var orderedSelections = selections.OrderBy(x => x.PluginName, StringComparer.OrdinalIgnoreCase).ToList();
         var completedMods = 0;
 
-        Task<(bool SourceExists, ModDependencyDiscoveryResult? Discovery, List<ModDependencyEntry> InitialEntries, string? Error)> StartDependencyScanTask(GameFolderStageSelection selection)
+        Task<(bool SourceExists, ModDependencyDiscoveryResult? Discovery, List<ModDependencyEntry> InitialEntries, DependencyReviewDecision? Decision, string? Error)> StartDependencyScanTask(GameFolderStageSelection selection)
         {
             return Task.Run(() =>
             {
@@ -1049,7 +1049,7 @@ public sealed class MainWindowViewModel : NotifyBase
                     var sourcePath = Path.Combine(scanRoot, selection.PluginName);
                     if (!File.Exists(sourcePath))
                     {
-                        return (false, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), (string?)null);
+                        return (false, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), (DependencyReviewDecision?)null, (string?)null);
                     }
 
                     var discovery = _dependencyDiscoveryService.CollectInitialFiles(scanRoot, resolvedGameRoot, selection.ModName, selection.PluginName);
@@ -1058,19 +1058,26 @@ public sealed class MainWindowViewModel : NotifyBase
                         .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
                         .ToList();
 
-                    if (reviewSelections is not null && reviewSelections.TryGetValue(BuildSelectionReviewKey(selection), out var reviewedKeep))
+                    DependencyReviewDecision? decision = null;
+                    if (reviewSelections is not null && reviewSelections.TryGetValue(BuildSelectionReviewKey(selection), out decision))
                     {
+                        var allKeepPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var path in decision.KeepRelativePaths)
+                            allKeepPaths.Add(path);
+                        foreach (var path in decision.WarnRelativePaths)
+                            allKeepPaths.Add(path);
+
                         initialEntries = discovery.Entries
-                            .Where(x => IsPluginOrArchiveRelativePath(x.RelativeDataPath) || reviewedKeep.Contains(x.RelativeDataPath))
+                            .Where(x => IsPluginOrArchiveRelativePath(x.RelativeDataPath) || allKeepPaths.Contains(x.RelativeDataPath))
                             .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
                             .ToList();
                     }
 
-                    return (true, discovery, initialEntries, (string?)null);
+                    return (true, discovery, initialEntries, decision, (string?)null);
                 }
                 catch (Exception ex)
                 {
-                    return (true, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), ex.Message);
+                    return (true, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), (DependencyReviewDecision?)null, ex.Message);
                 }
             });
         }
@@ -1082,7 +1089,7 @@ public sealed class MainWindowViewModel : NotifyBase
             await Task.Yield();
         }
 
-        Task<(bool SourceExists, ModDependencyDiscoveryResult? Discovery, List<ModDependencyEntry> InitialEntries, string? Error)>? pendingScanTask =
+        Task<(bool SourceExists, ModDependencyDiscoveryResult? Discovery, List<ModDependencyEntry> InitialEntries, DependencyReviewDecision? Decision, string? Error)>? pendingScanTask =
             orderedSelections.Count > 0 ? StartDependencyScanTask(orderedSelections[0]) : null;
 
         for (var selectionIndex = 0; selectionIndex < orderedSelections.Count; selectionIndex++)
@@ -1091,8 +1098,8 @@ public sealed class MainWindowViewModel : NotifyBase
             await ReportProgressAsync($"Preparing {selection.ModName}");
             await ReportProgressAsync($"Scanning {selection.ModName} dependencies (verify discovered files)");
 
-            var (sourceExists, discovery, initialEntries, scanError) = pendingScanTask is null
-                ? (false, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), "internal scan task was not initialized")
+            var (sourceExists, discovery, initialEntries, decision, scanError) = pendingScanTask is null
+                ? (false, (ModDependencyDiscoveryResult?)null, new List<ModDependencyEntry>(), (DependencyReviewDecision?)null, "internal scan task was not initialized")
                 : await pendingScanTask;
 
             pendingScanTask = selectionIndex + 1 < orderedSelections.Count
@@ -1230,7 +1237,14 @@ public sealed class MainWindowViewModel : NotifyBase
                     }
                 }
 
-                ModMetadataService.WriteMetadataFiles(modRepoRoot, selection.ModName, selection.PluginName, initialEntries, discovery);
+                ModMetadataService.WriteMetadataFiles(
+                    modRepoRoot, 
+                    selection.ModName, 
+                    selection.PluginName, 
+                    initialEntries, 
+                    discovery,
+                    decision?.WarnRelativePaths,
+                    decision?.DiscardRelativePaths);
 
                 var relativeSubmodulePath = Path.GetRelativePath(repoRoot, modRepoRoot)
                     .Replace('\\', '/');

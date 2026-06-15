@@ -10,7 +10,7 @@ namespace DmmDep
 {
 #nullable enable
 
-    internal enum FileKind { Pex, Psc, Nif, Mat, Texture, Mesh, Voice, Terrain, Icon, Tif, Biom, BackupOnly, Particle, Anim, Morph, Rig, Warn, Other }
+    internal enum FileKind { Pex, Psc, Nif, Mat, Texture, Mesh, Voice, Terrain, Icon, Tif, Biom, BackupOnly, Particle, Anim, Morph, Rig, Warn, Missing, Other }
 
     internal sealed class FileEntry
     {
@@ -689,11 +689,67 @@ namespace DmmDep
 
                 Log.Info($"[6] After PSC imports: {pscSet.Count} PSC, {pexSet.Count} PEX");
 
+                // ---- Prepare categorized outputs ----
+                var achlistKeep = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var achlistWarn = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var achlistDiscard = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                // Categorize files from manifest
+                foreach (var file in manifest.Files)
+                {
+                    if (string.IsNullOrWhiteSpace(file.PcPath))
+                        continue;
+
+                    if (file.Kind == "missing" || file.Source.StartsWith("ignored-filenotfound:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Files referenced but not found on disk go to discard
+                        achlistDiscard.Add(file.PcPath);
+                    }
+                    else if (file.Kind == "warn")
+                    {
+                        // Warn files (unclassified extensions, etc.) go to warn list
+                        achlistWarn.Add(file.PcPath);
+                    }
+                    else if (file.Kind == "backuponly")
+                    {
+                        // Backup files go to keep list
+                        achlistKeep.Add(file.PcPath);
+                    }
+                    else
+                    {
+                        // All other files go to keep
+                        achlistKeep.Add(file.PcPath);
+                    }
+                }
+
+                // achlistPaths contains files explicitly added via AddFile, ensure they're in keep
+                foreach (var path in achlistPaths)
+                {
+                    if (!achlistWarn.Contains(path) && !achlistDiscard.Contains(path))
+                        achlistKeep.Add(path);
+                }
+
                 // ---- Outputs ----
                 string achlistFileName = pluginName + (options.TestMode ? ".achlist.test" : ".achlist");
                 string achlistPath = Path.Combine(outputRoot, achlistFileName);
-                WriteAchlistJsonAsciiCrLf(achlistPath, achlistPaths.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
-                Log.Info($"Wrote achlist : {achlistPath} (total {achlistPaths.Count})");
+                WriteAchlistJsonAsciiCrLf(achlistPath, achlistKeep.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
+                Log.Info($"Wrote achlist : {achlistPath} (total {achlistKeep.Count})");
+
+                if (achlistWarn.Count > 0)
+                {
+                    string achlistWarnFileName = pluginName + (options.TestMode ? ".achlist_warn.test" : ".achlist_warn");
+                    string achlistWarnPath = Path.Combine(outputRoot, achlistWarnFileName);
+                    WriteAchlistJsonAsciiCrLf(achlistWarnPath, achlistWarn.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
+                    Log.Info($"Wrote achlist_warn : {achlistWarnPath} (total {achlistWarn.Count})");
+                }
+
+                if (achlistDiscard.Count > 0)
+                {
+                    string achlistDiscardFileName = pluginName + (options.TestMode ? ".achlist_discard.test" : ".achlist_discard");
+                    string achlistDiscardPath = Path.Combine(outputRoot, achlistDiscardFileName);
+                    WriteAchlistJsonAsciiCrLf(achlistDiscardPath, achlistDiscard.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
+                    Log.Info($"Wrote achlist_discard : {achlistDiscardPath} (total {achlistDiscard.Count})");
+                }
 
                 string csvPath = Path.Combine(outputRoot, pluginName + "_deps.csv");
                 WriteDepsCsv(csvPath, manifest.Files);
@@ -707,7 +763,7 @@ namespace DmmDep
                 }
 
                 swTotal.Stop();
-                Log.Always($"Done in {swTotal.Elapsed} | achlist={achlistPaths.Count}, deps={manifest.Files.Count}");
+                Log.Always($"Done in {swTotal.Elapsed} | achlist={achlistKeep.Count}, warn={achlistWarn.Count}, discard={achlistDiscard.Count}, deps={manifest.Files.Count}");
                 return 0;
             }
             catch (Exception ex)
@@ -720,6 +776,13 @@ namespace DmmDep
         private static void PrintUsage()
         {
             Console.WriteLine("dmmdep.exe <pluginPath> [options]");
+            Console.WriteLine();
+            Console.WriteLine("Outputs:");
+            Console.WriteLine("  <plugin>.achlist         Files to include (exist on disk, referenced by plugin)");
+            Console.WriteLine("  <plugin>.achlist_warn    Files with warnings (unclassified or questionable)");
+            Console.WriteLine("  <plugin>.achlist_discard Files to discard (referenced but not found on disk)");
+            Console.WriteLine("  <plugin>_deps.csv        Dependency manifest (CSV format)");
+            Console.WriteLine("  <plugin>_deps.json       Dependency manifest (JSON format, unless --silent)");
             Console.WriteLine();
             Console.WriteLine("Options:");
             Console.WriteLine("  --gameroot <path>     Override inferred game root (parent of Data).");
@@ -1118,7 +1181,11 @@ namespace DmmDep
             relPcPath = NormalizeRel(relPcPath);
             string fullPc = Path.Combine(gameRoot, relPcPath);
             if (!File.Exists(fullPc))
+            {
+                // Track missing files for discard list
+                AddIgnoredFileNotFound(manifest, relPcPath, $"missing-{source}");
                 return;
+            }
 
             string? xboxRel = null;
 
@@ -1173,7 +1240,7 @@ namespace DmmDep
                 {
                     PcPath = relPcPath,
                     XboxPath = null,
-                    Kind = FileKind.Warn.ToString().ToLowerInvariant(),
+                    Kind = FileKind.Missing.ToString().ToLowerInvariant(),
                     Source = $"ignored-filenotfound:{source}"
                 });
             }

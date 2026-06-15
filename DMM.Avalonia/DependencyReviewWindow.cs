@@ -14,7 +14,10 @@ using DMM.AssetManagers;
 
 namespace DMM.Avalonia;
 
-public sealed record DependencyReviewDecision(IReadOnlyCollection<string> KeepRelativePaths);
+public sealed record DependencyReviewDecision(
+    IReadOnlyCollection<string> KeepRelativePaths,
+    IReadOnlyCollection<string> WarnRelativePaths,
+    IReadOnlyCollection<string> DiscardRelativePaths);
 
 public sealed class DependencyReviewWindow : Window
 {
@@ -93,7 +96,7 @@ public sealed class DependencyReviewWindow : Window
         var okButton = new Button { Content = "OK", MinWidth = 90 };
         var cancelButton = new Button { Content = "Cancel", MinWidth = 90 };
 
-        okButton.Click += (_, _) => Close(new DependencyReviewDecision(BuildKeepList()));
+        okButton.Click += (_, _) => Close(BuildDecision());
         cancelButton.Click += (_, _) => Close(null);
 
         var body = new Grid
@@ -250,6 +253,28 @@ public sealed class DependencyReviewWindow : Window
         panel.Children.Add(text);
 
         return panel;
+    }
+
+    private DependencyReviewDecision BuildDecision()
+    {
+        var keep = _definiteKeep
+            .Where(x => x.Selected)
+            .Select(x => x.RelativePath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var warn = _maybeKeep
+            .Where(x => x.Selected)
+            .Select(x => x.RelativePath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var discard = _errors
+            .Select(x => x.RelativePath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new DependencyReviewDecision(keep, warn, discard);
     }
 
     private IReadOnlyCollection<string> BuildKeepList()
