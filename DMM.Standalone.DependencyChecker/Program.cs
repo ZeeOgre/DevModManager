@@ -694,6 +694,16 @@ namespace DmmDep
                 var achlistWarn = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var achlistDiscard = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+                // Log manifest file kinds for diagnostics
+                if (s_verbose)
+                {
+                    var kindCounts = manifest.Files
+                        .GroupBy(f => f.Kind)
+                        .Select(g => $"{g.Key}={g.Count()}")
+                        .ToList();
+                    Log.Info($"[Manifest Kinds] {string.Join(", ", kindCounts)}");
+                }
+
                 // Categorize files from manifest
                 foreach (var file in manifest.Files)
                 {
@@ -721,6 +731,8 @@ namespace DmmDep
                         achlistKeep.Add(file.PcPath);
                     }
                 }
+
+                Log.Info($"[Categorization] Keep={achlistKeep.Count}, Warn={achlistWarn.Count}, Discard={achlistDiscard.Count}");
 
                 // ---- Outputs ----
                 string achlistFileName = pluginName + (options.TestMode ? ".achlist.test" : ".achlist");
