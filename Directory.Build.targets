@@ -21,7 +21,8 @@
     <Message Importance="Normal" Text="Properties: Configuration=$(Configuration); IsCI=$(IsCI); EnableLocalReleaseTrigger=$(EnableLocalReleaseTrigger); TriggerGitHubRelease=$(TriggerGitHubRelease)" />
 
     <!-- Call script via PowerShell call operator to ensure script parameters are passed correctly.
-         Pass explicit RepoRoot so the script resolves repo root reliably. -->
-    <Exec Command="pwsh -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildThisFileDirectory)scripts\push-tag.ps1' -AutoCommit -RepoRoot '$(MSBuildThisFileDirectory)'&quot;" />
+         Pass explicit RepoRoot so the script resolves repo root reliably.
+         Use powershell.exe as fallback if pwsh is not available. -->
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildThisFileDirectory)scripts\push-tag.ps1' -AutoCommit -RepoRoot '$(MSBuildThisFileDirectory)'&quot;" />
   </Target>
 </Project>
