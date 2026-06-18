@@ -722,13 +722,6 @@ namespace DmmDep
                     }
                 }
 
-                // achlistPaths contains files explicitly added via AddFile, ensure they're in keep
-                foreach (var path in achlistPaths)
-                {
-                    if (!achlistWarn.Contains(path) && !achlistDiscard.Contains(path))
-                        achlistKeep.Add(path);
-                }
-
                 // ---- Outputs ----
                 string achlistFileName = pluginName + (options.TestMode ? ".achlist.test" : ".achlist");
                 string achlistPath = Path.Combine(outputRoot, achlistFileName);

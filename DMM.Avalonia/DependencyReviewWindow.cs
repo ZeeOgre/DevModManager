@@ -60,7 +60,7 @@ public sealed class DependencyReviewWindow : Window
         _maybeKeep = new ObservableCollection<DependencyReviewItem>(entries
             .Where(x => x.ParentArchiveMatch)
             .OrderBy(x => x.RelativeDataPath, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new DependencyReviewItem(x.RelativeDataPath, x.SourcePath, false, ResolveArchiveHitBrush(x.RelativeDataPath, Brushes.Khaki))));
+            .Select(x => new DependencyReviewItem(x.RelativeDataPath, x.SourcePath, true, ResolveArchiveHitBrush(x.RelativeDataPath, Brushes.Khaki))));
 
         _errors = new ObservableCollection<DependencyReviewItem>(
             missingReferences.OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
