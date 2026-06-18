@@ -30,10 +30,10 @@ jobs:
 
       - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} /p:SelfContained=false /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-temp
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release /p:SelfContained=false /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-temp
           Move-Item ./out/dmmdeps-temp/DMM.Standalone.DependencyChecker.exe ./out/dmmdeps/dmmdeps.exe -Force
           Remove-Item ./out/dmmdeps-temp -Recurse -Force
-          # Framework-dependent build with RID specified and explicit SelfContained=false to ensure all dependencies are also framework-dependent.
+          # Framework-dependent build without RID specified to ensure all dependencies remain framework-dependent.
       - name: Publish self-contained single-file (fat) build
         run: |
           dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat-temp
