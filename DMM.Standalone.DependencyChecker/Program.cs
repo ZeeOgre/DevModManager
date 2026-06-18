@@ -728,21 +728,16 @@ namespace DmmDep
                 WriteAchlistJsonAsciiCrLf(achlistPath, achlistKeep.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
                 Log.Info($"Wrote achlist : {achlistPath} (total {achlistKeep.Count})");
 
-                if (achlistWarn.Count > 0)
-                {
-                    string achlistWarnFileName = pluginName + (options.TestMode ? ".achlist_warn.test" : ".achlist_warn");
-                    string achlistWarnPath = Path.Combine(outputRoot, achlistWarnFileName);
-                    WriteAchlistJsonAsciiCrLf(achlistWarnPath, achlistWarn.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
-                    Log.Info($"Wrote achlist_warn : {achlistWarnPath} (total {achlistWarn.Count})");
-                }
+                // Always write warn and discard files, even if empty
+                string achlistWarnFileName = pluginName + (options.TestMode ? ".achlist_warn.test" : ".achlist_warn");
+                string achlistWarnPath = Path.Combine(outputRoot, achlistWarnFileName);
+                WriteAchlistJsonAsciiCrLf(achlistWarnPath, achlistWarn.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
+                Log.Info($"Wrote achlist_warn : {achlistWarnPath} (total {achlistWarn.Count})");
 
-                if (achlistDiscard.Count > 0)
-                {
-                    string achlistDiscardFileName = pluginName + (options.TestMode ? ".achlist_discard.test" : ".achlist_discard");
-                    string achlistDiscardPath = Path.Combine(outputRoot, achlistDiscardFileName);
-                    WriteAchlistJsonAsciiCrLf(achlistDiscardPath, achlistDiscard.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
-                    Log.Info($"Wrote achlist_discard : {achlistDiscardPath} (total {achlistDiscard.Count})");
-                }
+                string achlistDiscardFileName = pluginName + (options.TestMode ? ".achlist_discard.test" : ".achlist_discard");
+                string achlistDiscardPath = Path.Combine(outputRoot, achlistDiscardFileName);
+                WriteAchlistJsonAsciiCrLf(achlistDiscardPath, achlistDiscard.OrderBy(p => p, StringComparer.OrdinalIgnoreCase));
+                Log.Info($"Wrote achlist_discard : {achlistDiscardPath} (total {achlistDiscard.Count})");
 
                 string csvPath = Path.Combine(outputRoot, pluginName + "_deps.csv");
                 WriteDepsCsv(csvPath, manifest.Files);
