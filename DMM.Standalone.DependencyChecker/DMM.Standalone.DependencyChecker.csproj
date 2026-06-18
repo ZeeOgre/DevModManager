@@ -15,7 +15,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Microsoft.Data.Sqlite" />
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+	  <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
 	  <PackageReference Include="xunit.v3" />
 	  <PackageReference Include="YamlDotNet" />
 	</ItemGroup>
@@ -39,6 +41,8 @@
 		<PublishTrimmed>true</PublishTrimmed>
 		<DebugType>None</DebugType>
 		<IncludeSymbols>false</IncludeSymbols>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 	</PropertyGroup>
 
 	<!-- Publish-on-build: handles all cases including FullRelease
@@ -55,16 +59,16 @@
 		<Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Command="dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:AssemblyName=dmmdeps -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
 
 		<!-- Self-contained (single exe with runtime included) - FAT VERSION -->
-		<Exec Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Command="dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:EnableCompressionInSingleFile=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
+		<Exec Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Command="dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true -p:AssemblyName=dmmdeps_fat -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
 		
 		<!-- Copy published executables to distribution directory -->
 		<Copy Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" SourceFiles="$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64\dmmdeps.exe" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
-		      
+
 		<Copy Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" SourceFiles="$(MSBuildProjectDirectory)\publish\self-contained\win-x64\dmmdeps_fat.exe" DestinationFolder="$(DistributionDir)" SkipUnchangedFiles="true" />
-		
-		<Message Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Text="Published dmmdeps.exe (framework-dependent, ~10MB, requires .NET 8) to $(DistributionDir)" Importance="high" />
-		         
-		<Message Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Text="Published dmmdeps_fat.exe (self-contained, ~64MB, includes .NET 8) to $(DistributionDir)" Importance="high" />
+
+		<Message Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Text="Published dmmdeps.exe (framework-dependent, ~10MB, requires .NET 9) to $(DistributionDir)" Importance="high" />
+
+		<Message Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Text="Published dmmdeps_fat.exe (self-contained, ~64MB, includes .NET 9) to $(DistributionDir)" Importance="high" />
 	</Target>
 
 	<Target Name="DumpPublishProps" BeforeTargets="Publish">

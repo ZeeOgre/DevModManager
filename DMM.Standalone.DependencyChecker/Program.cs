@@ -54,6 +54,7 @@ namespace DmmDep
         public bool Verbose { get; set; } // --verbose: emit detailed ignored-file diagnostics
 
         public bool SmartClobber { get; set; } // --smartclobber : seed candidates from existing .achlist
+        public bool RebuildCache { get; set; } // --rebuildcache : force rebuild of parent archive cache
     }
 
     internal static class Program
@@ -690,20 +691,97 @@ namespace DmmDep
 
                 Log.Info($"[6] After PSC imports: {pscSet.Count} PSC, {pexSet.Count} PEX");
 
-                // ---- 7. Check for parent archive matches ----
-                Log.Info("[7] Checking for parent archive matches...");
-                var parentArchiveIndex = BuildParentArchiveIndex(pluginPath, dataRoot, gameRoot);
-                Log.Info($"[7] Parent archive index built: {parentArchiveIndex.Count} files indexed");
+                // ---- 7. Check for parent archive matches using cached index ----
+                Log.Info("[7] Loading parent archive index (cached)...");
+                if (options.RebuildCache)
+                {
+                    Log.Info("[7] --rebuildcache: Clearing existing cache...");
+                    ParentArchiveCache.ClearCache();
+                }
+                var parentArchiveIndex = ParentArchiveCache.GetOrBuildIndex(
+                    gameRoot,
+                    msg => Log.Info(msg)
+                );
+                Log.Info($"[7] Parent archive index loaded: {parentArchiveIndex.Count} files indexed");
+
+                // DEBUG: Show sample of archive index keys to verify format
+                if (s_verbose && parentArchiveIndex.Count > 0)
+                {
+                    var sampleArchiveKeys = parentArchiveIndex.Keys.Take(20).ToList();
+                    Log.Info($"[7] Sample of parent archive index keys (first 20):");
+                    foreach (var k in sampleArchiveKeys)
+                    {
+                        Log.Info($"[7]   INDEX KEY: '{k}'");
+                    }
+                }
 
                 // Mark files that match parent archives
+                int parentMatchCount = 0;
+                var sampleMatches = new List<string>();
+                var sampleMisses = new List<string>();
+
+                // DEBUG: Test a known parent archive file against manifest
+                bool testKeyExists = parentArchiveIndex.ContainsKey("Data\\meshes\\genesisplaceholder.txt".ToLowerInvariant());
+                Log.Info($"[7-DEBUG] Test lookup of parent archive key 'data\\meshes\\genesisplaceholder.txt': {testKeyExists}");
+
                 foreach (var file in manifest.Files.ToList())
                 {
                     if (file.Kind != "missing" && !file.Source.StartsWith("ignored-filenotfound:", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (parentArchiveIndex.ContainsKey(file.PcPath))
+                        // Check parent archive index for ALL file types
+                        string normalizedPath = file.PcPath.ToLowerInvariant();
+
+                        if (parentArchiveIndex.ContainsKey(normalizedPath))
                         {
                             // Update kind to ParentMatch
                             file.Kind = FileKind.ParentMatch.ToString().ToLowerInvariant();
+                            file.Source = $"parent-archive:{parentArchiveIndex[normalizedPath]}";
+                            parentMatchCount++;
+
+                            if (sampleMatches.Count < 10)
+                            {
+                                sampleMatches.Add($"{file.PcPath} -> {parentArchiveIndex[normalizedPath]}");
+                            }
+
+                            if (s_verbose)
+                            {
+                                Log.Info($"[7]   ParentMatch: {file.PcPath} -> {parentArchiveIndex[normalizedPath]}");
+                            }
+                        }
+                        else if (sampleMisses.Count < 10)
+                        {
+                            sampleMisses.Add(file.PcPath);
+                        }
+                    }
+                }
+
+                Log.Info($"[7] Marked {parentMatchCount} files as parent archive matches");
+
+                if (s_verbose && sampleMatches.Count > 0)
+                {
+                    Log.Info($"[7] Sample matches (first {sampleMatches.Count}):");
+                    foreach (var m in sampleMatches)
+                    {
+                        Log.Info($"[7]   {m}");
+                    }
+                }
+
+                if (s_verbose && sampleMisses.Count > 0 && parentMatchCount < 100)
+                {
+                    Log.Info($"[7] Sample misses (first {sampleMisses.Count}) - files not found in parent archives:");
+                    foreach (var m in sampleMisses)
+                    {
+                        Log.Info($"[7]   {m}");
+                    }
+
+                    // Show sample of what IS in the parent archive index
+                    var sampleArchiveKeys = parentArchiveIndex.Keys.Take(10).ToList();
+                    if (sampleArchiveKeys.Count > 0)
+                    {
+                        Log.Info($"[7] Sample of parent archive index keys (first 10):");
+                        foreach (var k in sampleArchiveKeys)
+                        {
+                            Log.Info($"[7]   {k}");
                         }
                     }
                 }
@@ -746,8 +824,9 @@ namespace DmmDep
                     }
                     else if (file.Kind == "backuponly")
                     {
-                        // Backup files go to keep list
-                        achlistKeep.Add(file.PcPath);
+                        // Backup files are never included in achlist (PSC source, TIF source, etc.)
+                        // They are tracked for backup purposes but not distributed
+                        continue;
                     }
                     else
                     {
@@ -818,6 +897,7 @@ namespace DmmDep
             Console.WriteLine("  --silent              Suppress all informational output except starting and completion.");
             Console.WriteLine("  --verbose             Emit detailed ignored/missing-file diagnostics and record ignored-filenotfound entries in deps outputs.");
             Console.WriteLine("  --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf).");
+            Console.WriteLine("  --rebuildcache        Force rebuild of parent archive cache (useful if game updated).");
         }
 
         private static Options? ParseArgs(string[] args)
@@ -863,6 +943,9 @@ namespace DmmDep
                         break;
                     case "--smartclobber":
                         opts.SmartClobber = true;
+                        break;
+                    case "--rebuildcache":
+                        opts.RebuildCache = true;
                         break;
                     case "--verbose":
                         opts.Verbose = true;

@@ -1,0 +1,400 @@
+using System.Data;
+using System.IO.Compression;
+using DMM.AssetManagers;
+using Microsoft.Data.Sqlite;
+
+namespace DmmDep;
+
+/// <summary>
+/// Manages persistent caching of parent/system archive file indexes using SQLite.
+/// Cache is stored in %LOCALAPPDATA%\ZeeOgre\dmmdeps\starfield_basefiles.db
+/// 
+/// Schema:
+///   archives: archive_path, file_name, size, last_modified, file_count, scan_timestamp
+///   files: file_path, archive_name (indexed for fast lookups)
+/// </summary>
+internal static class ParentArchiveCache
+{
+    private static readonly string CacheRoot = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "ZeeOgre",
+        "dmmdeps"
+    );
+
+    private static readonly string CacheDbPath = Path.Combine(CacheRoot, "starfield_basefiles.db");
+
+    /// <summary>
+    /// Get the cached parent archive index, or build/update it if stale.
+    /// </summary>
+    public static Dictionary<string, string> GetOrBuildIndex(string gameRoot, Action<string>? logger = null)
+    {
+        logger ??= _ => { };
+
+        Directory.CreateDirectory(CacheRoot);
+        logger($"[Cache] DB path: {CacheDbPath}");
+        EnsureSchema();
+
+        var parentArchives = DiscoverParentArchives(gameRoot);
+        logger($"[Cache] Found {parentArchives.Count} parent archives in game root");
+
+        // DEBUG: Log ContentResources.zip specifically
+        var contentResources = parentArchives.FirstOrDefault(a => a.Name.Equals("ContentResources.zip", StringComparison.OrdinalIgnoreCase));
+        if (contentResources != null)
+        {
+            logger($"[Cache]   -> ContentResources.zip found: {contentResources.FullName}");
+        }
+        else
+        {
+            logger($"[Cache]   -> WARNING: ContentResources.zip NOT found!");
+        }
+
+        using var conn = OpenConnection();
+
+        // Check which archives need scanning
+        var staleArchives = FindStaleArchives(conn, parentArchives, logger);
+
+        if (staleArchives.Count > 0)
+        {
+            logger($"[Cache] {staleArchives.Count} archive(s) need scanning");
+            foreach (var archive in staleArchives)
+            {
+                ScanAndCacheArchive(conn, archive, logger);
+            }
+        }
+        else
+        {
+            logger("[Cache] All archives are up to date");
+        }
+
+        // Load the complete index
+        var index = LoadFileIndex(conn);
+        logger($"[Cache] Loaded {index.Count} files from cache");
+
+        return index;
+    }
+
+    /// <summary>
+    /// Create the SQLite connection string and open connection.
+    /// </summary>
+    private static SqliteConnection OpenConnection()
+    {
+        var connString = new SqliteConnectionStringBuilder
+        {
+            DataSource = CacheDbPath,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+            Cache = SqliteCacheMode.Shared
+        }.ToString();
+
+        var conn = new SqliteConnection(connString);
+        conn.Open();
+
+        // Enable WAL mode for better concurrency
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "PRAGMA journal_mode=WAL;";
+            cmd.ExecuteNonQuery();
+        }
+
+        return conn;
+    }
+
+    /// <summary>
+    /// Ensure the database schema exists.
+    /// </summary>
+    private static void EnsureSchema()
+    {
+        using var conn = OpenConnection();
+        using var cmd = conn.CreateCommand();
+
+        cmd.CommandText = @"
+            CREATE TABLE IF NOT EXISTS archives (
+                archive_path TEXT PRIMARY KEY COLLATE NOCASE,
+                file_name TEXT NOT NULL COLLATE NOCASE,
+                size INTEGER NOT NULL,
+                last_modified TEXT NOT NULL,
+                file_count INTEGER NOT NULL,
+                scan_timestamp TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS files (
+                file_path TEXT PRIMARY KEY COLLATE NOCASE,
+                archive_name TEXT NOT NULL COLLATE NOCASE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_files_archive 
+            ON files(archive_name COLLATE NOCASE);
+        ";
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Discover all BA2 archives in the game root Data directory plus ContentResources.zip.
+    /// </summary>
+    private static List<FileInfo> DiscoverParentArchives(string gameRoot)
+    {
+        var archives = new List<FileInfo>();
+
+        // 1. BA2 archives in Data directory
+        var dataDir = Path.Combine(gameRoot, "Data");
+        if (Directory.Exists(dataDir))
+        {
+            archives.AddRange(
+                Directory.GetFiles(dataDir, "*.ba2", SearchOption.TopDirectoryOnly)
+                    .Where(p => !IsModArchive(p))
+                    .Select(p => new FileInfo(p))
+            );
+        }
+
+        // 2. ContentResources.zip (canonical source of all CK-distributed files)
+        var contentResourcesPath = Path.Combine(gameRoot, "Tools", "ContentResources.zip");
+        if (File.Exists(contentResourcesPath))
+        {
+            archives.Add(new FileInfo(contentResourcesPath));
+        }
+
+        return archives.OrderBy(f => f.Name).ToList();
+    }
+
+    /// <summary>
+    /// Heuristic to exclude mod archives from parent archive scanning.
+    /// </summary>
+    private static bool IsModArchive(string ba2Path)
+    {
+        var name = Path.GetFileNameWithoutExtension(ba2Path);
+        // For Starfield, base game archives typically start with "Starfield"
+        return !name.StartsWith("Starfield", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Find archives that need to be rescanned (new, changed, or missing from cache).
+    /// </summary>
+    private static List<FileInfo> FindStaleArchives(SqliteConnection conn, List<FileInfo> currentArchives, Action<string> logger)
+    {
+        var stale = new List<FileInfo>();
+
+        foreach (var archive in currentArchives)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT size, last_modified 
+                FROM archives 
+                WHERE archive_path = @path COLLATE NOCASE
+            ";
+            cmd.Parameters.AddWithValue("@path", archive.FullName);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+            {
+                // Not in cache
+                logger($"[Cache]   {archive.Name} - not in cache");
+                stale.Add(archive);
+                continue;
+            }
+
+            var cachedSize = reader.GetInt64(0);
+            var cachedModifiedStr = reader.GetString(1);
+            var cachedModified = DateTime.Parse(cachedModifiedStr, null, System.Globalization.DateTimeStyles.RoundtripKind);
+
+            if (cachedSize != archive.Length || cachedModified != archive.LastWriteTimeUtc)
+            {
+                logger($"[Cache]   {archive.Name} - changed (size or timestamp)");
+                logger($"[Cache]     Cached: size={cachedSize}, modified={cachedModified:o}");
+                logger($"[Cache]     Disk:   size={archive.Length}, modified={archive.LastWriteTimeUtc:o}");
+                stale.Add(archive);
+            }
+        }
+
+        return stale;
+    }
+
+    /// <summary>
+    /// Scan an archive (BA2 or ZIP) and cache its file list.
+    /// </summary>
+    private static void ScanAndCacheArchive(SqliteConnection conn, FileInfo archive, Action<string> logger)
+    {
+        logger($"[Cache] Scanning: {archive.Name}");
+
+        try
+        {
+            List<(string RelativePath, long Size)> entries;
+
+            if (archive.Extension.Equals(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                entries = ScanZipArchive(archive.FullName);
+            }
+            else
+            {
+                entries = BA2Archive.ReadIndex(archive.FullName)
+                    .Select(e => (e.RelativePath, (long)e.UnpackedSize))
+                    .ToList();
+            }
+
+            logger($"[Cache]   -> {entries.Count} files found");
+
+            using var transaction = conn.BeginTransaction();
+
+            // Delete old entries for this archive
+            using (var deleteArchiveCmd = conn.CreateCommand())
+            {
+                deleteArchiveCmd.CommandText = "DELETE FROM archives WHERE archive_path = @path COLLATE NOCASE";
+                deleteArchiveCmd.Parameters.AddWithValue("@path", archive.FullName);
+                deleteArchiveCmd.ExecuteNonQuery();
+            }
+
+            using (var deleteFilesCmd = conn.CreateCommand())
+            {
+                deleteFilesCmd.CommandText = "DELETE FROM files WHERE archive_name = @name COLLATE NOCASE";
+                deleteFilesCmd.Parameters.AddWithValue("@name", archive.Name);
+                deleteFilesCmd.ExecuteNonQuery();
+            }
+
+            // Insert archive metadata
+            using (var insertArchiveCmd = conn.CreateCommand())
+            {
+                insertArchiveCmd.CommandText = @"
+                    INSERT INTO archives (archive_path, file_name, size, last_modified, file_count, scan_timestamp)
+                    VALUES (@path, @name, @size, @modified, @count, @timestamp)
+                ";
+                insertArchiveCmd.Parameters.AddWithValue("@path", archive.FullName);
+                insertArchiveCmd.Parameters.AddWithValue("@name", archive.Name);
+                insertArchiveCmd.Parameters.AddWithValue("@size", archive.Length);
+                insertArchiveCmd.Parameters.AddWithValue("@modified", archive.LastWriteTimeUtc.ToString("o"));
+                insertArchiveCmd.Parameters.AddWithValue("@count", entries.Count);
+                insertArchiveCmd.Parameters.AddWithValue("@timestamp", DateTime.UtcNow.ToString("o"));
+                insertArchiveCmd.ExecuteNonQuery();
+            }
+
+            // Insert file entries in batches
+            const int batchSize = 500;
+            for (int i = 0; i < entries.Count; i += batchSize)
+            {
+                var batch = entries.Skip(i).Take(batchSize);
+                using var insertFilesCmd = conn.CreateCommand();
+                var sql = new System.Text.StringBuilder("INSERT OR REPLACE INTO files (file_path, archive_name) VALUES ");
+                var first = true;
+                var paramIndex = 0;
+
+                foreach (var entry in batch)
+                {
+                    if (!first) sql.Append(", ");
+                    sql.Append($"(@path{paramIndex}, @archive{paramIndex})");
+                    insertFilesCmd.Parameters.AddWithValue($"@path{paramIndex}", NormalizePath(entry.RelativePath));
+                    insertFilesCmd.Parameters.AddWithValue($"@archive{paramIndex}", archive.Name);
+                    paramIndex++;
+                    first = false;
+                }
+
+                insertFilesCmd.CommandText = sql.ToString();
+                insertFilesCmd.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
+            logger($"[Cache]   -> Cached {entries.Count} files");
+        }
+        catch (Exception ex)
+        {
+            logger($"[Cache]   -> Failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Load the complete file index from the cache.
+    /// </summary>
+    private static Dictionary<string, string> LoadFileIndex(SqliteConnection conn)
+    {
+        var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT file_path, archive_name FROM files";
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var path = reader.GetString(0);
+            var archive = reader.GetString(1);
+            index[path] = archive;
+        }
+
+        return index;
+    }
+
+    /// <summary>
+    /// Normalize a path to Data-relative format for consistent lookups.
+    /// </summary>
+    private static string NormalizePath(string path)
+    {
+        path = path.Replace('/', '\\').Trim('\\');
+
+        // Ensure it starts with "Data\"
+        if (!path.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+            path = "Data\\" + path;
+
+        // Normalize to lowercase for case-insensitive comparison
+        return path.ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Clear the entire cache database by dropping and recreating tables.
+    /// </summary>
+    public static void ClearCache()
+    {
+        if (!File.Exists(CacheDbPath))
+            return;
+
+        try
+        {
+            using var conn = OpenConnection();
+            using var cmd = conn.CreateCommand();
+
+            cmd.CommandText = @"
+                DROP TABLE IF EXISTS files;
+                DROP TABLE IF EXISTS archives;
+            ";
+            cmd.ExecuteNonQuery();
+
+            // Recreate schema
+            EnsureSchema();
+        }
+        catch (Exception ex)
+        {
+            // If we can't clear, try to delete the file
+            try
+            {
+                File.Delete(CacheDbPath);
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Cannot clear cache: {ex.Message}", ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Scan a ZIP archive and extract its file list.
+    /// </summary>
+    private static List<(string RelativePath, long Size)> ScanZipArchive(string zipPath)
+    {
+        var entries = new List<(string, long)>();
+
+        using var archive = ZipFile.OpenRead(zipPath);
+        int totalEntries = 0;
+        int skippedDirs = 0;
+
+        foreach (var entry in archive.Entries)
+        {
+            totalEntries++;
+
+            // Skip directories (entries with names ending in /)
+            if (entry.FullName.EndsWith("/") || entry.FullName.EndsWith("\\"))
+            {
+                skippedDirs++;
+                continue;
+            }
+
+            entries.Add((entry.FullName, entry.Length));
+        }
+
+        Console.WriteLine($"[ZIP] Total entries: {totalEntries}, Dirs skipped: {skippedDirs}, Files: {entries.Count}");
+        return entries;
+    }
+}
