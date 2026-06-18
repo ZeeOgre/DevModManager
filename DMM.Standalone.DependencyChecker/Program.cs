@@ -5,12 +5,13 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using DMM.AssetManagers;
 
 namespace DmmDep
 {
 #nullable enable
 
-    internal enum FileKind { Pex, Psc, Nif, Mat, Texture, Mesh, Voice, Terrain, Icon, Tif, Biom, BackupOnly, Particle, Anim, Morph, Rig, Warn, Missing, Other }
+    internal enum FileKind { Pex, Psc, Nif, Mat, Texture, Mesh, Voice, Terrain, Icon, Tif, Biom, BackupOnly, Particle, Anim, Morph, Rig, Warn, Missing, ParentMatch, Other }
 
     internal sealed class FileEntry
     {
@@ -689,6 +690,24 @@ namespace DmmDep
 
                 Log.Info($"[6] After PSC imports: {pscSet.Count} PSC, {pexSet.Count} PEX");
 
+                // ---- 7. Check for parent archive matches ----
+                Log.Info("[7] Checking for parent archive matches...");
+                var parentArchiveIndex = BuildParentArchiveIndex(pluginPath, dataRoot, gameRoot);
+                Log.Info($"[7] Parent archive index built: {parentArchiveIndex.Count} files indexed");
+
+                // Mark files that match parent archives
+                foreach (var file in manifest.Files.ToList())
+                {
+                    if (file.Kind != "missing" && !file.Source.StartsWith("ignored-filenotfound:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (parentArchiveIndex.ContainsKey(file.PcPath))
+                        {
+                            // Update kind to ParentMatch
+                            file.Kind = FileKind.ParentMatch.ToString().ToLowerInvariant();
+                        }
+                    }
+                }
+
                 // ---- Prepare categorized outputs ----
                 var achlistKeep = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var achlistWarn = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -714,6 +733,11 @@ namespace DmmDep
                     {
                         // Files referenced but not found on disk go to discard
                         achlistDiscard.Add(file.PcPath);
+                    }
+                    else if (file.Kind == "parentmatch")
+                    {
+                        // Files that match parent archives go to warn list
+                        achlistWarn.Add(file.PcPath);
                     }
                     else if (file.Kind == "warn")
                     {
@@ -1973,6 +1997,48 @@ namespace DmmDep
             var buf = new byte[count];
             Buffer.BlockCopy(bytes, offset, buf, 0, count);
             return buf;
+        }
+
+        private static Dictionary<string, bool> BuildParentArchiveIndex(string pluginPath, string dataRoot, string gameRoot)
+        {
+            try
+            {
+                // Use ModDependencyDiscoveryService to build the parent archive index
+                var discoveryService = new ModDependencyDiscoveryService();
+                string pluginName = Path.GetFileNameWithoutExtension(pluginPath);
+                string modName = pluginName; // For standalone, assume mod name equals plugin name
+
+                var result = discoveryService.CollectInitialFiles(dataRoot, gameRoot, modName, Path.GetFileName(pluginPath));
+
+                // Build a dictionary of all files that matched parent archives
+                var index = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in result.Entries.Where(e => e.ParentArchiveMatch))
+                {
+                    index[entry.RelativeDataPath] = true;
+                }
+
+                foreach (var path in result.ParentArchiveReferences)
+                {
+                    index[path] = true;
+                }
+
+                foreach (var path in result.HighProbabilityDiscard)
+                {
+                    index[path] = true;
+                }
+
+                foreach (var path in result.UndefinedDiscard)
+                {
+                    index[path] = true;
+                }
+
+                return index;
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"[WARN] Failed to build parent archive index: {ex.Message}");
+                return new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            }
         }
 
     }
