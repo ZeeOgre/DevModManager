@@ -30,16 +30,12 @@ jobs:
 
       - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release --no-self-contained /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmchecker /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-temp
-          Move-Item ./out/dmmdeps-temp/dmmchecker.exe ./out/dmmdeps/dmmdeps.exe -Force
-          Remove-Item ./out/dmmdeps-temp -Recurse -Force
-          # Using unique AssemblyName=dmmchecker to avoid conflicts with Modular project, then renaming to dmmdeps.exe
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release --no-self-contained /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmdeps /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
+          # Use SkipNestedPublish=true to prevent the nested PublishOnBuild target from running and causing assembly name ambiguity in CI restore.
       - name: Publish self-contained single-file (fat) build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:AssemblyName=dmmchecker_fat /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat-temp
-          Move-Item ./out/dmmdeps-fat-temp/dmmchecker_fat.exe ./out/dmmdeps-fat/dmmdeps_fat.exe -Force
-          Remove-Item ./out/dmmdeps-fat-temp -Recurse -Force
-          # Using unique AssemblyName=dmmchecker_fat to avoid conflicts, then renaming to dmmdeps_fat.exe
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:AssemblyName=dmmdeps_fat /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
+          # Use SkipNestedPublish=true to prevent nested target conflicts during CI publish.
 
       - name: Normalize names and prepare zips
         shell: pwsh
