@@ -50,8 +50,8 @@
 	     - PublishSelfContained: produce fat dmmdeps_fat.exe (trimming + compression)
 	     - Publish: produce both artifacts
 	     - FullRelease: produce both artifacts -->
-	<Target Name="PublishOnBuild" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' AND '$(SkipNestedPublish)' != 'true' AND ('$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease')">,
-		
+	<Target Name="PublishOnBuild" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' AND '$(SkipNestedPublish)' != 'true' AND ('$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease')">
+
 		<!-- Create distribution directory if it doesn't exist -->
 		<MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
 		
