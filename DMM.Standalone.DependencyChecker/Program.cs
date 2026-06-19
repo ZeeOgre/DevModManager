@@ -17,6 +17,7 @@ namespace DmmDep
     {
         public string PcPath { get; set; } = "";
         public string? XboxPath { get; set; }
+        public string? PS5Path { get; set; }
         public string Kind { get; set; } = "";
         public string Source { get; set; } = "";
     }
@@ -44,6 +45,7 @@ namespace DmmDep
         public string PluginPath { get; set; } = "";
         public string? GameRootOverride { get; set; }
         public string? XboxDataOverride { get; set; }
+        public string? PS5DataOverride { get; set; }
         public string? TifRootOverride { get; set; } = "..\\..\\Source\\TGATextures";
         public string? ScriptsRootOverride { get; set; } = "Scripts";
         public bool TestMode { get; set; } // --test switch
@@ -55,6 +57,7 @@ namespace DmmDep
 
         public bool SmartClobber { get; set; } // --smartclobber : seed candidates from existing .achlist
         public bool RebuildCache { get; set; } // --rebuildcache : force rebuild of parent archive cache
+        public bool IncludePsc { get; set; }    // --include-psc : include .psc source files in achlist
     }
 
     internal static class Program
@@ -104,6 +107,25 @@ namespace DmmDep
             string dataFolderName = Path.GetFileName(xboxDataRoot);
 
             return NormalizeRel(Path.Combine(xboxFolderName, dataFolderName, relFromXboxData));
+        }
+
+        private static string BuildPS5RelativePath(string ps5DataRoot, string ps5FullPath)
+        {
+            // Build consistent PS5 relative path from ps5DataRoot
+            // ps5DataRoot typically points to: <GameRoot>\PS5\Data
+            // We want to return: PS5\Data\<relative-from-ps5DataRoot>
+
+            string relFromPs5Data = GetRelativePath(ps5DataRoot, ps5FullPath);
+
+            // Get the parent of ps5DataRoot to find the PS5 folder name
+            string? ps5RootParent = Directory.GetParent(ps5DataRoot)?.FullName;
+            if (ps5RootParent == null)
+                return NormalizeRel(Path.Combine("PS5", "Data", relFromPs5Data));
+
+            string ps5FolderName = Path.GetFileName(Directory.GetParent(ps5DataRoot)?.FullName ?? "PS5");
+            string dataFolderName = Path.GetFileName(ps5DataRoot);
+
+            return NormalizeRel(Path.Combine(ps5FolderName, dataFolderName, relFromPs5Data));
         }
 
         private static bool IsMatExtension(string token)
@@ -180,6 +202,11 @@ namespace DmmDep
 
                 string xboxDataRoot = options.XboxDataOverride ?? InferXboxDataRoot(gameRoot, iniPath);
                 Log.Info($"XboxData : {xboxDataRoot}");
+
+                // PS5 Data root: infer from game root or use override
+                string? ps5DataRoot = options.PS5DataOverride ?? InferPS5DataRoot(gameRoot);
+                if (!string.IsNullOrEmpty(ps5DataRoot))
+                    Log.Info($"PS5Data  : {ps5DataRoot}");
 
                 // TIF root: ..\..\Source\TGATextures from game root, unless overridden
                 // TIF root: resolve to absolute path from game root
@@ -628,9 +655,9 @@ namespace DmmDep
                 CollectIconsAndPreviews(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot, tifRoot);
 
 
-                // ---- 5. Voice assets (PC dev + runtime + XB) ----
+                // ---- 5. Voice assets (PC dev + runtime + XB + PS5) ----
                 Log.Info("[5] Collecting voice files...");
-                CollectVoiceAssets(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot);
+                CollectVoiceAssets(manifest, achlistPaths, pluginName, gameRoot, xboxDataRoot, ps5DataRoot);
 
                 // ---- 6. Scripts (Bethesda Script Name format with imports) ----
                 static string ToPscRel(string name) =>
@@ -659,7 +686,12 @@ namespace DmmDep
                     string fullPex = Path.Combine(gameRoot, pexRel);
 
                     if (File.Exists(fullPsc) && pscSet.Add(pscRel))
-                        AddBackupOnlyFile(manifest, pscRel, "script-psc-or-import");
+                    {
+                        if (options.IncludePsc)
+                            AddFile(manifest, achlistPaths, pscRel, FileKind.Psc, "script-psc-or-import", gameRoot, xboxDataRoot);
+                        else
+                            AddBackupOnlyFile(manifest, pscRel, "script-psc-or-import");
+                    }
 
                     if (File.Exists(fullPex) && pexSet.Add(pexRel))
                         AddFile(manifest, achlistPaths, pexRel, FileKind.Pex, "script-pex-or-import", gameRoot, xboxDataRoot);
@@ -682,7 +714,12 @@ namespace DmmDep
                         string impPexRel = ToPexRel(importName);
 
                         if (File.Exists(Path.Combine(gameRoot, impPscRel)) && pscSet.Add(impPscRel))
-                            AddBackupOnlyFile(manifest, impPscRel, "psc-import");
+                        {
+                            if (options.IncludePsc)
+                                AddFile(manifest, achlistPaths, impPscRel, FileKind.Psc, "psc-import", gameRoot, xboxDataRoot);
+                            else
+                                AddBackupOnlyFile(manifest, impPscRel, "psc-import");
+                        }
 
                         if (File.Exists(Path.Combine(gameRoot, impPexRel)) && pexSet.Add(impPexRel))
                             AddFile(manifest, achlistPaths, impPexRel, FileKind.Pex, "pex-from-psc-import", gameRoot, xboxDataRoot);
@@ -890,6 +927,7 @@ namespace DmmDep
             Console.WriteLine("Options:");
             Console.WriteLine("  --gameroot <path>     Override inferred game root (parent of Data).");
             Console.WriteLine("  --xboxdata <path>     Override XBOX Data root (default from CreationKit.ini).");
+            Console.WriteLine("  --ps5data <path>      Override PS5 Data root (default <GameRoot>\\PS5\\Data).");
             Console.WriteLine("  --tifroot <path>      Override TIF root (default ..\\..\\Source\\TGATextures).");
             Console.WriteLine("  --scriptsroot <path>  Override Data\\Scripts root.");
             Console.WriteLine("  --test                Write .achlist.test instead of .achlist.");
@@ -898,6 +936,7 @@ namespace DmmDep
             Console.WriteLine("  --verbose             Emit detailed ignored/missing-file diagnostics and record ignored-filenotfound entries in deps outputs.");
             Console.WriteLine("  --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf).");
             Console.WriteLine("  --rebuildcache        Force rebuild of parent archive cache (useful if game updated).");
+            Console.WriteLine("  --include-psc         Include .psc script source files in achlist (for distributing source code).");
         }
 
         private static Options? ParseArgs(string[] args)
@@ -924,6 +963,10 @@ namespace DmmDep
                         if (++i >= args.Length) return null;
                         opts.XboxDataOverride = args[i];
                         break;
+                    case "--ps5data":
+                        if (++i >= args.Length) return null;
+                        opts.PS5DataOverride = args[i];
+                        break;
                     case "--tifroot":
                         if (++i >= args.Length) return null;
                         opts.TifRootOverride = args[i];
@@ -949,6 +992,9 @@ namespace DmmDep
                         break;
                     case "--verbose":
                         opts.Verbose = true;
+                        break;
+                    case "--include-psc":
+                        opts.IncludePsc = true;
                         break;
                     default:
                         Console.Error.WriteLine($"Unknown option: {arg}");
@@ -1027,6 +1073,13 @@ namespace DmmDep
                 throw new DirectoryNotFoundException("Inferred XBOX Data root not found: " + xbData);
 
             return xbData;
+        }
+
+        private static string? InferPS5DataRoot(string gameRoot)
+        {
+            // PS5 data root follows similar pattern to Xbox: <GameRoot>\PS5\Data
+            string fallback = Path.Combine(gameRoot, "PS5", "Data");
+            return Directory.Exists(fallback) ? fallback : null;
         }
 
         private static string NormalizeRel(string rel)
@@ -1417,7 +1470,8 @@ namespace DmmDep
             HashSet<string> achlist,
             string pluginName,
             string gameRoot,
-            string xboxDataRoot)
+            string xboxDataRoot,
+            string? ps5DataRoot)
         {
             string dataRoot = Path.Combine(gameRoot, "Data");
 
@@ -1427,7 +1481,8 @@ namespace DmmDep
                 foreach (var f in Directory.EnumerateFiles(devVoiceRoot, "*.*", SearchOption.AllDirectories))
                 {
                     string ext = Path.GetExtension(f).ToLowerInvariant();
-                    if (ext is ".wav" or ".lip" or ".txt" or ".dat")
+                    // All ESP voice files (WAV, WEM, LIP, TXT, DAT) are BackupOnly - not for distribution
+                    if (ext is ".wav" or ".wem" or ".lip" or ".txt" or ".dat")
                     {
                         // Filter out wwise.dat files
                         if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
@@ -1440,6 +1495,7 @@ namespace DmmDep
                 }
             }
 
+            // Only ESM voice files are distributed
             string pcVoiceRoot = Path.Combine(dataRoot, "Sound", "Voice", pluginName + ".esm");
             if (Directory.Exists(pcVoiceRoot))
             {
@@ -1457,14 +1513,48 @@ namespace DmmDep
 
             if (Directory.Exists(xboxDataRoot))
             {
-                // XBOX dev voice (esp)
-                string xbVoiceRoot = Path.Combine(xboxDataRoot, "Sound", "Voice", pluginName + ".esp");
-                if (Directory.Exists(xbVoiceRoot))
+                // XBOX dev voice (esp) - check ESP first but output as ESM path
+                // because voice normalization will rename ESP to ESM before backup runs
+                string xbVoiceEspRoot = Path.Combine(xboxDataRoot, "Sound", "Voice", pluginName + ".esp");
+                string xbVoiceEsmRoot = Path.Combine(xboxDataRoot, "Sound", "Voice", pluginName + ".esm");
+
+                // Check ESP folder first (development state)
+                if (Directory.Exists(xbVoiceEspRoot))
                 {
-                    foreach (var f in Directory.EnumerateFiles(xbVoiceRoot, "*.*", SearchOption.AllDirectories))
+                    foreach (var f in Directory.EnumerateFiles(xbVoiceEspRoot, "*.*", SearchOption.AllDirectories))
                     {
                         string ext = Path.GetExtension(f).ToLowerInvariant();
-                        if (ext is ".wav" or ".lip" or ".txt" or ".dat")
+                        if (ext is ".wem" or ".wav" or ".lip" or ".txt" or ".dat")
+                        {
+                            // Filter out wwise.dat files
+                            if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            // Convert ESP path to ESM path for CSV output
+                            string relXbEsp = BuildXboxRelativePath(xboxDataRoot, f);
+                            string relXbEsm = relXbEsp.Replace($"\\{pluginName}.esp\\", $"\\{pluginName}.esm\\", StringComparison.OrdinalIgnoreCase);
+
+                            if (!manifest.Files.Any(fe => fe.XboxPath == relXbEsm))
+                            {
+                                manifest.Files.Add(new FileEntry
+                                {
+                                    PcPath = "",
+                                    XboxPath = relXbEsm,
+                                    Kind = FileKind.Voice.ToString().ToLowerInvariant(),
+                                    Source = ext == ".wem" ? "xbox-voice-runtime" : "xbox-voice-dev"
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // Also check ESM folder (if already normalized)
+                if (Directory.Exists(xbVoiceEsmRoot))
+                {
+                    foreach (var f in Directory.EnumerateFiles(xbVoiceEsmRoot, "*.*", SearchOption.AllDirectories))
+                    {
+                        string ext = Path.GetExtension(f).ToLowerInvariant();
+                        if (ext is ".wem" or ".wav" or ".lip" or ".txt" or ".dat")
                         {
                             // Filter out wwise.dat files
                             if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
@@ -1478,29 +1568,76 @@ namespace DmmDep
                                     PcPath = "",
                                     XboxPath = relXb,
                                     Kind = FileKind.Voice.ToString().ToLowerInvariant(),
-                                    Source = "xbox-voice-dev"
+                                    Source = ext == ".wem" ? "xbox-voice-runtime" : "xbox-voice-dev"
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(ps5DataRoot) && Directory.Exists(ps5DataRoot))
+            {
+                // PS5 voice - check ESP first but output as ESM path
+                // because voice normalization will rename ESP to ESM before backup runs
+                string ps5VoiceEspRoot = Path.Combine(ps5DataRoot, "Sound", "Voice", pluginName + ".esp");
+                string ps5VoiceEsmRoot = Path.Combine(ps5DataRoot, "Sound", "Voice", pluginName + ".esm");
+
+                // Check ESP folder first (development state)
+                if (Directory.Exists(ps5VoiceEspRoot))
+                {
+                    foreach (var f in Directory.EnumerateFiles(ps5VoiceEspRoot, "*.*", SearchOption.AllDirectories))
+                    {
+                        string ext = Path.GetExtension(f).ToLowerInvariant();
+                        if (ext is ".wem" or ".wav" or ".lip" or ".txt" or ".dat")
+                        {
+                            // Filter out wwise.dat files
+                            if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            // Convert ESP path to ESM path for CSV output
+                            string relPs5Esp = BuildPS5RelativePath(ps5DataRoot, f);
+                            string relPs5Esm = relPs5Esp.Replace($"\\{pluginName}.esp\\", $"\\{pluginName}.esm\\", StringComparison.OrdinalIgnoreCase);
+
+                            if (!manifest.Files.Any(fe => fe.PS5Path == relPs5Esm))
+                            {
+                                manifest.Files.Add(new FileEntry
+                                {
+                                    PcPath = "",
+                                    XboxPath = "",
+                                    PS5Path = relPs5Esm,
+                                    Kind = FileKind.Voice.ToString().ToLowerInvariant(),
+                                    Source = ext == ".wem" ? "ps5-voice-runtime" : "ps5-voice-dev"
                                 });
                             }
                         }
                     }
                 }
 
-                // XBOX runtime voice (esm) – only WEM is expected to differ
-                xbVoiceRoot = Path.Combine(xboxDataRoot, "Sound", "Voice", pluginName + ".esm");
-                if (Directory.Exists(xbVoiceRoot))
+                // Also check ESM folder (if already normalized)
+                if (Directory.Exists(ps5VoiceEsmRoot))
                 {
-                    foreach (var f in Directory.EnumerateFiles(xbVoiceRoot, "*.wem", SearchOption.AllDirectories))
+                    foreach (var f in Directory.EnumerateFiles(ps5VoiceEsmRoot, "*.*", SearchOption.AllDirectories))
                     {
-                        string relXb = BuildXboxRelativePath(xboxDataRoot, f);
-                        if (!manifest.Files.Any(fe => fe.XboxPath == relXb))
+                        string ext = Path.GetExtension(f).ToLowerInvariant();
+                        if (ext is ".wem" or ".wav" or ".lip" or ".txt" or ".dat")
                         {
-                            manifest.Files.Add(new FileEntry
+                            // Filter out wwise.dat files
+                            if (Path.GetFileName(f).Equals("wwise.dat", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            string relPs5 = BuildPS5RelativePath(ps5DataRoot, f);
+                            if (!manifest.Files.Any(fe => fe.PS5Path == relPs5))
                             {
-                                PcPath = "",
-                                XboxPath = relXb,
-                                Kind = FileKind.Voice.ToString().ToLowerInvariant(),
-                                Source = "xbox-voice-runtime"
-                            });
+                                manifest.Files.Add(new FileEntry
+                                {
+                                    PcPath = "",
+                                    XboxPath = "",
+                                    PS5Path = relPs5,
+                                    Kind = FileKind.Voice.ToString().ToLowerInvariant(),
+                                    Source = ext == ".wem" ? "ps5-voice-runtime" : "ps5-voice-dev"
+                                });
+                            }
                         }
                     }
                 }
@@ -1530,12 +1667,13 @@ namespace DmmDep
         {
             using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
             using var sw = new StreamWriter(fs, Encoding.UTF8);
-            sw.WriteLine("kind,source,pcpath,xboxpath");
+            sw.WriteLine("kind,source,pcpath,xboxpath,ps5path");
             foreach (var f in files.OrderBy(x => x.Kind).ThenBy(x => x.PcPath, StringComparer.OrdinalIgnoreCase))
             {
                 string pc = (f.PcPath ?? "").Replace(',', ';');
                 string xb = (f.XboxPath ?? "").Replace(',', ';');
-                sw.WriteLine($"{f.Kind},{f.Source},{pc},{xb}");
+                string ps5 = (f.PS5Path ?? "").Replace(',', ';');
+                sw.WriteLine($"{f.Kind},{f.Source},{pc},{xb},{ps5}");
             }
             sw.Flush();
         }

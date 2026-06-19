@@ -259,22 +259,47 @@ $xboxButton.Add_Click({
 })
 $form.Controls.Add($xboxButton)
 
+# PlayStation Data Folder
+$playStationLabel = New-Object System.Windows.Forms.Label
+$playStationLabel.Text = "PlayStation Data Folder:"
+$playStationLabel.Location = New-Object System.Drawing.Point(10, 130)
+$playStationLabel.AutoSize = $true
+$form.Controls.Add($playStationLabel)
+
+$playStationBox = New-Object System.Windows.Forms.TextBox
+$playStationBox.Location = New-Object System.Drawing.Point(260, 130)
+$playStationBox.Width = 300
+$playStationBox.Text = if ($config.ContainsKey('PlayStationFolder')) { $config['PlayStationFolder'] } else { '' }
+$form.Controls.Add($playStationBox)
+
+$playStationButton = New-Object System.Windows.Forms.Button
+$playStationButton.Text = "..."
+$playStationButton.Location = New-Object System.Drawing.Point(570, 128)
+$playStationButton.Width = 40
+$playStationButton.Add_Click({
+    $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
+    if ($folderDialog.ShowDialog() -eq 'OK') {
+        $playStationBox.Text = $folderDialog.SelectedPath
+    }
+})
+$form.Controls.Add($playStationButton)
+
 # Archiver2.exe Path
 $archiverLabel = New-Object System.Windows.Forms.Label
 $archiverLabel.Text = "Archiver2.exe Path:"
-$archiverLabel.Location = New-Object System.Drawing.Point(10, 130)
+$archiverLabel.Location = New-Object System.Drawing.Point(10, 160)
 $archiverLabel.AutoSize = $true
 $form.Controls.Add($archiverLabel)
 
 $archiverBox = New-Object System.Windows.Forms.TextBox
-$archiverBox.Location = New-Object System.Drawing.Point(260, 130)
+$archiverBox.Location = New-Object System.Drawing.Point(260, 160)
 $archiverBox.Width = 300
 $archiverBox.Text = if ($config.ContainsKey('ArchiverPath')) { $config['ArchiverPath'] } else { '' }
 $form.Controls.Add($archiverBox)
 
 $archiverButton = New-Object System.Windows.Forms.Button
 $archiverButton.Text = "..."
-$archiverButton.Location = New-Object System.Drawing.Point(570, 128)
+$archiverButton.Location = New-Object System.Drawing.Point(570, 158)
 $archiverButton.Width = 40
 $archiverButton.Add_Click({
     $fileDialog = New-Object System.Windows.Forms.OpenFileDialog
@@ -291,19 +316,19 @@ $form.Controls.Add($archiverButton)
 # Dmmdeps.exe Path
 $dmmdepsLabel = New-Object System.Windows.Forms.Label
 $dmmdepsLabel.Text = "Dmmdeps.exe Path:"
-$dmmdepsLabel.Location = New-Object System.Drawing.Point(10, 160)
+$dmmdepsLabel.Location = New-Object System.Drawing.Point(10, 190)
 $dmmdepsLabel.AutoSize = $true
 $form.Controls.Add($dmmdepsLabel)
 
 $dmmdepsBox = New-Object System.Windows.Forms.TextBox
-$dmmdepsBox.Location = New-Object System.Drawing.Point(260, 160)
+$dmmdepsBox.Location = New-Object System.Drawing.Point(260, 190)
 $dmmdepsBox.Width = 300
 $dmmdepsBox.Text = if ($config.ContainsKey('DmmdepsPath')) { $config['DmmdepsPath'] } else { '' }
 $form.Controls.Add($dmmdepsBox)
 
 $dmmdepsButton = New-Object System.Windows.Forms.Button
 $dmmdepsButton.Text = "..."
-$dmmdepsButton.Location = New-Object System.Drawing.Point(570, 158)
+$dmmdepsButton.Location = New-Object System.Drawing.Point(570, 188)
 $dmmdepsButton.Width = 40
 $dmmdepsButton.Add_Click({
     $fileDialog = New-Object System.Windows.Forms.OpenFileDialog
@@ -324,20 +349,20 @@ $form.Controls.Add($dmmdepsButton)
 # Voice File Management
 $voiceLabel = New-Object System.Windows.Forms.Label
 $voiceLabel.Text = "Voice File Management:"
-$voiceLabel.Location = New-Object System.Drawing.Point(10, 200)
+$voiceLabel.Location = New-Object System.Drawing.Point(10, 230)
 $voiceLabel.AutoSize = $true
 $form.Controls.Add($voiceLabel)
 
 $voiceUpdateCheckbox = New-Object System.Windows.Forms.CheckBox
 $voiceUpdateCheckbox.Text = "Voice folder update (ESP to ESM)"
-$voiceUpdateCheckbox.Location = New-Object System.Drawing.Point(30, 220)
+$voiceUpdateCheckbox.Location = New-Object System.Drawing.Point(30, 250)
 $voiceUpdateCheckbox.AutoSize = $true
 $voiceUpdateCheckbox.Checked = Get-Bool -Config $config -Key 'VoiceFolderUpdate' -Default:$false
 $form.Controls.Add($voiceUpdateCheckbox)
 
 $rebuildAchlistCheckbox = New-Object System.Windows.Forms.CheckBox
 $rebuildAchlistCheckbox.Text = "Rebuild .achlist voice entries"
-$rebuildAchlistCheckbox.Location = New-Object System.Drawing.Point(330, 220)
+$rebuildAchlistCheckbox.Location = New-Object System.Drawing.Point(330, 250)
 $rebuildAchlistCheckbox.AutoSize = $true
 $rebuildAchlistCheckbox.Checked = Get-Bool -Config $config -Key 'RebuildAchlist' -Default:$false
 $form.Controls.Add($rebuildAchlistCheckbox)
@@ -345,13 +370,13 @@ $form.Controls.Add($rebuildAchlistCheckbox)
 # Archive Management
 $archiveLabel = New-Object System.Windows.Forms.Label
 $archiveLabel.Text = "Archive Management:"
-$archiveLabel.Location = New-Object System.Drawing.Point(10, 250)
+$archiveLabel.Location = New-Object System.Drawing.Point(10, 280)
 $archiveLabel.AutoSize = $true
 $form.Controls.Add($archiveLabel)
 
 $useDmmdepsCheckbox = New-Object System.Windows.Forms.CheckBox
 $useDmmdepsCheckbox.Text = "Use dmmdeps"
-$useDmmdepsCheckbox.Location = New-Object System.Drawing.Point(30, 270)
+$useDmmdepsCheckbox.Location = New-Object System.Drawing.Point(30, 300)
 $useDmmdepsCheckbox.AutoSize = $true
 $useDmmdepsCheckbox.Checked = Get-Bool -Config $config -Key 'UseDmmdeps' -Default:$false
 $form.Controls.Add($useDmmdepsCheckbox)
@@ -359,7 +384,7 @@ $form.Controls.Add($useDmmdepsCheckbox)
 # Move Include Source Scripts checkbox up to same row as Use dmmdeps
 $includeSourceScriptsCheckbox = New-Object System.Windows.Forms.CheckBox
 $includeSourceScriptsCheckbox.Text = "Include Source Scripts (.psc) in PC Archive"
-$includeSourceScriptsCheckbox.Location = New-Object System.Drawing.Point(180, 270)  # <-- Same Y as useDmmdepsCheckbox
+$includeSourceScriptsCheckbox.Location = New-Object System.Drawing.Point(180, 300)  # <-- Same Y as useDmmdepsCheckbox
 $includeSourceScriptsCheckbox.AutoSize = $true
 $includeSourceScriptsCheckbox.Checked = Get-Bool -Config $config -Key 'IncludeSourceScripts' -Default:$false
 $form.Controls.Add($includeSourceScriptsCheckbox)
@@ -367,7 +392,7 @@ $form.Controls.Add($includeSourceScriptsCheckbox)
 # SmartClobber option for dmmdeps
 $smartClobberCheckbox = New-Object System.Windows.Forms.CheckBox
 $smartClobberCheckbox.Text = "SmartClobber"
-$smartClobberCheckbox.Location = New-Object System.Drawing.Point(480, 270)
+$smartClobberCheckbox.Location = New-Object System.Drawing.Point(480, 300)
 $smartClobberCheckbox.AutoSize = $true
 $smartClobberCheckbox.Checked = Get-Bool -Config $config -Key 'SmartClobber' -Default:$false
 $form.Controls.Add($smartClobberCheckbox)
@@ -375,27 +400,34 @@ $form.Controls.Add($smartClobberCheckbox)
 # BA2 Archive Management
 $ba2Label = New-Object System.Windows.Forms.Label
 $ba2Label.Text = "BA2 Archive Management:"
-$ba2Label.Location = New-Object System.Drawing.Point(10, 300)
+$ba2Label.Location = New-Object System.Drawing.Point(10, 330)
 $ba2Label.AutoSize = $true
 $form.Controls.Add($ba2Label)
 
 $xboxArchiveCheckbox = New-Object System.Windows.Forms.CheckBox
 $xboxArchiveCheckbox.Text = "Xbox Archive"
-$xboxArchiveCheckbox.Location = New-Object System.Drawing.Point(30, 320)
+$xboxArchiveCheckbox.Location = New-Object System.Drawing.Point(30, 350)
 $xboxArchiveCheckbox.AutoSize = $true
 $xboxArchiveCheckbox.Checked = Get-Bool -Config $config -Key 'XboxArchive' -Default:$true
 $form.Controls.Add($xboxArchiveCheckbox)
 
+$playStationArchiveCheckbox = New-Object System.Windows.Forms.CheckBox
+$playStationArchiveCheckbox.Text = "PlayStation Archive"
+$playStationArchiveCheckbox.Location = New-Object System.Drawing.Point(150, 350)
+$playStationArchiveCheckbox.AutoSize = $true
+$playStationArchiveCheckbox.Checked = Get-Bool -Config $config -Key 'PlayStationArchive' -Default:$true
+$form.Controls.Add($playStationArchiveCheckbox)
+
 $windowsArchiveCheckbox = New-Object System.Windows.Forms.CheckBox
 $windowsArchiveCheckbox.Text = "Windows Archive"
-$windowsArchiveCheckbox.Location = New-Object System.Drawing.Point(180, 320)
+$windowsArchiveCheckbox.Location = New-Object System.Drawing.Point(310, 350)
 $windowsArchiveCheckbox.AutoSize = $true
 $windowsArchiveCheckbox.Checked = Get-Bool -Config $config -Key 'WindowsArchive' -Default:$true
 $form.Controls.Add($windowsArchiveCheckbox)
 
 $sortAchlistCheckbox = New-Object System.Windows.Forms.CheckBox
 $sortAchlistCheckbox.Text = "Sort .achlist before saving"
-$sortAchlistCheckbox.Location = New-Object System.Drawing.Point(340, 320)
+$sortAchlistCheckbox.Location = New-Object System.Drawing.Point(450, 350)
 $sortAchlistCheckbox.AutoSize = $true
 $sortAchlistCheckbox.Checked = Get-Bool -Config $config -Key 'SortAchlist' -Default:$false
 $form.Controls.Add($sortAchlistCheckbox)
@@ -403,20 +435,20 @@ $form.Controls.Add($sortAchlistCheckbox)
 # Backup Management
 $backupLabel = New-Object System.Windows.Forms.Label
 $backupLabel.Text = "Backup Management:"
-$backupLabel.Location = New-Object System.Drawing.Point(10, 350)
+$backupLabel.Location = New-Object System.Drawing.Point(10, 380)
 $backupLabel.AutoSize = $true
 $form.Controls.Add($backupLabel)
 
 $copyCheckbox = New-Object System.Windows.Forms.CheckBox
 $copyCheckbox.Text = "Copy Files to Backup Structure"
-$copyCheckbox.Location = New-Object System.Drawing.Point(30, 370)
+$copyCheckbox.Location = New-Object System.Drawing.Point(30, 400)
 $copyCheckbox.AutoSize = $true
 $copyCheckbox.Checked = Get-Bool -Config $config -Key 'Copy' -Default:$true
 $form.Controls.Add($copyCheckbox)
 
 $zipCheckbox = New-Object System.Windows.Forms.CheckBox
 $zipCheckbox.Text = "Create Dated Zip"
-$zipCheckbox.Location = New-Object System.Drawing.Point(260, 370)
+$zipCheckbox.Location = New-Object System.Drawing.Point(260, 400)
 $zipCheckbox.AutoSize = $true
 $zipCheckbox.Checked = Get-Bool -Config $config -Key 'Zip' -Default:$true
 $form.Controls.Add($zipCheckbox)
@@ -424,7 +456,7 @@ $form.Controls.Add($zipCheckbox)
 # NEW: Clean Copy
 $cleanCopyCheckbox = New-Object System.Windows.Forms.CheckBox
 $cleanCopyCheckbox.Text = "Clean copy (remove loose_pc/loose_xbox)"
-$cleanCopyCheckbox.Location = New-Object System.Drawing.Point(430, 370)
+$cleanCopyCheckbox.Location = New-Object System.Drawing.Point(430, 400)
 $cleanCopyCheckbox.AutoSize = $true
 $cleanCopyCheckbox.Checked = Get-Bool -Config $config -Key 'CleanCopy' -Default:$false
 $form.Controls.Add($cleanCopyCheckbox)
@@ -432,14 +464,14 @@ $form.Controls.Add($cleanCopyCheckbox)
 # "Select All" – turn on all feature checkboxes (no run)
 $doAllButton = New-Object System.Windows.Forms.Button
 $doAllButton.Text = "Select All"
-$doAllButton.Location = New-Object System.Drawing.Point(30, 400)
+$doAllButton.Location = New-Object System.Drawing.Point(30, 430)
 $doAllButton.Width = 100
 $form.Controls.Add($doAllButton)
 
 # Log label + box
 $logLabel = New-Object System.Windows.Forms.Label
 $logLabel.Text = "Log:"
-$logLabel.Location = New-Object System.Drawing.Point(10, 430)
+$logLabel.Location = New-Object System.Drawing.Point(10, 460)
 $logLabel.AutoSize = $true
 $form.Controls.Add($logLabel)
 
@@ -447,19 +479,19 @@ $logBox = New-Object System.Windows.Forms.TextBox
 $logBox.Multiline = $true
 $logBox.ScrollBars = "Vertical"
 $logBox.ReadOnly = $true
-$logBox.Location = New-Object System.Drawing.Point(10, 450)
+$logBox.Location = New-Object System.Drawing.Point(10, 480)
 $logBox.Size = New-Object System.Drawing.Size(600, 170)
 $form.Controls.Add($logBox)
 
 # Status + progress
 $statusLabel = New-Object System.Windows.Forms.Label
-$statusLabel.Location = New-Object System.Drawing.Point(10, 630)
+$statusLabel.Location = New-Object System.Drawing.Point(10, 660)
 $statusLabel.Size = New-Object System.Drawing.Size(600, 20)
 $statusLabel.Text = ""
 $form.Controls.Add($statusLabel)
 
 $progressBar = New-Object System.Windows.Forms.ProgressBar
-$progressBar.Location = New-Object System.Drawing.Point(10, 655)
+$progressBar.Location = New-Object System.Drawing.Point(10, 685)
 $progressBar.Size = New-Object System.Drawing.Size(600, 20)
 $form.Controls.Add($progressBar)
 
@@ -468,20 +500,20 @@ $form.Controls.Add($progressBar)
 # -------------------------------------------------------------------
 $runButton = New-Object System.Windows.Forms.Button
 $runButton.Text = "Run"
-$runButton.Location = New-Object System.Drawing.Point(200, 690)
+$runButton.Location = New-Object System.Drawing.Point(200, 720)
 $runButton.Width = 80
 $form.Controls.Add($runButton)
 
 $afButton = New-Object System.Windows.Forms.Button
 $afButton.Text = "Make AF Version"
-$afButton.Location = New-Object System.Drawing.Point(290, 690)
+$afButton.Location = New-Object System.Drawing.Point(290, 720)
 $afButton.Width = 110
 $afButton.Enabled = $false
 $form.Controls.Add($afButton)
 
 $closeButton = New-Object System.Windows.Forms.Button
 $closeButton.Text = "Close"
-$closeButton.Location = New-Object System.Drawing.Point(410, 690)
+$closeButton.Location = New-Object System.Drawing.Point(410, 720)
 $closeButton.Width = 80
 $closeButton.Add_Click({ $form.Close() })
 $form.Controls.Add($closeButton)
@@ -512,6 +544,13 @@ $inputBox.Add_TextChanged({
         $guess = Join-Path $root "XBOX\Data"
         $xboxBox.Text = $guess
     }
+
+    # Guess PlayStation folder from Data on first run if empty
+    if (-not $playStationBox.Text -and $dataBox.Text) {
+        $root = Split-Path $dataBox.Text -Parent
+        $guess = Join-Path $root "PS5\Data"
+        $playStationBox.Text = $guess
+    }
 })
 
 $dataBox.Add_TextChanged({
@@ -526,11 +565,70 @@ $dataBox.Add_TextChanged({
 # -------------------------------------------------------------------
 #  Core operations: Voice, BA2, Backup
 # -------------------------------------------------------------------
+function Normalize-ConsoleVoiceFolder {
+    param(
+        [string]$ConsoleDataRoot,
+        [string]$ModName,
+        [string]$PlatformLabel,
+        [System.Windows.Forms.TextBox]$LogBox
+    )
+
+    if (-not $ConsoleDataRoot) {
+        $LogBox.AppendText("SKIP [$PlatformLabel Voice Normalize]: Console path is empty.`r`n")
+        return
+    }
+
+    if (-not (Test-Path $ConsoleDataRoot)) {
+        $LogBox.AppendText("SKIP [$PlatformLabel Voice Normalize]: Path not found: $ConsoleDataRoot`r`n")
+        return
+    }
+
+    # Accept either ...\Data directly or ...\<Platform> and normalize to Data root.
+    $resolvedRoot = $ConsoleDataRoot
+    if ((Split-Path $resolvedRoot -Leaf) -ne 'Data') {
+        $candidateData = Join-Path $resolvedRoot 'Data'
+        if (Test-Path $candidateData) {
+            $resolvedRoot = $candidateData
+            $LogBox.AppendText("INFO [$PlatformLabel Voice Normalize]: Using Data child folder: $resolvedRoot`r`n")
+        }
+    }
+
+    $espVoiceFolder = Join-Path $resolvedRoot ("sound\voice\{0}.esp" -f $ModName)
+    $esmVoiceFolder = Join-Path $resolvedRoot ("sound\voice\{0}.esm" -f $ModName)
+
+    $hasEsm = Test-Path $esmVoiceFolder
+    $hasEsp = Test-Path $espVoiceFolder
+
+    # If no ESP exists, nothing to do
+    if (-not $hasEsp) {
+        if ($hasEsm) {
+            $LogBox.AppendText("KEEP [$PlatformLabel Voice]: ESM already exists, no ESP to process:`r`n  $esmVoiceFolder`r`n")
+        } else {
+            $LogBox.AppendText("SKIP [$PlatformLabel Voice Normalize]: No ESP or ESM voice folder found for mod '$ModName'.`r`n")
+            $LogBox.AppendText("  Checked ESM: $esmVoiceFolder`r`n")
+            $LogBox.AppendText("  Checked ESP: $espVoiceFolder`r`n")
+        }
+        return
+    }
+
+    # ESP exists - delete ESM if present, then rename ESP to ESM
+    if ($hasEsm) {
+        $LogBox.AppendText("Deleting existing $PlatformLabel ESM voice folder:`r`n  $esmVoiceFolder`r`n")
+        Remove-Item -Path $esmVoiceFolder -Recurse -Force
+    }
+
+    $LogBox.AppendText("Renaming $PlatformLabel ESP voice folder to ESM:`r`n  $espVoiceFolder`r`n")
+    $newName = ("{0}.esm" -f $ModName)
+    Rename-Item -Path $espVoiceFolder -NewName $newName
+    $LogBox.AppendText("  =>  $esmVoiceFolder`r`n")
+}
+
 function Invoke-VoiceManagement {
     param(
         [string]$InputPath,
         [string]$DataRoot,
         [string]$XboxRoot,
+        [string]$PlayStationRoot,
         [bool]$DoVoiceUpdate,
         [bool]$DoRebuildAchlist
     )
@@ -548,6 +646,10 @@ function Invoke-VoiceManagement {
         [System.Windows.Forms.MessageBox]::Show("Xbox Data Folder does not exist:`r`n$XboxRoot", "Error", 'OK', 'Error') | Out-Null
         return
     }
+    if (-not (Test-Path $PlayStationRoot)) {
+        [System.Windows.Forms.MessageBox]::Show("PlayStation Data Folder does not exist:`r`n$PlayStationRoot", "Error", 'OK', 'Error') | Out-Null
+        return
+    }
 
     $modName = [System.IO.Path]::GetFileNameWithoutExtension($InputPath)
 
@@ -555,6 +657,7 @@ function Invoke-VoiceManagement {
     $logBox.AppendText("Input : $InputPath`r`n")
     $logBox.AppendText("Data  : $DataRoot`r`n")
     $logBox.AppendText("Xbox  : $XboxRoot`r`n")
+    $logBox.AppendText("PS5   : $PlayStationRoot`r`n")
     $logBox.AppendText("DoVoiceUpdate   : $DoVoiceUpdate`r`n")
     $logBox.AppendText("DoRebuildAchlist: $DoRebuildAchlist`r`n")
     $logBox.AppendText("-------------------------------------`r`n")
@@ -564,6 +667,8 @@ function Invoke-VoiceManagement {
         $pcEspVoiceFolder  = Join-Path $DataRoot ("sound\voice\{0}.esp" -f $modName)
         $xboxEspVoiceFolder = Join-Path $XboxRoot ("sound\voice\{0}.esp" -f $modName)
         $xboxEsmVoiceFolder = Join-Path $XboxRoot ("sound\voice\{0}.esm" -f $modName)
+        $playStationEspVoiceFolder = Join-Path $PlayStationRoot ("sound\voice\{0}.esp" -f $modName)
+        $playStationEsmVoiceFolder = Join-Path $PlayStationRoot ("sound\voice\{0}.esm" -f $modName)
 
         if ($DoVoiceUpdate) {
             # 1) Delete existing PC ESM voice folder
@@ -596,23 +701,29 @@ function Invoke-VoiceManagement {
 
             # 4) Xbox: rename ESP tree to ESM tree if present
             if (Test-Path $xboxEspVoiceFolder) {
-                if (Test-Path $xboxEsmVoiceFolder) {
-                    $logBox.AppendText("Deleting old Xbox ESM voice folder:`r`n  $xboxEsmVoiceFolder`r`n")
-                    Remove-Item -Path $xboxEsmVoiceFolder -Recurse -Force
-                }
-
-                $logBox.AppendText("Renaming Xbox ESP voice folder to ESM:`r`n  $xboxEspVoiceFolder`r`n")
-                $parent = Split-Path $xboxEspVoiceFolder -Parent
-                $newName = ("{0}.esm" -f $modName)
-                Rename-Item -Path $xboxEspVoiceFolder -NewName $newName
-                $logBox.AppendText("  =>  $xboxEsmVoiceFolder`r`n")
-            } else {
+                Normalize-ConsoleVoiceFolder -ConsoleDataRoot $XboxRoot -ModName $modName -PlatformLabel 'Xbox' -LogBox $logBox
+            }
+            else {
                 $logBox.AppendText("WARNING: Xbox ESP folder NOT found!`r`n")
                 $logBox.AppendText("  Expected: $xboxEspVoiceFolder`r`n")
                 if (Test-Path $xboxEsmVoiceFolder) {
                     $logBox.AppendText("  Existing Xbox ESM left untouched:`r`n    $xboxEsmVoiceFolder`r`n")
                 } else {
                     $logBox.AppendText("  No Xbox ESM exists either; nothing to change.`r`n")
+                }
+            }
+
+            # 5) PlayStation: rename ESP tree to ESM tree if present
+            if (Test-Path $playStationEspVoiceFolder) {
+                Normalize-ConsoleVoiceFolder -ConsoleDataRoot $PlayStationRoot -ModName $modName -PlatformLabel 'PlayStation' -LogBox $logBox
+            }
+            else {
+                $logBox.AppendText("WARNING: PlayStation ESP folder NOT found!`r`n")
+                $logBox.AppendText("  Expected: $playStationEspVoiceFolder`r`n")
+                if (Test-Path $playStationEsmVoiceFolder) {
+                    $logBox.AppendText("  Existing PlayStation ESM left untouched:`r`n    $playStationEsmVoiceFolder`r`n")
+                } else {
+                    $logBox.AppendText("  No PlayStation ESM exists either; nothing to change.`r`n")
                 }
             }
         }
@@ -639,7 +750,8 @@ function Invoke-DmmdepsGeneration {
         [string]$DmmdepsPath,
         [string]$InputPath,
         [string]$DataFolder,
-        [bool]$SmartClobber
+        [bool]$SmartClobber,
+        [bool]$IncludePsc
     )
 
     if (-not (Test-Path $DmmdepsPath)) {
@@ -713,6 +825,10 @@ function Invoke-DmmdepsGeneration {
         if ($SmartClobber) {
             $dmmdepsArgs += "--Smartclobber"
         }
+
+        if ($IncludePsc) {
+            $dmmdepsArgs += "--include-psc"
+        }
         
         $logBox.AppendText("Command: `"$DmmdepsPath`" $($dmmdepsArgs -join ' ')`r`n")
         
@@ -756,13 +872,15 @@ function Invoke-Ba2Archives {
         [string]$AchlistPath,
         [string]$DataFolder,
         [string]$XboxDataPath,
+        [string]$PlayStationDataPath,
         [string]$ArchiverPath,
         [bool]$DoXbox,
+        [bool]$DoPlayStation,
         [bool]$DoWindows,
         [bool]$DoSort
     )
 
-    if (-not $DoXbox -and -not $DoWindows) { return }
+    if (-not $DoXbox -and -not $DoPlayStation -and -not $DoWindows) { return }
 
     if (-not (Test-Path $AchlistPath)) {
         [System.Windows.Forms.MessageBox]::Show("Achlist file not found:`r`n$AchlistPath", "Error", 'OK', 'Error') | Out-Null
@@ -772,8 +890,12 @@ function Invoke-Ba2Archives {
         [System.Windows.Forms.MessageBox]::Show("Data Folder does not exist:`r`n$DataFolder", "Error", 'OK', 'Error') | Out-Null
         return
     }
-    if (-not (Test-Path $XboxDataPath)) {
+    if ($DoXbox -and -not (Test-Path $XboxDataPath)) {
         [System.Windows.Forms.MessageBox]::Show("Xbox Data Path does not exist:`r`n$XboxDataPath", "Error", 'OK', 'Error') | Out-Null
+        return
+    }
+    if ($DoPlayStation -and -not (Test-Path $PlayStationDataPath)) {
+        [System.Windows.Forms.MessageBox]::Show("PlayStation Data Path does not exist:`r`n$PlayStationDataPath", "Error", 'OK', 'Error') | Out-Null
         return
     }
     if (-not (Test-Path $ArchiverPath)) {
@@ -785,8 +907,10 @@ function Invoke-Ba2Archives {
     $logBox.AppendText("Achlist : $AchlistPath`r`n")
     $logBox.AppendText("Data    : $DataFolder`r`n")
     $logBox.AppendText("Xbox    : $XboxDataPath`r`n")
+    $logBox.AppendText("PS5     : $PlayStationDataPath`r`n")
     $logBox.AppendText("Archiver: $ArchiverPath`r`n")
     $logBox.AppendText("XboxArchive   : $DoXbox`r`n")
+    $logBox.AppendText("PlayStationArchive: $DoPlayStation`r`n")
     $logBox.AppendText("WindowsArchive: $DoWindows`r`n")
     $logBox.AppendText("SortAchlist   : $DoSort`r`n")
     $logBox.AppendText("-------------------------------------`r`n")
@@ -847,75 +971,110 @@ function Invoke-Ba2Archives {
     # Text list paths
     $xboxMainFile       = "$DataFolder\$baseName`_xboxMain.txt"
     $xboxTextureFile    = "$DataFolder\$baseName`_xboxTextures.txt"
+    $playStationMainFile       = "$DataFolder\$baseName`_ps5Main.txt"
+    $playStationTextureFile    = "$DataFolder\$baseName`_ps5Textures.txt"
     $windowsMainFile    = "$DataFolder\$baseName`_windowsMain.txt"
     $windowsTextureFile = "$DataFolder\$baseName`_windowsTextures.txt"
 
     $xboxMainContent       = @()
     $xboxTextureContent    = @()
+    $playStationMainContent       = @()
+    $playStationTextureContent    = @()
     $windowsMainContent    = @()
     $windowsTextureContent = @()
 
-    $hasWemFiles     = $false
-    $hasTextureFiles = $false
-    $hasBtdFiles     = $false
-    $hasBk2Files     = $false
+    $hasWemFiles       = $false
+    $hasTextureFiles   = $false
+    $hasBtdFiles       = $false
+    $hasBnkFiles       = $false
+    $hasDlstringsFiles = $false
 
     foreach ($item in $jsonData) {
         $p   = $item -replace '/', '\\'
         $ext = [System.IO.Path]::GetExtension($p).ToLowerInvariant()
+        $leafName = [System.IO.Path]::GetFileName($p).ToLowerInvariant()
+
+        if ($ext -eq '.bk2') {
+            $replacementPath = [System.IO.Path]::ChangeExtension($p, '.bnk')
+            $replacementFile = $replacementPath -replace '^DATA', $DataFolder
+
+            if (Test-Path $replacementFile) {
+                $logBox.AppendText("Replacing non-archivable BK2 with BNK in archive list: $p => $replacementPath`r`n")
+                $p = $replacementPath
+                $ext = '.bnk'
+                $leafName = [System.IO.Path]::GetFileName($p).ToLowerInvariant()
+            }
+            else {
+                $logBox.AppendText("Skipping BK2 with no matching BNK file: $p`r`n")
+                continue
+            }
+        }
 
         $isTexture = ($p -match '^DATA\\Textures') -and ($ext -eq '.dds')
         $isWem     = ($ext -eq '.wem')
         $isPsc     = ($ext -eq '.psc')
         $isBtd     = ($ext -eq '.btd')
-        $isBk2     = ($ext -eq '.bk2')
+        $isBnk     = ($ext -eq '.bnk')
+        $isDlstrings = ($ext -eq '.dlstrings')
 
         if ($isBtd) {
             $hasBtdFiles = $true
         }
-        elseif ($isBk2) {
-            $hasBk2Files = $true
+        elseif ($isBnk) {
+            $hasBnkFiles = $true
+        }
+
+        if ($isDlstrings) {
+            $hasDlstringsFiles = $true
         }
 
         if ($isTexture) {
             $hasTextureFiles      = $true
             $windowsTextureContent += $p
             $xboxTextureContent    += ($p -replace '^DATA\\Textures', "$XboxDataPath\Textures")
+            $playStationTextureContent += $p
         }
         elseif ($isWem) {
             $hasWemFiles          = $true
             $windowsMainContent   += $p
             $xboxMainContent      += ($p -replace '^DATA', $XboxDataPath)
+            $playStationMainContent += ($p -replace '^DATA', $PlayStationDataPath)
         }
         elseif ($isPsc) {
             # Only include .psc in Windows (PC) archive and only if checkbox is on
             if ($includeSourceScriptsCheckbox.Checked) {
                 $windowsMainContent += $p
+                $playStationMainContent += $p
             }
         }
         else {
             $windowsMainContent += $p
             $xboxMainContent    += $p
+            $playStationMainContent += $p
         }
     }
 
     # Write the text lists
     $xboxMainContent    | Set-Content -Path $xboxMainFile -Encoding ASCII
+    $playStationMainContent | Set-Content -Path $playStationMainFile -Encoding ASCII
     $windowsMainContent | Set-Content -Path $windowsMainFile -Encoding ASCII
 
     if ($hasTextureFiles) {
         $xboxTextureContent    | Set-Content -Path $xboxTextureFile -Encoding ASCII
+        $playStationTextureContent | Set-Content -Path $playStationTextureFile -Encoding ASCII
         $windowsTextureContent | Set-Content -Path $windowsTextureFile -Encoding ASCII
     }
 
-    $logBox.AppendText("Windows and Xbox archive list files written.`r`n")
+    $logBox.AppendText("Windows, Xbox, and PlayStation archive list files written.`r`n")
 
-    # Compression: if we have any wem, btd, or bk2 at all, use None, else Default
-    $compressionType = if ($hasWemFiles -or $hasBtdFiles -or $hasBk2Files) { "None" } else { "Default" }
+    # Compression: if we have any wem, *.dlstrings, btd, or bnk at all, use None, else Default
+    $compressionType = if ($hasWemFiles -or $hasDlstringsFiles -or $hasBtdFiles -or $hasBnkFiles) { "None" } else { "Default" }
 
     # BA2 output names
     $xboxMainBa2        = "$DataFolder\$baseName - Main_xbox.ba2"
     $xboxTexturesBa2    = "$DataFolder\$baseName - Textures_xbox.ba2"
+    $playStationMainBa2 = "$DataFolder\$baseName - Main_ps.ba2"
+    $playStationTexturesBa2 = "$DataFolder\$baseName - Textures_ps.ba2"
     $windowsMainBa2     = "$DataFolder\$baseName - Main.ba2"
     $windowsTexturesBa2 = "$DataFolder\$baseName - Textures.ba2"
 
@@ -933,6 +1092,16 @@ function Invoke-Ba2Archives {
             if ($hasTextureFiles) {
                 $logBox.AppendText("Running Archiver2 for Xbox textures archive...`r`n")
                 Invoke-Expression "& '$ArchiverPath' -create='$xboxTexturesBa2' -sourceFile='$xboxTextureFile' -format=XBoxDDS -compression=XBox"
+            }
+        }
+
+        if ($DoPlayStation) {
+            $logBox.AppendText("Running Archiver2 for PlayStation main archive...`r`n")
+            Invoke-Expression "& '$ArchiverPath' -create='$playStationMainBa2' -sourceFile='$playStationMainFile' -format=General -compression=$compressionType"
+
+            if ($hasTextureFiles) {
+                $logBox.AppendText("Running Archiver2 for PlayStation textures archive...`r`n")
+                Invoke-Expression "& '$ArchiverPath' -create='$playStationTexturesBa2' -sourceFile='$playStationTextureFile' -format=DDS -compression=Default"
             }
         }
 
@@ -992,24 +1161,41 @@ function New-ZipFromFolder {
             return (-not $full.StartsWith($ExcludeFolder, [System.StringComparison]::OrdinalIgnoreCase))
         }
 
-    $total = $files.Count
-    if ($total -lt 1) {
-        $LogBox.AppendText("ZIP: No files found under $SourceFolder (after exclusions).`r`n")
+    # Also collect directories so empty folders (e.g., LOOSEFILES\PS5\Data) are represented in the zip.
+    $dirs = Get-ChildItem -Path $SourceFolder -Recurse -Directory -ErrorAction SilentlyContinue |
+        Where-Object {
+            if (-not $ExcludeFolder) { return $true }
+            $full = [System.IO.Path]::GetFullPath($_.FullName)
+            return (-not $full.StartsWith($ExcludeFolder, [System.StringComparison]::OrdinalIgnoreCase))
+        }
+
+    $totalFiles = $files.Count
+    $totalDirs  = $dirs.Count
+    if ($totalFiles -lt 1 -and $totalDirs -lt 1) {
+        $LogBox.AppendText("ZIP: No files or folders found under $SourceFolder (after exclusions).`r`n")
         return
     }
 
     $ProgressBar.Style   = 'Blocks'
     $ProgressBar.Minimum = 0
-    $ProgressBar.Maximum = $total
+    $ProgressBar.Maximum = [math]::Max(1, $totalFiles)
     $ProgressBar.Value   = 0
 
-    $LogBox.AppendText("ZIP: $total files to compress.`r`n")
+    $LogBox.AppendText("ZIP: $totalFiles files and $totalDirs folders to process.`r`n")
     Invoke-UiPump   # let UI breathe before the heavy loop
 
     $zipFileStream = [System.IO.File]::Open($ZipPath, [System.IO.FileMode]::Create)
     try {
         $zipMode    = [System.IO.Compression.ZipArchiveMode]::Create
         $zipArchive = New-Object System.IO.Compression.ZipArchive($zipFileStream, $zipMode, $false)
+
+        foreach ($dir in $dirs) {
+            $dirRelPath = $dir.FullName.Substring($SourceFolder.Length).TrimStart('\','/')
+            if ($dirRelPath) {
+                $entryName = ($dirRelPath -replace '\\', '/') + '/'
+                $zipArchive.CreateEntry($entryName) | Out-Null
+            }
+        }
 
         $i = 0
         foreach ($file in $files) {
@@ -1019,7 +1205,7 @@ function New-ZipFromFolder {
             [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
                 $zipArchive,
                 $file.FullName,
-                $relPath,
+                ($relPath -replace '\\', '/'),
                 [System.IO.Compression.CompressionLevel]::Optimal
             ) | Out-Null
 
@@ -1071,6 +1257,7 @@ function Invoke-Backup {
         [string]$BackupRoot,
         [string]$DataRoot,
         [string]$XboxRoot,
+        [string]$PlayStationRoot,
         [bool]$DoCopy,
         [bool]$DoZip,
         [bool]$DoClean
@@ -1084,6 +1271,10 @@ function Invoke-Backup {
     }
     if (-not ($XboxRoot -like "*\Data")) {
         [System.Windows.Forms.MessageBox]::Show("Xbox Data Folder must end with 'Data'", "Invalid Path", 'OK', 'Error')
+        return
+    }
+    if (-not ($PlayStationRoot -like "*\Data")) {
+        [System.Windows.Forms.MessageBox]::Show("PlayStation Data Folder must end with 'Data'", "Invalid Path", 'OK', 'Error')
         return
     }
 
@@ -1100,6 +1291,7 @@ function Invoke-Backup {
     $logBox.AppendText("Backup  : $BackupRoot`r`n")
     $logBox.AppendText("Data    : $DataRoot`r`n")
     $logBox.AppendText("Xbox    : $XboxRoot`r`n")
+    $logBox.AppendText("PS5     : $PlayStationRoot`r`n")
     $logBox.AppendText("DoCopy  : $DoCopy`r`n")
     $logBox.AppendText("DoZip   : $DoZip`r`n")
     $logBox.AppendText("DoClean : $DoClean`r`n")
@@ -1127,6 +1319,11 @@ function Invoke-Backup {
     }
 
     if ($DoCopy) {
+        $looseXboxDataRoot = Join-Path $modBackupRoot "LOOSEFILES\XBOX\Data"
+        $loosePs5DataRoot  = Join-Path $modBackupRoot "LOOSEFILES\PS5\Data"
+        New-Item -ItemType Directory -Force -Path $looseXboxDataRoot | Out-Null
+        New-Item -ItemType Directory -Force -Path $loosePs5DataRoot | Out-Null
+
         # base mod files (.esm/.esp/.ba2/.txt/.achlist)
         $basePath = $DataRoot
         Get-ChildItem -Path $basePath -Filter "$modName*" -Recurse -File |
@@ -1151,8 +1348,30 @@ function Invoke-Backup {
             $relPath  = $item -replace '^DATA\\', ''
             $relLower = $relPath.ToLowerInvariant()
 
-            $srcPath = Join-Path -Path $DataRoot -ChildPath $relPath
-            $dstPC   = Join-Path -Path (Join-Path $modBackupRoot "LOOSEFILES\Data") -ChildPath $relPath
+            # Absolute achlist entries still need a Data-relative destination layout.
+            if ($item -match '^[a-zA-Z]:\\' -or $item -match '^\\\\') {
+                $srcPath = $item
+
+                $dataMarker = "\data\"
+                $dataIndex = $item.ToLowerInvariant().IndexOf($dataMarker)
+                if ($dataIndex -ge 0) {
+                    $relPath = $item.Substring($dataIndex + $dataMarker.Length)
+                    $relLower = $relPath.ToLowerInvariant()
+                    $dstPC = Join-Path -Path (Join-Path $modBackupRoot "LOOSEFILES\Data") -ChildPath $relPath
+                }
+                else {
+                    $logBox.AppendText("SKIP [Main Copy]: Absolute path does not contain a Data root: $item`r`n")
+                    $count++
+                    if ($count -le $progressBar.Maximum) {
+                        $progressBar.Value = $count
+                    }
+                    continue
+                }
+            }
+            else {
+                $srcPath = Join-Path -Path $DataRoot -ChildPath $relPath
+                $dstPC   = Join-Path -Path (Join-Path $modBackupRoot "LOOSEFILES\Data") -ChildPath $relPath
+            }
 
             $logBox.AppendText("CHECK [Main Copy]: $srcPath`r`n")
 
@@ -1185,10 +1404,35 @@ function Invoke-Backup {
                 $dstXbox = Join-Path (Join-Path $modBackupRoot "LOOSEFILES\XBOX\Data") $relPath
                 $srcXbox = Join-Path $XboxRoot $relPath
                 $logBox.AppendText("CHECK [Xbox WEM]: $srcXbox`r`n")
+                if (-not (Test-Path $srcXbox) -and $relPath -match "\\$modName\.esm\\") {
+                    $xboxAltRel = $relPath -creplace "\\$([Regex]::Escape($modName))\.esm\\", "\\$modName.esp\\"
+                    $xboxAltSrc = Join-Path $XboxRoot $xboxAltRel
+                    if (Test-Path $xboxAltSrc) {
+                        $srcXbox = $xboxAltSrc
+                        $logBox.AppendText("FALLBACK [Xbox WEM]: Using ESP path source: $srcXbox`r`n")
+                    }
+                }
                 if (Test-Path $srcXbox) {
                     New-Item -ItemType Directory -Force -Path (Split-Path $dstXbox) | Out-Null
                     Copy-Item -Path $srcXbox -Destination $dstXbox -Force
                     $logBox.AppendText("COPY: $srcXbox => $dstXbox`r`n")
+                }
+
+                $dstPS5 = Join-Path (Join-Path $modBackupRoot "LOOSEFILES\PS5\Data") $relPath
+                $srcPS5 = Join-Path $PlayStationRoot $relPath
+                $logBox.AppendText("CHECK [PS5 WEM]: $srcPS5`r`n")
+                if (-not (Test-Path $srcPS5) -and $relPath -match "\\$modName\.esm\\") {
+                    $ps5AltRel = $relPath -creplace "\\$([Regex]::Escape($modName))\.esm\\", "\\$modName.esp\\"
+                    $ps5AltSrc = Join-Path $PlayStationRoot $ps5AltRel
+                    if (Test-Path $ps5AltSrc) {
+                        $srcPS5 = $ps5AltSrc
+                        $logBox.AppendText("FALLBACK [PS5 WEM]: Using ESP path source: $srcPS5`r`n")
+                    }
+                }
+                if (Test-Path $srcPS5) {
+                    New-Item -ItemType Directory -Force -Path (Split-Path $dstPS5) | Out-Null
+                    Copy-Item -Path $srcPS5 -Destination $dstPS5 -Force
+                    $logBox.AppendText("COPY: $srcPS5 => $dstPS5`r`n")
                 }
             }
 
@@ -1307,8 +1551,12 @@ function Invoke-Backup {
                               -LogBox $logBox `
                               -ProgressBar $progressBar `
                               -ExcludeFolder $excludeFolder
-
-            $logBox.AppendText("Zip created.`r`n")
+            if (Test-Path $zipPath) {
+                $zipSize = (Get-Item $zipPath).Length
+                $logBox.AppendText("Zip created: $zipPath ($zipSize bytes).`r`n")
+            } else {
+                $logBox.AppendText("ZIP ERROR: Zip file was not created at expected path: $zipPath`r`n")
+            }
         }
         catch {
             $logBox.AppendText("ZIP ERROR: $($_.Exception.Message)`r`n")
@@ -1327,6 +1575,7 @@ function Invoke-BackupFromCsv {
         [string]$BackupRoot,
         [string]$DataRoot,
         [string]$XboxRoot,
+        [string]$PlayStationRoot,
         [string]$CsvPath,
         [bool]$DoCopy,
         [bool]$DoZip,
@@ -1348,6 +1597,7 @@ function Invoke-BackupFromCsv {
     $logBox.AppendText("Backup  : $BackupRoot`r`n")
     $logBox.AppendText("Data    : $DataRoot`r`n")
     $logBox.AppendText("Xbox    : $XboxRoot`r`n")
+    $logBox.AppendText("PS5     : $PlayStationRoot`r`n")
     $logBox.AppendText("-------------------------------------`r`n")
 
     $modBackupRoot = Join-Path $BackupRoot $modName
@@ -1386,6 +1636,11 @@ function Invoke-BackupFromCsv {
     }
 
     if ($DoCopy) {
+        $looseXboxDataRoot = Join-Path $modBackupRoot "LOOSEFILES\XBOX\Data"
+        $loosePs5DataRoot  = Join-Path $modBackupRoot "LOOSEFILES\PS5\Data"
+        New-Item -ItemType Directory -Force -Path $looseXboxDataRoot | Out-Null
+        New-Item -ItemType Directory -Force -Path $loosePs5DataRoot | Out-Null
+
         # Reset junction targets for this backup run so AF creation
         # uses only folders discovered from the current CSV processing.
         $script:junctionTargets = @{}
@@ -1410,6 +1665,8 @@ function Invoke-BackupFromCsv {
             $count = 0
             $copiedPC = 0
             $copiedXbox = 0
+            $copiedPS5 = 0
+            $copiedPs5Destinations = @{}
             $GameRoot = Split-Path $DataRoot -Parent
             foreach ($row in $csvData) {
                 # PC path copy
@@ -1453,13 +1710,59 @@ function Invoke-BackupFromCsv {
                         Copy-Item -Path $srcPath -Destination $dstPC -Force
                         $copiedPC++
 
+                        if ($PlayStationRoot) {
+                            $psRelPath = $pcRaw.Replace('/', '\\')
+
+                            # Canonicalize to a Data-relative path for PS5 lookup.
+                            if ($psRelPath -match '^[a-zA-Z]:\\' -or $psRelPath.StartsWith("\\")) {
+                                $dataMarker = "\\data\\"
+                                $idxData = $psRelPath.ToLowerInvariant().IndexOf($dataMarker)
+                                if ($idxData -ge 0) {
+                                    $psRelPath = $psRelPath.Substring($idxData + $dataMarker.Length)
+                                }
+                            }
+                            elseif ($psRelPath.StartsWith("Data\\", [System.StringComparison]::OrdinalIgnoreCase)) {
+                                $psRelPath = $psRelPath.Substring(5)
+                            }
+
+                            if ($psRelPath.ToLowerInvariant().EndsWith('.wem')) {
+                                $srcPS5 = Join-Path $PlayStationRoot $psRelPath
+                                $dstPS5 = Join-Path (Join-Path $modBackupRoot "LOOSEFILES\PS5\Data") $psRelPath
+                                $logBox.AppendText("COPY [PS5 WEM]: $srcPS5 => $dstPS5`r`n")
+                                if (-not (Test-Path $srcPS5) -and $psRelPath -match "\\$modName\.esm\\") {
+                                    $psRelFallback = $psRelPath -creplace "\\$([Regex]::Escape($modName))\.esm\\", "\\$modName.esp\\"
+                                    $srcPS5Fallback = Join-Path $PlayStationRoot $psRelFallback
+                                    if (Test-Path $srcPS5Fallback) {
+                                        $srcPS5 = $srcPS5Fallback
+                                        $dstPS5 = Join-Path (Join-Path $modBackupRoot "LOOSEFILES\PS5\Data") $psRelFallback
+                                        $logBox.AppendText("FALLBACK [PS5 WEM CSV]: Using ESP path source: $srcPS5`r`n")
+                                    }
+                                }
+                                if (Test-Path $srcPS5) {
+                                    $ps5Key = $dstPS5.ToLowerInvariant()
+                                    if (-not $copiedPs5Destinations.ContainsKey($ps5Key)) {
+                                        New-Item -ItemType Directory -Force -Path (Split-Path $dstPS5) | Out-Null
+                                        Copy-Item -Path $srcPS5 -Destination $dstPS5 -Force
+                                        $copiedPs5Destinations[$ps5Key] = $true
+                                        $copiedPS5++
+                                    }
+                                    else {
+                                        $logBox.AppendText("SKIP [PS5 WEM duplicate destination]: $dstPS5`r`n")
+                                    }
+                                }
+                                else {
+                                    $logBox.AppendText("SKIP [PS5 WEM missing]: $srcPS5`r`n")
+                                }
+                            }
+                        }
+
                         # Track ESM folders for AF junction creation, mirroring
                         # the achlist-based backup logic. We normalize the CSV
                         # pcpath to a Data-relative form so we can detect
                         # "\\<modName>.esm\\" segments.
                         $achItem = $pcRaw.Replace('/', '\\')
                         if (-not $achItem.StartsWith("Data\\", [System.StringComparison]::OrdinalIgnoreCase)) {
-                            $achItem = "Data\\" + $achItem.TrimStart('\\')
+                            $achItem = "Data\\" + $achItem.TrimStart('\')
                         }
 
                         if ($achItem -match "\\$modName\.esm\\") {
@@ -1480,13 +1783,75 @@ function Invoke-BackupFromCsv {
                     New-Item -ItemType Directory -Force -Path (Split-Path $dstXbox) | Out-Null
                     Copy-Item -Path $srcXbox -Destination $dstXbox -Force
                     $copiedXbox++
+
+                    # Some CSV variants surface console audio in xboxpath rather than pcpath.
+                    if ($PlayStationRoot -and $xboxPathRaw.ToLowerInvariant().EndsWith('.wem')) {
+                        $xboxNorm = $xboxPathRaw.Replace('/', '\')
+                        $dataIdx = $xboxNorm.ToLowerInvariant().IndexOf("data\\")
+                        if ($dataIdx -ge 0) {
+                            $psRelFromData = $xboxNorm.Substring($dataIdx + 5)
+                            $srcPS5FromXboxRow = Join-Path $PlayStationRoot $psRelFromData
+                            $dstPS5FromXboxRow = Join-Path (Join-Path $modBackupRoot "LOOSEFILES\PS5\Data") $psRelFromData
+
+                            if (-not (Test-Path $srcPS5FromXboxRow) -and $psRelFromData -match "\\$modName\.esm\\") {
+                                $psRelFallback = $psRelFromData -creplace "\\$([Regex]::Escape($modName))\.esm\\", "\\$modName.esp\\"
+                                $srcPS5Fallback = Join-Path $PlayStationRoot $psRelFallback
+                                if (Test-Path $srcPS5Fallback) {
+                                    $srcPS5FromXboxRow = $srcPS5Fallback
+                                    $dstPS5FromXboxRow = Join-Path (Join-Path $modBackupRoot "LOOSEFILES\PS5\Data") $psRelFallback
+                                    $logBox.AppendText("FALLBACK [PS5 WEM from Xbox row]: Using ESP path source: $srcPS5FromXboxRow`r`n")
+                                }
+                            }
+
+                            $ps5FromXboxKey = $dstPS5FromXboxRow.ToLowerInvariant()
+                            if (Test-Path $srcPS5FromXboxRow) {
+                                if (-not $copiedPs5Destinations.ContainsKey($ps5FromXboxKey)) {
+                                    New-Item -ItemType Directory -Force -Path (Split-Path $dstPS5FromXboxRow) | Out-Null
+                                    Copy-Item -Path $srcPS5FromXboxRow -Destination $dstPS5FromXboxRow -Force
+                                    $copiedPs5Destinations[$ps5FromXboxKey] = $true
+                                    $copiedPS5++
+                                    $logBox.AppendText("COPY [PS5 WEM from Xbox row]: $srcPS5FromXboxRow => $dstPS5FromXboxRow`r`n")
+                                }
+                                else {
+                                    $logBox.AppendText("SKIP [PS5 WEM duplicate destination]: $dstPS5FromXboxRow`r`n")
+                                }
+                            }
+                            else {
+                                $logBox.AppendText("SKIP [PS5 WEM missing from Xbox row]: $srcPS5FromXboxRow`r`n")
+                            }
+                        }
+                    }
+                }
+
+                # PS5 path copy (native dmmdeps ps5path column)
+                if ($row.ps5path -and $row.ps5path.Trim()) {
+                    $ps5PathRaw = $row.ps5path.Trim().Replace('/', '\\')
+                    $srcPS5Native = Join-Path $GameRoot $ps5PathRaw
+                    $dstPS5Native = Join-Path (Join-Path $modBackupRoot "LOOSEFILES") $ps5PathRaw
+                    $ps5NativeKey = $dstPS5Native.ToLowerInvariant()
+
+                    if (Test-Path $srcPS5Native) {
+                        if (-not $copiedPs5Destinations.ContainsKey($ps5NativeKey)) {
+                            New-Item -ItemType Directory -Force -Path (Split-Path $dstPS5Native) | Out-Null
+                            Copy-Item -Path $srcPS5Native -Destination $dstPS5Native -Force
+                            $copiedPs5Destinations[$ps5NativeKey] = $true
+                            $copiedPS5++
+                            $logBox.AppendText("COPY [PS5 native]: $srcPS5Native => $dstPS5Native`r`n")
+                        }
+                        else {
+                            $logBox.AppendText("SKIP [PS5 native duplicate destination]: $dstPS5Native`r`n")
+                        }
+                    }
+                    else {
+                        $logBox.AppendText("SKIP [PS5 native missing]: $srcPS5Native`r`n")
+                    }
                 }
                 $count++
                 if ($count -le $progressBar.Maximum) {
                     $progressBar.Value = $count
                 }
             }
-            $logBox.AppendText("CSV processing complete. Processed $count items, copied $copiedPC PC files, $copiedXbox Xbox files.`r`n")
+            $logBox.AppendText("CSV processing complete. Processed $count items, copied $copiedPC PC files, $copiedXbox Xbox files, $copiedPS5 PS5 WEM files.`r`n")
         }
         catch {
             $logBox.AppendText("ERROR processing CSV: $($_.Exception.Message)`r`n")
@@ -1513,8 +1878,12 @@ function Invoke-BackupFromCsv {
                               -LogBox $logBox `
                               -ProgressBar $progressBar `
                               -ExcludeFolder $excludeFolder
-
-            $logBox.AppendText("Zip created.`r`n")
+            if (Test-Path $zipPath) {
+                $zipSize = (Get-Item $zipPath).Length
+                $logBox.AppendText("Zip created: $zipPath ($zipSize bytes).`r`n")
+            } else {
+                $logBox.AppendText("ZIP ERROR: Zip file was not created at expected path: $zipPath`r`n")
+            }
         }
         catch {
             $logBox.AppendText("ZIP ERROR: $($_.Exception.Message)`r`n")
@@ -1718,13 +2087,16 @@ $runButton.Add_Click({
         BackupFolder     = $destBox.Text
         DataFolder       = $dataBox.Text
         XboxFolder       = $xboxBox.Text
+        PlayStationFolder= $playStationBox.Text
         ArchiverPath     = $archiverBox.Text
         DmmdepsPath      = $dmmdepsBox.Text
         VoiceFolderUpdate= $voiceUpdateCheckbox.Checked
         RebuildAchlist   = $rebuildAchlistCheckbox.Checked
         UseDmmdeps       = $useDmmdepsCheckbox.Checked
+        IncludeSourceScripts = $includeSourceScriptsCheckbox.Checked
         SmartClobber     = $smartClobberCheckbox.Checked
         XboxArchive      = $xboxArchiveCheckbox.Checked
+        PlayStationArchive = $playStationArchiveCheckbox.Checked
         WindowsArchive   = $windowsArchiveCheckbox.Checked
         SortAchlist      = $sortAchlistCheckbox.Checked
         Copy             = $copyCheckbox.Checked
@@ -1742,9 +2114,28 @@ $runButton.Add_Click({
 
     $dataRoot     = $dataBox.Text
     $xboxRoot     = $xboxBox.Text
+    $playStationRoot = $playStationBox.Text
     $backupRoot   = $destBox.Text
     $archiverPath = $archiverBox.Text
     $dmmdepsPath  = $dmmdepsBox.Text
+
+    # Normalize console roots to ...\Data if user selected ...\XBOX or ...\PS5.
+    if ($xboxRoot -and (Split-Path $xboxRoot -Leaf) -ne 'Data') {
+        $candidateXboxData = Join-Path $xboxRoot 'Data'
+        if (Test-Path $candidateXboxData) {
+            $xboxRoot = $candidateXboxData
+            $xboxBox.Text = $xboxRoot
+            $logBox.AppendText("INFO: Normalized Xbox root to Data folder: $xboxRoot`r`n")
+        }
+    }
+    if ($playStationRoot -and (Split-Path $playStationRoot -Leaf) -ne 'Data') {
+        $candidatePsData = Join-Path $playStationRoot 'Data'
+        if (Test-Path $candidatePsData) {
+            $playStationRoot = $candidatePsData
+            $playStationBox.Text = $playStationRoot
+            $logBox.AppendText("INFO: Normalized PlayStation root to Data folder: $playStationRoot`r`n")
+        }
+    }
 
     $modName = [System.IO.Path]::GetFileNameWithoutExtension($inputPath)
     $achlistPath = if ($inputPath.ToLower().EndsWith(".achlist")) {
@@ -1762,8 +2153,16 @@ $runButton.Add_Click({
 
     $doVoice  = $voiceUpdateCheckbox.Checked -or $rebuildAchlistCheckbox.Checked
     $doDmmdeps = $useDmmdepsCheckbox.Checked
-    $doBa2    = $xboxArchiveCheckbox.Checked -or $windowsArchiveCheckbox.Checked -or $sortAchlistCheckbox.Checked
+    $doBa2    = $xboxArchiveCheckbox.Checked -or $playStationArchiveCheckbox.Checked -or $windowsArchiveCheckbox.Checked -or $sortAchlistCheckbox.Checked
     $doBackup = $copyCheckbox.Checked -or $zipCheckbox.Checked -or $cleanCopyCheckbox.Checked
+
+    # Always normalize console voice folder names before BA2/backup steps.
+    if ($xboxRoot -and (Test-Path $xboxRoot)) {
+        Normalize-ConsoleVoiceFolder -ConsoleDataRoot $xboxRoot -ModName $modName -PlatformLabel 'Xbox' -LogBox $logBox
+    }
+    if ($playStationRoot -and (Test-Path $playStationRoot)) {
+        Normalize-ConsoleVoiceFolder -ConsoleDataRoot $playStationRoot -ModName $modName -PlatformLabel 'PlayStation' -LogBox $logBox
+    }
 
     if (-not ($doVoice -or $doDmmdeps -or $doBa2 -or $doBackup)) {
         [System.Windows.Forms.MessageBox]::Show("No operations are selected. Tick at least one checkbox.", "Nothing to do", 'OK', 'Information') | Out-Null
@@ -1773,7 +2172,7 @@ $runButton.Add_Click({
     # Run dmmdeps first if selected
     if ($doDmmdeps) {
         $statusLabel.Text = "Running: Dmmdeps Generation..."
-        $dmmdepsSuccess = Invoke-DmmdepsGeneration -DmmdepsPath $dmmdepsPath -InputPath $inputPath -DataFolder $dataRoot -SmartClobber:$smartClobberCheckbox.Checked
+        $dmmdepsSuccess = Invoke-DmmdepsGeneration -DmmdepsPath $dmmdepsPath -InputPath $inputPath -DataFolder $dataRoot -SmartClobber:$smartClobberCheckbox.Checked -IncludePsc:$includeSourceScriptsCheckbox.Checked
         if (-not $dmmdepsSuccess) {
             $logBox.AppendText("Dmmdeps generation failed. Stopping execution.`r`n")
             return
@@ -1782,14 +2181,16 @@ $runButton.Add_Click({
 
     if ($doVoice) {
         $statusLabel.Text = "Running: Voice File Management..."
-        Invoke-VoiceManagement -InputPath $inputPath -DataRoot $dataRoot -XboxRoot $xboxRoot `
+        Invoke-VoiceManagement -InputPath $inputPath -DataRoot $dataRoot -XboxRoot $xboxRoot -PlayStationRoot $playStationRoot `
             -DoVoiceUpdate:$voiceUpdateCheckbox.Checked -DoRebuildAchlist:$rebuildAchlistCheckbox.Checked
     }
 
     if ($doBa2) {
         $statusLabel.Text = "Running: BA2 Archive Management..."
         Invoke-Ba2Archives -AchlistPath $achlistPath -DataFolder $dataRoot -XboxDataPath $xboxRoot `
+            -PlayStationDataPath $playStationRoot `
             -ArchiverPath $archiverPath -DoXbox:$xboxArchiveCheckbox.Checked `
+            -DoPlayStation:$playStationArchiveCheckbox.Checked `
             -DoWindows:$windowsArchiveCheckbox.Checked -DoSort:$sortAchlistCheckbox.Checked
     }
 
@@ -1799,7 +2200,7 @@ $runButton.Add_Click({
         # Handle CSV-based backup if dmmdeps was used
         if ($useDmmdepsCheckbox.Checked -and (Test-Path $csvPath)) {
             $logBox.AppendText("Using CSV-based backup. CSV path: $csvPath`r`n")
-            Invoke-BackupFromCsv -InputPath $inputPath -BackupRoot $backupRoot -DataRoot $dataRoot -XboxRoot $xboxRoot `
+            Invoke-BackupFromCsv -InputPath $inputPath -BackupRoot $backupRoot -DataRoot $dataRoot -XboxRoot $xboxRoot -PlayStationRoot $playStationRoot `
                 -CsvPath $csvPath -DoCopy:$copyCheckbox.Checked -DoZip:$zipCheckbox.Checked -DoClean:$cleanCopyCheckbox.Checked
         } else {
             if ($useDmmdepsCheckbox.Checked) {
@@ -1807,7 +2208,7 @@ $runButton.Add_Click({
             } else {
                 $logBox.AppendText("Using traditional achlist-based backup.`r`n")
             }
-            Invoke-Backup -InputPath $inputPath -BackupRoot $backupRoot -DataRoot $dataRoot -XboxRoot $xboxRoot `
+            Invoke-Backup -InputPath $inputPath -BackupRoot $backupRoot -DataRoot $dataRoot -XboxRoot $xboxRoot -PlayStationRoot $playStationRoot `
                 -DoCopy:$copyCheckbox.Checked -DoZip:$zipCheckbox.Checked -DoClean:$cleanCopyCheckbox.Checked
         }
 
@@ -1835,6 +2236,7 @@ $doAllButton.Add_Click({
     $useDmmdepsCheckbox.Checked     = $true
     $smartClobberCheckbox.Checked   = $true
     $xboxArchiveCheckbox.Checked    = $true
+    $playStationArchiveCheckbox.Checked = $true
     $windowsArchiveCheckbox.Checked = $true
     $sortAchlistCheckbox.Checked    = $true
     $copyCheckbox.Checked           = $true

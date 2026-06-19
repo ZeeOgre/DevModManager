@@ -142,6 +142,7 @@ jobs:
               --verbose             Emit detailed diagnostics for ignored/missing files
               --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf)
               --rebuildcache        Force rebuild of parent archive cache (rarely needed; auto-detects changes by default)
+              --include-psc         Include .psc script source files in achlist (for distributing source code)
             \`\`\`
 
             ### Examples
@@ -153,6 +154,11 @@ jobs:
             **Custom development setup:**
             \`\`\`
             dmmdeps.exe "G:\\ModDev\\MyMod.esm" --gameroot "C:\\Games\\Starfield" --tifroot "G:\\Source\\TGATextures"
+            \`\`\`
+
+            **Include script source files for open-source distribution:**
+            \`\`\`
+            dmmdeps.exe MyMod.esm --include-psc
             \`\`\`
 
             **CI/CD pipeline (silent mode):**
