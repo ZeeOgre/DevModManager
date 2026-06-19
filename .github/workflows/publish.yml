@@ -30,14 +30,16 @@ jobs:
 
       - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release --no-self-contained /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmdeps /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
-          # VERY CRITICAL NOTE HERE --no-self-contained is correct, --self-contained false is NOT the same and will produce a 60 mb file as opposed to the ~184 KB executable produced by --no-self-contained. 
-          # This is because --self-contained false still produces a self-contained executable but with the RID-specific runtime included, whereas --no-self-contained produces a framework-dependent executable that relies on the .NET runtime being installed separately. 
-          # The size difference is huge because the self-contained version includes the entire .NET runtime, while the framework-dependent version does not.
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release --no-self-contained /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmchecker /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-temp
+          Move-Item ./out/dmmdeps-temp/dmmchecker.exe ./out/dmmdeps/dmmdeps.exe -Force
+          Remove-Item ./out/dmmdeps-temp -Recurse -Force
+          # Using unique AssemblyName=dmmchecker to avoid conflicts with Modular project, then renaming to dmmdeps.exe
       - name: Publish self-contained single-file (fat) build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:AssemblyName=dmmdeps_fat /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
-          # By way of comparison this produces a ~60MB executable, the trimmed file loses some slop in targeting exactly win-x64, but the single-file bundling of the runtime and native SQLite libraries still results in a large file size compared to the framework-dependent version.
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:AssemblyName=dmmchecker_fat /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat-temp
+          Move-Item ./out/dmmdeps-fat-temp/dmmchecker_fat.exe ./out/dmmdeps-fat/dmmdeps_fat.exe -Force
+          Remove-Item ./out/dmmdeps-fat-temp -Recurse -Force
+          # Using unique AssemblyName=dmmchecker_fat to avoid conflicts, then renaming to dmmdeps_fat.exe
 
       - name: Normalize names and prepare zips
         shell: pwsh
