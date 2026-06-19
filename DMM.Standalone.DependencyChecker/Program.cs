@@ -414,10 +414,11 @@ namespace DmmDep
                 }
 
                 // Terrain backup-only folder Data\terrain\<modname>\**
+                // If BTD files exist, include the entire mod terrain folder tree
                 string modTerrainFolder = Path.Combine(gameRoot, "Data", "terrain", pluginName);
                 if (Directory.Exists(modTerrainFolder))
                 {
-                    Log.Info("[1b] Adding terrain backup folder...");
+                    Log.Info("[1b] Adding terrain backup folder (entire mod terrain tree)...");
                     foreach (var f in Directory.EnumerateFiles(modTerrainFolder, "*.*", SearchOption.AllDirectories))
                     {
                         string rel = "Data\\" + GetRelativePath(Path.Combine(gameRoot, "Data"), f);
@@ -1336,7 +1337,8 @@ namespace DmmDep
             FileKind kind,
             string source,
             string gameRoot,
-            string xboxDataRoot)
+            string xboxDataRoot,
+            string? ps5DataRoot = null)
         {
             relPcPath = NormalizeRel(relPcPath);
             string fullPc = Path.Combine(gameRoot, relPcPath);
@@ -1348,6 +1350,7 @@ namespace DmmDep
             }
 
             string? xboxRel = null;
+            string? ps5Rel = null;
 
             if (relPcPath.StartsWith("Data\\Sound", StringComparison.OrdinalIgnoreCase) ||
                 relPcPath.StartsWith("Data\\Textures", StringComparison.OrdinalIgnoreCase))
@@ -1360,6 +1363,18 @@ namespace DmmDep
                 {
                     xboxRel = BuildXboxRelativePath(xboxDataRoot, candidate);
                 }
+
+                if (!string.IsNullOrEmpty(ps5DataRoot))
+                {
+                    string ps5Candidate = Path.Combine(
+                        ps5DataRoot,
+                        GetRelativePath(Path.Combine(gameRoot, "Data"), fullPc));
+
+                    if (File.Exists(ps5Candidate))
+                    {
+                        ps5Rel = BuildPS5RelativePath(ps5DataRoot, ps5Candidate);
+                    }
+                }
             }
 
             achlist.Add(relPcPath);
@@ -1370,6 +1385,7 @@ namespace DmmDep
                 {
                     PcPath = relPcPath,
                     XboxPath = xboxRel,
+                    PS5Path = ps5Rel,
                     Kind = kind.ToString().ToLowerInvariant(),
                     Source = source
                 });
@@ -1506,7 +1522,7 @@ namespace DmmDep
                     {
                         string relUnderData = GetRelativePath(dataRoot, f);
                         string relPc = NormalizeRel(Path.Combine("Data", relUnderData));
-                        AddFile(manifest, achlist, relPc, FileKind.Voice, "pc-voice-runtime", gameRoot, xboxDataRoot);
+                        AddFile(manifest, achlist, relPc, FileKind.Voice, "pc-voice-runtime", gameRoot, xboxDataRoot, ps5DataRoot);
                     }
                 }
             }
