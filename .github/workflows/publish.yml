@@ -98,8 +98,11 @@ jobs:
             - Particles, Animations, Morphs, and more
 
             **Outputs:**
-            - \`.achlist\` - JSON array of PC file paths (for Achievement-safe mod managers)
+            - \`.achlist\` - JSON array of PC file paths (main asset list for Achievement-safe mod managers)
+            - \`.achlist_warn\` - Files found in parent game archives (may need manual review)
+            - \`.achlist_discard\` - High-probability false positives from NIF decoding (usually non-existent paths)
             - \`_deps.csv\` - Detailed spreadsheet with file paths, asset types, and discovery sources
+            - \`_deps.json\` - Full dependency manifest (JSON format, omitted with --silent)
 
             ### Downloads
             - **dmmdeps.zip** (~2 MB compressed, ~57 MB extracted) - Lightweight version with DLLs. Requires [.NET 9 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0/runtime)
@@ -109,7 +112,20 @@ jobs:
             \`\`\`
             dmmdeps.exe "C:\\Path\\To\\YourMod.esm"
             \`\`\`
-            Creates \`YourMod.achlist\` and \`YourMod_deps.csv\` in the same folder.
+            Creates \`YourMod.achlist\`, \`YourMod.achlist_warn\`, \`YourMod.achlist_discard\`, \`YourMod_deps.csv\`, and \`YourMod_deps.json\` in the same folder.
+
+            ### Understanding the Output Files
+
+            **Main Files:**
+            - **\`.achlist\`** - Your primary asset list. These are verified files that exist on disk and should be included in your mod package.
+
+            **Review Files:**
+            - **\`.achlist_warn\`** - Files found in parent game archives (e.g., Starfield.esm's BA2 files). These may be legitimate dependencies or false positives from the NIF decoder. Review these to decide if they should be included in your mod.
+            - **\`.achlist_discard\`** - High-probability false positives from NIF decoding. These are typically non-existent artifact paths that can be safely ignored.
+
+            **Detailed Manifests:**
+            - **\`_deps.csv\`** - Spreadsheet with all discovered dependencies, including PC/Xbox paths, asset types, and discovery sources.
+            - **\`_deps.json\`** - Full JSON manifest with metadata (omitted when using --silent).
 
             ### Command-Line Options
             \`\`\`
@@ -123,7 +139,9 @@ jobs:
               --test                Write .achlist.test instead of .achlist
               --quiet               Suppress skipped-file messages
               --silent              Suppress all output except start/completion
-              --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf which would not otherwise be detectable.)
+              --verbose             Emit detailed diagnostics for ignored/missing files
+              --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf)
+              --rebuildcache        Force rebuild of parent archive cache (rarely needed; auto-detects changes by default)
             \`\`\`
 
             ### Examples
@@ -141,6 +159,8 @@ jobs:
             \`\`\`
             dmmdeps.exe MyMod.esm --silent
             \`\`\`
+
+            **Note:** The tool automatically detects changes to parent game archives (.ba2 files) and rebuilds its cache when needed. The \`--rebuildcache\` option is available for troubleshooting but should rarely be necessary.
 
             ### Performance
             Sub-second execution for ~5000 files. No directory walking - deterministic asset discovery based on plugin content.
