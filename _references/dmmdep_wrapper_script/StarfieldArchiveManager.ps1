@@ -1324,10 +1324,14 @@ function Invoke-Backup {
         New-Item -ItemType Directory -Force -Path $looseXboxDataRoot | Out-Null
         New-Item -ItemType Directory -Force -Path $loosePs5DataRoot | Out-Null
 
-        # base mod files (.esm/.esp/.ba2/.txt/.achlist)
+        # base mod files (.esm/.esp/.ba2/.txt/.achlist/.achlist_warn/.achlist_discard)
         $basePath = $DataRoot
         Get-ChildItem -Path $basePath -Filter "$modName*" -Recurse -File |
-            Where-Object { $_.Extension -in '.esm', '.esp', '.ba2', '.txt', '.achlist' } |
+            Where-Object { 
+                $_.Extension -in '.esm', '.esp', '.ba2', '.txt', '.achlist' -or
+                $_.Name -like "*_warn" -or 
+                $_.Name -like "*_discard"
+            } |
             ForEach-Object {
                 $src = $_.FullName
                 $dst = Join-Path $modBackupRoot $_.Name
