@@ -30,39 +30,41 @@ jobs:
 
       - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release --no-self-contained /p:PublishSingleFile=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:AssemblyName=dmmdeps /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
-          # Use SkipNestedPublish=true to prevent the nested PublishOnBuild target from running and causing assembly name ambiguity in CI restore.
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release /p:SelfContained=false /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
+          # Framework-dependent build includes exe + required DLLs (not single file due to project references)
       - name: Publish self-contained single-file (fat) build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:AssemblyName=dmmdeps_fat /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} /p:SelfContained=true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
           # Use SkipNestedPublish=true to prevent nested target conflicts during CI publish.
 
       - name: Normalize names and prepare zips
         shell: pwsh
         run: |
           mkdir out\zips -ErrorAction SilentlyContinue
-          
-          # Framework-dependent build - already named dmmdeps.exe
-          $d1 = Get-ChildItem -Path out\dmmdeps -Filter dmmdeps.exe -File | Select-Object -First 1
+
+          # Framework-dependent build - find exe and rename it
+          $d1 = Get-ChildItem -Path out\dmmdeps -Filter DMM.Standalone.DependencyChecker.exe -File | Select-Object -First 1
           if ($null -eq $d1) { 
-            Write-Error "Framework-dependent dmmdeps.exe not found in out\dmmdeps"
+            Write-Error "Framework-dependent DMM.Standalone.DependencyChecker.exe not found in out\dmmdeps"
             Get-ChildItem -Path out\dmmdeps
             exit 1 
           }
-          
-          # Self-contained build - needs renaming from dmmdeps_fat.exe to dmmdeps-fat.exe
-          $d2 = Get-ChildItem -Path out\dmmdeps-fat -Filter dmmdeps_fat.exe -File | Select-Object -First 1
+          # Rename the exe to dmmdeps.exe
+          Rename-Item $d1.FullName -NewName "dmmdeps.exe" -Force
+
+          # Self-contained build - needs renaming from DMM.Standalone.DependencyChecker.exe to dmmdeps-fat.exe
+          $d2 = Get-ChildItem -Path out\dmmdeps-fat -Filter DMM.Standalone.DependencyChecker.exe -File | Select-Object -First 1
           if ($null -eq $d2) { 
-            Write-Error "Self-contained dmmdeps_fat.exe not found in out\dmmdeps-fat"
+            Write-Error "Self-contained DMM.Standalone.DependencyChecker.exe not found in out\dmmdeps-fat"
             Get-ChildItem -Path out\dmmdeps-fat
             exit 1 
           }
-          Copy-Item $d2.FullName out\dmmdeps-fat\dmmdeps-fat.exe -Force
-          
-          # Create zips
-          Compress-Archive -Path $d1.FullName -DestinationPath out\zips\dmmdeps.zip -Force
+          Rename-Item $d2.FullName -NewName "dmmdeps-fat.exe" -Force
+
+          # Create zips - include all files for framework-dependent
+          Compress-Archive -Path out\dmmdeps\* -DestinationPath out\zips\dmmdeps.zip -Force
           Compress-Archive -Path out\dmmdeps-fat\dmmdeps-fat.exe -DestinationPath out\zips\dmmdeps-fat.zip -Force
-          
+
           # Verify zips
           Write-Host "Created zips:"
           Get-ChildItem out\zips
@@ -100,8 +102,8 @@ jobs:
             - \`_deps.csv\` - Detailed spreadsheet with file paths, asset types, and discovery sources
 
             ### Downloads
-            - **dmmdeps.zip** (~186 KB) - Requires [.NET 9 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0/runtime)
-            - **dmmdeps-fat.zip** (~60 MB) - Includes .NET 9, no dependencies
+            - **dmmdeps.zip** (~2 MB compressed, ~57 MB extracted) - Lightweight version with DLLs. Requires [.NET 9 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0/runtime)
+            - **dmmdeps-fat.zip** (~13 MB) - Self-contained single file. Includes .NET 9, no dependencies
 
             ### Basic Usage
             \`\`\`

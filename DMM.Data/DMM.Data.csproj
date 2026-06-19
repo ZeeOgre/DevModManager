@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;FullRelease</Configurations>
+    <!-- Prevent this library from being treated as executable during publish -->
+    <IsPublishable>false</IsPublishable>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>

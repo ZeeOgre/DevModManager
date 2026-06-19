@@ -26,10 +26,11 @@
 	  <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
 	</ItemGroup>
 
-	<!-- Framework-dependent (slim) defaults when that configuration is selected -->
+	<!-- Framework-dependent (slim defaults when that configuration is selected -->
 	<PropertyGroup Condition="'$(Configuration)' == 'PublishFrameworkDependent'">
-		<PublishSingleFile>true</PublishSingleFile>
-		<!-- Trimming is NOT supported for framework-dependent single-file bundles -->
+		<SelfContained>false</SelfContained>
+		<!-- Cannot use PublishSingleFile with project references in framework-dependent mode -->
+		<PublishSingleFile>false</PublishSingleFile>
 		<PublishTrimmed>false</PublishTrimmed>
 		<DebugType>None</DebugType>
 		<IncludeSymbols>false</IncludeSymbols>
@@ -37,6 +38,7 @@
 
 	<!-- Self-contained (fat) defaults when that configuration is selected -->
 	<PropertyGroup Condition="'$(Configuration)' == 'PublishSelfContained'">
+		<SelfContained>true</SelfContained>
 		<PublishSingleFile>true</PublishSingleFile>
 		<PublishTrimmed>true</PublishTrimmed>
 		<DebugType>None</DebugType>
@@ -55,21 +57,26 @@
 		<!-- Create distribution directory if it doesn't exist -->
 		<MakeDir Directories="$(DistributionDir)" Condition="!Exists('$(DistributionDir)')" />
 		
-		<!-- Framework-dependent (single exe, user must have .NET installed) - SLIM VERSION -->
-		<!-- Note: Removed -r win-x64 flag to avoid NETSDK1151 error with referenced projects -->
-		<Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c Release --no-self-contained -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:EnableLocalReleaseTrigger=false -p:SkipNestedPublish=true -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
+		<!-- Framework-dependent (slim) - includes all DLLs but not .NET runtime -->
+		<!-- Note: Cannot use PublishSingleFile with project references in framework-dependent mode -->
+		<Exec Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c Release /p:SelfContained=false /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableLocalReleaseTrigger=false /p:SkipNestedPublish=true -o &quot;$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64&quot;" />
 
 		<!-- Self-contained (single exe with runtime included) - FAT VERSION -->
-		<Exec Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:DebugType=None -p:IncludeSymbols=false -p:OutputType=Exe -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true -p:EnableLocalReleaseTrigger=false -p:SkipNestedPublish=true -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
+		<Exec Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c Release -r win-x64 /p:SelfContained=true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:EnableLocalReleaseTrigger=false /p:SkipNestedPublish=true -o &quot;$(MSBuildProjectDirectory)\publish\self-contained\win-x64&quot;" />
 
 		<!-- Copy published executables to distribution directory -->
-		<Copy Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" SourceFiles="$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64\DMM.Standalone.DependencyChecker.exe" DestinationFiles="$(DistributionDir)\dmmdeps.exe" SkipUnchangedFiles="true" />
+		<!-- Framework-dependent: copy all files (exe + dlls) -->
+		<ItemGroup Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'">
+			<FrameworkDependentFiles Include="$(MSBuildProjectDirectory)\publish\framework-dependent\win-x64\**\*.*" />
+		</ItemGroup>
+		<Copy Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" SourceFiles="@(FrameworkDependentFiles)" DestinationFolder="$(DistributionDir)\dmmdeps" SkipUnchangedFiles="true" />
 
+		<!-- Self-contained: copy single executable and rename -->
 		<Copy Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" SourceFiles="$(MSBuildProjectDirectory)\publish\self-contained\win-x64\DMM.Standalone.DependencyChecker.exe" DestinationFiles="$(DistributionDir)\dmmdeps_fat.exe" SkipUnchangedFiles="true" />
 
-		<Message Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Text="Published dmmdeps.exe (framework-dependent, ~10MB, requires .NET 9) to $(DistributionDir)" Importance="high" />
+		<Message Condition="'$(Configuration)' == 'PublishFrameworkDependent' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Text="Published dmmdeps (framework-dependent, ~2MB with DLLs, requires .NET 9) to $(DistributionDir)\dmmdeps" Importance="high" />
 
-		<Message Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Text="Published dmmdeps_fat.exe (self-contained, ~64MB, includes .NET 9) to $(DistributionDir)" Importance="high" />
+		<Message Condition="'$(Configuration)' == 'PublishSelfContained' OR '$(Configuration)' == 'Publish' OR '$(Configuration)' == 'FullRelease'" Text="Published dmmdeps_fat.exe (self-contained, ~13MB, includes .NET 9) to $(DistributionDir)" Importance="high" />
 	</Target>
 
 	<Target Name="DumpPublishProps" BeforeTargets="Publish">
