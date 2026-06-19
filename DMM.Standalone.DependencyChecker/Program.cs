@@ -415,16 +415,28 @@ namespace DmmDep
 
                 // Terrain backup-only folder Data\terrain\<modname>\**
                 // If BTD files exist, include the entire mod terrain folder tree
+                if (btdNames.Any())
+                {
+                    Log.Info($"[1b] Found {btdNames.Count} BTD file(s): {string.Join(", ", btdNames)}");
+                }
+
                 string modTerrainFolder = Path.Combine(gameRoot, "Data", "terrain", pluginName);
                 if (Directory.Exists(modTerrainFolder))
                 {
-                    Log.Info("[1b] Adding terrain backup folder (entire mod terrain tree)...");
+                    Log.Info($"[1b] Adding terrain backup folder (entire mod terrain tree): {modTerrainFolder}");
+                    int terrainFileCount = 0;
                     foreach (var f in Directory.EnumerateFiles(modTerrainFolder, "*.*", SearchOption.AllDirectories))
                     {
                         string rel = "Data\\" + GetRelativePath(Path.Combine(gameRoot, "Data"), f);
                         rel = NormalizeRel(rel);
                         AddBackupOnlyFile(manifest, rel, "terrain-folder");
+                        terrainFileCount++;
                     }
+                    Log.Info($"[1b] Added {terrainFileCount} terrain file(s) from {modTerrainFolder}");
+                }
+                else if (btdNames.Any())
+                {
+                    Log.Warn($"[1b] BTD files found but terrain folder does not exist: {modTerrainFolder}");
                 }
 
                 // OverlayMasks from .btd -> Textures\Terrain\OverlayMasks\<name>.dds + TIF
