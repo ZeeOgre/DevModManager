@@ -329,6 +329,18 @@ if ($revRes.ExitCode -eq 0) {
             } else {
                 "Created tag $Tag" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
+                # Push the commit first (if this was an auto-bump)
+                if ($commitSha) {
+                    "Attempting to push commit $commitSha to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                    $pushCommitRes = Run-Git "push" "origin" "HEAD"
+                    if ($pushCommitRes.ExitCode -ne 0) {
+                        "Push commit failed (attempt $attempt). ExitCode: $($pushCommitRes.ExitCode). StdErr: $($pushCommitRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                        # Don't fail here - tag push might still work
+                    } else {
+                        "Pushed commit $commitSha to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                    }
+                }
+
                 # Push tag to origin (robust handling)
                 "Attempting to push tag $Tag to origin" | Out-File -FilePath $dbgFile -Append -Encoding utf8
                 $pushRes = Run-Git "push" "origin" "refs/tags/$Tag"
