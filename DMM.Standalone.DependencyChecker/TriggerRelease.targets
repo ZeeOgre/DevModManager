@@ -1,12 +1,22 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <!-- treat common CI env variables as CI -->
+    <IsCI Condition="'$(IsCI)' == '' and '$(GITHUB_ACTIONS)' == 'true'">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == '' and '$(CI)' == 'true'">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == '' and '$(TF_BUILD)' != ''">true</IsCI>
+    <IsCI Condition="'$(IsCI)' == ''">false</IsCI>
+
     <!-- Default: disabled. Set /p:TriggerGitHubRelease=true to enable in a build -->
     <TriggerGitHubRelease Condition="'$(TriggerGitHubRelease)' == ''">false</TriggerGitHubRelease>
   </PropertyGroup>
 
-  <Target Name="TriggerGitHubRelease" AfterTargets="Build"
-          Condition="'$(Configuration)' == 'FullRelease' and '$(TriggerGitHubRelease)' == 'true'">
-    <Message Text="TriggerGitHubRelease=true — running: $(MSBuildProjectDirectory)\..\scripts\push-tag.ps1 -AutoCommit" Importance="high" />
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1' -AutoCommit&quot;" />
+  <Target Name="TriggerGitHubRelease"
+          AfterTargets="Build"
+          Condition="'$(Configuration)' == 'FullRelease'
+                     and '$(TriggerGitHubRelease)' == 'true'
+                     and '$(IsCI)' != 'true'">
+    <Message Importance="High" Text="DMM.Standalone.DependencyChecker FullRelease — triggering tag/release automation" />
+    <Message Importance="Normal" Text="Configuration=$(Configuration); TriggerGitHubRelease=$(TriggerGitHubRelease); IsCI=$(IsCI)" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; '$(MSBuildProjectDirectory)\..\scripts\push-tag.ps1' -AutoCommit -RepoRoot '$(MSBuildProjectDirectory)\..\'&quot;" />
   </Target>
 </Project>
