@@ -103,14 +103,16 @@ dotnet publish DMM.Standalone.DependencyChecker\DMM.Standalone.DependencyChecker
 ### DMM.Standalone.DependencyChecker.csproj
 - Removed `PublishSingleFile=true` from framework-dependent publish command
 - Added explicit `SelfContained=false` to framework-dependent configuration
+- **Removed `/p:OutputType=Exe` parameter from publish commands** - this was overriding the library projects' `OutputType=Library` setting
 - Updated copy task to copy all files for framework-dependent build
 - Updated size estimates in messages
 
 ### Library Projects (DMM.Core, DMM.AssetManagers, DMM.Data)
 - Added `<IsPublishable>false</IsPublishable>` to prevent them from being treated as executables
+- **Added `<OutputType>Library</OutputType>` to explicitly mark them as libraries** - critical for preventing CS5001 errors during publish
 
 ### .github/workflows/publish.yml
-- Removed `AssemblyName` parameter from framework-dependent publish
+- **Removed `/p:OutputType=Exe` parameter from both publish commands** - this was causing library projects to be built as executables
 - Removed `--no-self-contained` and `-r` flags from framework-dependent build
 - Updated normalization step to handle multi-file framework-dependent output
 - Updated release notes to reflect actual sizes

@@ -30,11 +30,11 @@ jobs:
 
       - name: Publish framework-dependent build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release /p:SelfContained=false /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release /p:SelfContained=false /p:DebugType=None /p:IncludeSymbols=false /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps
           # Framework-dependent build includes exe + required DLLs (not single file due to project references)
       - name: Publish self-contained single-file (fat) build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} /p:SelfContained=true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} /p:SelfContained=true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
           # Use SkipNestedPublish=true to prevent nested target conflicts during CI publish.
 
       - name: Normalize names and prepare zips
