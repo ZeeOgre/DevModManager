@@ -31,6 +31,48 @@ if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true' -or -not [string]::IsN
     exit 0
 }
 
+# Prevent concurrent runs with a lock file (use a short-lived lock to avoid stale locks)
+$lockFile = Join-Path -Path $rootPath -ChildPath ".push-tag.lock"
+$lockTimeout = 30 # seconds
+$lockWaitStart = Get-Date
+
+while (Test-Path $lockFile) {
+    $elapsed = ((Get-Date) - $lockWaitStart).TotalSeconds
+    if ($elapsed -gt $lockTimeout) {
+        Write-Host "Lock file timeout exceeded; assuming stale lock and proceeding"
+        "Lock file timeout; removing stale lock" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+        Remove-Item $lockFile -Force -ErrorAction SilentlyContinue
+        break
+    }
+    Write-Host "Waiting for lock file to be released..."
+    "Waiting for lock file" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    Start-Sleep -Milliseconds 500
+}
+
+# Create lock file
+try {
+    "$(Get-Date)|$PID" | Out-File -FilePath $lockFile -Encoding utf8
+    "Created lock file" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+} catch {
+    Write-Host "Failed to create lock file: $_"
+    "Failed to create lock file: $_" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    exit 0
+}
+
+# Cleanup function to remove lock file
+function Remove-LockFile {
+    if (Test-Path $lockFile) {
+        Remove-Item $lockFile -Force -ErrorAction SilentlyContinue
+        "Removed lock file" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+    }
+}
+
+# Ensure lock is removed on script exit (even if error occurs)
+trap {
+    Remove-LockFile
+    throw
+}
+
 function Run-Git {
     param(
         [Parameter(ValueFromRemainingArguments = $true)]
@@ -467,4 +509,8 @@ if (-not $TagCreated) {
 
 "---- push-tag debug end: $(Get-Date) ----" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
+# Clean up lock file before exit
+Remove-LockFile
+
+exit 0
 exit 0
