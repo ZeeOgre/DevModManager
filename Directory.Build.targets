@@ -15,7 +15,7 @@
           Condition="'$(EnableLocalReleaseTrigger)' == 'true'
                      and '$(IsCI)' != 'true'
                      and '$(Configuration)' == 'FullRelease'
-                     and '$(TriggerGitHubRelease)' != 'true'">
+                     and '$(TriggerGitHubRelease)' == 'true'">
     <!-- Diagnostic: show who triggered and key properties -->
     <Message Importance="High" Text="Local FullRelease build — running directory-level release trigger for project: $(MSBuildProjectName)" />
     <Message Importance="Normal" Text="Properties: Configuration=$(Configuration); IsCI=$(IsCI); EnableLocalReleaseTrigger=$(EnableLocalReleaseTrigger); TriggerGitHubRelease=$(TriggerGitHubRelease)" />
