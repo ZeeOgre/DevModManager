@@ -385,8 +385,6 @@ FodyWeavers.xsd
 
 # push-tag debug logs created by scripts/push-tag.ps1
 push-tag-debug-*.log
-# push-tag lock file
-.push-tag.lock
 # per-project push-tag log
 DMM.Standalone.DependencyChecker/push-tag.log
 
