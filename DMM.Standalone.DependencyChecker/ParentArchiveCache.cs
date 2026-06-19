@@ -26,7 +26,13 @@ internal static class ParentArchiveCache
     /// <summary>
     /// Get the cached parent archive index, or build/update it if stale.
     /// </summary>
-    public static Dictionary<string, string> GetOrBuildIndex(string gameRoot, Action<string>? logger = null)
+    /// <param name="gameRoot">Game installation root directory</param>
+    /// <param name="masterNames">Optional list of master plugin names (e.g., "DebugMenuFramework.esm") to include their BA2 archives</param>
+    /// <param name="logger">Optional logging callback</param>
+    public static Dictionary<string, string> GetOrBuildIndex(
+        string gameRoot,
+        IEnumerable<string>? masterNames = null,
+        Action<string>? logger = null)
     {
         logger ??= _ => { };
 
@@ -34,7 +40,7 @@ internal static class ParentArchiveCache
         logger($"[Cache] DB path: {CacheDbPath}");
         EnsureSchema();
 
-        var parentArchives = DiscoverParentArchives(gameRoot);
+        var parentArchives = DiscoverParentArchives(gameRoot, masterNames, logger);
         logger($"[Cache] Found {parentArchives.Count} parent archives in game root");
 
         // DEBUG: Log ContentResources.zip specifically
@@ -128,24 +134,51 @@ internal static class ParentArchiveCache
     }
 
     /// <summary>
-    /// Discover all BA2 archives in the game root Data directory plus ContentResources.zip.
+    /// Discover all BA2 archives in the game root Data directory plus ContentResources.zip,
+    /// plus any BA2 archives for master plugins.
     /// </summary>
-    private static List<FileInfo> DiscoverParentArchives(string gameRoot)
+    private static List<FileInfo> DiscoverParentArchives(
+        string gameRoot,
+        IEnumerable<string>? masterNames,
+        Action<string> logger)
     {
         var archives = new List<FileInfo>();
 
-        // 1. BA2 archives in Data directory
+        // 1. BA2 archives in Data directory (base game only)
         var dataDir = Path.Combine(gameRoot, "Data");
         if (Directory.Exists(dataDir))
         {
             archives.AddRange(
                 Directory.GetFiles(dataDir, "*.ba2", SearchOption.TopDirectoryOnly)
-                    .Where(p => !IsModArchive(p))
+                    .Where(p => IsBaseGameArchive(p))
                     .Select(p => new FileInfo(p))
             );
         }
 
-        // 2. ContentResources.zip (canonical source of all CK-distributed files)
+        // 2. Master plugin archives (e.g., "DebugMenuFramework*.ba2")
+        if (masterNames != null && Directory.Exists(dataDir))
+        {
+            foreach (var masterFile in masterNames)
+            {
+                if (string.IsNullOrWhiteSpace(masterFile))
+                    continue;
+
+                var baseName = Path.GetFileNameWithoutExtension(masterFile);
+                if (string.IsNullOrWhiteSpace(baseName))
+                    continue;
+
+                var pattern = $"{baseName}*.ba2";
+                var masterArchives = Directory.GetFiles(dataDir, pattern, SearchOption.TopDirectoryOnly);
+
+                if (masterArchives.Length > 0)
+                {
+                    logger($"[Cache]   Found {masterArchives.Length} archive(s) for master '{masterFile}': {pattern}");
+                    archives.AddRange(masterArchives.Select(p => new FileInfo(p)));
+                }
+            }
+        }
+
+        // 3. ContentResources.zip (canonical source of all CK-distributed files)
         var contentResourcesPath = Path.Combine(gameRoot, "Tools", "ContentResources.zip");
         if (File.Exists(contentResourcesPath))
         {
@@ -156,13 +189,13 @@ internal static class ParentArchiveCache
     }
 
     /// <summary>
-    /// Heuristic to exclude mod archives from parent archive scanning.
+    /// Heuristic to identify base game archives.
+    /// For Starfield, base game archives typically start with "Starfield".
     /// </summary>
-    private static bool IsModArchive(string ba2Path)
+    private static bool IsBaseGameArchive(string ba2Path)
     {
         var name = Path.GetFileNameWithoutExtension(ba2Path);
-        // For Starfield, base game archives typically start with "Starfield"
-        return !name.StartsWith("Starfield", StringComparison.OrdinalIgnoreCase);
+        return name.StartsWith("Starfield", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -396,5 +429,69 @@ internal static class ParentArchiveCache
 
         Console.WriteLine($"[ZIP] Total entries: {totalEntries}, Dirs skipped: {skippedDirs}, Files: {entries.Count}");
         return entries;
+    }
+
+    /// <summary>
+    /// Parse the TES4 header of a plugin file and extract master plugin names from MAST subrecords.
+    /// </summary>
+    public static List<string> ParsePluginMasters(string pluginPath)
+    {
+        var masters = new List<string>();
+
+        if (!File.Exists(pluginPath))
+            return masters;
+
+        try
+        {
+            using var stream = File.OpenRead(pluginPath);
+            using var reader = new BinaryReader(stream);
+
+            // Read TES4 record type (4 bytes)
+            var recordType = new string(reader.ReadChars(4));
+            if (recordType != "TES4")
+                return masters; // Not a valid plugin
+
+            // Skip record size (4 bytes) and flags (4 bytes)
+            reader.ReadUInt32();
+            reader.ReadUInt32();
+
+            // Read form ID (4 bytes) and version control (4 bytes)
+            reader.ReadUInt32();
+            reader.ReadUInt32();
+
+            // Read TES4 data size (4 bytes) to know when to stop
+            var tes4DataSize = reader.ReadUInt32();
+            var tes4EndPos = stream.Position + tes4DataSize;
+
+            // Scan subrecords until we reach the end of TES4
+            while (stream.Position < tes4EndPos)
+            {
+                // Read subrecord type (4 bytes)
+                var subType = new string(reader.ReadChars(4));
+                var subSize = reader.ReadUInt16();
+
+                if (subType == "MAST")
+                {
+                    // MAST contains a null-terminated string with the master filename
+                    var masterBytes = reader.ReadBytes(subSize);
+                    var masterName = System.Text.Encoding.UTF8.GetString(masterBytes).TrimEnd('\0');
+                    if (!string.IsNullOrWhiteSpace(masterName))
+                    {
+                        masters.Add(masterName);
+                    }
+                }
+                else
+                {
+                    // Skip this subrecord
+                    stream.Seek(subSize, SeekOrigin.Current);
+                }
+            }
+        }
+        catch
+        {
+            // If parsing fails, just return empty list
+        }
+
+        return masters;
     }
 }

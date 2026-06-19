@@ -743,6 +743,18 @@ namespace DmmDep
 
                 // ---- 7. Check for parent archive matches using cached index ----
                 Log.Info("[7] Loading parent archive index (cached)...");
+
+                // Parse master plugins from the plugin file
+                var masterPlugins = ParentArchiveCache.ParsePluginMasters(pluginPath);
+                if (masterPlugins.Count > 0)
+                {
+                    Log.Info($"[7] Found {masterPlugins.Count} master plugin(s): {string.Join(", ", masterPlugins)}");
+                }
+                else
+                {
+                    Log.Info("[7] No master plugins found");
+                }
+
                 if (options.RebuildCache)
                 {
                     Log.Info("[7] --rebuildcache: Clearing existing cache...");
@@ -750,6 +762,7 @@ namespace DmmDep
                 }
                 var parentArchiveIndex = ParentArchiveCache.GetOrBuildIndex(
                     gameRoot,
+                    masterPlugins,
                     msg => Log.Info(msg)
                 );
                 Log.Info($"[7] Parent archive index loaded: {parentArchiveIndex.Count} files indexed");
