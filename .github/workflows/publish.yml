@@ -180,7 +180,7 @@ jobs:
             **Subsequent runs (cached):** ~3 seconds for ~5000 files  
             **Cache size:** ~550 MB (base game + Creation Kit ContentResources), ~650 MB with expansions and common master dependencies
 
-            The cache is stored at `%LOCALAPPDATA%\ZeeOgre\dmmdeps\parentfile_cache.db` and uses a composite-key SQLite schema to preserve duplicate file paths across multiple archives without collision.
+            The cache is stored at \`%LOCALAPPDATA%\\ZeeOgre\\dmmdeps\\parentfile_cache.db\` and uses a composite-key SQLite schema to preserve duplicate file paths across multiple archives without collision.
 
             No directory walking required - deterministic asset discovery based on plugin content.
 
