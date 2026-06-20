@@ -361,7 +361,7 @@ internal static class ParentArchiveCache
                 parameters.Add($"@archive{i}");
             }
 
-            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE archive_name IN ({string.Join(", ", parameters)}) COLLATE NOCASE";
+            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE archive_name COLLATE NOCASE IN ({string.Join(", ", parameters)})";
 
             int paramIndex = 0;
             foreach (var archiveName in allowedArchiveNames)
