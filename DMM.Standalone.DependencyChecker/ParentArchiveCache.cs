@@ -419,6 +419,16 @@ internal static class ParentArchiveCache
                 }
                 var filteredCount = (long)testCmd.ExecuteScalar()!;
                 Console.WriteLine($"[LoadFileIndex-DEBUG] Files matching filter: {filteredCount}");
+
+                // DEBUG: Show a sample of ContentResources.zip material paths from the DB
+                testCmd.CommandText = "SELECT file_path FROM files WHERE archive_name = 'ContentResources.zip' AND file_path LIKE '%modela_civilian%' LIMIT 5";
+                testCmd.Parameters.Clear();
+                using var dbReader = testCmd.ExecuteReader();
+                Console.WriteLine($"[LoadFileIndex-DEBUG] Sample ContentResources.zip ModelA paths in DB:");
+                while (dbReader.Read())
+                {
+                    Console.WriteLine($"[LoadFileIndex-DEBUG]   {dbReader.GetString(0)}");
+                }
             }
         }
         else
