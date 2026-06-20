@@ -67,6 +67,22 @@ internal static class ParentArchiveCache
 
         using var conn = OpenConnection();
 
+        // DEBUG: Count total files in cache before filtering
+        using (var countCmd = conn.CreateCommand())
+        {
+            countCmd.CommandText = "SELECT COUNT(*) FROM files";
+            var totalFiles = (long)countCmd.ExecuteScalar()!;
+            logger($"[Cache-DEBUG] Total files in cache (before filter): {totalFiles}");
+
+            countCmd.CommandText = "SELECT archive_name, COUNT(*) as cnt FROM files GROUP BY archive_name ORDER BY cnt DESC LIMIT 10";
+            using var reader = countCmd.ExecuteReader();
+            logger($"[Cache-DEBUG] Top archives in cache:");
+            while (reader.Read())
+            {
+                logger($"[Cache-DEBUG]   {reader.GetString(0)}: {reader.GetInt64(1)} files");
+            }
+        }
+
         // Check which archives need scanning
         var staleArchives = FindStaleArchives(conn, parentArchives, logger);
 
@@ -372,9 +388,8 @@ internal static class ParentArchiveCache
             }
 
             // Note: file_path is already lowercase in the cache, and we compare lowercase in Program.cs.
-            // Use a subquery with UNION ALL to force case-insensitive archive name matching.
-            var inClause = string.Join(" OR ", parameters.Select((p, i) => $"LOWER(archive_name) = LOWER({p})"));
-            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE {inClause}";
+            // archive_name has COLLATE NOCASE in schema, so IN clause will be case-insensitive.
+            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE archive_name IN ({string.Join(", ", parameters)})";
 
             int paramIndex = 0;
             foreach (var archiveName in allowedArchiveNames)
