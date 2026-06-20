@@ -796,19 +796,21 @@ namespace DmmDep
 
                         if (parentArchiveIndex.ContainsKey(normalizedPath))
                         {
+                            string archiveName = parentArchiveIndex[normalizedPath];
+
                             // Update kind to ParentMatch
                             file.Kind = FileKind.ParentMatch.ToString().ToLowerInvariant();
-                            file.Source = $"parent-archive:{parentArchiveIndex[normalizedPath]}";
+                            file.Source = $"parent-archive:{archiveName}";
                             parentMatchCount++;
 
                             if (sampleMatches.Count < 10)
                             {
-                                sampleMatches.Add($"{file.PcPath} -> {parentArchiveIndex[normalizedPath]}");
+                                sampleMatches.Add($"{file.PcPath} -> {archiveName}");
                             }
 
                             if (s_verbose)
                             {
-                                Log.Info($"[7]   ParentMatch: {file.PcPath} -> {parentArchiveIndex[normalizedPath]}");
+                                Log.Info($"[7]   ParentMatch: {file.PcPath} -> {archiveName}");
                             }
                         }
                         else if (sampleMisses.Count < 10)

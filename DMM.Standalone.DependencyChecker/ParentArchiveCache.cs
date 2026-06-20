@@ -25,6 +25,7 @@ internal static class ParentArchiveCache
 
     /// <summary>
     /// Get the cached parent archive index, or build/update it if stale.
+    /// Returns only files from allowed archives (base game, ContentResources, and specified masters).
     /// </summary>
     /// <param name="gameRoot">Game installation root directory</param>
     /// <param name="masterNames">Optional list of master plugin names (e.g., "DebugMenuFramework.esm") to include their BA2 archives</param>
@@ -42,6 +43,16 @@ internal static class ParentArchiveCache
 
         var parentArchives = DiscoverParentArchives(gameRoot, masterNames, logger);
         logger($"[Cache] Found {parentArchives.Count} parent archives in game root");
+
+        // Build list of allowed archive names (base game + ContentResources + masters only)
+        var allowedArchiveNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var archive in parentArchives)
+        {
+            allowedArchiveNames.Add(archive.Name);
+        }
+
+        logger($"[Cache] Allowed archives for lookup: {string.Join(", ", allowedArchiveNames)}");
 
         // DEBUG: Log ContentResources.zip specifically
         var contentResources = parentArchives.FirstOrDefault(a => a.Name.Equals("ContentResources.zip", StringComparison.OrdinalIgnoreCase));
@@ -72,9 +83,9 @@ internal static class ParentArchiveCache
             logger("[Cache] All archives are up to date");
         }
 
-        // Load the complete index
-        var index = LoadFileIndex(conn);
-        logger($"[Cache] Loaded {index.Count} files from cache");
+        // Load the index, but only for allowed archives
+        var index = LoadFileIndex(conn, allowedArchiveNames);
+        logger($"[Cache] Loaded {index.Count} files from allowed parent archives");
 
         return index;
     }
@@ -331,14 +342,39 @@ internal static class ParentArchiveCache
     }
 
     /// <summary>
-    /// Load the complete file index from the cache.
+    /// Load the file index from the cache, filtered to only include files from allowed archives.
     /// </summary>
-    private static Dictionary<string, string> LoadFileIndex(SqliteConnection conn)
+    /// <param name="conn">Open SQLite connection</param>
+    /// <param name="allowedArchiveNames">Optional set of archive names to include. If null, includes all archives.</param>
+    private static Dictionary<string, string> LoadFileIndex(SqliteConnection conn, HashSet<string>? allowedArchiveNames = null)
     {
         var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT file_path, archive_name FROM files";
+
+        if (allowedArchiveNames != null && allowedArchiveNames.Count > 0)
+        {
+            // Build a parameterized IN clause
+            var parameters = new List<string>();
+            for (int i = 0; i < allowedArchiveNames.Count; i++)
+            {
+                parameters.Add($"@archive{i}");
+            }
+
+            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE archive_name IN ({string.Join(", ", parameters)}) COLLATE NOCASE";
+
+            int paramIndex = 0;
+            foreach (var archiveName in allowedArchiveNames)
+            {
+                cmd.Parameters.AddWithValue($"@archive{paramIndex}", archiveName);
+                paramIndex++;
+            }
+        }
+        else
+        {
+            // No filter - return everything (legacy behavior)
+            cmd.CommandText = "SELECT file_path, archive_name FROM files";
+        }
 
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
