@@ -87,6 +87,16 @@ internal static class ParentArchiveCache
         var index = LoadFileIndex(conn, allowedArchiveNames);
         logger($"[Cache] Loaded {index.Count} files from allowed parent archives");
 
+        // DEBUG: Show which archives contributed files
+        if (index.Count > 0)
+        {
+            var archiveFileCounts = index.GroupBy(kvp => kvp.Value)
+                .Select(g => $"{g.Key}={g.Count()}")
+                .OrderByDescending(s => int.Parse(s.Split('=')[1]))
+                .Take(10);
+            logger($"[Cache] Top contributing archives: {string.Join(", ", archiveFileCounts)}");
+        }
+
         return index;
     }
 
@@ -361,7 +371,9 @@ internal static class ParentArchiveCache
                 parameters.Add($"@archive{i}");
             }
 
-            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE archive_name COLLATE NOCASE IN ({string.Join(", ", parameters)})";
+            // Note: file_path is already lowercase in the cache, and we compare lowercase in Program.cs,
+            // so COLLATE is not needed here. archive_name comparison is case-insensitive by design.
+            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE archive_name IN ({string.Join(", ", parameters)})";
 
             int paramIndex = 0;
             foreach (var archiveName in allowedArchiveNames)
