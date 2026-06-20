@@ -397,6 +397,23 @@ internal static class ParentArchiveCache
                 cmd.Parameters.AddWithValue($"@archive{paramIndex}", archiveName);
                 paramIndex++;
             }
+
+            // DEBUG: Test if ContentResources.zip files are actually being selected
+            using (var testCmd = conn.CreateCommand())
+            {
+                testCmd.CommandText = "SELECT COUNT(*) FROM files WHERE archive_name = @name";
+                testCmd.Parameters.AddWithValue("@name", "ContentResources.zip");
+                var crCount = (long)testCmd.ExecuteScalar()!;
+                Console.WriteLine($"[LoadFileIndex-DEBUG] ContentResources.zip files in DB: {crCount}");
+
+                testCmd.CommandText = $"SELECT COUNT(*) FROM files WHERE archive_name IN ({string.Join(", ", parameters)})";
+                for (int i = 0; i < allowedArchiveNames.Count; i++)
+                {
+                    testCmd.Parameters.AddWithValue($"@archive{i}", allowedArchiveNames.ElementAt(i));
+                }
+                var filteredCount = (long)testCmd.ExecuteScalar()!;
+                Console.WriteLine($"[LoadFileIndex-DEBUG] Files matching filter: {filteredCount}");
+            }
         }
         else
         {
