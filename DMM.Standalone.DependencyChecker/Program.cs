@@ -784,8 +784,17 @@ namespace DmmDep
                 var sampleMisses = new List<string>();
 
                 // DEBUG: Test a known parent archive file against manifest
-                bool testKeyExists = parentArchiveIndex.ContainsKey("Data\\meshes\\genesisplaceholder.txt".ToLowerInvariant());
+                bool testKeyExists = parentArchiveIndex.ContainsKey("data\\meshes\\genesisplaceholder.txt");
                 Log.Info($"[7-DEBUG] Test lookup of parent archive key 'data\\meshes\\genesisplaceholder.txt': {testKeyExists}");
+
+                // DEBUG: Test a specific material that should be in ContentResources
+                string testMatPath = "data\\materials\\actors\\modela\\modela_civilian_01\\yellow_variant\\modela_expedition_yellow_headbase.mat";
+                bool testMatExists = parentArchiveIndex.ContainsKey(testMatPath);
+                Log.Info($"[7-DEBUG] Test lookup of material 'data\\materials\\actors\\modela\\modela_civilian_01\\...': {testMatExists}");
+                if (testMatExists)
+                {
+                    Log.Info($"[7-DEBUG]   Found in archive: {parentArchiveIndex[testMatPath]}");
+                }
 
                 foreach (var file in manifest.Files.ToList())
                 {
@@ -821,7 +830,7 @@ namespace DmmDep
                         }
                         else if (sampleMisses.Count < 10)
                         {
-                            sampleMisses.Add(file.PcPath);
+                            sampleMisses.Add($"{file.PcPath} (normalized: {normalizedPath})");
                         }
                     }
                 }
