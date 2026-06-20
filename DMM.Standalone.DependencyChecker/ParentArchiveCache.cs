@@ -54,6 +54,12 @@ internal static class ParentArchiveCache
 
         logger($"[Cache] Allowed archives for lookup: {string.Join(", ", allowedArchiveNames)}");
 
+        // DEBUG: Show each archive name with quotes to reveal any whitespace issues
+        foreach (var name in allowedArchiveNames.Where(n => n.Contains("Content", StringComparison.OrdinalIgnoreCase)))
+        {
+            logger($"[Cache-DEBUG] Allowed archive (exact): '{name}' (length={name.Length})");
+        }
+
         // DEBUG: Log ContentResources.zip specifically
         var contentResources = parentArchives.FirstOrDefault(a => a.Name.Equals("ContentResources.zip", StringComparison.OrdinalIgnoreCase));
         if (contentResources != null)
