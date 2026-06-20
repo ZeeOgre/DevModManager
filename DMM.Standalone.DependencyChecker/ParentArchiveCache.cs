@@ -371,9 +371,10 @@ internal static class ParentArchiveCache
                 parameters.Add($"@archive{i}");
             }
 
-            // Note: file_path is already lowercase in the cache, and we compare lowercase in Program.cs,
-            // so COLLATE is not needed here. archive_name comparison is case-insensitive by design.
-            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE archive_name IN ({string.Join(", ", parameters)})";
+            // Note: file_path is already lowercase in the cache, and we compare lowercase in Program.cs.
+            // Use a subquery with UNION ALL to force case-insensitive archive name matching.
+            var inClause = string.Join(" OR ", parameters.Select((p, i) => $"LOWER(archive_name) = LOWER({p})"));
+            cmd.CommandText = $"SELECT file_path, archive_name FROM files WHERE {inClause}";
 
             int paramIndex = 0;
             foreach (var archiveName in allowedArchiveNames)

@@ -828,10 +828,19 @@ namespace DmmDep
 
                 Log.Info($"[7] Marked {parentMatchCount} files as parent archive matches");
 
-                if (s_verbose && sampleMatches.Count > 0)
+                if (sampleMatches.Count > 0)
                 {
                     Log.Info($"[7] Sample matches (first {sampleMatches.Count}):");
                     foreach (var m in sampleMatches)
+                    {
+                        Log.Info($"[7]   {m}");
+                    }
+                }
+
+                if (sampleMisses.Count > 0)
+                {
+                    Log.Info($"[7] Sample misses (first {sampleMisses.Count}):");
+                    foreach (var m in sampleMisses)
                     {
                         Log.Info($"[7]   {m}");
                     }
