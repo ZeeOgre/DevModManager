@@ -791,8 +791,14 @@ namespace DmmDep
                 {
                     if (file.Kind != "missing" && !file.Source.StartsWith("ignored-filenotfound:", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Check parent archive index for ALL file types
-                        string normalizedPath = file.PcPath.ToLowerInvariant();
+                        // Normalize path for parent archive lookup:
+                        // - Replace / with \
+                        // - Ensure Data\ prefix
+                        // - Lowercase for case-insensitive comparison
+                        string normalizedPath = file.PcPath.Replace('/', '\\').Trim('\\');
+                        if (!normalizedPath.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                            normalizedPath = "Data\\" + normalizedPath;
+                        normalizedPath = normalizedPath.ToLowerInvariant();
 
                         if (parentArchiveIndex.ContainsKey(normalizedPath))
                         {
