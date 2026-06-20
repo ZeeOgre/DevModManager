@@ -195,8 +195,20 @@ if ($exitCode -ne 0) {
 
 $status = ""
 if ($stdOut) { $status = $stdOut.Trim() }
-if ($status -and -not $Force) {
-    # If AutoCommit is requested, only allow if changed files are within an approved whitelist
+$hasUncommittedChanges = ($status -ne "")
+
+# Check if tag already exists (local) BEFORE committing anything
+$tagAlreadyExists = $false
+$revRes = Run-Git "rev-parse" "--verify" "refs/tags/$Tag"
+if ($revRes.ExitCode -eq 0) {
+    $tagAlreadyExists = $true
+    Write-Host "Tag $Tag already exists locally."
+    "Tag $Tag already exists locally" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+}
+
+# Handle uncommitted changes
+if ($hasUncommittedChanges -and -not $Force) {
+    # If AutoCommit is requested, validate changed files
     if ($AutoCommit) {
         # Extract changed paths from porcelain output
         $changed = @()
@@ -231,23 +243,30 @@ if ($status -and -not $Force) {
             exit 3
         }
 
-        # Stage and commit
-        "AutoCommit: staging changed files: $($changed -join ', ')" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-        $addRes = Run-Git "add" "--all"
-        if ($addRes.ExitCode -ne 0) {
-            Write-Error "git add failed: $($addRes.StdErr)"
-            "git add failed: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-            exit 3
+        # If tag exists, we'll bump version and commit everything together
+        # If tag doesn't exist, commit changes now so we can tag the current state
+        if (-not $tagAlreadyExists) {
+            # Stage and commit changes now
+            "AutoCommit: staging changed files: $($changed -join ', ')" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            $addRes = Run-Git "add" "--all"
+            if ($addRes.ExitCode -ne 0) {
+                Write-Error "git add failed: $($addRes.StdErr)"
+                "git add failed: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                exit 3
+            }
+            $commitMsg = "Auto-commit changes for FullRelease by push-tag.ps1"
+            $commitRes = Run-Git "commit" "-m" $commitMsg
+            if ($commitRes.ExitCode -ne 0) {
+                Write-Error "git commit failed: $($commitRes.StdErr)"
+                "git commit failed: $($commitRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                exit 3
+            }
+            "AutoCommit: commit created" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+            $hasUncommittedChanges = $false  # changes are now committed
+        } else {
+            # Tag exists - we'll bump version and commit everything together in the bump loop
+            "AutoCommit: deferring commit until after version bump (tag exists)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
         }
-        $commitMsg = "Auto-commit changes for FullRelease by push-tag.ps1"
-        $commitRes = Run-Git "commit" "-m" $commitMsg
-        if ($commitRes.ExitCode -ne 0) {
-            Write-Error "git commit failed: $($commitRes.StdErr)"
-            "git commit failed: $($commitRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-            exit 3
-        }
-        "AutoCommit: commit created" | Out-File -FilePath $dbgFile -Append -Encoding utf8
-
     } else {
         Write-Error "Working tree not clean. Commit or stash changes, or rerun with -Force.`nChanges:`n$status"
         "Working tree not clean. Changes:`n$status" | Out-File -FilePath $dbgFile -Append -Encoding utf8
@@ -257,10 +276,7 @@ if ($status -and -not $Force) {
 
 # Check if tag already exists (local)
 $TagCreated = $false
-$revRes = Run-Git "rev-parse" "--verify" "refs/tags/$Tag"
-if ($revRes.ExitCode -eq 0) {
-    Write-Host "Tag $Tag already exists locally."
-    "Tag $Tag already exists locally" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+if ($tagAlreadyExists) {
 
     # If tag exists, try to bump patch and create a new tag if allowed
     if ($AutoCommit -or $Force) {
@@ -294,11 +310,11 @@ if ($revRes.ExitCode -eq 0) {
             Set-Content -Path $versionFilePath -Value $newVer -Encoding UTF8
             "Auto-bump: version.txt updated to $newVer" | Out-File -FilePath $dbgFile -Append -Encoding utf8
 
-            # Stage and commit the updated version file
-            $addRes = Run-Git "add" "$versionFilePath"
+            # Stage ALL changes (version file + any code changes that were deferred)
+            $addRes = Run-Git "add" "--all"
             if ($addRes.ExitCode -ne 0) {
-                Write-Error "git add failed for version file: $($addRes.StdErr)"
-                "git add failed for version file: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
+                Write-Error "git add failed: $($addRes.StdErr)"
+                "git add failed: $($addRes.StdErr)" | Out-File -FilePath $dbgFile -Append -Encoding utf8
                 exit 5
             }
             $commitMsg = "Auto-bump version to $newVer for release"
