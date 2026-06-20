@@ -7,7 +7,7 @@ namespace DmmDep;
 
 /// <summary>
 /// Manages persistent caching of parent/system archive file indexes using SQLite.
-/// Cache is stored in %LOCALAPPDATA%\ZeeOgre\dmmdeps\starfield_basefiles.db
+/// Cache is stored in %LOCALAPPDATA%\ZeeOgre\dmmdeps\parentfile_cache.db
 /// 
 /// Schema:
 ///   archives: archive_path, file_name, size, last_modified, file_count, scan_timestamp
@@ -21,7 +21,7 @@ internal static class ParentArchiveCache
         "dmmdeps"
     );
 
-    private static readonly string CacheDbPath = Path.Combine(CacheRoot, "starfield_basefiles.db");
+    private static readonly string CacheDbPath = Path.Combine(CacheRoot, "parentfile_cache.db");
 
     /// <summary>
     /// Get the cached parent archive index, or build/update it if stale.
@@ -36,6 +36,7 @@ internal static class ParentArchiveCache
         Action<string>? logger = null)
     {
         logger ??= _ => { };
+        var cacheTimer = System.Diagnostics.Stopwatch.StartNew();
 
         Directory.CreateDirectory(CacheRoot);
         logger($"[Cache] DB path: {CacheDbPath}");
@@ -54,13 +55,7 @@ internal static class ParentArchiveCache
 
         logger($"[Cache] Allowed archives for lookup: {string.Join(", ", allowedArchiveNames)}");
 
-        // DEBUG: Show each archive name with quotes to reveal any whitespace issues
-        foreach (var name in allowedArchiveNames.Where(n => n.Contains("Content", StringComparison.OrdinalIgnoreCase)))
-        {
-            logger($"[Cache-DEBUG] Allowed archive (exact): '{name}' (length={name.Length})");
-        }
-
-        // DEBUG: Log ContentResources.zip specifically
+        // Log ContentResources.zip specifically
         var contentResources = parentArchives.FirstOrDefault(a => a.Name.Equals("ContentResources.zip", StringComparison.OrdinalIgnoreCase));
         if (contentResources != null)
         {
@@ -72,22 +67,6 @@ internal static class ParentArchiveCache
         }
 
         using var conn = OpenConnection();
-
-        // DEBUG: Count total files in cache before filtering
-        using (var countCmd = conn.CreateCommand())
-        {
-            countCmd.CommandText = "SELECT COUNT(*) FROM files";
-            var totalFiles = (long)countCmd.ExecuteScalar()!;
-            logger($"[Cache-DEBUG] Total files in cache (before filter): {totalFiles}");
-
-            countCmd.CommandText = "SELECT archive_name, COUNT(*) as cnt FROM files GROUP BY archive_name ORDER BY cnt DESC LIMIT 10";
-            using var reader = countCmd.ExecuteReader();
-            logger($"[Cache-DEBUG] Top archives in cache:");
-            while (reader.Read())
-            {
-                logger($"[Cache-DEBUG]   {reader.GetString(0)}: {reader.GetInt64(1)} files");
-            }
-        }
 
         // Check which archives need scanning
         var staleArchives = FindStaleArchives(conn, parentArchives, logger);
@@ -118,6 +97,9 @@ internal static class ParentArchiveCache
                 .Take(10);
             logger($"[Cache] Top contributing archives: {string.Join(", ", archiveFileCounts)}");
         }
+
+        cacheTimer.Stop();
+        logger($"[Cache] Cache build completed in {cacheTimer.Elapsed.TotalSeconds:F2} seconds");
 
         return index;
     }
@@ -166,9 +148,13 @@ internal static class ParentArchiveCache
             );
 
             CREATE TABLE IF NOT EXISTS files (
-                file_path TEXT PRIMARY KEY COLLATE NOCASE,
-                archive_name TEXT NOT NULL COLLATE NOCASE
+                file_path TEXT NOT NULL COLLATE NOCASE,
+                archive_name TEXT NOT NULL COLLATE NOCASE,
+                PRIMARY KEY (file_path, archive_name)
             );
+
+            CREATE INDEX IF NOT EXISTS idx_files_path 
+            ON files(file_path COLLATE NOCASE);
 
             CREATE INDEX IF NOT EXISTS idx_files_archive 
             ON files(archive_name COLLATE NOCASE);
@@ -402,33 +388,6 @@ internal static class ParentArchiveCache
             {
                 cmd.Parameters.AddWithValue($"@archive{paramIndex}", archiveName);
                 paramIndex++;
-            }
-
-            // DEBUG: Test if ContentResources.zip files are actually being selected
-            using (var testCmd = conn.CreateCommand())
-            {
-                testCmd.CommandText = "SELECT COUNT(*) FROM files WHERE archive_name = @name";
-                testCmd.Parameters.AddWithValue("@name", "ContentResources.zip");
-                var crCount = (long)testCmd.ExecuteScalar()!;
-                Console.WriteLine($"[LoadFileIndex-DEBUG] ContentResources.zip files in DB: {crCount}");
-
-                testCmd.CommandText = $"SELECT COUNT(*) FROM files WHERE archive_name IN ({string.Join(", ", parameters)})";
-                for (int i = 0; i < allowedArchiveNames.Count; i++)
-                {
-                    testCmd.Parameters.AddWithValue($"@archive{i}", allowedArchiveNames.ElementAt(i));
-                }
-                var filteredCount = (long)testCmd.ExecuteScalar()!;
-                Console.WriteLine($"[LoadFileIndex-DEBUG] Files matching filter: {filteredCount}");
-
-                // DEBUG: Show a sample of ContentResources.zip material paths from the DB
-                testCmd.CommandText = "SELECT file_path FROM files WHERE archive_name = 'ContentResources.zip' AND file_path LIKE '%modela_civilian%' LIMIT 5";
-                testCmd.Parameters.Clear();
-                using var dbReader = testCmd.ExecuteReader();
-                Console.WriteLine($"[LoadFileIndex-DEBUG] Sample ContentResources.zip ModelA paths in DB:");
-                while (dbReader.Read())
-                {
-                    Console.WriteLine($"[LoadFileIndex-DEBUG]   {dbReader.GetString(0)}");
-                }
             }
         }
         else

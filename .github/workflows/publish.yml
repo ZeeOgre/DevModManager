@@ -88,6 +88,12 @@ jobs:
             async function createReleaseForTag(t) {
               const releaseBody = `## DevModManager Dependency Checker ${t}
 
+            ### What's New in This Release
+            - **Fixed:** Parent archive cache now uses composite primary key to prevent file ownership collisions when the same asset exists in multiple archives (e.g., ContentResources.zip and mod archives)
+            - **Improved:** Cache database renamed to \`parentfile_cache.db\` for future multi-game support
+            - **Added:** Cache build timing information for performance visibility
+            - **Cleaned:** Removed debug logging that was user-specific and wouldn't work for other installations
+
             ### What It Does
             Scans Starfield plugins (.esm/.esp) and discovers all asset dependencies:
             - Meshes, Materials, Textures (with PC & Xbox paths)
@@ -105,8 +111,8 @@ jobs:
             - \`_deps.json\` - Full dependency manifest (JSON format, omitted with --silent)
 
             ### Downloads
-            - **dmmdeps.zip** (~2 MB compressed, ~57 MB extracted) - Lightweight version with DLLs. Requires [.NET 9 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0/runtime)
-            - **dmmdeps-fat.zip** (~13 MB) - Self-contained single file. Includes .NET 9, no dependencies
+            - **dmmdeps.zip** (~4 MB compressed, includes required dependencies) - Framework-dependent build. Requires [.NET 9 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0/runtime)
+            - **dmmdeps-fat.zip** (~13 MB) - Self-contained single-file build. Includes .NET 9 runtime, no dependencies required
 
             ### Basic Usage
             \`\`\`
@@ -134,6 +140,7 @@ jobs:
             Options:
               --gameroot <path>     Override game root (parent of Data folder)
               --xboxdata <path>     Override Xbox Data root (default from CreationKit.ini)
+              --ps5data <path>      Override PS5 Data root (default <GameRoot>\\PS5\\Data)
               --tifroot <path>      Override TIF source root (default ..\\..\\Source\\TGATextures)
               --scriptsroot <path>  Override Scripts folder (default Data\\Scripts)
               --test                Write .achlist.test instead of .achlist
@@ -169,7 +176,13 @@ jobs:
             **Note:** The tool automatically detects changes to parent game archives (.ba2 files) and rebuilds its cache when needed. The \`--rebuildcache\` option is available for troubleshooting but should rarely be necessary.
 
             ### Performance
-            Sub-second execution for ~5000 files. No directory walking - deterministic asset discovery based on plugin content.
+            **First run (building cache):** ~44 seconds for a typical Starfield mod with base game + DLC archives  
+            **Subsequent runs (cached):** ~3 seconds for ~5000 files  
+            **Cache size:** ~550 MB (base game + Creation Kit ContentResources), ~650 MB with expansions and common master dependencies
+
+            The cache is stored at `%LOCALAPPDATA%\ZeeOgre\dmmdeps\parentfile_cache.db` and uses a composite-key SQLite schema to preserve duplicate file paths across multiple archives without collision.
+
+            No directory walking required - deterministic asset discovery based on plugin content.
 
             ### Full Documentation
             See [README.md](https://github.com/ZeeOgre/DevModManager/blob/master/DMM.Standalone.DependencyChecker/README.md) for detailed documentation, troubleshooting, and integration guide.

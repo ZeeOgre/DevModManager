@@ -2152,7 +2152,7 @@ $runButton.Add_Click({
     $script:lastRunInputPath   = $inputPath
     $script:lastRunModName     = $modName
     $script:lastRunAchlistPath = $achlistPath
-    
+    $script:lastRunCsvPath     = $csvPath   
     $csvPath = Join-Path $dataRoot "$($modName)_deps.csv"
 
     $doVoice  = $voiceUpdateCheckbox.Checked -or $rebuildAchlistCheckbox.Checked

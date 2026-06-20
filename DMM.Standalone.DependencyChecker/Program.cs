@@ -566,6 +566,7 @@ namespace DmmDep
                 Log.Info("[3] Scanning MATs for DDS tokens (via JSON File/FileName)...");
 
                 int matsWithCustom = 0;
+                int matsWithoutCustom = 0;
                 int totalDdsHits = 0;
 
                 foreach (var matRel in matRelPaths)
@@ -657,11 +658,15 @@ namespace DmmDep
                     }
                     else
                     {
-                        Log.Info($"[3] MAT has no existing custom textures (kept MAT dependency): {matRel}");
+                        matsWithoutCustom++;
+                        if (s_verbose)
+                        {
+                            Log.Info($"[3] MAT has no existing custom textures (kept MAT dependency): {matRel}");
+                        }
                     }
                 }
 
-                Log.Info($"[3] MATs with custom DDS: {matsWithCustom}, total DDS hits: {totalDdsHits}");
+                Log.Info($"[3] MATs with custom DDS: {matsWithCustom}, without custom DDS: {matsWithoutCustom}, total DDS hits: {totalDdsHits}");
 
                 // ---- 4. Interface icons + shipbuilder + workshop ----
                 Log.Info("[4] Collecting interface icons / previews...");
@@ -767,34 +772,10 @@ namespace DmmDep
                 );
                 Log.Info($"[7] Parent archive index loaded: {parentArchiveIndex.Count} files indexed");
 
-                // DEBUG: Show sample of archive index keys to verify format
-                if (s_verbose && parentArchiveIndex.Count > 0)
-                {
-                    var sampleArchiveKeys = parentArchiveIndex.Keys.Take(20).ToList();
-                    Log.Info($"[7] Sample of parent archive index keys (first 20):");
-                    foreach (var k in sampleArchiveKeys)
-                    {
-                        Log.Info($"[7]   INDEX KEY: '{k}'");
-                    }
-                }
-
                 // Mark files that match parent archives
                 int parentMatchCount = 0;
                 var sampleMatches = new List<string>();
                 var sampleMisses = new List<string>();
-
-                // DEBUG: Test a known parent archive file against manifest
-                bool testKeyExists = parentArchiveIndex.ContainsKey("data\\meshes\\genesisplaceholder.txt");
-                Log.Info($"[7-DEBUG] Test lookup of parent archive key 'data\\meshes\\genesisplaceholder.txt': {testKeyExists}");
-
-                // DEBUG: Test a specific material that should be in ContentResources
-                string testMatPath = "data\\materials\\actors\\modela\\modela_civilian_01\\yellow_variant\\modela_expedition_yellow_headbase.mat";
-                bool testMatExists = parentArchiveIndex.ContainsKey(testMatPath);
-                Log.Info($"[7-DEBUG] Test lookup of material 'data\\materials\\actors\\modela\\modela_civilian_01\\...': {testMatExists}");
-                if (testMatExists)
-                {
-                    Log.Info($"[7-DEBUG]   Found in archive: {parentArchiveIndex[testMatPath]}");
-                }
 
                 foreach (var file in manifest.Files.ToList())
                 {
@@ -852,26 +833,6 @@ namespace DmmDep
                     foreach (var m in sampleMisses)
                     {
                         Log.Info($"[7]   {m}");
-                    }
-                }
-
-                if (s_verbose && sampleMisses.Count > 0 && parentMatchCount < 100)
-                {
-                    Log.Info($"[7] Sample misses (first {sampleMisses.Count}) - files not found in parent archives:");
-                    foreach (var m in sampleMisses)
-                    {
-                        Log.Info($"[7]   {m}");
-                    }
-
-                    // Show sample of what IS in the parent archive index
-                    var sampleArchiveKeys = parentArchiveIndex.Keys.Take(10).ToList();
-                    if (sampleArchiveKeys.Count > 0)
-                    {
-                        Log.Info($"[7] Sample of parent archive index keys (first 10):");
-                        foreach (var k in sampleArchiveKeys)
-                        {
-                            Log.Info($"[7]   {k}");
-                        }
                     }
                 }
 
