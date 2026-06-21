@@ -223,9 +223,11 @@ if ($hasUncommittedChanges -and -not $Force) {
         $allowed = @(
             'DMM.Standalone.DependencyChecker/*',
             'DMM.Installer/*',
+            'DMM.Avalonia/*',
             'scripts/*',
             'Properties/*',
-            'TriggerRelease.targets'  # allow committing the targets file when we auto-bump
+            'TriggerRelease.targets',  # allow committing the targets file when we auto-bump
+            '.github/workflows/publish.yml'  # allow workflow release notes updates
         )
 
         $unsafe = @()

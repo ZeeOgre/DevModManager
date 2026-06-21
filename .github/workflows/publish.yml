@@ -89,6 +89,7 @@ jobs:
               const releaseBody = `## DevModManager Dependency Checker ${t}
 
             ### What's New in This Release
+            - **Security:** Disabled single-file compression to reduce antivirus false positives (Defender Wacatac heuristic warnings)
             - **Fixed:** Parent archive cache now uses composite primary key to prevent file ownership collisions when the same asset exists in multiple archives (e.g., ContentResources.zip and mod archives)
             - **Improved:** Cache database renamed to \`parentfile_cache.db\` for future multi-game support
             - **Added:** Cache build timing information for performance visibility
@@ -112,7 +113,7 @@ jobs:
 
             ### Downloads
             - **dmmdeps.zip** (~4 MB compressed, includes required dependencies) - Framework-dependent build. Requires [.NET 9 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0/runtime)
-            - **dmmdeps-fat.zip** (~13 MB) - Self-contained single-file build. Includes .NET 9 runtime, no dependencies required
+            - **dmmdeps-fat.zip** (~18 MB) - Self-contained single-file build. Includes .NET 9 runtime, no dependencies required. Uncompressed to reduce antivirus false positives.
 
             ### Basic Usage
             \`\`\`
