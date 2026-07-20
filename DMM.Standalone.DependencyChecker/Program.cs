@@ -11,7 +11,7 @@ namespace DmmDep
 {
 #nullable enable
 
-    internal enum FileKind { Pex, Psc, Nif, Mat, Texture, Mesh, Voice, Terrain, Icon, Tif, Biom, BackupOnly, Particle, Anim, Morph, Rig, Warn, Missing, ParentMatch, Other }
+    internal enum FileKind { Pex, Psc, Nif, Mat, Texture, Mesh, Voice, Terrain, Icon, Tif, Biom, BackupOnly, Particle, Anim, Morph, Rig, Lod, Warn, Missing, ParentMatch, Other }
 
     internal sealed class FileEntry
     {
@@ -458,6 +458,43 @@ namespace DmmDep
                     {
                         tifRel = NormalizeRel(tifRel);
                         AddBackupOnlyFile(manifest, tifRel, "terrain-overlay-tif");
+                    }
+                }
+
+                // ---- LOD Files from .btd worldspaces ----
+                Log.Info("[1c-lod] Checking LOD files for worldspaces from .btd...");
+                foreach (var worldspaceName in btdNames)
+                {
+                    // 1. LODSettings\<worldspacename>.lod
+                    string lodSettingsRel = NormalizeRel(Path.Combine("Data", "LODSettings", worldspaceName + ".lod"));
+                    string lodSettingsFull = Path.Combine(gameRoot, lodSettingsRel);
+                    if (File.Exists(lodSettingsFull))
+                    {
+                        AddFile(manifest, achlistPaths, lodSettingsRel, FileKind.Lod, "worldspace-lod-settings", gameRoot, xboxDataRoot);
+                    }
+
+                    // 2. Meshes\Terrain\<Worldspace>\Objects\*.nif
+                    // We'll add the entire directory pattern instead of individual files
+                    string terrainMeshDir = Path.Combine("Data", "Meshes", "Terrain", worldspaceName, "Objects");
+                    string terrainMeshDirFull = Path.Combine(gameRoot, terrainMeshDir);
+
+                    if (Directory.Exists(terrainMeshDirFull))
+                    {
+                        var lodNifs = Directory.GetFiles(terrainMeshDirFull, "*.nif", SearchOption.TopDirectoryOnly);
+                        if (lodNifs.Length > 0)
+                        {
+                            Log.Info($"[1c-lod] Found {lodNifs.Length} LOD mesh(es) for worldspace '{worldspaceName}'");
+                            foreach (var lodNifFull in lodNifs)
+                            {
+                                string lodNifRel = NormalizeRel(lodNifFull.Substring(gameRoot.Length).TrimStart('\\'));
+                                AddFile(manifest, achlistPaths, lodNifRel, FileKind.Lod, "worldspace-lod-mesh", gameRoot, xboxDataRoot);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Warn if the worldspace has a .btd but no LOD mesh directory
+                        Log.Warn($"[1c-lod] Worldspace '{worldspaceName}' has .btd file but LOD mesh directory not found: {terrainMeshDir}");
                     }
                 }
 
