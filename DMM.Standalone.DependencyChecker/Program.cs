@@ -507,6 +507,7 @@ namespace DmmDep
 
                 // ---- 2. NIF -> MAT + MeshPath + RIG ----
                 Log.Info("[2] Scanning NIFs for MAT, mesh stems, and RIG... meshes come from nifs (which are in meshes) but are stored in geometries... confused yet?");
+                var nifReader = new NifReader();
 
                 foreach (var nifRel in nifRelPaths)
                 {
