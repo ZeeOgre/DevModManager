@@ -172,18 +172,6 @@ public sealed class NifReader
     public IReadOnlyList<NifMeshStringEntry> ReadMeshStrings(string nifPath)
     {
         byte[] bytes = File.ReadAllBytes(nifPath);
-        return ReadMeshStrings(bytes);
-    }
-
-    /// <summary>
-    /// Deserializes mesh references from NIF bytes already loaded by the caller.
-    /// This avoids rereading every NIF when a dependency walker also needs its bytes
-    /// for material and rig processing.
-    /// </summary>
-    public IReadOnlyList<NifMeshStringEntry> ReadMeshStrings(byte[] bytes)
-    {
-        ArgumentNullException.ThrowIfNull(bytes);
-
         var entries = new List<NifMeshStringEntry>();
         IReadOnlyList<NifSerializedString> serialized = ReadSerializedStrings(bytes);
 
