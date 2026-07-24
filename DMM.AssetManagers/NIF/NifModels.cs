@@ -29,6 +29,7 @@ public sealed class NifReadableMeshCopy
 public sealed class NifMeshStringEntry
 {
     public int Index { get; init; }
+    public int Offset { get; init; } = -1;
     public string RawToken { get; init; } = "";
     public string NormalizedToken { get; init; } = "";
 }
