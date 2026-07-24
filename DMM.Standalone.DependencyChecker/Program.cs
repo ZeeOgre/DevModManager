@@ -516,19 +516,27 @@ namespace DmmDep
 
                     var nifBytes = File.ReadAllBytes(full);
 
-                    // Starfield mesh references are extensionless, relative strings in
-                    // BSGeometry "Mesh Path" fields.  Let the NIF reader identify those
-                    // typed fields; do not infer meshes from unrelated printable strings.
-                    foreach (NifMeshStringEntry mesh in nifReader.ReadMeshStrings(nifBytes))
+                    NifDependencyReadResult nifDependencies = nifReader.ReadDependencies(nifBytes);
+                    foreach (string meshRel in nifDependencies.Meshes)
                     {
-                        string meshRel = mesh.NormalizedToken;
                         if (File.Exists(Path.Combine(gameRoot, meshRel)))
                             AddFile(manifest, achlistPaths, meshRel, FileKind.Mesh, $"nif:{nifRel}", gameRoot, xboxDataRoot);
                     }
+                    foreach (string matRel in nifDependencies.Mats)
+                    {
+                        if (File.Exists(Path.Combine(gameRoot, matRel)))
+                            matRelPaths.Add(matRel);
+                        else
+                            Log.Warn($"[2] Typed MAT path '{matRel}' from NIF '{nifRel}' does not exist");
+                    }
 
+                    if (nifDependencies.IsStructured && nifDependencies.IsComplete)
+                    {
+                        Log.Info($"[2] Structured Starfield parse: {nifRel} in {nifDependencies.StructuredParseTime.TotalMilliseconds:F1} ms");
+                        continue;
+                    }
 
-
-
+                    Log.Warn($"[2] NIF structured parse incomplete for '{nifRel}'; using legacy token fallback: {string.Join("; ", nifDependencies.Diagnostics)}");
                     foreach (var s in ExtractPrintableStrings(nifBytes, 4))
                     {
                         string token = s.Replace('/', '\\').TrimStart('\\');

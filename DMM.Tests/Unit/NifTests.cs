@@ -94,6 +94,21 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Reader_ReadDependencies_Uses_Complete_Structured_Starfield_Path_For_Geometry_Only_Nif()
+    {
+        byte[] bytes = BuildBethesdaLikeSingleBlockNif(
+            "CombinedStorageContainer:44",
+            "zeeogre\\combinedstoragecontainer\\detals01_4_lod1");
+
+        NifDependencyReadResult result = new NifReader().ReadDependencies(bytes);
+
+        Assert.True(result.IsStructured);
+        Assert.True(result.IsComplete);
+        Assert.Empty(result.Diagnostics);
+        Assert.Equal("Data\\Geometries\\zeeogre\\combinedstoragecontainer\\detals01_4_lod1.mesh", Assert.Single(result.Meshes));
+    }
+
+    [Fact]
     public void Reader_ReadStringTable_Includes_SizedString2_Block_Name_Payloads()
     {
         string root = CreateTempRoot();

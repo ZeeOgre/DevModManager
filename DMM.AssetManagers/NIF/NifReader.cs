@@ -7,6 +7,65 @@ public sealed class NifReader
     private const int MaxSizedStringLength = 0x8000;
     private const uint StarfieldBethesdaStreamVersion = 170;
 
+    private static readonly HashSet<string> SupportedStarfieldPathBlocks = new(StringComparer.Ordinal)
+    {
+        "BSGeometry", "BSLightingShaderProperty", "BSEffectShaderProperty"
+    };
+
+    private static readonly string[] PotentialPathBlockMarkers =
+    {
+        "Shader", "Texture", "Behavior", "Havok", "Morph", "Skin", "Bone", "ExtraData", "Collision"
+    };
+
+    public NifDependencyReadResult ReadDependencies(byte[] bytes)
+    {
+        ArgumentNullException.ThrowIfNull(bytes);
+        var timer = System.Diagnostics.Stopwatch.StartNew();
+        if (!TryReadBethesdaStructure(bytes, out NifStructureScan structure) ||
+            structure.BethesdaStreamVersion < StarfieldBethesdaStreamVersion)
+        {
+            return new NifDependencyReadResult
+            {
+                IsStructured = false,
+                IsComplete = false,
+                StructuredParseTime = timer.Elapsed,
+                Diagnostics = { "NIF is not a supported Starfield Bethesda structure." }
+            };
+        }
+
+        var result = new NifDependencyReadResult { IsStructured = true, IsComplete = true };
+        foreach (NifBlockSpan block in structure.Blocks)
+        {
+            if (block.TypeName == "BSGeometry")
+            {
+                result.Meshes.AddRange(ReadStarfieldGeometryMeshPaths(bytes, structure, block).Select(entry => entry.NormalizedToken));
+                continue;
+            }
+
+            if (block.TypeName is "BSLightingShaderProperty" or "BSEffectShaderProperty")
+            {
+                if (TryReadStarfieldShaderMaterial(bytes, block, out string material))
+                    result.Mats.Add(material);
+                else
+                    result.Diagnostics.Add($"Block {block.Index} ({block.TypeName}) could not deserialize its Starfield Material field.");
+                continue;
+            }
+
+            if (PotentialPathBlockMarkers.Any(marker => block.TypeName.Contains(marker, StringComparison.Ordinal)) &&
+                !SupportedStarfieldPathBlocks.Contains(block.TypeName))
+            {
+                result.Diagnostics.Add($"Block {block.Index} ({block.TypeName}) may contain external paths but has no Starfield schema decoder.");
+            }
+        }
+
+        result.Mats.RemoveAll(string.IsNullOrWhiteSpace);
+        DeduplicateSort(result.Meshes);
+        DeduplicateSort(result.Mats);
+        result.IsComplete = result.Diagnostics.Count == 0;
+        result.StructuredParseTime = timer.Elapsed;
+        return result;
+    }
+
     public NifReadResult Read(string nifPath)
     {
         if (nifPath == null) throw new ArgumentNullException(nameof(nifPath));
@@ -218,12 +277,26 @@ public sealed class NifReader
         if (structure.BethesdaStreamVersion < StarfieldBethesdaStreamVersion)
             return entries;
 
-        int entryIndex = 0;
         foreach (NifBlockSpan block in structure.Blocks.Where(block =>
                      string.Equals(block.TypeName, "BSGeometry", StringComparison.Ordinal)))
+            entries.AddRange(ReadStarfieldGeometryMeshPaths(bytes, structure, block));
+
+        return entries;
+    }
+
+    private static IReadOnlyList<NifMeshStringEntry> ReadStarfieldGeometryMeshPaths(
+        byte[] bytes,
+        NifStructureScan structure,
+        NifBlockSpan block)
+    {
+        var entries = new List<NifMeshStringEntry>();
+        if (structure.BethesdaStreamVersion < StarfieldBethesdaStreamVersion)
+            return entries;
+
+        int entryIndex = 0;
         {
             if (!TryReadStarfieldBsGeometryMeshArrayStart(bytes, block, out int position, out uint geometryFlags))
-                continue;
+                return entries;
 
             for (int lodIndex = 0; lodIndex < 4; lodIndex++)
             {
@@ -235,8 +308,6 @@ public sealed class NifReader
                     !TryReadUInt32(bytes, ref position, out _))
                     break;
 
-                // Per the NIF schema, external meshes have a SizedString Mesh Path;
-                // internal meshes have BSMeshData instead and no path dependency.
                 if ((geometryFlags & 0x200) != 0)
                     break;
 
@@ -258,6 +329,22 @@ public sealed class NifReader
 
         return entries;
     }
+
+    private static bool TryReadStarfieldShaderMaterial(byte[] bytes, NifBlockSpan block, out string material)
+    {
+        material = string.Empty;
+        int position = block.StartOffset;
+        // NiObjectNET base: Name, Extra Data List, Controller. Starfield shader
+        // properties then begin directly with BSLayeredMaterial.Name.
+        if (!TrySkip(bytes, ref position, 4) || !TryReadUInt32(bytes, ref position, out uint extraDataCount) ||
+            extraDataCount > (uint)((block.EndOffsetExclusive - position) / 4) ||
+            !TrySkip(bytes, ref position, checked((int)extraDataCount * 4)) || !TrySkip(bytes, ref position, 4) ||
+            !TryReadSizedString4(bytes, ref position, out string token) || position > block.EndOffsetExclusive)
+            return false;
+
+        return TryNormalizeMatToken(token.Replace('/', '\\').Trim(), out material);
+    }
+
 
     private static bool TryReadStarfieldBsGeometryMeshArrayStart(
         byte[] bytes,
