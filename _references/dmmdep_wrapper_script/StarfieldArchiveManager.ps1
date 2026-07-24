@@ -980,6 +980,18 @@ function Invoke-Ba2Archives {
 
     $baseName = [System.IO.Path]::GetFileNameWithoutExtension($AchlistPath)
 
+    # Archive2 cannot use an archive as input while rewriting that same archive.
+    # A previous run can leave these paths in an achlist (for example through
+    # SmartClobber), which makes Archive2 hold the input open and then fail to
+    # open the output BA2 for writing.
+    $generatedArchiveNames = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    [void]$generatedArchiveNames.Add("$baseName - Main_xbox.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Textures_xbox.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Main_ps.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Textures_ps.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Main.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Textures.ba2")
+
     # Text list paths
     $xboxMainFile       = "$DataFolder\$baseName`_xboxMain.txt"
     $xboxTextureFile    = "$DataFolder\$baseName`_xboxTextures.txt"
@@ -1005,6 +1017,11 @@ function Invoke-Ba2Archives {
         $p   = $item -replace '/', '\\'
         $ext = [System.IO.Path]::GetExtension($p).ToLowerInvariant()
         $leafName = [System.IO.Path]::GetFileName($p).ToLowerInvariant()
+
+        if ($generatedArchiveNames.Contains([System.IO.Path]::GetFileName($p))) {
+            $logBox.AppendText("Skipping generated BA2 from archive input: $p`r`n")
+            continue
+        }
 
         if ($ext -eq '.bk2') {
             $replacementPath = [System.IO.Path]::ChangeExtension($p, '.bnk')
@@ -1090,6 +1107,34 @@ function Invoke-Ba2Archives {
     $windowsMainBa2     = "$DataFolder\$baseName - Main.ba2"
     $windowsTexturesBa2 = "$DataFolder\$baseName - Textures.ba2"
 
+    function Invoke-Archive2Create {
+        param(
+            [string]$ArchivePath,
+            [string]$SourceFile,
+            [string]$Format,
+            [string]$Compression,
+            [string]$Label
+        )
+
+        # Archive2 does not reliably replace an existing BA2. Delete the prior
+        # output first, and report a clear error if another process owns it.
+        if (Test-Path -LiteralPath $ArchivePath) {
+            try {
+                Remove-Item -LiteralPath $ArchivePath -Force -ErrorAction Stop
+                $logBox.AppendText("Removed previous $Label archive: $ArchivePath`r`n")
+            }
+            catch {
+                throw "Cannot replace $Label archive because it is locked or read-only: $ArchivePath. Close the process using it and try again. $($_.Exception.Message)"
+            }
+        }
+
+        $logBox.AppendText("Running Archive2 for $Label archive...`r`n")
+        & $ArchiverPath "-create=$ArchivePath" "-sourceFile=$SourceFile" "-format=$Format" "-compression=$Compression"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Archive2 failed while creating $Label archive (exit code $LASTEXITCODE): $ArchivePath"
+        }
+    }
+
     # Run Archive2 from Starfield root so "Data\..." resolves
     $originalLocation = Get-Location
     try {
@@ -1098,32 +1143,26 @@ function Invoke-Ba2Archives {
         Push-Location -Path $starfieldRoot
 
         if ($DoXbox) {
-            $logBox.AppendText("Running Archiver2 for Xbox main archive...`r`n")
-            Invoke-Expression "& '$ArchiverPath' -create='$xboxMainBa2' -sourceFile='$xboxMainFile' -format=General -compression=$compressionType"
+            Invoke-Archive2Create -ArchivePath $xboxMainBa2 -SourceFile $xboxMainFile -Format 'General' -Compression $compressionType -Label 'Xbox main'
 
             if ($hasTextureFiles) {
-                $logBox.AppendText("Running Archiver2 for Xbox textures archive...`r`n")
-                Invoke-Expression "& '$ArchiverPath' -create='$xboxTexturesBa2' -sourceFile='$xboxTextureFile' -format=XBoxDDS -compression=XBox"
+                Invoke-Archive2Create -ArchivePath $xboxTexturesBa2 -SourceFile $xboxTextureFile -Format 'XBoxDDS' -Compression 'XBox' -Label 'Xbox textures'
             }
         }
 
         if ($DoPlayStation) {
-            $logBox.AppendText("Running Archiver2 for PlayStation main archive...`r`n")
-            Invoke-Expression "& '$ArchiverPath' -create='$playStationMainBa2' -sourceFile='$playStationMainFile' -format=General -compression=$compressionType"
+            Invoke-Archive2Create -ArchivePath $playStationMainBa2 -SourceFile $playStationMainFile -Format 'General' -Compression $compressionType -Label 'PlayStation main'
 
             if ($hasTextureFiles) {
-                $logBox.AppendText("Running Archiver2 for PlayStation textures archive...`r`n")
-                Invoke-Expression "& '$ArchiverPath' -create='$playStationTexturesBa2' -sourceFile='$playStationTextureFile' -format=DDS -compression=Default"
+                Invoke-Archive2Create -ArchivePath $playStationTexturesBa2 -SourceFile $playStationTextureFile -Format 'DDS' -Compression 'Default' -Label 'PlayStation textures'
             }
         }
 
         if ($DoWindows) {
-            $logBox.AppendText("Running Archiver2 for Windows main archive...`r`n")
-            Invoke-Expression "& '$ArchiverPath' -create='$windowsMainBa2' -sourceFile='$windowsMainFile' -format=General -compression=$compressionType"
+            Invoke-Archive2Create -ArchivePath $windowsMainBa2 -SourceFile $windowsMainFile -Format 'General' -Compression $compressionType -Label 'Windows main'
 
             if ($hasTextureFiles) {
-                $logBox.AppendText("Running Archiver2 for Windows textures archive...`r`n")
-                Invoke-Expression "& '$ArchiverPath' -create='$windowsTexturesBa2' -sourceFile='$windowsTextureFile' -format=DDS -compression=Default"
+                Invoke-Archive2Create -ArchivePath $windowsTexturesBa2 -SourceFile $windowsTextureFile -Format 'DDS' -Compression 'Default' -Label 'Windows textures'
             }
         }
     }
