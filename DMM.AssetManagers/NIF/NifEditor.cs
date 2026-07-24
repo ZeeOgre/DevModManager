@@ -40,7 +40,7 @@ public sealed class NifEditor
         {
             string fullSourceMesh = Path.Combine(fullGameRoot, entry.NormalizedToken);
 
-            string blockName = TryGetResolvedName(namesByMeshStringIndex, entry.Index)
+            string blockName = TryGetResolvedName(namesByMeshStringIndex, FindSerializedStringIndex(serialized, entry))
                                ?? GetReadableMeshName(entry.NormalizedToken);
             string uniqueBlockName = EnsureUniqueName(blockName, destinationNameCounts);
             string destRel = Path.Combine("Data", "Geometries", nifDirRel, nifBase, uniqueBlockName + ".mesh");
@@ -76,10 +76,11 @@ public sealed class NifEditor
         var meshOffsetsByBlock = new Dictionary<int, List<int>>();
         foreach (NifMeshStringEntry mesh in meshes)
         {
-            if (mesh.Index < 0 || mesh.Index >= serialized.Count)
+            int serializedIndex = FindSerializedStringIndex(serialized, mesh);
+            if (serializedIndex < 0)
                 continue;
 
-            int meshOffset = serialized[mesh.Index].Offset;
+            int meshOffset = serialized[serializedIndex].Offset;
             int blockIndex = FindContainingBlockIndex(structure.Blocks, meshOffset);
             if (blockIndex < 0)
                 continue;
@@ -90,7 +91,7 @@ public sealed class NifEditor
                 meshOffsetsByBlock[blockIndex] = meshIndices;
             }
 
-            meshIndices.Add(mesh.Index);
+            meshIndices.Add(serializedIndex);
         }
 
         foreach (NifBlockSpan block in structure.Blocks)
@@ -127,6 +128,20 @@ public sealed class NifEditor
         }
 
         return -1;
+    }
+
+    private static int FindSerializedStringIndex(IReadOnlyList<NifSerializedString> serialized, NifMeshStringEntry mesh)
+    {
+        if (mesh.Offset >= 0)
+        {
+            for (int i = 0; i < serialized.Count; i++)
+            {
+                if (serialized[i].Offset == mesh.Offset)
+                    return i;
+            }
+        }
+
+        return mesh.Index >= 0 && mesh.Index < serialized.Count ? mesh.Index : -1;
     }
 
     private static int? ReadBlockNameStringIndex(
