@@ -15,7 +15,11 @@ public sealed record NifSchemaField(string Name, NifFieldKind Kind, NifPredicate
     public string Type => Template ?? Kind.ToString();
     public bool CanContainExternalDependency => DependencyCategory is not null;
 }
-public sealed record NifSchemaType(string Name, bool IsStruct, string? BaseType, NifPredicate Predicate, IReadOnlyList<NifSchemaField> Fields);
+/// <summary>A NifSkope-derived serialized type. Empty Fields means a known opaque layout: its block span is known, but it has no decoded dependency fields yet.</summary>
+public sealed record NifSchemaType(string Name, bool IsStruct, string? BaseType, NifPredicate Predicate, IReadOnlyList<NifSchemaField> Fields)
+{
+    public bool IsDependencyBearing => Fields.Any(field => field.CanContainExternalDependency);
+}
 public sealed record NifSchemaProfile(string Name, NifFamily Family, uint[] BethesdaStreamVersions, string Evidence, string? BaseProfile = null);
 public sealed record NifSchemaProfileResolution(NifSchemaProfile? Profile, NifSchemaProfile? NearestProfile)
 { public bool IsKnown => Profile is not null; public NifFamily Family => Profile?.Family ?? NearestProfile?.Family ?? NifFamily.Unknown; public bool IsExactProfileMatch => Profile is not null; public NifSchemaProfile? CompatibilityProfile => Profile is null ? NearestProfile : null; }

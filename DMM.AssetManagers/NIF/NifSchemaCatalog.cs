@@ -13,7 +13,7 @@ public static class NifSchemaCatalog
         new("Fallout4", NifFamily.Fallout4, [130], "V20_2_0_7_FO4"),
         new("Fallout4Special", NifFamily.Fallout4, [132, 139], "V20_2_0_7_FO4_2", "Fallout4"),
         new("Fallout76", NifFamily.Fallout4, [155], "V20_2_0_7_F76", "Fallout4"),
-        new("Starfield170", NifFamily.Starfield, [170], "NifSkope #BS_GTE_STF# baseline; exact documented stream 170")
+        new("Starfield", NifFamily.Starfield, [170, 173, 175], "NifSkope #BS_GTE_STF# baseline; observed Starfield streams 170, 173, and 175 share this schema generation")
     ];
     public static IReadOnlyList<NifSchemaType> AllTypes => Types.Values.OrderBy(x => x.Name).ToArray();
     public static bool TryGet(string name, out NifSchemaType? type) => Types.TryGetValue(name, out type);
@@ -28,7 +28,7 @@ public static class NifSchemaCatalog
     private static Dictionary<string, NifSchemaType> Build()
     {
         var types = new List<NifSchemaType>();
-        NifSchemaCommon.Add(types); NifSchemaBethesda.Add(types); NifSchemaSkyrim.Add(types); NifSchemaFallout4.Add(types); NifSchemaStarfield.Add(types); NifSchemaLegacy.Add(types);
+        NifSchemaNifSkopeInventory.Add(types); NifSchemaCommon.Add(types); NifSchemaBethesda.Add(types); NifSchemaSkyrim.Add(types); NifSchemaFallout4.Add(types); NifSchemaStarfield.Add(types); NifSchemaLegacy.Add(types);
         // A block name can have additive family variants (for example shader
         // properties in Fallout 4 and Starfield). Keep the registry key stable;
         // profile-aware field selection resolves the applicable variant.

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -45,4 +45,11 @@
 	  <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
   </ItemGroup>
 
+
+  <PropertyGroup>
+    <Authors>ZeeOgre</Authors>
+    <Company>ZeeOgre</Company>
+    <Copyright>Copyright (c) ZeeOgre</Copyright>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+  </PropertyGroup>
 </Project>

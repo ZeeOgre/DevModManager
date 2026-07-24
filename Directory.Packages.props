@@ -13,12 +13,11 @@
     <!-- DMM.AssetManagers -->
     <PackageVersion Include="GameFinder" Version="4.9.0" />
     <PackageVersion Include="GameFinder.StoreHandlers.BethNet" Version="1.8.0" />
-    <PackageVersion Include="niflysharp" Version="1.3.0" />
+    <PackageVersion Include="Nifly" Version="1.0.0" />
     <PackageVersion Include="Octokit" Version="14.0.0" />
     <PackageVersion Include="Sharp.BSA.BA2" Version="1.17.0" />
     <PackageVersion Include="SQLite" Version="3.13.0" />
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.11" />
-    <PackageVersion Include="SteamKit2" Version="3.4.0" />
     <!-- DMM.Avalonia -->
     <PackageVersion Include="Avalonia" Version="11.3.12" />
     <PackageVersion Include="Avalonia.Desktop" Version="11.3.12" />

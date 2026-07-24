@@ -81,12 +81,12 @@ public sealed class NifReader
         // The catalog resolves every encountered block before family predicates
         // select applicable fields. The same block-table walk is used by every
         // Bethesda family; only variants and field predicates differ.
-        foreach (NifBlockSpan block in structure.Blocks)
+        foreach (IGrouping<string, NifBlockSpan> blocksByType in structure.Blocks.GroupBy(block => block.TypeName, StringComparer.Ordinal))
         {
-            if (!NifSchemaCatalog.TryGet(block.TypeName, out _))
+            if (!NifSchemaCatalog.TryGet(blocksByType.Key, out _))
             {
                 diagnostics.IsComplete = false;
-                diagnostics.UnhandledBlockTypes.Add($"Unknown {family} block type: {block.TypeName}");
+                diagnostics.UnhandledBlockTypes.Add($"Unknown {family} block type: {blocksByType.Key} × {blocksByType.Count()}");
             }
         }
         // NifSkope's Starfield schema stores material references in the inherited
@@ -99,7 +99,7 @@ public sealed class NifReader
             if (!NifSchemaCatalog.TryGet(block.TypeName, out _)) continue;
             if (block.TypeName is "BSLightingShaderProperty" or "BSEffectShaderProperty")
             {
-                if (!TryReadHeaderStringReference(bytes, block, structure, out string value, out int offset))
+                if (!TryReadSchemaStringReference(bytes, block, structure, "Name", out string value, out int offset))
                 {
                     diagnostics.IsComplete = false;
                     diagnostics.UnhandledBlockTypes.Add($"{block.TypeName}: malformed NiObjectNET Name");
@@ -113,19 +113,16 @@ public sealed class NifReader
             }
             else if (block.TypeName == "BSBehaviorGraphExtraData")
             {
-                // NiExtraData.Name then Behaviour Graph File (both string indexes).
-                int position = block.StartOffset + 4;
-                if (!TryReadUInt32(bytes, ref position, out uint stringIndex) || stringIndex >= structure.HeaderStrings.Count)
+                if (!TryReadSchemaStringReference(bytes, block, structure, "Behaviour Graph File", out string value, out int behaviorOffset))
                 {
                     diagnostics.IsComplete = false;
                     diagnostics.UnhandledBlockTypes.Add("BSBehaviorGraphExtraData: malformed Behaviour Graph File");
                     continue;
                 }
-                string value = structure.HeaderStrings[(int)stringIndex];
                 if (TryNormalizeHkxToken(value, out string behavior))
                 {
                     result.Havoks.Add(behavior);
-                    diagnostics.Records.Add(new NifDependencyRecord { BlockIndex = block.Index, BlockType = block.TypeName, Field = "Behaviour Graph File", Category = "Behavior", Offset = block.StartOffset + 4, Value = behavior });
+                    diagnostics.Records.Add(new NifDependencyRecord { BlockIndex = block.Index, BlockType = block.TypeName, Field = "Behaviour Graph File", Category = "Behavior", Offset = behaviorOffset, Value = behavior });
                 }
             }
         }
@@ -159,14 +156,60 @@ public sealed class NifReader
     }
 
 
-    private static bool TryReadHeaderStringReference(byte[] bytes, NifBlockSpan block, NifStructureScan structure, out string value, out int offset)
+    /// <summary>Locates a string-index field by walking NifSkope-derived base fields in serialization order.</summary>
+    private static bool TryReadSchemaStringReference(byte[] bytes, NifBlockSpan block, NifStructureScan structure, string fieldName, out string value, out int offset)
     {
-        value = string.Empty; offset = block.StartOffset;
-        int position = block.StartOffset;
-        if (!TryReadUInt32(bytes, ref position, out uint index) || index >= structure.HeaderStrings.Count)
+        value = string.Empty;
+        offset = block.StartOffset;
+        if (!NifSchemaCatalog.TryGet(block.TypeName, out NifSchemaType? type) || type is null)
             return false;
-        value = structure.HeaderStrings[(int)index];
-        return true;
+
+        var lineage = new Stack<NifSchemaType>();
+        for (NifSchemaType? current = type; current is not null;)
+        {
+            lineage.Push(current);
+            current = current.BaseType is not null && NifSchemaCatalog.TryGet(current.BaseType, out NifSchemaType? parent) ? parent : null;
+        }
+
+        int position = block.StartOffset;
+        var values = new Dictionary<string, uint>(StringComparer.Ordinal);
+        while (lineage.Count > 0)
+        {
+            foreach (NifSchemaField field in lineage.Pop().Fields)
+            {
+                if (field.Kind == NifFieldKind.StringIndex)
+                {
+                    int fieldOffset = position;
+                    if (!TryReadUInt32(bytes, ref position, out uint index)) return false;
+                    if (field.Name == fieldName)
+                    {
+                        if (index >= structure.HeaderStrings.Count) return false;
+                        value = structure.HeaderStrings[(int)index];
+                        offset = fieldOffset;
+                        return true;
+                    }
+                    continue;
+                }
+                if (field.Kind == NifFieldKind.UInt32)
+                {
+                    if (!TryReadUInt32(bytes, ref position, out uint number)) return false;
+                    values[field.Name] = number;
+                    continue;
+                }
+                if (field.Kind is NifFieldKind.Ref or NifFieldKind.Int32 or NifFieldKind.Float32) { if (!TrySkip(bytes, ref position, 4)) return false; continue; }
+                if (field.Kind == NifFieldKind.UInt16) { if (!TrySkip(bytes, ref position, 2)) return false; continue; }
+                if (field.Kind is NifFieldKind.UInt8 or NifFieldKind.Bool) { if (!TrySkip(bytes, ref position, 1)) return false; continue; }
+                if (field.Kind == NifFieldKind.Array && field.Length is CountField count && values.TryGetValue(count.FieldName, out uint length))
+                {
+                    if (!TrySkip(bytes, ref position, checked((int)length * 4))) return false;
+                    continue;
+                }
+                // The requested field lies after an opaque or predicate-controlled field.
+                // Do not guess an offset; report it as malformed/unsupported instead.
+                return false;
+            }
+        }
+        return false;
     }
 
     public IReadOnlyList<NifStringEntry> ReadStringTable(string nifPath)

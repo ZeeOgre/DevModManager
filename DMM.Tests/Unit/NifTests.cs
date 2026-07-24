@@ -15,6 +15,68 @@ public sealed class NifTests
         Assert.Contains(mesh!.Fields, field => field.Name == "Mesh Path" && field.DependencyCategory == "Mesh");
     }
 
+    [Theory]
+    [InlineData(170u)]
+    [InlineData(173u)]
+    [InlineData(175u)]
+    public void SchemaCatalog_Observed_Starfield_Streams_Share_One_Generation(uint streamVersion)
+    {
+        NifSchemaProfileResolution profile = NifSchemaCatalog.ResolveProfile(0, 0, streamVersion);
+
+        Assert.True(profile.IsKnown);
+        Assert.True(profile.IsExactProfileMatch);
+        Assert.Equal(NifFamily.Starfield, profile.Family);
+        Assert.Equal("Starfield", profile.Profile!.Name);
+    }
+
+    [Theory]
+    [InlineData(173u)]
+    [InlineData(175u)]
+    public void Reader_Parses_Observed_Starfield_Stream_Corpus_Layouts(uint streamVersion)
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, $"stream-{streamVersion}.nif");
+            File.WriteAllBytes(nifPath, BuildStarfieldNif(
+                ["NiNode", "BSXFlags", "NiStringExtraData", "NiIntegerExtraData", "bhkNPCollisionObject", "bhkPhysicsSystem", "BSLightingShaderProperty"],
+                ["materials\\ships\\hull.mat"],
+                [[], [], [], [], [], [], UIntPayload(0)], streamVersion));
+
+            NifReadResult result = new NifReader().Read(nifPath);
+            Assert.True(result.Diagnostics.IsComplete);
+            Assert.Equal(["Data\\Materials\\ships\\hull.mat"], result.Mats);
+            Assert.Equal("Starfield", result.Diagnostics.SchemaProfileName);
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public void SchemaCatalog_Recognizes_Common_NifSkope_Inherited_Blocks_And_Structs()
+    {
+        string[] commonBlocks = ["NiNode", "BSXFlags", "NiStringExtraData", "NiIntegerExtraData", "bhkNPCollisionObject", "bhkPhysicsSystem"];
+        Assert.All(commonBlocks, typeName => Assert.True(NifSchemaCatalog.TryGet(typeName, out _), typeName));
+        Assert.True(NifSchemaCatalog.TryGet("NiBound", out NifSchemaType? niBound));
+        Assert.True(niBound!.IsStruct);
+    }
+
+    [Fact]
+    public void Reader_Deduplicates_Unknown_Block_Diagnostics_By_Type()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "unknown.nif");
+            File.WriteAllBytes(nifPath, BuildStarfieldNif(["NiNode", "DefinitelyUnknown", "DefinitelyUnknown"], ["node"], [UIntPayload(0), [], []]));
+            NifReadResult result = new NifReader().Read(nifPath);
+
+            Assert.False(result.Diagnostics.IsComplete);
+            Assert.Contains("Unknown Starfield block type: DefinitelyUnknown × 2", result.Diagnostics.UnhandledBlockTypes);
+            Assert.DoesNotContain(result.Diagnostics.UnhandledBlockTypes, message => message.Contains("NiNode", StringComparison.Ordinal));
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
     [Fact]
     public void Reader_Read_Extracts_Mats_And_Meshes()
     {
@@ -829,12 +891,12 @@ public sealed class NifTests
         return ms.ToArray();
     }
 
-    private static byte[] BuildStarfieldNif(string[] types, string[] strings, byte[][] payloads)
+    private static byte[] BuildStarfieldNif(string[] types, string[] strings, byte[][] payloads, uint streamVersion = 170)
     {
         using var ms = new MemoryStream();
         using var bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
         bw.Write(Encoding.ASCII.GetBytes("Gamebryo File Format, Version 20.2.0.7\n"));
-        bw.Write(0x14020007u); bw.Write((byte)1); bw.Write(12u); bw.Write(types.Length); bw.Write(170u);
+        bw.Write(0x14020007u); bw.Write((byte)1); bw.Write(12u); bw.Write(types.Length); bw.Write(streamVersion);
         WriteSized1(bw, ""); bw.Write(0u); WriteSized1(bw, ""); WriteSized1(bw, "");
         bw.Write((ushort)types.Length);
         foreach (string type in types) WriteSized4(bw, type);
