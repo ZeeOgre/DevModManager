@@ -14,11 +14,21 @@ public sealed class NifReadResult
 /// <summary>Outcome of the schema-selected dependency reader (never a token-search outcome).</summary>
 public sealed class NifDependencyDiagnostics
 {
-    public bool IsStarfield { get; init; }
+    public NifFamily Family { get; init; }
+    public bool IsKnown { get; init; }
     public bool IsComplete { get; set; }
     public uint BethesdaStreamVersion { get; init; }
     public List<NifDependencyRecord> Records { get; } = new();
     public List<string> UnhandledBlockTypes { get; } = new();
+}
+
+public enum NifFamily
+{
+    Unknown,
+    Other,
+    Skyrim,
+    Fallout4,
+    Starfield
 }
 
 public sealed class NifDependencyRecord

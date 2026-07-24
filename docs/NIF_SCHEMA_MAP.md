@@ -1,6 +1,8 @@
 # NIF dependency schema map
 
-This map is the implementation contract for deterministic dependency extraction. It is derived from the vendored NifSkope schema at `_references/nifskope/build/nif.xml` and NifSkope's resource extraction implementation in `_references/nifskope/src/spells/fileextract.cpp`.
+This map is the implementation contract for deterministic dependency extraction. Its authoritative source is the checked-in C# `NifSchemaCatalog` in `DMM.AssetManagers.NIF`; NifSkope is reference material only.
+
+The schema catalog owns every known block, struct, field, predicate, and dependency classification. It has no runtime dependency on vendored XML or generated external documentation.
 
 ## Dispatch contract
 

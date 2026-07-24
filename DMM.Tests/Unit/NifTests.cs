@@ -7,6 +7,15 @@ namespace DMM.Tests.Unit;
 public sealed class NifTests
 {
     [Fact]
+    public void SchemaCatalog_Is_SelfContained_And_Covers_NifSkope_Block_And_Struct_Inventory()
+    {
+        Assert.True(NifSchemaCatalog.TryGet("BSGeometry", out NifSchemaType? geometry));
+        Assert.Contains(geometry!.Fields, field => field.Name == "Meshes" && field.Type == "BSMeshArray");
+        Assert.True(NifSchemaCatalog.TryGet("BSMesh", out NifSchemaType? mesh));
+        Assert.Contains(mesh!.Fields, field => field.Name == "Mesh Path" && field.DependencyCategory == "Mesh");
+    }
+
+    [Fact]
     public void Reader_Read_Extracts_Mats_And_Meshes()
     {
         string root = CreateTempRoot();
@@ -109,7 +118,8 @@ public sealed class NifTests
 
             Assert.Equal(["Data\\Materials\\ships\\engine.mat", "Data\\Materials\\ships\\hull.mat"], result.Mats);
             Assert.Equal(["Data\\Animations\\ships\\idle.hkx"], result.Havoks);
-            Assert.True(result.Diagnostics.IsStarfield);
+            Assert.Equal(NifFamily.Starfield, result.Diagnostics.Family);
+            Assert.True(result.Diagnostics.IsKnown);
             Assert.True(result.Diagnostics.IsComplete);
             Assert.Equal(3, result.Diagnostics.Records.Count);
         }
