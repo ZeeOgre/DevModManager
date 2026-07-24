@@ -7,6 +7,15 @@ namespace DMM.Tests.Unit;
 public sealed class NifTests
 {
     [Fact]
+    public void SchemaCatalog_Is_SelfContained_And_Covers_NifSkope_Block_And_Struct_Inventory()
+    {
+        Assert.True(NifSchemaCatalog.TryGet("BSGeometry", out NifSchemaType? geometry));
+        Assert.Contains(geometry!.Fields, field => field.Name == "Meshes" && field.Type == "BSMeshArray");
+        Assert.True(NifSchemaCatalog.TryGet("BSMesh", out NifSchemaType? mesh));
+        Assert.Contains(mesh!.Fields, field => field.Name == "Mesh Path" && field.DependencyCategory == "Mesh");
+    }
+
+    [Fact]
     public void Reader_Read_Extracts_Mats_And_Meshes()
     {
         string root = CreateTempRoot();
@@ -91,6 +100,30 @@ public sealed class NifTests
         {
             Directory.Delete(root, true);
         }
+    }
+
+    [Fact]
+    public void Reader_Read_Uses_Starfield_Schema_For_Material_And_Behavior_String_Indexes()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "starfield.nif");
+            File.WriteAllBytes(nifPath, BuildStarfieldNif(
+                ["BSLightingShaderProperty", "BSEffectShaderProperty", "BSBehaviorGraphExtraData"],
+                ["materials\\ships\\hull.mat", "materials\\ships\\engine.mat", "animations\\ships\\idle.hkx"],
+                [UIntPayload(0), UIntPayload(1), BehaviorPayload(2)]));
+
+            NifReadResult result = new NifReader().Read(nifPath);
+
+            Assert.Equal(["Data\\Materials\\ships\\engine.mat", "Data\\Materials\\ships\\hull.mat"], result.Mats);
+            Assert.Equal(["Data\\Animations\\ships\\idle.hkx"], result.Havoks);
+            Assert.Equal(NifFamily.Starfield, result.Diagnostics.Family);
+            Assert.True(result.Diagnostics.IsKnown);
+            Assert.True(result.Diagnostics.IsComplete);
+            Assert.Equal(3, result.Diagnostics.Records.Count);
+        }
+        finally { Directory.Delete(root, true); }
     }
 
     [Fact]
@@ -747,7 +780,7 @@ public sealed class NifTests
         bw.Write((byte)1);
         bw.Write(12u);
         bw.Write(1);
-        bw.Write(172u);
+        bw.Write(170u);
         WriteSized1(bw, "");
         bw.Write(0u);
         WriteSized1(bw, "");
@@ -796,6 +829,34 @@ public sealed class NifTests
         return ms.ToArray();
     }
 
+    private static byte[] BuildStarfieldNif(string[] types, string[] strings, byte[][] payloads)
+    {
+        using var ms = new MemoryStream();
+        using var bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
+        bw.Write(Encoding.ASCII.GetBytes("Gamebryo File Format, Version 20.2.0.7\n"));
+        bw.Write(0x14020007u); bw.Write((byte)1); bw.Write(12u); bw.Write(types.Length); bw.Write(170u);
+        WriteSized1(bw, ""); bw.Write(0u); WriteSized1(bw, ""); WriteSized1(bw, "");
+        bw.Write((ushort)types.Length);
+        foreach (string type in types) WriteSized4(bw, type);
+        for (ushort i = 0; i < types.Length; i++) bw.Write(i);
+        foreach (byte[] payload in payloads) bw.Write(payload.Length);
+        bw.Write((uint)strings.Length); bw.Write((uint)strings.Max(x => x.Length));
+        foreach (string value in strings) WriteSized4(bw, value);
+        bw.Write(0); // groups
+        foreach (byte[] payload in payloads) bw.Write(payload);
+        bw.Flush(); return ms.ToArray();
+    }
+
+    private static byte[] UIntPayload(uint value)
+    {
+        using var ms = new MemoryStream(); using var bw = new BinaryWriter(ms); bw.Write(value); return ms.ToArray();
+    }
+
+    private static byte[] BehaviorPayload(uint value)
+    {
+        using var ms = new MemoryStream(); using var bw = new BinaryWriter(ms); bw.Write(0u); bw.Write(value); bw.Write(false); return ms.ToArray();
+    }
+
     private static byte[] BuildBethesdaLikeTwoBlocksNif(
         string blockNameA,
         string blockNameB,
@@ -812,7 +873,7 @@ public sealed class NifTests
         bw.Write((byte)1);
         bw.Write(12u);
         bw.Write(2);
-        bw.Write(172u);
+        bw.Write(170u);
         WriteSized1(bw, "");
         bw.Write(0u);
         WriteSized1(bw, "");
@@ -869,7 +930,7 @@ public sealed class NifTests
         bw.Write((byte)1);
         bw.Write(12u);
         bw.Write(1);
-        bw.Write(172u);
+        bw.Write(170u);
         WriteSized1(bw, "");
         bw.Write(0u);
         WriteSized1(bw, "");
