@@ -5,15 +5,18 @@ namespace DMM.AssetManagers.NIF;
 public sealed class NifReader
 {
     private const int MaxSizedStringLength = 0x8000;
-    private const uint StarfieldBethesdaStreamVersion = 170;
 
     public NifReadResult Read(string nifPath)
     {
         if (nifPath == null) throw new ArgumentNullException(nameof(nifPath));
         if (!File.Exists(nifPath)) throw new FileNotFoundException("NIF not found", nifPath);
 
+        byte[] bytes = File.ReadAllBytes(nifPath);
+        if (TryReadBethesdaStructure(bytes, out NifStructureScan structure))
+            return ReadStructuredBethesda(bytes, nifPath, structure, NifSchemaCatalog.ResolveProfile(0, 0, structure.BethesdaStreamVersion));
+
         var result = new NifReadResult { Path = nifPath };
-        result.Meshes.AddRange(ReadMeshStrings(nifPath).Select(entry => entry.NormalizedToken));
+        result.Meshes.AddRange(ReadMeshStrings(bytes).Select(entry => entry.NormalizedToken));
 
         foreach (NifStringEntry entry in ReadStringTable(nifPath))
         {
@@ -52,12 +55,132 @@ public sealed class NifReader
         return result;
     }
 
+    /// <summary>
+    /// Shared Bethesda block-table reader. Family selection changes schema
+    /// predicates and field layouts; it never changes the header/block algorithm.
+    /// </summary>
+    private NifReadResult ReadStructuredBethesda(byte[] bytes, string nifPath, NifStructureScan structure, NifSchemaProfileResolution profileResolution)
+    {
+        NifFamily family = profileResolution.Family;
+        var diagnostics = new NifDependencyDiagnostics
+        {
+            Family = family,
+            IsKnown = profileResolution.IsKnown,
+            SchemaProfileName = profileResolution.Profile?.Name,
+            NearestSchemaProfileName = profileResolution.NearestProfile?.Name,
+            IsComplete = profileResolution.IsKnown,
+            BethesdaStreamVersion = structure.BethesdaStreamVersion
+        };
+        var result = new NifReadResult { Path = nifPath, Diagnostics = diagnostics };
+
+        // The catalog resolves every encountered block before family predicates
+        // select applicable fields. The same block-table walk is used by every
+        // Bethesda family; only variants and field predicates differ.
+        foreach (NifBlockSpan block in structure.Blocks)
+        {
+            if (!NifSchemaCatalog.TryGet(block.TypeName, out _))
+            {
+                diagnostics.IsComplete = false;
+                diagnostics.UnhandledBlockTypes.Add($"Unknown {family} block type: {block.TypeName}");
+            }
+        }
+        // NifSkope's Starfield schema stores material references in the inherited
+        // NiObjectNET Name string-index of the two shader-property blocks.  The
+        // BSLayedMaterial tree is a view of the external .mat, not bytes in a NIF.
+        foreach (NifBlockSpan block in structure.Blocks)
+        {
+            // Every table entry is dispatched against the internal schema before
+            // any family reader handles its dependency-bearing fields.
+            if (!NifSchemaCatalog.TryGet(block.TypeName, out _)) continue;
+            if (block.TypeName is "BSLightingShaderProperty" or "BSEffectShaderProperty")
+            {
+                if (!TryReadHeaderStringReference(bytes, block, structure, out string value, out int offset))
+                {
+                    diagnostics.IsComplete = false;
+                    diagnostics.UnhandledBlockTypes.Add($"{block.TypeName}: malformed NiObjectNET Name");
+                    continue;
+                }
+                if (TryNormalizeMatToken(value, out string material))
+                {
+                    result.Mats.Add(material);
+                    diagnostics.Records.Add(new NifDependencyRecord { BlockIndex = block.Index, BlockType = block.TypeName, Field = "Name / Material", Category = "Material", Offset = offset, Value = material });
+                }
+            }
+            else if (block.TypeName == "BSBehaviorGraphExtraData")
+            {
+                // NiExtraData.Name then Behaviour Graph File (both string indexes).
+                int position = block.StartOffset + 4;
+                if (!TryReadUInt32(bytes, ref position, out uint stringIndex) || stringIndex >= structure.HeaderStrings.Count)
+                {
+                    diagnostics.IsComplete = false;
+                    diagnostics.UnhandledBlockTypes.Add("BSBehaviorGraphExtraData: malformed Behaviour Graph File");
+                    continue;
+                }
+                string value = structure.HeaderStrings[(int)stringIndex];
+                if (TryNormalizeHkxToken(value, out string behavior))
+                {
+                    result.Havoks.Add(behavior);
+                    diagnostics.Records.Add(new NifDependencyRecord { BlockIndex = block.Index, BlockType = block.TypeName, Field = "Behaviour Graph File", Category = "Behavior", Offset = block.StartOffset + 4, Value = behavior });
+                }
+            }
+        }
+
+        if (family == NifFamily.Starfield)
+        {
+            foreach (NifMeshStringEntry mesh in ReadStarfieldGeometryMeshPaths(bytes, structure))
+            {
+                result.Meshes.Add(mesh.NormalizedToken);
+                diagnostics.Records.Add(new NifDependencyRecord { BlockType = "BSGeometry", Field = "Meshes[].Mesh Path", Category = "Mesh", Offset = mesh.Offset, Value = mesh.NormalizedToken });
+            }
+        }
+        DeduplicateSort(result.Mats); DeduplicateSort(result.Meshes); DeduplicateSort(result.Havoks);
+        return diagnostics.IsComplete ? result : ReadLegacyWithDiagnostics(bytes, nifPath, diagnostics);
+    }
+
+    private NifReadResult ReadLegacyWithDiagnostics(byte[] bytes, string nifPath, NifDependencyDiagnostics diagnostics)
+    {
+        var result = new NifReadResult { Path = nifPath, Diagnostics = diagnostics };
+        result.Meshes.AddRange(ReadMeshStrings(bytes).Select(entry => entry.NormalizedToken));
+        foreach (NifSerializedString entry in ReadSerializedStrings(bytes))
+        {
+            string value = entry.Value.Replace('/', '\\').Trim();
+            if (TryNormalizeMatToken(value, out string mat)) result.Mats.Add(mat);
+            else if (TryNormalizeRigToken(value, out string rig)) result.Rigs.Add(rig);
+            else if (TryNormalizeHavokToken(value, out string havok) || TryNormalizeHkxToken(value, out havok)) result.Havoks.Add(havok);
+            else if (LooksLikeAssetToken(value)) result.OtherAssets.Add(value.TrimStart('\\'));
+        }
+        DeduplicateSort(result.Mats); DeduplicateSort(result.Meshes); DeduplicateSort(result.Rigs); DeduplicateSort(result.Havoks); DeduplicateSort(result.OtherAssets);
+        return result;
+    }
+
+
+    private static bool TryReadHeaderStringReference(byte[] bytes, NifBlockSpan block, NifStructureScan structure, out string value, out int offset)
+    {
+        value = string.Empty; offset = block.StartOffset;
+        int position = block.StartOffset;
+        if (!TryReadUInt32(bytes, ref position, out uint index) || index >= structure.HeaderStrings.Count)
+            return false;
+        value = structure.HeaderStrings[(int)index];
+        return true;
+    }
+
     public IReadOnlyList<NifStringEntry> ReadStringTable(string nifPath)
     {
         if (nifPath == null) throw new ArgumentNullException(nameof(nifPath));
         if (!File.Exists(nifPath)) throw new FileNotFoundException("NIF not found", nifPath);
 
         byte[] bytes = File.ReadAllBytes(nifPath);
+
+        // A well-formed Starfield NIF has a fully specified string table.  Do not
+        // turn arbitrary block bytes into dependencies by applying the legacy
+        // length-prefixed-string scavenger to this family.
+        if (TryReadBethesdaStructure(bytes, out NifStructureScan structure) &&
+            NifSchemaCatalog.ResolveProfile(0, 0, structure.BethesdaStreamVersion).IsKnown)
+        {
+            return structure.HeaderStrings
+                .Select((value, index) => new NifStringEntry { Index = index, Value = value })
+                .ToList();
+        }
 
         // Mesh paths are serialized in NIF blocks, not necessarily in the Bethesda
         // header string table.  Always scan serialized strings across the whole file;
@@ -215,7 +338,7 @@ public sealed class NifReader
         NifStructureScan structure)
     {
         var entries = new List<NifMeshStringEntry>();
-        if (structure.BethesdaStreamVersion < StarfieldBethesdaStreamVersion)
+        if (NifSchemaCatalog.ResolveProfile(0, 0, structure.BethesdaStreamVersion).Family != NifFamily.Starfield)
             return entries;
 
         int entryIndex = 0;
@@ -585,6 +708,12 @@ public sealed class NifReader
     internal static bool TryNormalizeHavokToken(string token, out string normalized)
     {
         return TryNormalizeDataTokenWithKnownRoots(token, ".hvk", out normalized,
+            "Meshes", "Animations", "Actors", "Data");
+    }
+
+    internal static bool TryNormalizeHkxToken(string token, out string normalized)
+    {
+        return TryNormalizeDataTokenWithKnownRoots(token, ".hkx", out normalized,
             "Meshes", "Animations", "Actors", "Data");
     }
 

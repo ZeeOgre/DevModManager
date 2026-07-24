@@ -514,81 +514,30 @@ namespace DmmDep
                     string full = Path.Combine(gameRoot, nifRel);
                     if (!File.Exists(full)) continue;
 
-                    var nifBytes = File.ReadAllBytes(full);
-
-                    // Starfield mesh references are extensionless, relative strings in
-                    // BSGeometry "Mesh Path" fields.  Let the NIF reader identify those
-                    // typed fields; do not infer meshes from unrelated printable strings.
-                    foreach (NifMeshStringEntry mesh in nifReader.ReadMeshStrings(nifBytes))
-                    {
-                        string meshRel = mesh.NormalizedToken;
+                    NifReadResult dependencies = nifReader.Read(full);
+                    foreach (string meshRel in dependencies.Meshes)
                         if (File.Exists(Path.Combine(gameRoot, meshRel)))
                             AddFile(manifest, achlistPaths, meshRel, FileKind.Mesh, $"nif:{nifRel}", gameRoot, xboxDataRoot);
-                    }
 
-
-
-
-                    foreach (var s in ExtractPrintableStrings(nifBytes, 4))
+                    foreach (string matRel in dependencies.Mats)
                     {
-                        string token = s.Replace('/', '\\').TrimStart('\\');
+                        if (File.Exists(Path.Combine(gameRoot, matRel))) matRelPaths.Add(matRel);
+                        else Log.Warn($"[2] Presumed MAT path '{matRel}' from NIF '{nifRel}' does not exist");
+                    }
+                    foreach (string rigRel in dependencies.Rigs)
+                        if (File.Exists(Path.Combine(gameRoot, rigRel)))
+                            AddFile(manifest, achlistPaths, rigRel, FileKind.Rig, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                    foreach (string havokRel in dependencies.Havoks)
+                        if (File.Exists(Path.Combine(gameRoot, havokRel)))
+                            AddFile(manifest, achlistPaths, havokRel, FileKind.Anim, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                    foreach (string otherRel in dependencies.OtherAssets)
+                        if (File.Exists(Path.Combine(gameRoot, otherRel)))
+                            AddFile(manifest, achlistPaths, otherRel, FileKind.Other, $"nif:{nifRel}", gameRoot, xboxDataRoot);
 
-                        if (IsMatExtension(token))
-                        {
-                            string rel = token;
-
-                            // Truncate at .mat extension to remove garbage like .mat+ or .mat1
-                            int matIndex = rel.IndexOf(".mat", StringComparison.OrdinalIgnoreCase);
-                            if (matIndex >= 0)
-                            {
-                                rel = rel.Substring(0, matIndex + 4); // Keep up to and including ".mat"
-                            }
-
-                            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
-                            {
-                                rel = rel.StartsWith("Materials\\", StringComparison.OrdinalIgnoreCase)
-                                    ? Path.Combine("Data", rel)
-                                    : Path.Combine("Data\\Materials", rel);
-                            }
-                            rel = NormalizeRel(rel);
-                            string fullMat = Path.Combine(gameRoot, rel);
-
-                            if (File.Exists(fullMat))
-                            {
-                                matRelPaths.Add(rel);
-                            }
-                            else
-                            {
-                                Log.Warn($"[2] Presumed MAT path '{rel}' from NIF '{nifRel}' does not exist");
-                            }
-                        }
-                        else if (token.EndsWith(".rig", StringComparison.OrdinalIgnoreCase))
-                        {
-                            string rel = token;
-
-                            // Truncate at .rig extension to remove garbage
-                            int rigIndex = rel.IndexOf(".rig", StringComparison.OrdinalIgnoreCase);
-                            if (rigIndex >= 0)
-                            {
-                                rel = rel.Substring(0, rigIndex + 4); // Keep up to and including ".rig"
-                            }
-
-                            if (!rel.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
-                            {
-                                rel = rel.StartsWith("meshes\\", StringComparison.OrdinalIgnoreCase)
-                                    ? NormalizeRel(Path.Combine("Data", rel))
-                                    : NormalizeRel(Path.Combine("Data\\Meshes", rel));
-                            }
-                            else
-                            {
-                                rel = NormalizeRel(rel);
-                            }
-
-                            if (File.Exists(Path.Combine(gameRoot, rel)))
-                            {
-                                AddFile(manifest, achlistPaths, rel, FileKind.Rig, $"nif:{nifRel}", gameRoot, xboxDataRoot);
-                            }
-                        }
+                    if (!dependencies.Diagnostics.IsComplete)
+                    {
+                        string reasons = string.Join("; ", dependencies.Diagnostics.UnhandledBlockTypes);
+                        Log.Warn($"[2] NIF structured parse incomplete: {nifRel}; family={dependencies.Diagnostics.Family}; bs={dependencies.Diagnostics.BethesdaStreamVersion}; {reasons}");
                     }
                 }
 
