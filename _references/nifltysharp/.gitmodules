@@ -1,4 +1,0 @@
-[submodule "nifxml"]
-	path = nifxml
-	url = https://github.com/niftools/nifxml
-	branch = develop

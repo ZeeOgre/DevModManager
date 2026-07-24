@@ -14,8 +14,8 @@ public sealed class NifReadResult
 /// <summary>Outcome of the schema-selected dependency reader (never a token-search outcome).</summary>
 public sealed class NifDependencyDiagnostics
 {
-    public NifFamily Family { get; init; }
-    public bool IsKnown { get; init; }
+    public NifFamily Family { get; set; }
+    public bool IsKnown { get; set; }
     public string? SchemaProfileName { get; init; }
     public string? NearestSchemaProfileName { get; init; }
     public string? CompatibilityProfileName { get; init; }
