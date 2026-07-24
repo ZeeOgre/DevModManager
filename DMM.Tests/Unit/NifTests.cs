@@ -64,6 +64,36 @@ public sealed class NifTests
     }
 
     [Fact]
+    public void Reader_ReadMeshStrings_Includes_Extensionless_Relative_Lod4_Mesh_Path_In_BsGeometry_Block()
+    {
+        string root = CreateTempRoot();
+        try
+        {
+            string nifPath = Path.Combine(root, "sample.nif");
+            string[] meshTokens = Enumerable.Range(1, 4)
+                .Select(lod => $"zeeogre\\combinedstoragecontainer\\detals01_4_lod{lod}")
+                .ToArray();
+            File.WriteAllBytes(nifPath, BuildBethesdaLikeSingleBlockNif("CombinedStorageContainer:44", meshTokens));
+
+            var reader = new NifReader();
+            var meshEntries = reader.ReadMeshStrings(nifPath);
+            var meshEntriesFromBytes = reader.ReadMeshStrings(File.ReadAllBytes(nifPath));
+
+            Assert.Equal(meshTokens, meshEntries.Select(entry => entry.RawToken));
+            Assert.Equal(
+                meshTokens.Select(token => "Data\\Geometries\\" + token + ".mesh"),
+                meshEntries.Select(entry => entry.NormalizedToken));
+            Assert.All(meshEntries, entry => Assert.True(entry.Offset >= 0));
+            Assert.Equal(meshEntries.Select(entry => entry.Offset).Order(), meshEntries.Select(entry => entry.Offset));
+            Assert.Equal(meshEntries.Select(entry => entry.RawToken), meshEntriesFromBytes.Select(entry => entry.RawToken));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void Reader_ReadStringTable_Includes_SizedString2_Block_Name_Payloads()
     {
         string root = CreateTempRoot();
@@ -704,8 +734,11 @@ public sealed class NifTests
         ms.WriteByte(0);
     }
 
-    private static byte[] BuildBethesdaLikeSingleBlockNif(string blockName, string meshToken)
+    private static byte[] BuildBethesdaLikeSingleBlockNif(string blockName, params string[] meshTokens)
     {
+        if (meshTokens.Length > 4)
+            throw new ArgumentOutOfRangeException(nameof(meshTokens));
+
         using var ms = new MemoryStream();
         using var bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
 
@@ -734,9 +767,27 @@ public sealed class NifTests
         bw.Write(0);
 
         long blockStart = ms.Position;
-        bw.Write(0);
-        bw.Write(0);
-        WriteSized4(bw, meshToken);
+        // NiObjectNET + NiAVObject + BSGeometry fields before the four BSMeshArray entries.
+        bw.Write(0); // Name string index
+        bw.Write(0u); // Num Extra Data List
+        bw.Write(-1); // Controller
+        bw.Write(0u); // Flags: external mesh data
+        bw.Write(new byte[56]); // NiAVObject transform and collision object
+        bw.Write(new byte[52]); // BSGeometry bounds and three references
+        for (int lodIndex = 0; lodIndex < 4; lodIndex++)
+        {
+            if (lodIndex >= meshTokens.Length)
+            {
+                bw.Write((byte)0);
+                continue;
+            }
+
+            bw.Write((byte)1); // Has Mesh
+            bw.Write(0u); // Indices Size
+            bw.Write(0u); // Num Verts
+            bw.Write(0u); // Mesh Flags
+            WriteSized4(bw, meshTokens[lodIndex]); // External Mesh Path
+        }
         long blockEnd = ms.Position;
 
         ms.Position = blockSizePosition;
