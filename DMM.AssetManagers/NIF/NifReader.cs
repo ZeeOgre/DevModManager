@@ -5,7 +5,6 @@ namespace DMM.AssetManagers.NIF;
 public sealed class NifReader
 {
     private const int MaxSizedStringLength = 0x8000;
-    private const uint StarfieldBethesdaStreamVersion = 170;
 
     public NifReadResult Read(string nifPath)
     {
@@ -14,10 +13,10 @@ public sealed class NifReader
 
         byte[] bytes = File.ReadAllBytes(nifPath);
         if (TryReadBethesdaStructure(bytes, out NifStructureScan structure))
-            return ReadStructuredBethesda(bytes, nifPath, structure, DetectFamily(structure));
+            return ReadStructuredBethesda(bytes, nifPath, structure, NifSchemaCatalog.ResolveProfile(0, 0, structure.BethesdaStreamVersion));
 
         var result = new NifReadResult { Path = nifPath };
-        result.Meshes.AddRange(new NifReader().ReadMeshStrings(bytes).Select(entry => entry.NormalizedToken));
+        result.Meshes.AddRange(ReadMeshStrings(bytes).Select(entry => entry.NormalizedToken));
 
         foreach (NifStringEntry entry in ReadStringTable(nifPath))
         {
@@ -60,15 +59,23 @@ public sealed class NifReader
     /// Shared Bethesda block-table reader. Family selection changes schema
     /// predicates and field layouts; it never changes the header/block algorithm.
     /// </summary>
-    private static NifReadResult ReadStructuredBethesda(byte[] bytes, string nifPath, NifStructureScan structure, NifFamily family)
+    private NifReadResult ReadStructuredBethesda(byte[] bytes, string nifPath, NifStructureScan structure, NifSchemaProfileResolution profileResolution)
     {
+        NifFamily family = profileResolution.Family;
         var diagnostics = new NifDependencyDiagnostics
         {
             Family = family,
-            IsKnown = family != NifFamily.Unknown,
+            IsKnown = profileResolution.IsKnown,
+            SchemaProfileName = profileResolution.Profile?.Name,
+            NearestSchemaProfileName = profileResolution.NearestProfile?.Name,
+            CompatibilityProfileName = profileResolution.CompatibilityProfile?.Name,
+            IsExactProfileMatch = profileResolution.IsExactProfileMatch,
+            ObservedBethesdaStreamVersion = structure.BethesdaStreamVersion,
             IsComplete = true,
             BethesdaStreamVersion = structure.BethesdaStreamVersion
         };
+        if (!profileResolution.IsExactProfileMatch)
+            diagnostics.UnhandledBlockTypes.Add($"No exact schema profile for Bethesda stream {structure.BethesdaStreamVersion}; compatibility baseline {profileResolution.CompatibilityProfile?.Name ?? "none"}.");
         var result = new NifReadResult { Path = nifPath, Diagnostics = diagnostics };
 
         // The catalog resolves every encountered block before family predicates
@@ -135,10 +142,10 @@ public sealed class NifReader
         return diagnostics.IsComplete ? result : ReadLegacyWithDiagnostics(bytes, nifPath, diagnostics);
     }
 
-    private static NifReadResult ReadLegacyWithDiagnostics(byte[] bytes, string nifPath, NifDependencyDiagnostics diagnostics)
+    private NifReadResult ReadLegacyWithDiagnostics(byte[] bytes, string nifPath, NifDependencyDiagnostics diagnostics)
     {
         var result = new NifReadResult { Path = nifPath, Diagnostics = diagnostics };
-        result.Meshes.AddRange(new NifReader().ReadMeshStrings(bytes).Select(entry => entry.NormalizedToken));
+        result.Meshes.AddRange(ReadMeshStrings(bytes).Select(entry => entry.NormalizedToken));
         foreach (NifSerializedString entry in ReadSerializedStrings(bytes))
         {
             string value = entry.Value.Replace('/', '\\').Trim();
@@ -151,14 +158,6 @@ public sealed class NifReader
         return result;
     }
 
-    internal static NifFamily DetectFamily(NifStructureScan structure) => structure.BethesdaStreamVersion switch
-    {
-        >= StarfieldBethesdaStreamVersion => NifFamily.Starfield,
-        >= 130 => NifFamily.Fallout4,
-        >= 83 => NifFamily.Skyrim,
-        > 0 => NifFamily.Other,
-        _ => NifFamily.Unknown
-    };
 
     private static bool TryReadHeaderStringReference(byte[] bytes, NifBlockSpan block, NifStructureScan structure, out string value, out int offset)
     {
@@ -181,7 +180,7 @@ public sealed class NifReader
         // turn arbitrary block bytes into dependencies by applying the legacy
         // length-prefixed-string scavenger to this family.
         if (TryReadBethesdaStructure(bytes, out NifStructureScan structure) &&
-            structure.BethesdaStreamVersion >= StarfieldBethesdaStreamVersion)
+            NifSchemaCatalog.ResolveProfile(0, 0, structure.BethesdaStreamVersion).IsKnown)
         {
             return structure.HeaderStrings
                 .Select((value, index) => new NifStringEntry { Index = index, Value = value })
@@ -344,7 +343,7 @@ public sealed class NifReader
         NifStructureScan structure)
     {
         var entries = new List<NifMeshStringEntry>();
-        if (structure.BethesdaStreamVersion < StarfieldBethesdaStreamVersion)
+        if (NifSchemaCatalog.ResolveProfile(0, 0, structure.BethesdaStreamVersion).Family != NifFamily.Starfield)
             return entries;
 
         int entryIndex = 0;

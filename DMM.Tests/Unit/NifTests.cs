@@ -780,7 +780,7 @@ public sealed class NifTests
         bw.Write((byte)1);
         bw.Write(12u);
         bw.Write(1);
-        bw.Write(172u);
+        bw.Write(170u);
         WriteSized1(bw, "");
         bw.Write(0u);
         WriteSized1(bw, "");
@@ -834,7 +834,7 @@ public sealed class NifTests
         using var ms = new MemoryStream();
         using var bw = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true);
         bw.Write(Encoding.ASCII.GetBytes("Gamebryo File Format, Version 20.2.0.7\n"));
-        bw.Write(0x14020007u); bw.Write((byte)1); bw.Write(12u); bw.Write(types.Length); bw.Write(172u);
+        bw.Write(0x14020007u); bw.Write((byte)1); bw.Write(12u); bw.Write(types.Length); bw.Write(170u);
         WriteSized1(bw, ""); bw.Write(0u); WriteSized1(bw, ""); WriteSized1(bw, "");
         bw.Write((ushort)types.Length);
         foreach (string type in types) WriteSized4(bw, type);
@@ -873,7 +873,7 @@ public sealed class NifTests
         bw.Write((byte)1);
         bw.Write(12u);
         bw.Write(2);
-        bw.Write(172u);
+        bw.Write(170u);
         WriteSized1(bw, "");
         bw.Write(0u);
         WriteSized1(bw, "");
@@ -930,7 +930,7 @@ public sealed class NifTests
         bw.Write((byte)1);
         bw.Write(12u);
         bw.Write(1);
-        bw.Write(172u);
+        bw.Write(170u);
         WriteSized1(bw, "");
         bw.Write(0u);
         WriteSized1(bw, "");

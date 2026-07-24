@@ -16,6 +16,13 @@ public sealed class NifDependencyDiagnostics
 {
     public NifFamily Family { get; init; }
     public bool IsKnown { get; init; }
+    public string? SchemaProfileName { get; init; }
+    public string? NearestSchemaProfileName { get; init; }
+    public string? CompatibilityProfileName { get; init; }
+    public bool IsExactProfileMatch { get; init; }
+    public uint ObservedBethesdaStreamVersion { get; init; }
+    public List<string> UnsupportedFields { get; } = new();
+    public List<string> UnconsumedBlockData { get; } = new();
     public bool IsComplete { get; set; }
     public uint BethesdaStreamVersion { get; init; }
     public List<NifDependencyRecord> Records { get; } = new();

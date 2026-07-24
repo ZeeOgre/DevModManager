@@ -16,3 +16,6 @@ public sealed record NifSchemaField(string Name, NifFieldKind Kind, NifPredicate
     public bool CanContainExternalDependency => DependencyCategory is not null;
 }
 public sealed record NifSchemaType(string Name, bool IsStruct, string? BaseType, NifPredicate Predicate, IReadOnlyList<NifSchemaField> Fields);
+public sealed record NifSchemaProfile(string Name, NifFamily Family, uint[] BethesdaStreamVersions, string Evidence, string? BaseProfile = null);
+public sealed record NifSchemaProfileResolution(NifSchemaProfile? Profile, NifSchemaProfile? NearestProfile)
+{ public bool IsKnown => Profile is not null; public NifFamily Family => Profile?.Family ?? NearestProfile?.Family ?? NifFamily.Unknown; public bool IsExactProfileMatch => Profile is not null; public NifSchemaProfile? CompatibilityProfile => Profile is null ? NearestProfile : null; }
