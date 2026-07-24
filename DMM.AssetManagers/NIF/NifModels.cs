@@ -8,6 +8,27 @@ public sealed class NifReadResult
     public List<string> Rigs { get; } = new();
     public List<string> Havoks { get; } = new();
     public List<string> OtherAssets { get; } = new();
+    public NifDependencyDiagnostics Diagnostics { get; init; } = new();
+}
+
+/// <summary>Outcome of the schema-selected dependency reader (never a token-search outcome).</summary>
+public sealed class NifDependencyDiagnostics
+{
+    public bool IsStarfield { get; init; }
+    public bool IsComplete { get; set; }
+    public uint BethesdaStreamVersion { get; init; }
+    public List<NifDependencyRecord> Records { get; } = new();
+    public List<string> UnhandledBlockTypes { get; } = new();
+}
+
+public sealed class NifDependencyRecord
+{
+    public int BlockIndex { get; init; }
+    public string BlockType { get; init; } = "";
+    public string Field { get; init; } = "";
+    public string Category { get; init; } = "";
+    public int Offset { get; init; } = -1;
+    public string Value { get; init; } = "";
 }
 
 public sealed class NifStringEntry
