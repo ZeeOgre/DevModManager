@@ -1,6 +1,6 @@
 namespace DMM.AssetManagers.NIF;
 
-public sealed class NifReadResult
+public class NifReadResult
 {
     public string Path { get; init; } = "";
     public List<string> Mats { get; } = new();
@@ -8,6 +8,14 @@ public sealed class NifReadResult
     public List<string> Rigs { get; } = new();
     public List<string> Havoks { get; } = new();
     public List<string> OtherAssets { get; } = new();
+}
+
+public sealed class NifDependencyReadResult : NifReadResult
+{
+    public bool IsStructured { get; set; }
+    public bool IsComplete { get; set; }
+    public List<string> Diagnostics { get; } = new();
+    public TimeSpan StructuredParseTime { get; set; }
 }
 
 public sealed class NifStringEntry
@@ -29,6 +37,7 @@ public sealed class NifReadableMeshCopy
 public sealed class NifMeshStringEntry
 {
     public int Index { get; init; }
+    public int Offset { get; init; } = -1;
     public string RawToken { get; init; } = "";
     public string NormalizedToken { get; init; } = "";
 }
@@ -50,12 +59,14 @@ public readonly record struct NifSerializedString(int Offset, int PrefixSize, in
 public sealed class NifBlockSpan
 {
     public int Index { get; init; }
+    public string TypeName { get; init; } = "";
     public int StartOffset { get; init; }
     public int EndOffsetExclusive { get; init; }
 }
 
 public sealed class NifStructureScan
 {
+    public uint BethesdaStreamVersion { get; init; }
     public int BlocksStartOffset { get; init; }
     public IReadOnlyList<string> HeaderStrings { get; init; } = Array.Empty<string>();
     public IReadOnlyList<NifBlockSpan> Blocks { get; init; } = Array.Empty<NifBlockSpan>();

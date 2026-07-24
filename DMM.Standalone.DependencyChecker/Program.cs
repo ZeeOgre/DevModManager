@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using DMM.AssetManagers;
+using DMM.AssetManagers.NIF;
 
 namespace DmmDep
 {
@@ -506,6 +507,7 @@ namespace DmmDep
 
                 // ---- 2. NIF -> MAT + MeshPath + RIG ----
                 Log.Info("[2] Scanning NIFs for MAT, mesh stems, and RIG... meshes come from nifs (which are in meshes) but are stored in geometries... confused yet?");
+                var nifReader = new NifReader();
 
                 foreach (var nifRel in nifRelPaths)
                 {
@@ -514,9 +516,27 @@ namespace DmmDep
 
                     var nifBytes = File.ReadAllBytes(full);
 
+                    NifDependencyReadResult nifDependencies = nifReader.ReadDependencies(nifBytes);
+                    foreach (string meshRel in nifDependencies.Meshes)
+                    {
+                        if (File.Exists(Path.Combine(gameRoot, meshRel)))
+                            AddFile(manifest, achlistPaths, meshRel, FileKind.Mesh, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                    }
+                    foreach (string matRel in nifDependencies.Mats)
+                    {
+                        if (File.Exists(Path.Combine(gameRoot, matRel)))
+                            matRelPaths.Add(matRel);
+                        else
+                            Log.Warn($"[2] Typed MAT path '{matRel}' from NIF '{nifRel}' does not exist");
+                    }
 
+                    if (nifDependencies.IsStructured && nifDependencies.IsComplete)
+                    {
+                        Log.Info($"[2] Structured Starfield parse: {nifRel} in {nifDependencies.StructuredParseTime.TotalMilliseconds:F1} ms");
+                        continue;
+                    }
 
-
+                    Log.Warn($"[2] NIF structured parse incomplete for '{nifRel}'; using legacy token fallback: {string.Join("; ", nifDependencies.Diagnostics)}");
                     foreach (var s in ExtractPrintableStrings(nifBytes, 4))
                     {
                         string token = s.Replace('/', '\\').TrimStart('\\');
@@ -575,26 +595,6 @@ namespace DmmDep
                             if (File.Exists(Path.Combine(gameRoot, rel)))
                             {
                                 AddFile(manifest, achlistPaths, rel, FileKind.Rig, $"nif:{nifRel}", gameRoot, xboxDataRoot);
-                            }
-                        }
-                        else if (!token.Contains('.') && token.Contains("\\"))
-                        {
-                            string stem = token.TrimStart('\\');
-
-                            int nullChar = stem.IndexOf('\0');
-                            if (nullChar >= 0)
-                            {
-                                stem = stem.Substring(0, nullChar);
-                            }
-                            stem = stem.TrimEnd();
-
-                            string meshRel = stem.StartsWith("geometries\\", StringComparison.OrdinalIgnoreCase)
-                                ? NormalizeRel(Path.Combine("Data", stem + ".mesh"))
-                                : NormalizeRel(Path.Combine("Data\\geometries", stem + ".mesh"));
-
-                            if (File.Exists(Path.Combine(gameRoot, meshRel)))
-                            {
-                                AddFile(manifest, achlistPaths, meshRel, FileKind.Mesh, $"nif:{nifRel}", gameRoot, xboxDataRoot);
                             }
                         }
                     }
