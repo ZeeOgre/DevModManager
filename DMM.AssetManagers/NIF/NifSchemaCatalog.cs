@@ -29,6 +29,10 @@ public static class NifSchemaCatalog
     {
         var types = new List<NifSchemaType>();
         NifSchemaCommon.Add(types); NifSchemaBethesda.Add(types); NifSchemaSkyrim.Add(types); NifSchemaFallout4.Add(types); NifSchemaStarfield.Add(types); NifSchemaLegacy.Add(types);
-        return types.ToDictionary(x => x.Name, StringComparer.Ordinal);
+        // A block name can have additive family variants (for example shader
+        // properties in Fallout 4 and Starfield). Keep the registry key stable;
+        // profile-aware field selection resolves the applicable variant.
+        return types.GroupBy(x => x.Name, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.Last(), StringComparer.Ordinal);
     }
 }
