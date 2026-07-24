@@ -13,7 +13,7 @@
     <!-- DMM.AssetManagers -->
     <PackageVersion Include="GameFinder" Version="4.9.0" />
     <PackageVersion Include="GameFinder.StoreHandlers.BethNet" Version="1.8.0" />
-    <PackageVersion Include="Nifly" Version="1.0.0" />
+    <PackageVersion Include="niflysharp" Version="2.0.4" />
     <PackageVersion Include="Octokit" Version="14.0.0" />
     <PackageVersion Include="Sharp.BSA.BA2" Version="1.17.0" />
     <PackageVersion Include="SQLite" Version="3.13.0" />

@@ -29,8 +29,8 @@
 
 ### Framework-Dependent (`dmmdeps.zip` - ~2 MB)
 - **Contains**: `dmmdeps.exe` + all required DLLs
-- **Requires**: .NET 9 Runtime installed on the target machine
-- **Use case**: Development, CI/CD, or users who already have .NET 9 installed
+- **Requires**: .NET 10 Runtime installed on the target machine
+- **Use case**: Development, CI/CD, or users who already have .NET 10 installed
 
 ### Self-Contained (`dmmdeps-fat.zip` - ~13 MB)
 - **Contains**: Single `dmmdeps-fat.exe` file with embedded .NET runtime
@@ -95,7 +95,7 @@ You can test the workflow commands locally:
 dotnet publish DMM.Standalone.DependencyChecker\DMM.Standalone.DependencyChecker.csproj -c Release /p:SelfContained=false /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o .\out\dmmdeps
 
 # Self-contained  
-dotnet publish DMM.Standalone.DependencyChecker\DMM.Standalone.DependencyChecker.csproj -c Release -r win-x64 /p:SelfContained=true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o .\out\dmmdeps-fat
+dotnet publish DMM.Standalone.DependencyChecker\DMM.Standalone.DependencyChecker.csproj -c Release -r win-x64 /p:SelfContained=true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:OutputType=Exe /p:EnableCompressionInSingleFile=false /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o .\out\dmmdeps-fat
 ```
 
 ## Key Configuration Changes
@@ -121,7 +121,7 @@ dotnet publish DMM.Standalone.DependencyChecker\DMM.Standalone.DependencyChecker
 
 ### Option 1: DLL Auto-Installation for dmmdeps.exe
 To make `dmmdeps.exe` install missing DLLs automatically, you could:
-1. Create a launcher stub that checks for .NET 9 runtime
+1. Create a launcher stub that checks for .NET 10 runtime
 2. If not found, download and install it (requires admin rights)
 3. Then launch the actual application
 
