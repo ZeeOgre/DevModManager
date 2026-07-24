@@ -10,5 +10,9 @@ public sealed record FixedLength(int Value) : NifLengthExpression;
 public sealed record CountField(string FieldName) : NifLengthExpression;
 public sealed record BitFlagLength(string FieldName, uint Mask) : NifLengthExpression;
 public sealed record NifSchemaField(string Name, NifFieldKind Kind, NifPredicate? Predicate = null, string? Template = null, NifLengthExpression? Length = null, string? DependencyCategory = null, NifNormalizationStrategy Normalization = NifNormalizationStrategy.None)
-{ public bool CanContainExternalDependency => DependencyCategory is not null; }
+{
+    /// <summary>Serialized schema type name, retained for callers that display inventory rows.</summary>
+    public string Type => Template ?? Kind.ToString();
+    public bool CanContainExternalDependency => DependencyCategory is not null;
+}
 public sealed record NifSchemaType(string Name, bool IsStruct, string? BaseType, NifPredicate Predicate, IReadOnlyList<NifSchemaField> Fields);
