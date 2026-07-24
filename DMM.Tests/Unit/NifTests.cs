@@ -77,11 +77,15 @@ public sealed class NifTests
 
             var reader = new NifReader();
             var meshEntries = reader.ReadMeshStrings(nifPath);
+            var meshEntriesFromBytes = reader.ReadMeshStrings(File.ReadAllBytes(nifPath));
 
             Assert.Equal(meshTokens, meshEntries.Select(entry => entry.RawToken));
             Assert.Equal(
                 meshTokens.Select(token => "Data\\Geometries\\" + token + ".mesh"),
                 meshEntries.Select(entry => entry.NormalizedToken));
+            Assert.All(meshEntries, entry => Assert.True(entry.Offset >= 0));
+            Assert.Equal(meshEntries.Select(entry => entry.Offset).Order(), meshEntries.Select(entry => entry.Offset));
+            Assert.Equal(meshEntries.Select(entry => entry.RawToken), meshEntriesFromBytes.Select(entry => entry.RawToken));
         }
         finally
         {

@@ -172,14 +172,25 @@ public sealed class NifReader
     public IReadOnlyList<NifMeshStringEntry> ReadMeshStrings(string nifPath)
     {
         byte[] bytes = File.ReadAllBytes(nifPath);
-        var entries = new List<NifMeshStringEntry>();
-        IReadOnlyList<NifSerializedString> serialized = ReadSerializedStrings(bytes);
+        return ReadMeshStrings(bytes);
+    }
+
+    /// <summary>
+    /// Deserializes mesh references from NIF bytes already loaded by the caller.
+    /// This avoids rereading every NIF when a dependency walker also needs its bytes
+    /// for material and rig processing.
+    /// </summary>
+    public IReadOnlyList<NifMeshStringEntry> ReadMeshStrings(byte[] bytes)
+    {
+        ArgumentNullException.ThrowIfNull(bytes);
 
         if (TryReadBethesdaStructure(bytes, out NifStructureScan structure))
-            return ReadStarfieldGeometryMeshPaths(bytes, serialized, structure);
+            return ReadStarfieldGeometryMeshPaths(bytes, structure);
 
         // Non-Bethesda/legacy NIFs do not have BSGeometry mesh arrays. Retain the
         // serialized-string fallback for those formats only.
+        var entries = new List<NifMeshStringEntry>();
+        IReadOnlyList<NifSerializedString> serialized = ReadSerializedStrings(bytes);
         for (int index = 0; index < serialized.Count; index++)
         {
             NifSerializedString value = serialized[index];
@@ -190,6 +201,7 @@ public sealed class NifReader
             entries.Add(new NifMeshStringEntry
             {
                 Index = index,
+                Offset = value.Offset,
                 RawToken = rawToken,
                 NormalizedToken = normalizedToken
             });
@@ -200,17 +212,13 @@ public sealed class NifReader
 
     private static IReadOnlyList<NifMeshStringEntry> ReadStarfieldGeometryMeshPaths(
         byte[] bytes,
-        IReadOnlyList<NifSerializedString> serialized,
         NifStructureScan structure)
     {
         var entries = new List<NifMeshStringEntry>();
         if (structure.BethesdaStreamVersion < StarfieldBethesdaStreamVersion)
             return entries;
 
-        var stringIndexByOffset = serialized
-            .Select((value, index) => (value.Offset, Index: index))
-            .ToDictionary(value => value.Offset, value => value.Index);
-
+        int entryIndex = 0;
         foreach (NifBlockSpan block in structure.Blocks.Where(block =>
                      string.Equals(block.TypeName, "BSGeometry", StringComparison.Ordinal)))
         {
@@ -235,13 +243,13 @@ public sealed class NifReader
                 int stringOffset = position;
                 if (!TryReadSizedString4(bytes, ref position, out string rawToken) ||
                     position > block.EndOffsetExclusive ||
-                    !TryNormalizeMeshToken(rawToken.Replace('/', '\\').Trim(), out string normalizedToken) ||
-                    !stringIndexByOffset.TryGetValue(stringOffset, out int stringIndex))
+                    !TryNormalizeMeshToken(rawToken.Replace('/', '\\').Trim(), out string normalizedToken))
                     break;
 
                 entries.Add(new NifMeshStringEntry
                 {
-                    Index = stringIndex,
+                    Index = entryIndex++,
+                    Offset = stringOffset,
                     RawToken = rawToken.Replace('/', '\\').Trim(),
                     NormalizedToken = normalizedToken
                 });
