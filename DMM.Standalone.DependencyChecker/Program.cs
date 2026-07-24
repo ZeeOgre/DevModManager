@@ -519,9 +519,8 @@ namespace DmmDep
                     // Starfield mesh references are extensionless, relative strings in
                     // BSGeometry "Mesh Path" fields.  Let the NIF reader identify those
                     // typed fields; do not infer meshes from unrelated printable strings.
-                    foreach (NifMeshStringEntry mesh in nifReader.ReadMeshStrings(nifBytes))
+                    foreach (string meshRel in new NifReader().Read(full).Meshes)
                     {
-                        string meshRel = mesh.NormalizedToken;
                         if (File.Exists(Path.Combine(gameRoot, meshRel)))
                             AddFile(manifest, achlistPaths, meshRel, FileKind.Mesh, $"nif:{nifRel}", gameRoot, xboxDataRoot);
                     }
