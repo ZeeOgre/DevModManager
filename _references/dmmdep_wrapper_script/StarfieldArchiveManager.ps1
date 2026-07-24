@@ -136,7 +136,7 @@ function Rebuild-AchlistFromEsmVoice {
 # -------------------------------------------------------------------
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Mod Archiver (Unified)"
-$form.Size = New-Object System.Drawing.Size(640, 800)
+$form.Size = New-Object System.Drawing.Size(640, 820)
 $form.StartPosition = "CenterScreen"
 $form.AllowDrop = $true
 
@@ -397,37 +397,44 @@ $smartClobberCheckbox.AutoSize = $true
 $smartClobberCheckbox.Checked = Get-Bool -Config $config -Key 'SmartClobber' -Default:$false
 $form.Controls.Add($smartClobberCheckbox)
 
+$preserveParentMatCheckbox = New-Object System.Windows.Forms.CheckBox
+$preserveParentMatCheckbox.Text = "Preserve parent .MAT files"
+$preserveParentMatCheckbox.Location = New-Object System.Drawing.Point(30, 322)
+$preserveParentMatCheckbox.AutoSize = $true
+$preserveParentMatCheckbox.Checked = Get-Bool -Config $config -Key 'PreserveParentMat' -Default:$false
+$form.Controls.Add($preserveParentMatCheckbox)
+
 # BA2 Archive Management
 $ba2Label = New-Object System.Windows.Forms.Label
 $ba2Label.Text = "BA2 Archive Management:"
-$ba2Label.Location = New-Object System.Drawing.Point(10, 330)
+$ba2Label.Location = New-Object System.Drawing.Point(10, 350)
 $ba2Label.AutoSize = $true
 $form.Controls.Add($ba2Label)
 
 $xboxArchiveCheckbox = New-Object System.Windows.Forms.CheckBox
 $xboxArchiveCheckbox.Text = "Xbox Archive"
-$xboxArchiveCheckbox.Location = New-Object System.Drawing.Point(30, 350)
+$xboxArchiveCheckbox.Location = New-Object System.Drawing.Point(30, 370)
 $xboxArchiveCheckbox.AutoSize = $true
 $xboxArchiveCheckbox.Checked = Get-Bool -Config $config -Key 'XboxArchive' -Default:$true
 $form.Controls.Add($xboxArchiveCheckbox)
 
 $playStationArchiveCheckbox = New-Object System.Windows.Forms.CheckBox
 $playStationArchiveCheckbox.Text = "PlayStation Archive"
-$playStationArchiveCheckbox.Location = New-Object System.Drawing.Point(150, 350)
+$playStationArchiveCheckbox.Location = New-Object System.Drawing.Point(150, 370)
 $playStationArchiveCheckbox.AutoSize = $true
 $playStationArchiveCheckbox.Checked = Get-Bool -Config $config -Key 'PlayStationArchive' -Default:$true
 $form.Controls.Add($playStationArchiveCheckbox)
 
 $windowsArchiveCheckbox = New-Object System.Windows.Forms.CheckBox
 $windowsArchiveCheckbox.Text = "Windows Archive"
-$windowsArchiveCheckbox.Location = New-Object System.Drawing.Point(310, 350)
+$windowsArchiveCheckbox.Location = New-Object System.Drawing.Point(310, 370)
 $windowsArchiveCheckbox.AutoSize = $true
 $windowsArchiveCheckbox.Checked = Get-Bool -Config $config -Key 'WindowsArchive' -Default:$true
 $form.Controls.Add($windowsArchiveCheckbox)
 
 $sortAchlistCheckbox = New-Object System.Windows.Forms.CheckBox
 $sortAchlistCheckbox.Text = "Sort .achlist before saving"
-$sortAchlistCheckbox.Location = New-Object System.Drawing.Point(450, 350)
+$sortAchlistCheckbox.Location = New-Object System.Drawing.Point(450, 370)
 $sortAchlistCheckbox.AutoSize = $true
 $sortAchlistCheckbox.Checked = Get-Bool -Config $config -Key 'SortAchlist' -Default:$false
 $form.Controls.Add($sortAchlistCheckbox)
@@ -435,20 +442,20 @@ $form.Controls.Add($sortAchlistCheckbox)
 # Backup Management
 $backupLabel = New-Object System.Windows.Forms.Label
 $backupLabel.Text = "Backup Management:"
-$backupLabel.Location = New-Object System.Drawing.Point(10, 380)
+$backupLabel.Location = New-Object System.Drawing.Point(10, 400)
 $backupLabel.AutoSize = $true
 $form.Controls.Add($backupLabel)
 
 $copyCheckbox = New-Object System.Windows.Forms.CheckBox
 $copyCheckbox.Text = "Copy Files to Backup Structure"
-$copyCheckbox.Location = New-Object System.Drawing.Point(30, 400)
+$copyCheckbox.Location = New-Object System.Drawing.Point(30, 420)
 $copyCheckbox.AutoSize = $true
 $copyCheckbox.Checked = Get-Bool -Config $config -Key 'Copy' -Default:$true
 $form.Controls.Add($copyCheckbox)
 
 $zipCheckbox = New-Object System.Windows.Forms.CheckBox
 $zipCheckbox.Text = "Create Dated Zip"
-$zipCheckbox.Location = New-Object System.Drawing.Point(260, 400)
+$zipCheckbox.Location = New-Object System.Drawing.Point(260, 420)
 $zipCheckbox.AutoSize = $true
 $zipCheckbox.Checked = Get-Bool -Config $config -Key 'Zip' -Default:$true
 $form.Controls.Add($zipCheckbox)
@@ -456,7 +463,7 @@ $form.Controls.Add($zipCheckbox)
 # NEW: Clean Copy
 $cleanCopyCheckbox = New-Object System.Windows.Forms.CheckBox
 $cleanCopyCheckbox.Text = "Clean copy (remove loose_pc/loose_xbox)"
-$cleanCopyCheckbox.Location = New-Object System.Drawing.Point(430, 400)
+$cleanCopyCheckbox.Location = New-Object System.Drawing.Point(430, 420)
 $cleanCopyCheckbox.AutoSize = $true
 $cleanCopyCheckbox.Checked = Get-Bool -Config $config -Key 'CleanCopy' -Default:$false
 $form.Controls.Add($cleanCopyCheckbox)
@@ -464,14 +471,14 @@ $form.Controls.Add($cleanCopyCheckbox)
 # "Select All" – turn on all feature checkboxes (no run)
 $doAllButton = New-Object System.Windows.Forms.Button
 $doAllButton.Text = "Select All"
-$doAllButton.Location = New-Object System.Drawing.Point(30, 430)
+$doAllButton.Location = New-Object System.Drawing.Point(30, 450)
 $doAllButton.Width = 100
 $form.Controls.Add($doAllButton)
 
 # Log label + box
 $logLabel = New-Object System.Windows.Forms.Label
 $logLabel.Text = "Log:"
-$logLabel.Location = New-Object System.Drawing.Point(10, 460)
+$logLabel.Location = New-Object System.Drawing.Point(10, 480)
 $logLabel.AutoSize = $true
 $form.Controls.Add($logLabel)
 
@@ -479,19 +486,19 @@ $logBox = New-Object System.Windows.Forms.TextBox
 $logBox.Multiline = $true
 $logBox.ScrollBars = "Vertical"
 $logBox.ReadOnly = $true
-$logBox.Location = New-Object System.Drawing.Point(10, 480)
+$logBox.Location = New-Object System.Drawing.Point(10, 500)
 $logBox.Size = New-Object System.Drawing.Size(600, 170)
 $form.Controls.Add($logBox)
 
 # Status + progress
 $statusLabel = New-Object System.Windows.Forms.Label
-$statusLabel.Location = New-Object System.Drawing.Point(10, 660)
+$statusLabel.Location = New-Object System.Drawing.Point(10, 680)
 $statusLabel.Size = New-Object System.Drawing.Size(600, 20)
 $statusLabel.Text = ""
 $form.Controls.Add($statusLabel)
 
 $progressBar = New-Object System.Windows.Forms.ProgressBar
-$progressBar.Location = New-Object System.Drawing.Point(10, 685)
+$progressBar.Location = New-Object System.Drawing.Point(10, 705)
 $progressBar.Size = New-Object System.Drawing.Size(600, 20)
 $form.Controls.Add($progressBar)
 
@@ -500,20 +507,20 @@ $form.Controls.Add($progressBar)
 # -------------------------------------------------------------------
 $runButton = New-Object System.Windows.Forms.Button
 $runButton.Text = "Run"
-$runButton.Location = New-Object System.Drawing.Point(200, 720)
+$runButton.Location = New-Object System.Drawing.Point(200, 740)
 $runButton.Width = 80
 $form.Controls.Add($runButton)
 
 $afButton = New-Object System.Windows.Forms.Button
 $afButton.Text = "Make AF Version"
-$afButton.Location = New-Object System.Drawing.Point(290, 720)
+$afButton.Location = New-Object System.Drawing.Point(290, 740)
 $afButton.Width = 110
 $afButton.Enabled = $false
 $form.Controls.Add($afButton)
 
 $closeButton = New-Object System.Windows.Forms.Button
 $closeButton.Text = "Close"
-$closeButton.Location = New-Object System.Drawing.Point(410, 720)
+$closeButton.Location = New-Object System.Drawing.Point(410, 740)
 $closeButton.Width = 80
 $closeButton.Add_Click({ $form.Close() })
 $form.Controls.Add($closeButton)
@@ -751,7 +758,8 @@ function Invoke-DmmdepsGeneration {
         [string]$InputPath,
         [string]$DataFolder,
         [bool]$SmartClobber,
-        [bool]$IncludePsc
+        [bool]$IncludePsc,
+        [bool]$PreserveParentMat
     )
 
     if (-not (Test-Path $DmmdepsPath)) {
@@ -828,6 +836,10 @@ function Invoke-DmmdepsGeneration {
 
         if ($IncludePsc) {
             $dmmdepsArgs += "--include-psc"
+        }
+
+        if ($PreserveParentMat) {
+            $dmmdepsArgs += "--preserve-parent-mat"
         }
         
         $logBox.AppendText("Command: `"$DmmdepsPath`" $($dmmdepsArgs -join ' ')`r`n")
@@ -968,6 +980,18 @@ function Invoke-Ba2Archives {
 
     $baseName = [System.IO.Path]::GetFileNameWithoutExtension($AchlistPath)
 
+    # Archive2 cannot use an archive as input while rewriting that same archive.
+    # A previous run can leave these paths in an achlist (for example through
+    # SmartClobber), which makes Archive2 hold the input open and then fail to
+    # open the output BA2 for writing.
+    $generatedArchiveNames = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    [void]$generatedArchiveNames.Add("$baseName - Main_xbox.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Textures_xbox.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Main_ps.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Textures_ps.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Main.ba2")
+    [void]$generatedArchiveNames.Add("$baseName - Textures.ba2")
+
     # Text list paths
     $xboxMainFile       = "$DataFolder\$baseName`_xboxMain.txt"
     $xboxTextureFile    = "$DataFolder\$baseName`_xboxTextures.txt"
@@ -993,6 +1017,11 @@ function Invoke-Ba2Archives {
         $p   = $item -replace '/', '\\'
         $ext = [System.IO.Path]::GetExtension($p).ToLowerInvariant()
         $leafName = [System.IO.Path]::GetFileName($p).ToLowerInvariant()
+
+        if ($generatedArchiveNames.Contains([System.IO.Path]::GetFileName($p))) {
+            $logBox.AppendText("Skipping generated BA2 from archive input: $p`r`n")
+            continue
+        }
 
         if ($ext -eq '.bk2') {
             $replacementPath = [System.IO.Path]::ChangeExtension($p, '.bnk')
@@ -1078,6 +1107,34 @@ function Invoke-Ba2Archives {
     $windowsMainBa2     = "$DataFolder\$baseName - Main.ba2"
     $windowsTexturesBa2 = "$DataFolder\$baseName - Textures.ba2"
 
+    function Invoke-Archive2Create {
+        param(
+            [string]$ArchivePath,
+            [string]$SourceFile,
+            [string]$Format,
+            [string]$Compression,
+            [string]$Label
+        )
+
+        # Archive2 does not reliably replace an existing BA2. Delete the prior
+        # output first, and report a clear error if another process owns it.
+        if (Test-Path -LiteralPath $ArchivePath) {
+            try {
+                Remove-Item -LiteralPath $ArchivePath -Force -ErrorAction Stop
+                $logBox.AppendText("Removed previous $Label archive: $ArchivePath`r`n")
+            }
+            catch {
+                throw "Cannot replace $Label archive because it is locked or read-only: $ArchivePath. Close the process using it and try again. $($_.Exception.Message)"
+            }
+        }
+
+        $logBox.AppendText("Running Archive2 for $Label archive...`r`n")
+        & $ArchiverPath "-create=$ArchivePath" "-sourceFile=$SourceFile" "-format=$Format" "-compression=$Compression"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Archive2 failed while creating $Label archive (exit code $LASTEXITCODE): $ArchivePath"
+        }
+    }
+
     # Run Archive2 from Starfield root so "Data\..." resolves
     $originalLocation = Get-Location
     try {
@@ -1086,32 +1143,26 @@ function Invoke-Ba2Archives {
         Push-Location -Path $starfieldRoot
 
         if ($DoXbox) {
-            $logBox.AppendText("Running Archiver2 for Xbox main archive...`r`n")
-            Invoke-Expression "& '$ArchiverPath' -create='$xboxMainBa2' -sourceFile='$xboxMainFile' -format=General -compression=$compressionType"
+            Invoke-Archive2Create -ArchivePath $xboxMainBa2 -SourceFile $xboxMainFile -Format 'General' -Compression $compressionType -Label 'Xbox main'
 
             if ($hasTextureFiles) {
-                $logBox.AppendText("Running Archiver2 for Xbox textures archive...`r`n")
-                Invoke-Expression "& '$ArchiverPath' -create='$xboxTexturesBa2' -sourceFile='$xboxTextureFile' -format=XBoxDDS -compression=XBox"
+                Invoke-Archive2Create -ArchivePath $xboxTexturesBa2 -SourceFile $xboxTextureFile -Format 'XBoxDDS' -Compression 'XBox' -Label 'Xbox textures'
             }
         }
 
         if ($DoPlayStation) {
-            $logBox.AppendText("Running Archiver2 for PlayStation main archive...`r`n")
-            Invoke-Expression "& '$ArchiverPath' -create='$playStationMainBa2' -sourceFile='$playStationMainFile' -format=General -compression=$compressionType"
+            Invoke-Archive2Create -ArchivePath $playStationMainBa2 -SourceFile $playStationMainFile -Format 'General' -Compression $compressionType -Label 'PlayStation main'
 
             if ($hasTextureFiles) {
-                $logBox.AppendText("Running Archiver2 for PlayStation textures archive...`r`n")
-                Invoke-Expression "& '$ArchiverPath' -create='$playStationTexturesBa2' -sourceFile='$playStationTextureFile' -format=DDS -compression=Default"
+                Invoke-Archive2Create -ArchivePath $playStationTexturesBa2 -SourceFile $playStationTextureFile -Format 'DDS' -Compression 'Default' -Label 'PlayStation textures'
             }
         }
 
         if ($DoWindows) {
-            $logBox.AppendText("Running Archiver2 for Windows main archive...`r`n")
-            Invoke-Expression "& '$ArchiverPath' -create='$windowsMainBa2' -sourceFile='$windowsMainFile' -format=General -compression=$compressionType"
+            Invoke-Archive2Create -ArchivePath $windowsMainBa2 -SourceFile $windowsMainFile -Format 'General' -Compression $compressionType -Label 'Windows main'
 
             if ($hasTextureFiles) {
-                $logBox.AppendText("Running Archiver2 for Windows textures archive...`r`n")
-                Invoke-Expression "& '$ArchiverPath' -create='$windowsTexturesBa2' -sourceFile='$windowsTextureFile' -format=DDS -compression=Default"
+                Invoke-Archive2Create -ArchivePath $windowsTexturesBa2 -SourceFile $windowsTextureFile -Format 'DDS' -Compression 'Default' -Label 'Windows textures'
             }
         }
     }
@@ -2099,6 +2150,7 @@ $runButton.Add_Click({
         UseDmmdeps       = $useDmmdepsCheckbox.Checked
         IncludeSourceScripts = $includeSourceScriptsCheckbox.Checked
         SmartClobber     = $smartClobberCheckbox.Checked
+        PreserveParentMat = $preserveParentMatCheckbox.Checked
         XboxArchive      = $xboxArchiveCheckbox.Checked
         PlayStationArchive = $playStationArchiveCheckbox.Checked
         WindowsArchive   = $windowsArchiveCheckbox.Checked
@@ -2176,7 +2228,7 @@ $runButton.Add_Click({
     # Run dmmdeps first if selected
     if ($doDmmdeps) {
         $statusLabel.Text = "Running: Dmmdeps Generation..."
-        $dmmdepsSuccess = Invoke-DmmdepsGeneration -DmmdepsPath $dmmdepsPath -InputPath $inputPath -DataFolder $dataRoot -SmartClobber:$smartClobberCheckbox.Checked -IncludePsc:$includeSourceScriptsCheckbox.Checked
+        $dmmdepsSuccess = Invoke-DmmdepsGeneration -DmmdepsPath $dmmdepsPath -InputPath $inputPath -DataFolder $dataRoot -SmartClobber:$smartClobberCheckbox.Checked -IncludePsc:$includeSourceScriptsCheckbox.Checked -PreserveParentMat:$preserveParentMatCheckbox.Checked
         if (-not $dmmdepsSuccess) {
             $logBox.AppendText("Dmmdeps generation failed. Stopping execution.`r`n")
             return
@@ -2239,6 +2291,7 @@ $doAllButton.Add_Click({
     $rebuildAchlistCheckbox.Checked = $true
     $useDmmdepsCheckbox.Checked     = $true
     $smartClobberCheckbox.Checked   = $true
+    $preserveParentMatCheckbox.Checked = $true
     $xboxArchiveCheckbox.Checked    = $true
     $playStationArchiveCheckbox.Checked = $true
     $windowsArchiveCheckbox.Checked = $true

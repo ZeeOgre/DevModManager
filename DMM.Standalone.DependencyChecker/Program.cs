@@ -58,6 +58,7 @@ namespace DmmDep
         public bool SmartClobber { get; set; } // --smartclobber : seed candidates from existing .achlist
         public bool RebuildCache { get; set; } // --rebuildcache : force rebuild of parent archive cache
         public bool IncludePsc { get; set; }    // --include-psc : include .psc source files in achlist
+        public bool PreserveParentMat { get; set; } // --preserve-parent-mat : package parent MATs without scanning their dependencies
     }
 
     internal static class Program
@@ -599,6 +600,31 @@ namespace DmmDep
                     }
                 }
 
+                // Load the parent index before walking MAT dependencies so --preserve-parent-mat
+                // can retain a parent material itself without adding its referenced textures.
+                var masterPlugins = ParentArchiveCache.ParsePluginMasters(pluginPath);
+                if (masterPlugins.Count > 0)
+                {
+                    Log.Info($"[2.5] Found {masterPlugins.Count} master plugin(s): {string.Join(", ", masterPlugins)}");
+                }
+                else
+                {
+                    Log.Info("[2.5] No master plugins found");
+                }
+
+                if (options.RebuildCache)
+                {
+                    Log.Info("[2.5] --rebuildcache: Clearing existing cache...");
+                    ParentArchiveCache.ClearCache();
+                }
+
+                var parentArchiveIndex = ParentArchiveCache.GetOrBuildIndex(
+                    gameRoot,
+                    masterPlugins,
+                    msg => Log.Info(msg)
+                );
+                Log.Info($"[2.5] Parent archive index loaded: {parentArchiveIndex.Count} files indexed");
+
                 // ---- 3. MATs -> DDS ----
                 Log.Info("[3] Scanning MATs for DDS tokens (via JSON File/FileName)...");
 
@@ -621,6 +647,16 @@ namespace DmmDep
                     // even when they do not point to custom DDS files. Material parameter
                     // edits can still be meaningful without custom textures.
                     AddFile(manifest, achlistPaths, matRel, FileKind.Mat, "mat-referenced", gameRoot, xboxDataRoot);
+
+                    string normalizedMatPath = matRel.Replace('/', '\\').Trim('\\').ToLowerInvariant();
+                    if (!normalizedMatPath.StartsWith("data\\", StringComparison.Ordinal))
+                        normalizedMatPath = "data\\" + normalizedMatPath;
+
+                    if (options.PreserveParentMat && parentArchiveIndex.ContainsKey(normalizedMatPath))
+                    {
+                        Log.Info($"[3] Preserving parent MAT without walking dependencies: {matRel}");
+                        continue;
+                    }
 
                     string matText = File.ReadAllText(fullMat);
                     var found = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -786,27 +822,6 @@ namespace DmmDep
                 // ---- 7. Check for parent archive matches using cached index ----
                 Log.Info("[7] Loading parent archive index (cached)...");
 
-                // Parse master plugins from the plugin file
-                var masterPlugins = ParentArchiveCache.ParsePluginMasters(pluginPath);
-                if (masterPlugins.Count > 0)
-                {
-                    Log.Info($"[7] Found {masterPlugins.Count} master plugin(s): {string.Join(", ", masterPlugins)}");
-                }
-                else
-                {
-                    Log.Info("[7] No master plugins found");
-                }
-
-                if (options.RebuildCache)
-                {
-                    Log.Info("[7] --rebuildcache: Clearing existing cache...");
-                    ParentArchiveCache.ClearCache();
-                }
-                var parentArchiveIndex = ParentArchiveCache.GetOrBuildIndex(
-                    gameRoot,
-                    masterPlugins,
-                    msg => Log.Info(msg)
-                );
                 Log.Info($"[7] Parent archive index loaded: {parentArchiveIndex.Count} files indexed");
 
                 // Mark files that match parent archives
@@ -901,8 +916,16 @@ namespace DmmDep
                     }
                     else if (file.Kind == "parentmatch")
                     {
-                        // Files that match parent archives go to warn list
-                        achlistWarn.Add(file.PcPath);
+                        if (options.PreserveParentMat && file.PcPath.EndsWith(".mat", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Explicitly retain a parent material so Archive2 and backup/zip consume it.
+                            achlistKeep.Add(file.PcPath);
+                        }
+                        else
+                        {
+                            // Files that match parent archives go to warn list.
+                            achlistWarn.Add(file.PcPath);
+                        }
                     }
                     else if (file.Kind == "warn")
                     {
@@ -987,6 +1010,7 @@ namespace DmmDep
             Console.WriteLine("  --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf).");
             Console.WriteLine("  --rebuildcache        Force rebuild of parent archive cache (useful if game updated).");
             Console.WriteLine("  --include-psc         Include .psc script source files in achlist (for distributing source code).");
+            Console.WriteLine("  --preserve-parent-mat Include parent-archive .mat files in achlist without scanning their referenced files.");
         }
 
         private static Options? ParseArgs(string[] args)
@@ -1045,6 +1069,9 @@ namespace DmmDep
                         break;
                     case "--include-psc":
                         opts.IncludePsc = true;
+                        break;
+                    case "--preserve-parent-mat":
+                        opts.PreserveParentMat = true;
                         break;
                     default:
                         Console.Error.WriteLine($"Unknown option: {arg}");
