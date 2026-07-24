@@ -50,12 +50,14 @@ public readonly record struct NifSerializedString(int Offset, int PrefixSize, in
 public sealed class NifBlockSpan
 {
     public int Index { get; init; }
+    public string TypeName { get; init; } = "";
     public int StartOffset { get; init; }
     public int EndOffsetExclusive { get; init; }
 }
 
 public sealed class NifStructureScan
 {
+    public uint BethesdaStreamVersion { get; init; }
     public int BlocksStartOffset { get; init; }
     public IReadOnlyList<string> HeaderStrings { get; init; } = Array.Empty<string>();
     public IReadOnlyList<NifBlockSpan> Blocks { get; init; } = Array.Empty<NifBlockSpan>();

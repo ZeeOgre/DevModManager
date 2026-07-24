@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using DMM.AssetManagers;
+using DMM.AssetManagers.NIF;
 
 namespace DmmDep
 {
@@ -514,6 +515,15 @@ namespace DmmDep
 
                     var nifBytes = File.ReadAllBytes(full);
 
+                    // Starfield mesh references are extensionless, relative strings in
+                    // BSGeometry "Mesh Path" fields.  Let the NIF reader identify those
+                    // typed fields; do not infer meshes from unrelated printable strings.
+                    foreach (string meshRel in new NifReader().Read(full).Meshes)
+                    {
+                        if (File.Exists(Path.Combine(gameRoot, meshRel)))
+                            AddFile(manifest, achlistPaths, meshRel, FileKind.Mesh, $"nif:{nifRel}", gameRoot, xboxDataRoot);
+                    }
+
 
 
 
@@ -575,26 +585,6 @@ namespace DmmDep
                             if (File.Exists(Path.Combine(gameRoot, rel)))
                             {
                                 AddFile(manifest, achlistPaths, rel, FileKind.Rig, $"nif:{nifRel}", gameRoot, xboxDataRoot);
-                            }
-                        }
-                        else if (!token.Contains('.') && token.Contains("\\"))
-                        {
-                            string stem = token.TrimStart('\\');
-
-                            int nullChar = stem.IndexOf('\0');
-                            if (nullChar >= 0)
-                            {
-                                stem = stem.Substring(0, nullChar);
-                            }
-                            stem = stem.TrimEnd();
-
-                            string meshRel = stem.StartsWith("geometries\\", StringComparison.OrdinalIgnoreCase)
-                                ? NormalizeRel(Path.Combine("Data", stem + ".mesh"))
-                                : NormalizeRel(Path.Combine("Data\\geometries", stem + ".mesh"));
-
-                            if (File.Exists(Path.Combine(gameRoot, meshRel)))
-                            {
-                                AddFile(manifest, achlistPaths, meshRel, FileKind.Mesh, $"nif:{nifRel}", gameRoot, xboxDataRoot);
                             }
                         }
                     }
