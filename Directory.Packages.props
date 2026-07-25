@@ -19,6 +19,7 @@
     <PackageVersion Include="Sharp.BSA.BA2" Version="1.17.0" />
     <PackageVersion Include="SQLite" Version="3.13.0" />
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.4" />
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
     <!-- DMM.Avalonia -->
     <PackageVersion Include="Avalonia" Version="12.1.0" />
     <PackageVersion Include="Avalonia.Desktop" Version="12.1.0" />
