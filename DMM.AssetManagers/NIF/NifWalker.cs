@@ -17,6 +17,8 @@ public sealed class DependencyReference
 /// <summary>Traverses niflysharp's deserialized object graph; it never decodes NIF bytes itself.</summary>
 public sealed class NifWalker
 {
+    private const int StarfieldExternalMeshSlots = 4;
+
     public IReadOnlyList<DependencyReference> Walk(string nifPath, NifDependencyDiagnostics diagnostics)
     {
         NifFile? file = null;
