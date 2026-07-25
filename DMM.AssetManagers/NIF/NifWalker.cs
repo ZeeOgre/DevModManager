@@ -73,24 +73,23 @@ public sealed class NifWalker
 
     private static void AddGeometryMeshes(BSGeometry geometry, int blockIndex, string blockType, List<DependencyReference> output)
     {
-        // Starfield BSGeometry stores up to four sparse external mesh slots.  niflysharp's
-        // MeshCount can represent the populated count rather than the highest occupied
-        // slot, so walk the schema-defined slot range as well to preserve later LOD
-        // entries when an earlier slot is absent.
-        int meshCount = geometry.MeshCount();
-        int meshSlots = Math.Max(StarfieldExternalMeshSlots, meshCount);
-        for (byte meshIndex = 0; meshIndex < meshSlots; meshIndex++)
+        // Consume every mesh niflysharp exposes. The structural recovery in NifReader
+        // independently unions all four serialized BSGeometry paths because 2.0.4 can
+        // stop exposing entries even when the serialized positions are not sparse.
+        byte meshCount = geometry.MeshCount();
+        for (byte meshIndex = 0; meshIndex < meshCount; meshIndex++)
         {
+            BSGeometryMesh? mesh = geometry.SelectMesh(meshIndex);
+            if (mesh is null)
+                continue;
+
             try
             {
-                using BSGeometryMesh mesh = geometry.SelectMesh(meshIndex);
                 Add(mesh.meshName.get(), DependencyKind.Mesh, blockIndex, blockType, $"Meshes[{meshIndex}].Mesh Path", output);
             }
-            catch (Exception) when (meshIndex >= meshCount)
+            finally
             {
-                // niflysharp owns deserialization; if a schema slot is not present, do not
-                // invent or byte-scan a dependency.  Continue probing remaining declared
-                // Starfield slots so sparse later LODs remain discoverable.
+                geometry.ReleaseMesh();
             }
         }
     }
