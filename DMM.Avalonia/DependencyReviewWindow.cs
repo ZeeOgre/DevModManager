@@ -312,8 +312,7 @@ public sealed class DependencyReviewWindow : Window
 
     private Task HandleDropAsync(DragEventArgs e)
     {
-#pragma warning disable CS0618 // Type or member is obsolete - TODO: Update to Avalonia 12+ DataTransfer API when upgrading
-        if (e.Data.Contains(DataFormats.Files) && e.Data.Get(DataFormats.Files) is IEnumerable<IStorageItem> files)
+        if (e.DataTransfer.TryGetFiles() is { } files)
         {
             foreach (var file in files)
             {
@@ -325,15 +324,13 @@ public sealed class DependencyReviewWindow : Window
             }
         }
 
-        if (e.Data.Contains(DataFormats.Text) && e.Data.Get(DataFormats.Text) is string text && !string.IsNullOrWhiteSpace(text))
+        if (e.DataTransfer.TryGetText() is { } text && !string.IsNullOrWhiteSpace(text))
         {
             foreach (var line in text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 TryAddDroppedFile(line.Trim('"', ' '));
             }
         }
-#pragma warning restore CS0618
-
         return Task.CompletedTask;
     }
 
