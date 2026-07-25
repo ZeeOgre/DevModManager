@@ -24,35 +24,9 @@ public sealed class NifReader
             }
             diagnostics.Records.Add(new NifDependencyRecord { BlockIndex = dependency.BlockIndex ?? -1, BlockType = dependency.BlockType, Field = dependency.FieldPath, Category = dependency.Kind.ToString(), Value = dependency.NormalizedPath });
         }
-
-        // niflysharp 2.0.4 can omit the fourth external mesh from some Starfield
-        // BSGeometry blocks. Recover only the four explicitly serialized mesh-path
-        // fields from the already-defined Bethesda block table and union them with
-        // niflysharp's object-model results. This is not a general byte/string scan.
-        byte[] bytes = File.ReadAllBytes(nifPath);
-        if (TryReadBethesdaStructure(bytes, out NifStructureScan structure) &&
-            IsSupportedStarfieldStreamVersion(structure.BethesdaStreamVersion))
-        {
-            foreach (NifMeshStringEntry mesh in ReadStarfieldGeometryMeshPaths(bytes, structure))
-            {
-                result.Meshes.Add(mesh.NormalizedToken);
-                diagnostics.Records.Add(new NifDependencyRecord
-                {
-                    BlockType = "BSGeometry",
-                    Field = "Meshes[].Mesh Path (structural recovery)",
-                    Category = DependencyKind.Mesh.ToString(),
-                    Offset = mesh.Offset,
-                    Value = mesh.NormalizedToken
-                });
-            }
-        }
-
         DeduplicateSort(result.Mats); DeduplicateSort(result.Meshes); DeduplicateSort(result.Rigs); DeduplicateSort(result.Havoks); DeduplicateSort(result.OtherAssets);
         return result;
     }
-
-    private static bool IsSupportedStarfieldStreamVersion(uint streamVersion) =>
-        streamVersion is 170 or 173 or 175;
 
 
     public IReadOnlyList<NifStringEntry> ReadStringTable(string nifPath)
@@ -197,8 +171,7 @@ public sealed class NifReader
     {
         ArgumentNullException.ThrowIfNull(bytes);
 
-        if (TryReadBethesdaStructure(bytes, out NifStructureScan structure) &&
-            IsSupportedStarfieldStreamVersion(structure.BethesdaStreamVersion))
+        if (TryReadBethesdaStructure(bytes, out NifStructureScan structure))
             return ReadStarfieldGeometryMeshPaths(bytes, structure);
 
         // Non-Bethesda/legacy NIFs do not have BSGeometry mesh arrays. Retain the
