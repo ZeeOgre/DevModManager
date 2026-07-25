@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
@@ -156,6 +156,12 @@ namespace DmmDep
 
         static int Main(string[] args)
         {
+            if (args.Length == 1 && string.Equals(args[0], "--version", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine("dmmdeps " + typeof(Program).Assembly.GetName().Version);
+                return 0;
+            }
+
             if (args.Length == 0)
             {
                 PrintUsage();

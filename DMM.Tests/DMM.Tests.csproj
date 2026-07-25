@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
 	<OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -9,7 +9,6 @@
     <IsTestProject>true</IsTestProject>
     <AssemblyName>dmmtest</AssemblyName>
     <RootNamespace>DMM.Tests</RootNamespace>
-	<StartupObject>DMM.Tests.Harness.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Harness\Program.cs" />
     <Folder Include="Unit\" />
   </ItemGroup>
 

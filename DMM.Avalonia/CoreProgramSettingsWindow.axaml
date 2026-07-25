@@ -15,20 +15,20 @@
 
             <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10" Margin="0,6,0,0">
                 <TextBlock Text="Mod Repo Root:" VerticalAlignment="Center" FontWeight="SemiBold" />
-                <TextBox Grid.Column="1" Text="{Binding RepoRootPath}" Watermark="Folder used for managed mod repositories" />
+                <TextBox Grid.Column="1" Text="{Binding RepoRootPath}" PlaceholderText="Folder used for managed mod repositories" />
                 <Button Grid.Column="2" Content="Browse" Click="BrowseRepoRoot_Click" MinWidth="90" />
 
                 <TextBlock Grid.Row="1" Text="Repo Layout:" VerticalAlignment="Center" FontWeight="SemiBold" />
                 <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding RepoOrganizationChoices}" SelectedItem="{Binding RepoOrganization}" />
 
                 <TextBlock Grid.Row="2" Text="GitHub Account:" VerticalAlignment="Center" FontWeight="SemiBold" />
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding GitHubAccount}" Watermark="GitHub owner/user (e.g. ZeeOgre)" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding GitHubAccount}" PlaceholderText="GitHub owner/user (e.g. ZeeOgre)" />
 
                 <TextBlock Grid.Row="3" Text="GitHub Token:" VerticalAlignment="Center" FontWeight="SemiBold" />
-                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding GitHubToken}" PasswordChar="●" Watermark="PAT used for git/GitHub operations" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding GitHubToken}" PasswordChar="●" PlaceholderText="PAT used for git/GitHub operations" />
 
                 <TextBlock Grid.Row="4" Text="GitHub ModRoot Repo:" VerticalAlignment="Center" FontWeight="SemiBold" />
-                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding GitHubModRootRepo}" Watermark="https://github.com/&lt;account&gt;/GameMods" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding GitHubModRootRepo}" PlaceholderText="https://github.com/&lt;account&gt;/GameMods" />
             </Grid>
 
             <TextBlock Text="Recommended: Game repo with per-mod folders (single remote, independent stage folders/branches inside each mod workflow)." TextWrapping="Wrap" />
