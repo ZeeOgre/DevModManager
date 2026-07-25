@@ -1,4 +1,4 @@
-﻿name: CI Publish and Release
+name: CI Publish and Release
 
 on:
   push:
@@ -20,10 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v3
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore
         run: dotnet restore ${{ env.BUILD_PROJECT }}
@@ -34,8 +34,16 @@ jobs:
           # Framework-dependent build includes exe + required DLLs (not single file due to project references)
       - name: Publish self-contained single-file (fat) build
         run: |
-          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} /p:SelfContained=true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
+          dotnet publish ${{ env.BUILD_PROJECT }} -c Release -r ${{ env.RID }} /p:SelfContained=true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:DebugType=None /p:IncludeSymbols=false /p:EnableCompressionInSingleFile=false /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true /p:SkipNestedPublish=true /p:EnableLocalReleaseTrigger=false -o ./out/dmmdeps-fat
           # Use SkipNestedPublish=true to prevent nested target conflicts during CI publish.
+
+      - name: Smoke-test published outputs
+        shell: pwsh
+        run: |
+          & .\out\dmmdeps\DMM.Standalone.DependencyChecker.exe --version
+          if ($LASTEXITCODE -ne 0) { throw "Framework-dependent smoke test failed." }
+          & .\out\dmmdeps-fat\DMM.Standalone.DependencyChecker.exe --version
+          if ($LASTEXITCODE -ne 0) { throw "Self-contained smoke test failed." }
 
       - name: Normalize names and prepare zips
         shell: pwsh
@@ -112,8 +120,8 @@ jobs:
             - \`_deps.json\` - Full dependency manifest (JSON format, omitted with --silent)
 
             ### Downloads
-            - **dmmdeps.zip** (~4 MB compressed, includes required dependencies) - Framework-dependent build. Requires [.NET 9 Runtime](https://dotnet.microsoft.com/download/dotnet/9.0/runtime)
-            - **dmmdeps-fat.zip** (~18 MB) - Self-contained single-file build. Includes .NET 9 runtime, no dependencies required. Uncompressed to reduce antivirus false positives.
+            - **dmmdeps.zip** (~4 MB compressed, includes required dependencies) - Framework-dependent build. Requires [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime)
+            - **dmmdeps-fat.zip** (~18 MB) - Self-contained single-file build. Includes .NET 10 runtime, no dependencies required. Uncompressed to reduce antivirus false positives.
 
             ### Basic Usage
             \`\`\`
