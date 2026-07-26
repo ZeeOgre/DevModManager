@@ -42,7 +42,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DMM.AssetManagers\DMM.AssetManagers.csproj" />
-	  <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
+    <ProjectReference Include="..\DMM.Core\DMM.Core.csproj" />
+    <ProjectReference Include="..\DMM.Standalone.DependencyChecker\DMM.Standalone.DependencyChecker.csproj" />
   </ItemGroup>
 
 
