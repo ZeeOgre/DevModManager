@@ -10,7 +10,7 @@ namespace DmmDep;
 /// Cache is stored in %LOCALAPPDATA%\ZeeOgre\dmmdeps\parentfile_cache.db
 /// 
 /// Schema:
-///   archives: archive_path, file_name, size, last_modified, file_count, scan_timestamp
+///   archives: archive_path, file_name, size, last_modified_ticks, xxh128, file_count, scan_timestamp
 ///   files: file_path, archive_name (indexed for fast lookups)
 /// </summary>
 internal static class ParentArchiveCache
@@ -33,7 +33,8 @@ internal static class ParentArchiveCache
     public static Dictionary<string, string> GetOrBuildIndex(
         string gameRoot,
         IEnumerable<string>? masterNames = null,
-        Action<string>? logger = null)
+        Action<string>? logger = null,
+        CancellationToken cancellationToken = default)
     {
         logger ??= _ => { };
         var cacheTimer = System.Diagnostics.Stopwatch.StartNew();
@@ -69,14 +70,14 @@ internal static class ParentArchiveCache
         using var conn = OpenConnection();
 
         // Check which archives need scanning
-        var staleArchives = FindStaleArchives(conn, parentArchives, logger);
+        var staleArchives = FindStaleArchives(conn, parentArchives, logger, cancellationToken);
 
         if (staleArchives.Count > 0)
         {
             logger($"[Cache] {staleArchives.Count} archive(s) need scanning");
-            foreach (var archive in staleArchives)
+            foreach (var staleArchive in staleArchives)
             {
-                ScanAndCacheArchive(conn, archive, logger);
+                ScanAndCacheArchive(conn, staleArchive.Archive, staleArchive.Fingerprint, logger, cancellationToken);
             }
         }
         else
@@ -143,6 +144,8 @@ internal static class ParentArchiveCache
                 file_name TEXT NOT NULL COLLATE NOCASE,
                 size INTEGER NOT NULL,
                 last_modified TEXT NOT NULL,
+                last_modified_ticks INTEGER NULL,
+                xxh128 TEXT NULL,
                 file_count INTEGER NOT NULL,
                 scan_timestamp TEXT NOT NULL
             );
@@ -160,6 +163,21 @@ internal static class ParentArchiveCache
             ON files(archive_name COLLATE NOCASE);
         ";
         cmd.ExecuteNonQuery();
+
+        // Existing databases are upgraded in place. The legacy date column remains untouched.
+        EnsureArchiveColumn(conn, "last_modified_ticks", "INTEGER NULL");
+        EnsureArchiveColumn(conn, "xxh128", "TEXT NULL");
+    }
+
+    private static void EnsureArchiveColumn(SqliteConnection conn, string name, string declaration)
+    {
+        using var check = conn.CreateCommand();
+        check.CommandText = "SELECT COUNT(*) FROM pragma_table_info('archives') WHERE name = @name";
+        check.Parameters.AddWithValue("@name", name);
+        if (Convert.ToInt64(check.ExecuteScalar()) != 0) return;
+        using var alter = conn.CreateCommand();
+        alter.CommandText = $"ALTER TABLE archives ADD COLUMN {name} {declaration}";
+        alter.ExecuteNonQuery();
     }
 
     /// <summary>
@@ -230,54 +248,65 @@ internal static class ParentArchiveCache
     /// <summary>
     /// Find archives that need to be rescanned (new, changed, or missing from cache).
     /// </summary>
-    private static List<FileInfo> FindStaleArchives(SqliteConnection conn, List<FileInfo> currentArchives, Action<string> logger)
+    private sealed record StaleArchive(FileInfo Archive, ParentArchiveFingerprint Fingerprint);
+
+    private static List<StaleArchive> FindStaleArchives(SqliteConnection conn, List<FileInfo> currentArchives, Action<string> logger, CancellationToken cancellationToken)
     {
-        var stale = new List<FileInfo>();
+        var stale = new List<StaleArchive>();
 
         foreach (var archive in currentArchives)
         {
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                SELECT size, last_modified 
+                SELECT size, last_modified_ticks, xxh128
                 FROM archives 
                 WHERE archive_path = @path COLLATE NOCASE
             ";
             cmd.Parameters.AddWithValue("@path", archive.FullName);
 
             using var reader = cmd.ExecuteReader();
-            if (!reader.Read())
+            long? cachedSize = null;
+            long? cachedTicks = null;
+            string? cachedHash = null;
+            if (reader.Read())
             {
-                // Not in cache
-                logger($"[Cache]   {archive.Name} - not in cache");
-                stale.Add(archive);
-                continue;
+                cachedSize = reader.GetInt64(0);
+                cachedTicks = reader.IsDBNull(1) ? null : reader.GetInt64(1);
+                cachedHash = reader.IsDBNull(2) ? null : reader.GetString(2);
             }
+            reader.Close();
 
-            var cachedSize = reader.GetInt64(0);
-            var cachedModifiedStr = reader.GetString(1);
-            var cachedModified = DateTime.Parse(cachedModifiedStr, null, System.Globalization.DateTimeStyles.RoundtripKind);
-
-            if (cachedSize != archive.Length || cachedModified != archive.LastWriteTimeUtc)
-            {
-                logger($"[Cache]   {archive.Name} - changed (size or timestamp)");
-                logger($"[Cache]     Cached: size={cachedSize}, modified={cachedModified:o}");
-                logger($"[Cache]     Disk:   size={archive.Length}, modified={archive.LastWriteTimeUtc:o}");
-                stale.Add(archive);
-            }
+            var validation = ParentArchiveFingerprintService.Validate(archive.FullName, cachedSize, cachedTicks, cachedHash, logger, cancellationToken);
+            if (validation.Status == ParentArchiveValidationStatus.UnchangedByHash)
+                UpdateFingerprintMetadata(conn, validation.Fingerprint!);
+            else if (validation.Status == ParentArchiveValidationStatus.Changed)
+                stale.Add(new(archive, validation.Fingerprint!));
         }
 
         return stale;
     }
 
+    private static void UpdateFingerprintMetadata(SqliteConnection conn, ParentArchiveFingerprint fingerprint)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "UPDATE archives SET size=@size, last_modified_ticks=@ticks, xxh128=@hash WHERE archive_path=@path COLLATE NOCASE";
+        cmd.Parameters.AddWithValue("@size", fingerprint.FileLength);
+        cmd.Parameters.AddWithValue("@ticks", fingerprint.LastWriteTimeUtcTicks);
+        cmd.Parameters.AddWithValue("@hash", fingerprint.XxHash128!);
+        cmd.Parameters.AddWithValue("@path", fingerprint.FullPath);
+        cmd.ExecuteNonQuery();
+    }
+
     /// <summary>
     /// Scan an archive (BA2 or ZIP) and cache its file list.
     /// </summary>
-    private static void ScanAndCacheArchive(SqliteConnection conn, FileInfo archive, Action<string> logger)
+    private static void ScanAndCacheArchive(SqliteConnection conn, FileInfo archive, ParentArchiveFingerprint fingerprint, Action<string> logger, CancellationToken cancellationToken)
     {
         logger($"[Cache] Scanning: {archive.Name}");
 
         try
         {
+            fingerprint = ParentArchiveFingerprintService.EnsureHash(fingerprint, logger, cancellationToken);
             List<(string RelativePath, long Size)> entries;
 
             if (archive.Extension.Equals(".zip", StringComparison.OrdinalIgnoreCase))
@@ -314,13 +343,15 @@ internal static class ParentArchiveCache
             using (var insertArchiveCmd = conn.CreateCommand())
             {
                 insertArchiveCmd.CommandText = @"
-                    INSERT INTO archives (archive_path, file_name, size, last_modified, file_count, scan_timestamp)
-                    VALUES (@path, @name, @size, @modified, @count, @timestamp)
+                    INSERT INTO archives (archive_path, file_name, size, last_modified, last_modified_ticks, xxh128, file_count, scan_timestamp)
+                    VALUES (@path, @name, @size, @modified, @ticks, @hash, @count, @timestamp)
                 ";
                 insertArchiveCmd.Parameters.AddWithValue("@path", archive.FullName);
                 insertArchiveCmd.Parameters.AddWithValue("@name", archive.Name);
-                insertArchiveCmd.Parameters.AddWithValue("@size", archive.Length);
+                insertArchiveCmd.Parameters.AddWithValue("@size", fingerprint.FileLength);
                 insertArchiveCmd.Parameters.AddWithValue("@modified", archive.LastWriteTimeUtc.ToString("o"));
+                insertArchiveCmd.Parameters.AddWithValue("@ticks", fingerprint.LastWriteTimeUtcTicks);
+                insertArchiveCmd.Parameters.AddWithValue("@hash", fingerprint.XxHash128!);
                 insertArchiveCmd.Parameters.AddWithValue("@count", entries.Count);
                 insertArchiveCmd.Parameters.AddWithValue("@timestamp", DateTime.UtcNow.ToString("o"));
                 insertArchiveCmd.ExecuteNonQuery();
@@ -352,6 +383,10 @@ internal static class ParentArchiveCache
 
             transaction.Commit();
             logger($"[Cache]   -> Cached {entries.Count} files");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

@@ -19,6 +19,7 @@
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
 	  <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
 	  <PackageReference Include="YamlDotNet" />
+	  <PackageReference Include="System.IO.Hashing" />
 	</ItemGroup>
 
 	<ItemGroup>
