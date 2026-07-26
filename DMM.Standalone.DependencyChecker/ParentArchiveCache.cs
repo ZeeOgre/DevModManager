@@ -355,6 +355,7 @@ internal static class ParentArchiveCache
                 insertArchiveCmd.Parameters.AddWithValue("@count", entries.Count);
                 insertArchiveCmd.Parameters.AddWithValue("@timestamp", DateTime.UtcNow.ToString("o"));
                 insertArchiveCmd.ExecuteNonQuery();
+                logger($"[Cache]   -> Stored fingerprint: size={fingerprint.FileLength}, ticks={fingerprint.LastWriteTimeUtcTicks}, xxh128={fingerprint.XxHash128}");
             }
 
             // Insert file entries in batches
