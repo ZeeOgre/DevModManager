@@ -404,6 +404,13 @@ $preserveParentMatCheckbox.AutoSize = $true
 $preserveParentMatCheckbox.Checked = Get-Bool -Config $config -Key 'PreserveParentMat' -Default:$false
 $form.Controls.Add($preserveParentMatCheckbox)
 
+$forceRebuildCacheCheckbox = New-Object System.Windows.Forms.CheckBox
+$forceRebuildCacheCheckbox.Text = "Force rebuild parent archive cache"
+$forceRebuildCacheCheckbox.Location = New-Object System.Drawing.Point(250, 322)
+$forceRebuildCacheCheckbox.AutoSize = $true
+$forceRebuildCacheCheckbox.Checked = Get-Bool -Config $config -Key 'ForceRebuildParentCache' -Default:$false
+$form.Controls.Add($forceRebuildCacheCheckbox)
+
 # BA2 Archive Management
 $ba2Label = New-Object System.Windows.Forms.Label
 $ba2Label.Text = "BA2 Archive Management:"
@@ -759,7 +766,8 @@ function Invoke-DmmdepsGeneration {
         [string]$DataFolder,
         [bool]$SmartClobber,
         [bool]$IncludePsc,
-        [bool]$PreserveParentMat
+        [bool]$PreserveParentMat,
+        [bool]$ForceRebuildCache
     )
 
     if (-not (Test-Path $DmmdepsPath)) {
@@ -840,6 +848,11 @@ function Invoke-DmmdepsGeneration {
 
         if ($PreserveParentMat) {
             $dmmdepsArgs += "--preserve-parent-mat"
+        }
+
+        if ($ForceRebuildCache) {
+            $dmmdepsArgs += "--rebuildcache"
+            $logBox.AppendText("Force rebuild of the parent archive cache is active.`r`n")
         }
         
         $logBox.AppendText("Command: `"$DmmdepsPath`" $($dmmdepsArgs -join ' ')`r`n")
@@ -2151,6 +2164,7 @@ $runButton.Add_Click({
         IncludeSourceScripts = $includeSourceScriptsCheckbox.Checked
         SmartClobber     = $smartClobberCheckbox.Checked
         PreserveParentMat = $preserveParentMatCheckbox.Checked
+        ForceRebuildParentCache = $forceRebuildCacheCheckbox.Checked
         XboxArchive      = $xboxArchiveCheckbox.Checked
         PlayStationArchive = $playStationArchiveCheckbox.Checked
         WindowsArchive   = $windowsArchiveCheckbox.Checked
@@ -2228,7 +2242,7 @@ $runButton.Add_Click({
     # Run dmmdeps first if selected
     if ($doDmmdeps) {
         $statusLabel.Text = "Running: Dmmdeps Generation..."
-        $dmmdepsSuccess = Invoke-DmmdepsGeneration -DmmdepsPath $dmmdepsPath -InputPath $inputPath -DataFolder $dataRoot -SmartClobber:$smartClobberCheckbox.Checked -IncludePsc:$includeSourceScriptsCheckbox.Checked -PreserveParentMat:$preserveParentMatCheckbox.Checked
+        $dmmdepsSuccess = Invoke-DmmdepsGeneration -DmmdepsPath $dmmdepsPath -InputPath $inputPath -DataFolder $dataRoot -SmartClobber:$smartClobberCheckbox.Checked -IncludePsc:$includeSourceScriptsCheckbox.Checked -PreserveParentMat:$preserveParentMatCheckbox.Checked -ForceRebuildCache:$forceRebuildCacheCheckbox.Checked
         if (-not $dmmdepsSuccess) {
             $logBox.AppendText("Dmmdeps generation failed. Stopping execution.`r`n")
             return
