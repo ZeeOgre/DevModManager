@@ -20,6 +20,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate changelog and prepare release notes
+        shell: pwsh
+        run: |
+          ./scripts/Test-ChangelogVersion.ps1 `
+            -CurrentVersionPath DMM.Standalone.DependencyChecker/Properties/version.txt `
+            -ChangelogPath CHANGELOG.md `
+            -OutputPath out/release-notes.md
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v5
         with:
@@ -87,121 +95,17 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const fs = require('fs');
             const tag = context.ref.replace('refs/tags/','');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const sha = context.sha;
             const maxAttempts = 3;
 
+            const releaseBody = fs.readFileSync('out/release-notes.md', 'utf8');
+            if (!releaseBody.trim()) throw new Error('Extracted release notes are empty. Add release notes to CHANGELOG.md before running FullRelease.');
+
             async function createReleaseForTag(t) {
-              const releaseBody = `## DevModManager Dependency Checker ${t}
-
-            ### What's New in This Release
-            - **Security:** Disabled single-file compression to reduce antivirus false positives (Defender Wacatac heuristic warnings)
-            - **Fixed:** Parent archive cache now uses composite primary key to prevent file ownership collisions when the same asset exists in multiple archives (e.g., ContentResources.zip and mod archives)
-            - **Improved:** Cache database renamed to \`parentfile_cache.db\` for future multi-game support
-            - **Added:** Cache build timing information for performance visibility
-            - **Cleaned:** Removed debug logging that was user-specific and wouldn't work for other installations
-
-            ### What It Does
-            Scans Starfield plugins (.esm/.esp) and discovers all asset dependencies:
-            - Meshes, Materials, Textures (with PC & Xbox paths)
-            - Scripts (Papyrus .psc/.pex with automatic import resolution)
-            - Terrain (.btd files, overlay masks, and source TIF files)
-            - Interface Icons (Inventory/ShipBuilder/Workshop + source TIF files)
-            - Voice Assets (PC & Xbox, dev & runtime)
-            - Particles, Animations, Morphs, and more
-
-            **Outputs:**
-            - \`.achlist\` - JSON array of PC file paths (main asset list for Achievement-safe mod managers)
-            - \`.achlist_warn\` - Files found in parent game archives (may need manual review)
-            - \`.achlist_discard\` - High-probability false positives from NIF decoding (usually non-existent paths)
-            - \`_deps.csv\` - Detailed spreadsheet with file paths, asset types, and discovery sources
-            - \`_deps.json\` - Full dependency manifest (JSON format, omitted with --silent)
-
-            ### Downloads
-            - **dmmdeps.zip** (~4 MB compressed, includes required dependencies) - Framework-dependent build. Requires [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime)
-            - **dmmdeps-fat.zip** (~18 MB) - Self-contained single-file build. Includes .NET 10 runtime, no dependencies required. Uncompressed to reduce antivirus false positives.
-
-            ### Basic Usage
-            \`\`\`
-            dmmdeps.exe "C:\\Path\\To\\YourMod.esm"
-            \`\`\`
-            Creates \`YourMod.achlist\`, \`YourMod.achlist_warn\`, \`YourMod.achlist_discard\`, \`YourMod_deps.csv\`, and \`YourMod_deps.json\` in the same folder.
-
-            ### Understanding the Output Files
-
-            **Main Files:**
-            - **\`.achlist\`** - Your primary asset list. These are verified files that exist on disk and should be included in your mod package.
-
-            **Review Files:**
-            - **\`.achlist_warn\`** - Files found in parent game archives (e.g., Starfield.esm's BA2 files). These may be legitimate dependencies or false positives from the NIF decoder. Review these to decide if they should be included in your mod.
-            - **\`.achlist_discard\`** - High-probability false positives from NIF decoding. These are typically non-existent artifact paths that can be safely ignored.
-
-            **Detailed Manifests:**
-            - **\`_deps.csv\`** - Spreadsheet with all discovered dependencies, including PC/Xbox paths, asset types, and discovery sources.
-            - **\`_deps.json\`** - Full JSON manifest with metadata (omitted when using --silent).
-
-            ### Command-Line Options
-            \`\`\`
-            dmmdeps.exe <pluginPath> [options]
-
-            Options:
-              --gameroot <path>     Override game root (parent of Data folder)
-              --xboxdata <path>     Override Xbox Data root (default from CreationKit.ini)
-              --ps5data <path>      Override PS5 Data root (default <GameRoot>\\PS5\\Data)
-              --tifroot <path>      Override TIF source root (default ..\\..\\Source\\TGATextures)
-              --scriptsroot <path>  Override Scripts folder (default Data\\Scripts)
-              --test                Write .achlist.test instead of .achlist
-              --quiet               Suppress skipped-file messages
-              --silent              Suppress all output except start/completion
-              --verbose             Emit detailed diagnostics for ignored/missing files
-              --smartclobber        Seed candidates from existing .achlist (captures manual overrides like Data\\Interface\\mapicons.swf)
-              --rebuildcache        Force rebuild of parent archive cache (rarely needed; auto-detects changes by default)
-              --include-psc         Include .psc script source files in achlist (for distributing source code)
-            \`\`\`
-
-            ### Examples
-            **Auto-detect everything:**
-            \`\`\`
-            dmmdeps.exe "C:\\Games\\Starfield\\Data\\MyMod.esm"
-            \`\`\`
-
-            **Custom development setup:**
-            \`\`\`
-            dmmdeps.exe "G:\\ModDev\\MyMod.esm" --gameroot "C:\\Games\\Starfield" --tifroot "G:\\Source\\TGATextures"
-            \`\`\`
-
-            **Include script source files for open-source distribution:**
-            \`\`\`
-            dmmdeps.exe MyMod.esm --include-psc
-            \`\`\`
-
-            **CI/CD pipeline (silent mode):**
-            \`\`\`
-            dmmdeps.exe MyMod.esm --silent
-            \`\`\`
-
-            **Note:** The tool automatically detects changes to parent game archives (.ba2 files) and rebuilds its cache when needed. The \`--rebuildcache\` option is available for troubleshooting but should rarely be necessary.
-
-            ### Performance
-            **First run (building cache):** ~44 seconds for a typical Starfield mod with base game + DLC archives  
-            **Subsequent runs (cached):** ~3 seconds for ~5000 files  
-            **Cache size:** ~550 MB (base game + Creation Kit ContentResources), ~650 MB with expansions and common master dependencies
-
-            The cache is stored at \`%LOCALAPPDATA%\\ZeeOgre\\dmmdeps\\parentfile_cache.db\` and uses a composite-key SQLite schema to preserve duplicate file paths across multiple archives without collision.
-
-            No directory walking required - deterministic asset discovery based on plugin content.
-
-            ### Full Documentation
-            See [README.md](https://github.com/ZeeOgre/DevModManager/blob/master/DMM.Standalone.DependencyChecker/README.md) for detailed documentation, troubleshooting, and integration guide.
-
-            ### Complementary PowerShell Script
-            While the rest of DMM is under development in C#, a complementary PowerShell script is available to automate mod backups and archive management for producing Windows and Xbox \`.ba2\` archives:
-
-            - [StarfieldArchiveManager.ps1](https://github.com/ZeeOgre/SharedResources/blob/master/scripts/StarfieldArchiveManager.ps1)
-            `;
-
               const { data: newRel } = await github.rest.repos.createRelease({
                 owner,
                 repo,

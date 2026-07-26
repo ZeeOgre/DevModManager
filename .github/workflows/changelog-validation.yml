@@ -1,0 +1,29 @@
+name: Changelog Validation
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-version-notes:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from pull request base
+        shell: pwsh
+        run: |
+          git show "origin/${{ github.base_ref }}:DMM.Standalone.DependencyChecker/Properties/version.txt" | Set-Content -Path "$env:RUNNER_TEMP/base-version.txt" -NoNewline
+
+      - name: Require release notes when DMMDeps version changes
+        shell: pwsh
+        run: |
+          ./scripts/Test-ChangelogVersion.ps1 `
+            -CurrentVersionPath DMM.Standalone.DependencyChecker/Properties/version.txt `
+            -BaseVersionPath "$env:RUNNER_TEMP/base-version.txt" `
+            -ChangelogPath CHANGELOG.md
